@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>$(BaseTargetFramework)</TargetFramework>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="xunit.v3" />
+        <PackageReference Include="xunit.runner.visualstudio" />
+        <PackageReference Include="Shouldly" />
+    </ItemGroup>
+    <ItemGroup>
+        <Using Include="Xunit" />
+        <Using Include="Shouldly" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\ShinyCommander.Core\ShinyCommander.Core.csproj" />
+    </ItemGroup>
+</Project>

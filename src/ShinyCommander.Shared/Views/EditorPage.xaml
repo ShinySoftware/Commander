@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:md="http://shiny.net/maui/markdown"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             x:Class="ShinyCommander.Views.EditorPage"
+             x:DataType="vm:EditorViewModel">
+
+    <shiny:KeyboardShortcuts.Shortcuts>
+        <shiny:KeyboardShortcut Gesture="Primary+S" Command="{Binding SaveCommand}" Description="Save" />
+        <shiny:KeyboardShortcut Gesture="F2" Command="{Binding SaveCommand}" Description="Save" />
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="Close" />
+    </shiny:KeyboardShortcuts.Shortcuts>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <shiny:ShinyButton Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="{Binding Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
+            <HorizontalStackLayout Grid.Column="2" Spacing="4">
+                <shiny:ShinyButton Text="💾 Save" Command="{Binding SaveCommand}" Appearance="Filled" FontSize="12" ContentPadding="10,3" />
+            </HorizontalStackLayout>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="8" Padding="0">
+            <Grid>
+                <Editor IsVisible="{Binding IsPlainText}"
+                        Text="{Binding Text}"
+                        FontFamily="{DynamicResource MonoFont}"
+                        FontSize="{Binding FontSize}"
+                        AutoSize="Disabled"
+                        IsSpellCheckEnabled="False"
+                        IsTextPredictionEnabled="False" />
+                <md:MarkdownEditor IsVisible="{Binding IsMarkdown}" Markdown="{Binding Text, Mode=TwoWay}" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2" Style="{StaticResource Toolbar}" Padding="10,4">
+            <Label Text="{Binding Status}" Style="{StaticResource Subtle}" />
+        </Grid>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>$(BaseTargetFramework)</TargetFramework>
+        <RootNamespace>ShinyCommander.Core</RootNamespace>
+        <IsAotCompatible>true</IsAotCompatible>
+    </PropertyGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="ShinyCommander.Core.Tests" />
+    </ItemGroup>
+</Project>

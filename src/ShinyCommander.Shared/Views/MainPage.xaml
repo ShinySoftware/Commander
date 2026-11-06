@@ -1,0 +1,991 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:views="clr-namespace:ShinyCommander.Views"
+             xmlns:conv="clr-namespace:ShinyCommander.Converters"
+             x:Class="ShinyCommander.Views.MainPage"
+             x:DataType="vm:MainViewModel"
+             Title="ShinyCommander">
+
+    <!-- The whole Total Commander keymap. Shiny's engine routes these on Windows (WinUI), macOS (NSEvent
+         monitor) and Linux (GTK capture controller). CanExecute == false hands the key back to the focused
+         text box, which is how typing into the command line coexists with Space/Backspace/Home/End. -->
+    <shiny:KeyboardShortcuts.Shortcuts>
+        <shiny:KeyboardShortcut Gesture="Up" Command="{Binding CursorUpCommand}" Description="Move cursor up" Category="Navigation" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Down" Command="{Binding CursorDownCommand}" Description="Move cursor down" Category="Navigation" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="PageUp" Command="{Binding PageUpCommand}" Description="Page up" Category="Navigation" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="PageDown" Command="{Binding PageDownCommand}" Description="Page down" Category="Navigation" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Home" Command="{Binding HomeCommand}" Description="First item" Category="Navigation" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="End" Command="{Binding EndCommand}" Description="Last item" Category="Navigation" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Enter" Command="{Binding EnterCommand}" Description="Open folder / archive / file, or run the command line" Category="Navigation" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Backspace" Command="{Binding BackspaceCommand}" Description="Parent folder" Category="Navigation" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Tab" Command="{Binding SwitchPanelCommand}" Description="Switch active panel" Category="Navigation" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding EscapeCommand}" Description="Clear command line / close filter / cancel" Category="Navigation" />
+        <shiny:KeyboardShortcut Gesture="Primary+PageUp" Command="{Binding GoParentCommand}" Description="Parent folder" Category="Navigation" />
+        <shiny:KeyboardShortcut Gesture="Primary+Backslash" Command="{Binding GoRootCommand}" Description="Root folder" Category="Navigation" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+H" Command="{Binding GoHomeCommand}" Description="Home folder" Category="Navigation" />
+        <shiny:KeyboardShortcut Gesture="Alt+Left" Command="{Binding GoBackCommand}" Description="Back (history)" Category="Navigation" />
+        <shiny:KeyboardShortcut Gesture="Alt+Right" Command="{Binding GoForwardCommand}" Description="Forward (history)" Category="Navigation" />
+        <shiny:KeyboardShortcut Gesture="Primary+Left" Command="{Binding OpenInOtherPanelCommand}" Description="Open folder under cursor in other panel" Category="Navigation" />
+        <shiny:KeyboardShortcut Gesture="Primary+Right" Command="{Binding OpenInOtherPanelCommand}" Description="Open folder under cursor in other panel" Category="Navigation" />
+        <shiny:KeyboardShortcut Gesture="Alt+F1" Command="{Binding DriveMenuLeftCommand}" Description="Change drive - left panel" Category="Navigation" />
+        <shiny:KeyboardShortcut Gesture="Alt+F2" Command="{Binding DriveMenuRightCommand}" Description="Change drive - right panel" Category="Navigation" />
+        <shiny:KeyboardShortcut Gesture="Primary+D" Command="{Binding HotlistCommand}" Description="Directory hotlist" Category="Navigation" />
+        <shiny:KeyboardShortcut Gesture="Insert" Command="{Binding InsertCommand}" Description="Mark / unmark and move down" Category="Selection" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Space" Command="{Binding SpaceCommand}" Description="Mark / unmark (calculates folder size)" Category="Selection" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Shift+Up" Command="{Binding MarkUpCommand}" Description="Mark and move up" Category="Selection" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Shift+Down" Command="{Binding MarkDownCommand}" Description="Mark and move down" Category="Selection" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Primary+A" Command="{Binding SelectAllCommand}" Description="Select all" Category="Selection" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+A" Command="{Binding DeselectAllCommand}" Description="Unselect all" Category="Selection" />
+        <shiny:KeyboardShortcut Gesture="Primary+G" Command="{Binding SelectGroupCommand}" Description="Select group (mask)" Category="Selection" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+G" Command="{Binding DeselectGroupCommand}" Description="Unselect group (mask)" Category="Selection" />
+        <shiny:KeyboardShortcut Gesture="Primary+I" Command="{Binding InvertSelectionCommand}" Description="Invert selection" Category="Selection" />
+        <shiny:KeyboardShortcut Gesture="Alt+Shift+E" Command="{Binding SelectSameExtensionCommand}" Description="Select files with same extension" Category="Selection" />
+        <shiny:KeyboardShortcut Gesture="F2" Command="{Binding RenameCommand}" Description="Rename" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="Shift+F6" Command="{Binding RenameCommand}" Description="Rename" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="F3" Command="{Binding ViewCommand}" Description="View (lister)" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="F4" Command="{Binding EditCommand}" Description="Edit" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="Shift+F4" Command="{Binding NewFileCommand}" Description="New file + edit" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="F5" Command="{Binding CopyCommand}" Description="Copy" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="F6" Command="{Binding MoveCommand}" Description="Move / rename" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="F7" Command="{Binding MakeDirectoryCommand}" Description="New folder" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="F8" Command="{Binding DeleteCommand}" Description="Delete (to trash)" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="Delete" Command="{Binding DeleteCommand}" Description="Delete (to trash)" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="Shift+F8" Command="{Binding DeletePermanentlyCommand}" Description="Delete permanently" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="Shift+Delete" Command="{Binding DeletePermanentlyCommand}" Description="Delete permanently" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="Alt+F5" Command="{Binding PackCommand}" Description="Pack into zip" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="Alt+F9" Command="{Binding UnpackCommand}" Description="Unpack archives" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+C" Command="{Binding CopyPathsToClipboardCommand}" Description="Copy full paths to clipboard" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="Primary+Enter" Command="{Binding CopyNameToCommandLineCommand}" Description="Name to command line" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+Enter" Command="{Binding CopyPathToCommandLineCommand}" Description="Full path to command line" Category="Files" />
+        <shiny:KeyboardShortcut Gesture="Primary+R" Command="{Binding RefreshCommand}" Description="Reread folder" Category="View" />
+        <shiny:KeyboardShortcut Gesture="Primary+H" Command="{Binding ToggleHiddenCommand}" Description="Show / hide hidden files" Category="View" />
+        <shiny:KeyboardShortcut Gesture="Primary+B" Command="{Binding BranchViewCommand}" Description="Branch view (all files in subfolders)" Category="View" />
+        <shiny:KeyboardShortcut Gesture="Primary+F8" Command="{Binding ToggleTreeCommand}" Description="Folder tree" Category="View" />
+        <shiny:KeyboardShortcut Gesture="Primary+F" Command="{Binding QuickFilterCommand}" Description="Quick filter" Category="View" />
+        <shiny:KeyboardShortcut Gesture="Primary+T" Command="{Binding NewTabCommand}" Description="New tab" Category="View" />
+        <shiny:KeyboardShortcut Gesture="Primary+W" Command="{Binding CloseTabCommand}" Description="Close tab" Category="View" />
+        <shiny:KeyboardShortcut Gesture="Ctrl+Tab" Command="{Binding NextTabCommand}" Description="Next tab" Category="View" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Ctrl+Shift+Tab" Command="{Binding PreviousTabCommand}" Description="Previous tab" Category="View" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Primary+U" Command="{Binding SwapPanelsCommand}" Description="Swap panels" Category="View" />
+        <shiny:KeyboardShortcut Gesture="Primary+Period" Command="{Binding TargetEqualsSourceCommand}" Description="Target = source" Category="View" />
+        <shiny:KeyboardShortcut Gesture="Alt+F7" Command="{Binding FindCommand}" Description="Find files" Category="Tools" />
+        <shiny:KeyboardShortcut Gesture="Primary+M" Command="{Binding MultiRenameCommand}" Description="Multi-rename tool" Category="Tools" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+S" Command="{Binding SynchronizeCommand}" Description="Synchronize directories" Category="Tools" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+F2" Command="{Binding CompareFilesCommand}" Description="Compare files by content" Category="Tools" />
+        <shiny:KeyboardShortcut Gesture="Primary+O" Command="{Binding OpenTerminalCommand}" Description="Open terminal here" Category="Tools" />
+        <shiny:KeyboardShortcut Gesture="Primary+E" Command="{Binding RevealInFileManagerCommand}" Description="Reveal in system file manager" Category="Tools" />
+        <shiny:KeyboardShortcut Gesture="Primary+Comma" Command="{Binding SettingsCommand}" Description="Settings" Category="Tools" />
+        <shiny:KeyboardShortcut Gesture="F1" Command="{Binding HelpCommand}" Description="Keyboard reference" Category="Tools" />
+    </shiny:KeyboardShortcuts.Shortcuts>
+
+    <ContentPage.Resources>
+        <conv:RibbonTabVisibleConverter x:Key="RibbonTabVisible" />
+        <conv:RibbonTabBackgroundConverter x:Key="RibbonTabBackground" />
+        <conv:RibbonTabTextConverter x:Key="RibbonTabText" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto,Auto,Auto,Auto" Padding="0">
+
+        <!-- RIBBON:BEGIN (generated by tools/ribbon.py - edit the table there) -->
+        <shiny:Ribbon x:Name="MainRibbon"
+                      Grid.Row="0"
+                      ApplicationButtonText="ShinyCommander"
+                      ApplicationButtonCommand="{Binding HelpCommand}"
+                      AccentColor="{StaticResource Accent}"
+                      AllowCollapse="True"
+                      ShowTooltips="True">
+            <shiny:Ribbon.QuickAccessItems>
+                <shiny:RibbonButton Text="Settings" Size="Small" Command="{Binding SettingsCommand}" Tooltip="Settings">
+                    <shiny:RibbonButton.IconTemplate><DataTemplate><shiny:MotionIconView Icon="settings" Trigger="Appear" WidthRequest="16" HeightRequest="16" /></DataTemplate></shiny:RibbonButton.IconTemplate>
+                </shiny:RibbonButton>
+                <shiny:RibbonButton Text="Help" Size="Small" Command="{Binding HelpCommand}" Tooltip="Keyboard reference (F1)">
+                    <shiny:RibbonButton.IconTemplate><DataTemplate><shiny:MotionIconView Icon="help" Trigger="Appear" WidthRequest="16" HeightRequest="16" /></DataTemplate></shiny:RibbonButton.IconTemplate>
+                </shiny:RibbonButton>
+            </shiny:Ribbon.QuickAccessItems>
+            <shiny:RibbonTab Title="Files" Key="files">
+                <shiny:RibbonGroup Title="Transfer">
+                    <shiny:RibbonButton Text="Copy" Size="Large" Command="{Binding CopyCommand}" Shortcut="F5" Tooltip="Copy (F5)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="copy" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Move" Size="Large" Command="{Binding MoveCommand}" Shortcut="F6" Tooltip="Move (F6)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="arrow-right" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Delete" Size="Large" Command="{Binding DeleteCommand}" Shortcut="F8" Tooltip="Delete (F8)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="trash" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="Create">
+                    <shiny:RibbonButton Text="New Folder" Size="Small" Command="{Binding MakeDirectoryCommand}" Shortcut="F7" Tooltip="New Folder (F7)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="folder" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="New File" Size="Small" Command="{Binding NewFileCommand}" Shortcut="Shift+F4" Tooltip="New File (Shift+F4)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="file" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Rename" Size="Small" Command="{Binding RenameCommand}" Shortcut="F2" Tooltip="Rename (F2)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="edit" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="Open">
+                    <shiny:RibbonButton Text="View" Size="Large" Command="{Binding ViewCommand}" Shortcut="F3" Tooltip="View (F3)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="eye" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Edit" Size="Small" Command="{Binding EditCommand}" Shortcut="F4" Tooltip="Edit (F4)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="file-text" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Terminal" Size="Small" Command="{Binding OpenTerminalCommand}" Shortcut="Primary+O" Tooltip="Terminal (Primary+O)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="external-link" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Reveal" Size="Small" Command="{Binding RevealInFileManagerCommand}" Shortcut="Primary+E" Tooltip="Reveal (Primary+E)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="search" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="Archive">
+                    <shiny:RibbonButton Text="Pack" Size="Small" Command="{Binding PackCommand}" Shortcut="Alt+F5" Tooltip="Pack (Alt+F5)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="download" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Unpack" Size="Small" Command="{Binding UnpackCommand}" Shortcut="Alt+F9" Tooltip="Unpack (Alt+F9)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="upload" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="Clipboard">
+                    <shiny:RibbonButton Text="Copy Paths" Size="Small" Command="{Binding CopyPathsToClipboardCommand}" Shortcut="Primary+Shift+C" Tooltip="Copy Paths (Primary+Shift+C)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="clipboard" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Name to Cmd" Size="Small" Command="{Binding CopyNameToCommandLineCommand}" Shortcut="Primary+Enter" Tooltip="Name to Cmd (Primary+Enter)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="arrow-down" Color="#3B82F6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+            </shiny:RibbonTab>
+            <shiny:RibbonTab Title="Selection" Key="select">
+                <shiny:RibbonGroup Title="Mark">
+                    <shiny:RibbonButton Text="Select All" Size="Large" Command="{Binding SelectAllCommand}" Shortcut="Primary+A" Tooltip="Select All (Primary+A)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="check-circle" Color="#8B5CF6" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Unselect All" Size="Small" Command="{Binding DeselectAllCommand}" Shortcut="Primary+Shift+A" Tooltip="Unselect All (Primary+Shift+A)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="x-circle" Color="#8B5CF6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Invert" Size="Small" Command="{Binding InvertSelectionCommand}" Shortcut="Primary+I" Tooltip="Invert (Primary+I)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="shuffle" Color="#8B5CF6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="By pattern">
+                    <shiny:RibbonButton Text="Select Group…" Size="Small" Command="{Binding SelectGroupCommand}" Shortcut="Primary+G" Tooltip="Select Group… (Primary+G)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="filter" Color="#8B5CF6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Unselect Group…" Size="Small" Command="{Binding DeselectGroupCommand}" Shortcut="Primary+Shift+G" Tooltip="Unselect Group… (Primary+Shift+G)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="close" Color="#8B5CF6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Same Extension" Size="Small" Command="{Binding SelectSameExtensionCommand}" Shortcut="Alt+Shift+E" Tooltip="Same Extension (Alt+Shift+E)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="tag" Color="#8B5CF6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+            </shiny:RibbonTab>
+            <shiny:RibbonTab Title="View" Key="view">
+                <shiny:RibbonGroup Title="Panel">
+                    <shiny:RibbonButton Text="Reread" Size="Large" Command="{Binding RefreshCommand}" Shortcut="Primary+R" Tooltip="Reread (Primary+R)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="refresh" Color="#14B8A6" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Hidden Files" Size="Small" Command="{Binding ToggleHiddenCommand}" Shortcut="Primary+H" Tooltip="Hidden Files (Primary+H)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="eye" Color="#14B8A6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Folder Tree" Size="Small" Command="{Binding ToggleTreeCommand}" Shortcut="Primary+F8" Tooltip="Folder Tree (Primary+F8)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="folder-open" Color="#14B8A6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Branch View" Size="Small" Command="{Binding BranchViewCommand}" Shortcut="Primary+B" Tooltip="Branch View (Primary+B)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="expand" Color="#14B8A6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="Filter">
+                    <shiny:RibbonButton Text="Quick Filter" Size="Large" Command="{Binding QuickFilterCommand}" Shortcut="Primary+F" Tooltip="Quick Filter (Primary+F)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="filter" Color="#14B8A6" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="Tabs">
+                    <shiny:RibbonButton Text="New Tab" Size="Small" Command="{Binding NewTabCommand}" Shortcut="Primary+T" Tooltip="New Tab (Primary+T)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="plus" Color="#14B8A6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Close Tab" Size="Small" Command="{Binding CloseTabCommand}" Shortcut="Primary+W" Tooltip="Close Tab (Primary+W)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="close" Color="#14B8A6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Next Tab" Size="Small" Command="{Binding NextTabCommand}" Shortcut="Ctrl+Tab" Tooltip="Next Tab (Ctrl+Tab)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="chevron-right" Color="#14B8A6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="Panels">
+                    <shiny:RibbonButton Text="Swap" Size="Small" Command="{Binding SwapPanelsCommand}" Shortcut="Primary+U" Tooltip="Swap (Primary+U)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="repeat" Color="#14B8A6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Target = Source" Size="Small" Command="{Binding TargetEqualsSourceCommand}" Shortcut="Primary+." Tooltip="Target = Source (Primary+.)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="link" Color="#14B8A6" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+            </shiny:RibbonTab>
+            <shiny:RibbonTab Title="Go" Key="go">
+                <shiny:RibbonGroup Title="History">
+                    <shiny:RibbonButton Text="Back" Size="Large" Command="{Binding GoBackCommand}" Shortcut="Alt+Left" Tooltip="Back (Alt+Left)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="arrow-left" Color="#22C55E" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Forward" Size="Small" Command="{Binding GoForwardCommand}" Shortcut="Alt+Right" Tooltip="Forward (Alt+Right)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="arrow-right" Color="#22C55E" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Parent" Size="Small" Command="{Binding GoParentCommand}" Shortcut="Backspace" Tooltip="Parent (Backspace)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="arrow-up" Color="#22C55E" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="Places">
+                    <shiny:RibbonButton Text="Home" Size="Large" Command="{Binding GoHomeCommand}" Shortcut="Primary+Shift+H" Tooltip="Home (Primary+Shift+H)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="home" Color="#22C55E" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Root" Size="Small" Command="{Binding GoRootCommand}" Shortcut="Primary+\" Tooltip="Root (Primary+\)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="database" Color="#22C55E" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Hotlist" Size="Small" Command="{Binding HotlistCommand}" Shortcut="Primary+D" Tooltip="Hotlist (Primary+D)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="star" Color="#22C55E" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="Drives">
+                    <shiny:RibbonButton Text="Left Drive…" Size="Small" Command="{Binding DriveMenuLeftCommand}" Shortcut="Alt+F1" Tooltip="Left Drive… (Alt+F1)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="compass" Color="#22C55E" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Right Drive…" Size="Small" Command="{Binding DriveMenuRightCommand}" Shortcut="Alt+F2" Tooltip="Right Drive… (Alt+F2)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="compass" Color="#22C55E" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Other Panel" Size="Small" Command="{Binding OpenInOtherPanelCommand}" Shortcut="Primary+Right" Tooltip="Other Panel (Primary+Right)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="chevron-right" Color="#22C55E" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+            </shiny:RibbonTab>
+            <shiny:RibbonTab Title="Tools" Key="tools">
+                <shiny:RibbonGroup Title="Find">
+                    <shiny:RibbonButton Text="Find Files" Size="Large" Command="{Binding FindCommand}" Shortcut="Alt+F7" Tooltip="Find Files (Alt+F7)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="search" Color="#F97316" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="Batch">
+                    <shiny:RibbonButton Text="Multi-Rename" Size="Large" Command="{Binding MultiRenameCommand}" Shortcut="Primary+M" Tooltip="Multi-Rename (Primary+M)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="edit" Color="#F97316" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="Compare">
+                    <shiny:RibbonButton Text="Sync Dirs" Size="Large" Command="{Binding SynchronizeCommand}" Shortcut="Primary+Shift+S" Tooltip="Sync Dirs (Primary+Shift+S)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="refresh" Color="#F97316" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Compare Files" Size="Small" Command="{Binding CompareFilesCommand}" Shortcut="Primary+Shift+F2" Tooltip="Compare Files (Primary+Shift+F2)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="activity" Color="#F97316" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="App">
+                    <shiny:RibbonButton Text="Settings" Size="Small" Command="{Binding SettingsCommand}" Shortcut="Primary+," Tooltip="Settings (Primary+,)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="settings" Color="#F97316" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="Keyboard Help" Size="Small" Command="{Binding HelpCommand}" Shortcut="F1" Tooltip="Keyboard Help (F1)">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="help" Color="#F97316" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+            </shiny:RibbonTab>
+        </shiny:Ribbon>
+
+        <Grid x:Name="AppKitRibbon" Grid.Row="0" RowDefinitions="38,92" IsVisible="False" Style="{StaticResource Toolbar}">
+            <Grid ColumnDefinitions="Auto,*,Auto" Padding="8,6,8,0" ColumnSpacing="10">
+                <Border Style="{StaticResource RibbonAppButton}">
+                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding HelpCommand}" /></Border.GestureRecognizers>
+                    <Label Text="ShinyCommander" TextColor="White" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
+                </Border>
+                <HorizontalStackLayout Grid.Column="1" Spacing="2">
+                    <Border Style="{StaticResource RibbonTabHeader}" BackgroundColor="{Binding RibbonTab, Converter={StaticResource RibbonTabBackground}, ConverterParameter=files}">
+                        <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectRibbonTabCommand}" CommandParameter="files" /></Border.GestureRecognizers>
+                        <Label Text="Files" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=files}" />
+                    </Border>
+                    <Border Style="{StaticResource RibbonTabHeader}" BackgroundColor="{Binding RibbonTab, Converter={StaticResource RibbonTabBackground}, ConverterParameter=select}">
+                        <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectRibbonTabCommand}" CommandParameter="select" /></Border.GestureRecognizers>
+                        <Label Text="Selection" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=select}" />
+                    </Border>
+                    <Border Style="{StaticResource RibbonTabHeader}" BackgroundColor="{Binding RibbonTab, Converter={StaticResource RibbonTabBackground}, ConverterParameter=view}">
+                        <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectRibbonTabCommand}" CommandParameter="view" /></Border.GestureRecognizers>
+                        <Label Text="View" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=view}" />
+                    </Border>
+                    <Border Style="{StaticResource RibbonTabHeader}" BackgroundColor="{Binding RibbonTab, Converter={StaticResource RibbonTabBackground}, ConverterParameter=go}">
+                        <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectRibbonTabCommand}" CommandParameter="go" /></Border.GestureRecognizers>
+                        <Label Text="Go" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=go}" />
+                    </Border>
+                    <Border Style="{StaticResource RibbonTabHeader}" BackgroundColor="{Binding RibbonTab, Converter={StaticResource RibbonTabBackground}, ConverterParameter=tools}">
+                        <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectRibbonTabCommand}" CommandParameter="tools" /></Border.GestureRecognizers>
+                        <Label Text="Tools" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=tools}" />
+                    </Border>
+                </HorizontalStackLayout>
+                <HorizontalStackLayout Grid.Column="2" Spacing="4">
+                    <shiny:MotionIconView Icon="settings" Trigger="Hover,Press" Command="{Binding SettingsCommand}" WidthRequest="18" HeightRequest="18" VerticalOptions="Center" />
+                    <shiny:MotionIconView Icon="help" Trigger="Hover,Press" Command="{Binding HelpCommand}" WidthRequest="18" HeightRequest="18" VerticalOptions="Center" Margin="6,0,0,0" />
+                </HorizontalStackLayout>
+            </Grid>
+            <Border Grid.Row="1" StrokeThickness="0" Padding="8,4" BackgroundColor="{AppThemeBinding Light={StaticResource PanelLight}, Dark={StaticResource PanelDark}}">
+                <Grid>
+                    <HorizontalStackLayout Spacing="0" IsVisible="{Binding RibbonTab, Converter={StaticResource RibbonTabVisible}, ConverterParameter=files}">
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                            <Border Style="{StaticResource RibbonLarge}" ToolTipProperties.Text="Copy (F5)">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding CopyCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="copy" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="Copy" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource RibbonLarge}" ToolTipProperties.Text="Move (F6)">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding MoveCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="arrow-right" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="Move" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                            <Border Style="{StaticResource RibbonLarge}" ToolTipProperties.Text="Delete (F8)">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DeleteCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="trash" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="Delete" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Transfer" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="New Folder (F7)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding MakeDirectoryCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="folder" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="New Folder" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="New File (Shift+F4)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding NewFileCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="file" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="New File" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Rename (F2)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding RenameCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="edit" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Rename" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Create" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                            <Border Style="{StaticResource RibbonLarge}" ToolTipProperties.Text="View (F3)">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ViewCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="eye" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="View" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Edit (F4)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding EditCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="file-text" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Edit" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Terminal (Primary+O)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding OpenTerminalCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="external-link" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Terminal" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Reveal (Primary+E)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding RevealInFileManagerCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="search" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Reveal" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Open" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Pack (Alt+F5)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding PackCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="download" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Pack" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Unpack (Alt+F9)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding UnpackCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="upload" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Unpack" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Archive" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Copy Paths (Primary+Shift+C)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding CopyPathsToClipboardCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="clipboard" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Copy Paths" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Name to Cmd (Primary+Enter)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding CopyNameToCommandLineCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="arrow-down" Color="#3B82F6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Name to Cmd" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Clipboard" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="0" IsVisible="{Binding RibbonTab, Converter={StaticResource RibbonTabVisible}, ConverterParameter=select}">
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                            <Border Style="{StaticResource RibbonLarge}" ToolTipProperties.Text="Select All (Primary+A)">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectAllCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="check-circle" Color="#8B5CF6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="Select All" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Unselect All (Primary+Shift+A)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DeselectAllCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="x-circle" Color="#8B5CF6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Unselect All" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Invert (Primary+I)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding InvertSelectionCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="shuffle" Color="#8B5CF6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Invert" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Mark" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Select Group… (Primary+G)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectGroupCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="filter" Color="#8B5CF6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Select Group…" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Unselect Group… (Primary+Shift+G)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DeselectGroupCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="close" Color="#8B5CF6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Unselect Group…" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Same Extension (Alt+Shift+E)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectSameExtensionCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="tag" Color="#8B5CF6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Same Extension" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="By pattern" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="0" IsVisible="{Binding RibbonTab, Converter={StaticResource RibbonTabVisible}, ConverterParameter=view}">
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                            <Border Style="{StaticResource RibbonLarge}" ToolTipProperties.Text="Reread (Primary+R)">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding RefreshCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="refresh" Color="#14B8A6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="Reread" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Hidden Files (Primary+H)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleHiddenCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="eye" Color="#14B8A6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Hidden Files" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Folder Tree (Primary+F8)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleTreeCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="folder-open" Color="#14B8A6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Folder Tree" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Branch View (Primary+B)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding BranchViewCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="expand" Color="#14B8A6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Branch View" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Panel" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                            <Border Style="{StaticResource RibbonLarge}" ToolTipProperties.Text="Quick Filter (Primary+F)">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding QuickFilterCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="filter" Color="#14B8A6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="Quick Filter" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Filter" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="New Tab (Primary+T)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding NewTabCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="plus" Color="#14B8A6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="New Tab" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Close Tab (Primary+W)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding CloseTabCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="close" Color="#14B8A6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Close Tab" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Next Tab (Ctrl+Tab)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding NextTabCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="chevron-right" Color="#14B8A6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Next Tab" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Tabs" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Swap (Primary+U)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SwapPanelsCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="repeat" Color="#14B8A6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Swap" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Target = Source (Primary+.)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding TargetEqualsSourceCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="link" Color="#14B8A6" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Target = Source" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Panels" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="0" IsVisible="{Binding RibbonTab, Converter={StaticResource RibbonTabVisible}, ConverterParameter=go}">
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                            <Border Style="{StaticResource RibbonLarge}" ToolTipProperties.Text="Back (Alt+Left)">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoBackCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="arrow-left" Color="#22C55E" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="Back" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Forward (Alt+Right)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoForwardCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="arrow-right" Color="#22C55E" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Forward" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Parent (Backspace)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoParentCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="arrow-up" Color="#22C55E" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Parent" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="History" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                            <Border Style="{StaticResource RibbonLarge}" ToolTipProperties.Text="Home (Primary+Shift+H)">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoHomeCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="home" Color="#22C55E" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="Home" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Root (Primary+\)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoRootCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="database" Color="#22C55E" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Root" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Hotlist (Primary+D)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding HotlistCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="star" Color="#22C55E" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Hotlist" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Places" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Left Drive… (Alt+F1)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DriveMenuLeftCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="compass" Color="#22C55E" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Left Drive…" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Right Drive… (Alt+F2)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DriveMenuRightCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="compass" Color="#22C55E" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Right Drive…" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Other Panel (Primary+Right)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding OpenInOtherPanelCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="chevron-right" Color="#22C55E" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Other Panel" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Drives" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                    </HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="0" IsVisible="{Binding RibbonTab, Converter={StaticResource RibbonTabVisible}, ConverterParameter=tools}">
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                            <Border Style="{StaticResource RibbonLarge}" ToolTipProperties.Text="Find Files (Alt+F7)">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding FindCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="search" Color="#F97316" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="Find Files" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Find" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                            <Border Style="{StaticResource RibbonLarge}" ToolTipProperties.Text="Multi-Rename (Primary+M)">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding MultiRenameCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="edit" Color="#F97316" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="Multi-Rename" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Batch" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                            <Border Style="{StaticResource RibbonLarge}" ToolTipProperties.Text="Sync Dirs (Primary+Shift+S)">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SynchronizeCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="refresh" Color="#F97316" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="Sync Dirs" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Compare Files (Primary+Shift+F2)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding CompareFilesCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="activity" Color="#F97316" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Compare Files" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="Compare" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Settings (Primary+,)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SettingsCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="settings" Color="#F97316" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Settings" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" ToolTipProperties.Text="Keyboard Help (F1)">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding HelpCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="help" Color="#F97316" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="Keyboard Help" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="App" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                    </HorizontalStackLayout>
+                </Grid>
+            </Border>
+        </Grid>
+        <!-- RIBBON:END -->
+
+        <!-- the two panels -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="6" Padding="6,6,6,4">
+            <views:FilePanelView BindingContext="{Binding Left}" />
+            <views:FilePanelView Grid.Column="1" BindingContext="{Binding Right}" />
+        </Grid>
+
+        <!-- console output of command-line commands -->
+        <Border Grid.Row="2" IsVisible="{Binding ShowOutput}" Style="{StaticResource Card}" Margin="6,0,6,4" Padding="0">
+            <Grid RowDefinitions="Auto,*" HeightRequest="190">
+                <Grid ColumnDefinitions="*,Auto,Auto" Padding="8,2" Style="{StaticResource Toolbar}">
+                    <HorizontalStackLayout Spacing="6">
+                        <shiny:MotionIconView Icon="activity" Color="{StaticResource Accent}" IsPlaying="{Binding IsCommandRunning}" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                        <Label Text="Console" Style="{StaticResource SectionTitle}" VerticalOptions="Center" />
+                        <ActivityIndicator IsRunning="{Binding IsCommandRunning}" IsVisible="{Binding IsCommandRunning}" HeightRequest="14" WidthRequest="14" Color="{StaticResource Accent}" />
+                    </HorizontalStackLayout>
+                    <shiny:ShinyButton Grid.Column="1" Text="Stop" Command="{Binding CancelCommandCommand}" IsVisible="{Binding IsCommandRunning}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                    <shiny:ShinyButton Grid.Column="2" Text="✕" Command="{Binding CloseOutputCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                </Grid>
+                <ScrollView x:Name="OutputScroll" Grid.Row="1" Padding="8,4">
+                    <Label Text="{Binding CommandOutput}" FontFamily="{DynamicResource MonoFont}" FontSize="12" />
+                </ScrollView>
+            </Grid>
+        </Border>
+
+        <!-- copy / move / delete progress (Esc cancels) -->
+        <Border Grid.Row="3" IsVisible="{Binding IsOperationRunning}" Style="{StaticResource Card}" Margin="6,0,6,4" Padding="10,6">
+            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="3">
+                <shiny:MotionIconView Grid.RowSpan="3" Icon="hourglass" Color="{StaticResource Accent}" IsPlaying="{Binding IsOperationRunning}" WidthRequest="28" HeightRequest="28" VerticalOptions="Center" />
+                <Label Grid.Column="1" Text="{Binding OperationTitle}" FontAttributes="Bold" />
+                <shiny:ProgressBar Grid.Column="1" Grid.Row="1" Value="{Binding OperationProgress}" Maximum="1" TrackHeight="8" UseGradient="True" PulseEnabled="True" />
+                <Label Grid.Column="1" Grid.Row="2" Text="{Binding OperationDetail}" Style="{StaticResource Subtle}" LineBreakMode="MiddleTruncation" />
+                <shiny:ShinyButton Grid.Column="2" Grid.RowSpan="3" Text="Cancel" Command="{Binding CancelOperationCommand}" Appearance="Outlined" VerticalOptions="Center" />
+            </Grid>
+        </Border>
+
+        <!-- command line -->
+        <Grid Grid.Row="4" ColumnDefinitions="Auto,*" Padding="10,2,10,2" ColumnSpacing="6">
+            <Label Text="{Binding CommandPrompt}" FontFamily="{DynamicResource MonoFont}" FontSize="12" VerticalOptions="Center" LineBreakMode="HeadTruncation" MaximumWidthRequest="520" Style="{StaticResource Subtle}" />
+            <Entry x:Name="CommandEntry"
+                   Grid.Column="1"
+                   Text="{Binding CommandText}"
+                   FontFamily="{DynamicResource MonoFont}"
+                   FontSize="12"
+                   Placeholder="type a command, or use the keys below…" />
+        </Grid>
+
+        <!-- function key bar -->
+        <Grid Grid.Row="5" Style="{StaticResource Toolbar}" Padding="6,5" ColumnSpacing="6" ColumnDefinitions="*,*,*,*,*,*,*,*">
+            <Border Grid.Column="0" Style="{StaticResource KeyCap}">
+                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding RenameCommand}" /></Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
+                    <Border Style="{StaticResource KeyCapKey}"><Label Text="F2" Style="{StaticResource KeyCapKeyText}" /></Border>
+                    <shiny:MotionIconView Icon="edit" Trigger="Hover,Press" Color="{StaticResource Accent}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
+                    <Label Text="Rename" FontSize="12" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
+            <Border Grid.Column="1" Style="{StaticResource KeyCap}">
+                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ViewCommand}" /></Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
+                    <Border Style="{StaticResource KeyCapKey}"><Label Text="F3" Style="{StaticResource KeyCapKeyText}" /></Border>
+                    <shiny:MotionIconView Icon="eye" Trigger="Hover,Press" Color="{StaticResource Accent}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
+                    <Label Text="View" FontSize="12" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
+            <Border Grid.Column="2" Style="{StaticResource KeyCap}">
+                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding EditCommand}" /></Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
+                    <Border Style="{StaticResource KeyCapKey}"><Label Text="F4" Style="{StaticResource KeyCapKeyText}" /></Border>
+                    <shiny:MotionIconView Icon="file-text" Trigger="Hover,Press" Color="{StaticResource Accent}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
+                    <Label Text="Edit" FontSize="12" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
+            <Border Grid.Column="3" Style="{StaticResource KeyCap}">
+                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding CopyCommand}" /></Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
+                    <Border Style="{StaticResource KeyCapKey}"><Label Text="F5" Style="{StaticResource KeyCapKeyText}" /></Border>
+                    <shiny:MotionIconView Icon="copy" Trigger="Hover,Press" Color="{StaticResource Accent}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
+                    <Label Text="Copy" FontSize="12" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
+            <Border Grid.Column="4" Style="{StaticResource KeyCap}">
+                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding MoveCommand}" /></Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
+                    <Border Style="{StaticResource KeyCapKey}"><Label Text="F6" Style="{StaticResource KeyCapKeyText}" /></Border>
+                    <shiny:MotionIconView Icon="arrow-right" Trigger="Hover,Press" Color="{StaticResource Accent}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
+                    <Label Text="Move" FontSize="12" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
+            <Border Grid.Column="5" Style="{StaticResource KeyCap}">
+                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding MakeDirectoryCommand}" /></Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
+                    <Border Style="{StaticResource KeyCapKey}"><Label Text="F7" Style="{StaticResource KeyCapKeyText}" /></Border>
+                    <shiny:MotionIconView Icon="folder" Trigger="Hover,Press" Color="{StaticResource Accent}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
+                    <Label Text="New Folder" FontSize="12" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
+            <Border Grid.Column="6" Style="{StaticResource KeyCap}">
+                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DeleteCommand}" /></Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
+                    <Border Style="{StaticResource KeyCapKey}"><Label Text="F8" Style="{StaticResource KeyCapKeyText}" /></Border>
+                    <shiny:MotionIconView Icon="trash" Trigger="Hover,Press" Color="{StaticResource Accent}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
+                    <Label Text="Delete" FontSize="12" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
+            <Border Grid.Column="7" Style="{StaticResource KeyCap}">
+                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding FindCommand}" /></Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
+                    <Border Style="{StaticResource KeyCapKey}"><Label Text="Alt+F7" Style="{StaticResource KeyCapKeyText}" /></Border>
+                    <shiny:MotionIconView Icon="search" Trigger="Hover,Press" Color="{StaticResource Accent}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
+                    <Label Text="Find" FontSize="12" VerticalOptions="Center" />
+                </HorizontalStackLayout>
+            </Border>
+        </Grid>
+    </Grid>
+</ContentPage>

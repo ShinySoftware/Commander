@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:conv="clr-namespace:ShinyCommander.Converters"
+             xmlns:core="clr-namespace:ShinyCommander.Core.Models;assembly=ShinyCommander.Core"
+             x:Class="ShinyCommander.Views.FilePanelView"
+             x:DataType="vm:PanelViewModel">
+
+    <ContentView.Resources>
+        <!-- row visuals keyed off FileItemViewModel.RowState (cursor x marked) -->
+        <conv:RowBackgroundConverter x:Key="RowBackground" />
+        <conv:RowTextConverter x:Key="RowText" />
+        <conv:RowFontConverter x:Key="RowFont" />
+        <conv:BoolToThemeColorConverter x:Key="BoolColor" />
+        <conv:DriveIconConverter x:Key="DriveIcon" />
+
+        <Style x:Key="RowLabel" TargetType="Label">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+            <Setter Property="LineBreakMode" Value="TailTruncation" />
+        </Style>
+
+        <Style x:Key="RowSubLabel" TargetType="Label" BasedOn="{StaticResource RowLabel}">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontFamily" Value="{DynamicResource MonoFont}" />
+        </Style>
+
+        <Style x:Key="HeaderLabel" TargetType="Label">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontAttributes" Value="Bold" />
+            <Setter Property="VerticalTextAlignment" Value="Center" />
+            <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" />
+        </Style>
+    </ContentView.Resources>
+
+    <Border x:Name="PanelBorder"
+            Style="{StaticResource Card}"
+            StrokeThickness="2"
+            Stroke="{Binding IsActive, Converter={StaticResource BoolColor}, ConverterParameter='Accent|Border'}"
+            Padding="0">
+
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,*,Auto">
+
+            <!-- folder tabs (Ctrl+T / Ctrl+W / Ctrl+Tab) -->
+            <CollectionView Grid.Row="0"
+                            ItemsSource="{Binding Tabs}"
+                            IsVisible="{Binding HasMultipleTabs}"
+                            SelectionMode="None"
+                            HeightRequest="32"
+                            ItemsLayout="HorizontalList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:PanelTabViewModel">
+                        <Grid Padding="4,4,0,0">
+                            <shiny:BadgeView Text="{Binding MarkedBadge}" Position="TopRight" FontSize="9" OffsetX="-2" OffsetY="2">
+                                <Border Padding="10,3"
+                                        StrokeShape="RoundRectangle 6,6,0,0"
+                                        StrokeThickness="0"
+                                        BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolColor}, ConverterParameter='Accent|Header'}">
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnTabTapped" />
+                                    </Border.GestureRecognizers>
+                                    <Label Text="{Binding Title}" FontSize="12" MaxLines="1" TextColor="{Binding IsSelected, Converter={StaticResource BoolColor}, ConverterParameter='White|Text'}" />
+                                </Border>
+                            </shiny:BadgeView>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- drive bar + free space -->
+            <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Padding="6,6,6,2" ColumnSpacing="8">
+                <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                    <HorizontalStackLayout x:Name="DriveBar" Spacing="4" BindableLayout.ItemsSource="{Binding Drives}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="core:DriveEntry">
+                                <Border Style="{StaticResource Chip}">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnDriveTapped" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="4">
+                                        <shiny:MotionIconView Icon="{Binding Name, Converter={StaticResource DriveIcon}}" Trigger="Hover,Press" Color="{StaticResource Accent}" WidthRequest="13" HeightRequest="13" VerticalOptions="Center" />
+                                        <Label Text="{Binding Name}" FontSize="11" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </HorizontalStackLayout>
+                </ScrollView>
+                <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
+                    <shiny:ProgressBar Value="{Binding DriveUsage}" Maximum="1" WidthRequest="60" TrackHeight="5" VerticalOptions="Center" />
+                    <shiny:PillView Text="{Binding FreeSpaceText}" Type="Info" FontSize="10" />
+                </HorizontalStackLayout>
+            </Grid>
+
+            <!-- path / back / forward / up -->
+            <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,Auto,*,Auto" Padding="6,2" ColumnSpacing="2">
+                <shiny:ShinyButton Command="{Binding GoBackCommand}" LeftMotionIcon="arrow-left" Appearance="Text" ContentPadding="6,0" IconSize="14" />
+                <shiny:ShinyButton Grid.Column="1" Command="{Binding GoForwardCommand}" LeftMotionIcon="arrow-right" Appearance="Text" ContentPadding="6,0" IconSize="14" />
+                <shiny:ShinyButton Grid.Column="2" Command="{Binding GoUpCommand}" LeftMotionIcon="arrow-up" Appearance="Text" ContentPadding="6,0" IconSize="14" />
+                <Entry x:Name="PathEntry"
+                       Grid.Column="3"
+                       Text="{Binding PathText}"
+                       FontFamily="{DynamicResource MonoFont}"
+                       FontSize="12"
+                       Completed="OnPathCompleted"
+                       Focused="OnPathFocused"
+                       Unfocused="OnPathUnfocused" />
+                <shiny:ShinyButton Grid.Column="4" Command="{Binding ToggleTreeCommand}" LeftMotionIcon="folder-open" Appearance="Text" ContentPadding="6,0" IconSize="15" />
+            </Grid>
+
+            <!-- quick filter (Ctrl+F) -->
+            <Grid Grid.Row="3" ColumnDefinitions="Auto,*" Padding="8,0,8,4" ColumnSpacing="6" IsVisible="{Binding ShowQuickFilter}">
+                <Label Text="Filter:" Style="{StaticResource Subtle}" VerticalOptions="Center" />
+                <Entry x:Name="FilterEntry"
+                       Grid.Column="1"
+                       Placeholder="*.cs;*.md   (Esc closes)"
+                       Text="{Binding ActiveTab.QuickFilter}"
+                       Focused="OnFilterFocused"
+                       Unfocused="OnFilterUnfocused" />
+            </Grid>
+
+            <!-- column headers (click to sort) -->
+            <Grid Grid.Row="4"
+                  ColumnDefinitions="24,*,56,92,122,84"
+                  Padding="6,3"
+                  BackgroundColor="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}">
+                <Label Grid.Column="1" Text="{Binding ActiveTab.NameHeader}" Style="{StaticResource HeaderLabel}">
+                    <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Name" /></Label.GestureRecognizers>
+                </Label>
+                <Label Grid.Column="2" Text="{Binding ActiveTab.ExtHeader}" Style="{StaticResource HeaderLabel}">
+                    <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Extension" /></Label.GestureRecognizers>
+                </Label>
+                <Label Grid.Column="3" Text="{Binding ActiveTab.SizeHeader}" Style="{StaticResource HeaderLabel}" HorizontalTextAlignment="End" Margin="0,0,8,0">
+                    <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Size" /></Label.GestureRecognizers>
+                </Label>
+                <Label Grid.Column="4" Text="{Binding ActiveTab.DateHeader}" Style="{StaticResource HeaderLabel}">
+                    <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Modified" /></Label.GestureRecognizers>
+                </Label>
+                <Label Grid.Column="5" Text="{Binding ActiveTab.AttrHeader}" Style="{StaticResource HeaderLabel}">
+                    <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Attributes" /></Label.GestureRecognizers>
+                </Label>
+            </Grid>
+
+            <!-- tree (Ctrl+F8) + file list -->
+            <Grid Grid.Row="5" ColumnDefinitions="Auto,*">
+                <Border x:Name="TreeHost"
+                        WidthRequest="230"
+                        IsVisible="{Binding ShowTree}"
+                        StrokeThickness="0"
+                        Padding="0,0,1,0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}">
+                    <shiny:TreeView x:Name="FolderTree"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource PanelLight}, Dark={StaticResource PanelDark}}"
+                                    IndentSize="14"
+                                    RowPadding="4,2"
+                                    ChevronSize="12"
+                                    ItemSelected="OnTreeItemSelected">
+                        <shiny:TreeView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:FolderNode">
+                                <HorizontalStackLayout Spacing="4">
+                                    <Label Text="{Binding Icon}" FontSize="12" VerticalTextAlignment="Center" />
+                                    <Label Text="{Binding Name}" FontSize="12" VerticalTextAlignment="Center" LineBreakMode="TailTruncation" />
+                                </HorizontalStackLayout>
+                            </DataTemplate>
+                        </shiny:TreeView.ItemTemplate>
+                    </shiny:TreeView>
+                </Border>
+
+                <Grid Grid.Column="1">
+                    <CollectionView x:Name="FileList"
+                                    ItemsSource="{Binding ActiveTab.Items}"
+                                    SelectionMode="None"
+                                    ItemSizingStrategy="MeasureFirstItem">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:FileItemViewModel">
+                                <Grid ColumnDefinitions="24,*,56,92,122,84" Padding="8,0" HeightRequest="24" BackgroundColor="{Binding RowState, Converter={StaticResource RowBackground}}">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnRowTapped" />
+                                        <TapGestureRecognizer Tapped="OnRowDoubleTapped" NumberOfTapsRequired="2" />
+                                        <TapGestureRecognizer Tapped="OnRowRightTapped" Buttons="Secondary" />
+                                    </Grid.GestureRecognizers>
+
+                                    <shiny:MotionIconView Icon="{Binding MotionIcon}"
+                                                          Color="{Binding IconColor}"
+                                                          IsPlaying="{Binding IsActiveCursor}"
+                                                          Interval="0:0:2.5"
+                                                          StrokeWidth="2"
+                                                          WidthRequest="16"
+                                                          HeightRequest="16"
+                                                          HorizontalOptions="Start"
+                                                          VerticalOptions="Center" />
+                                    <Label Grid.Column="1" Text="{Binding Name}" Style="{StaticResource RowLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
+                                    <Label Grid.Column="2" Text="{Binding Extension}" Style="{StaticResource RowLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
+                                    <Label Grid.Column="3" Text="{Binding SizeText}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" HorizontalTextAlignment="End" Margin="0,0,8,0" />
+                                    <Label Grid.Column="4" Text="{Binding DateText}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
+                                    <Label Grid.Column="5" Text="{Binding AttributeText}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <shiny:MotionIconView Icon="loader"
+                                          IsPlaying="{Binding ActiveTab.IsLoading}"
+                                          IsVisible="{Binding ActiveTab.IsLoading}"
+                                          Color="{StaticResource Accent}"
+                                          WidthRequest="36"
+                                          HeightRequest="36"
+                                          HorizontalOptions="Center"
+                                          VerticalOptions="Center" />
+                </Grid>
+            </Grid>
+
+            <!-- status: "x k / y k in a / b file(s), c / d dir(s)" -->
+            <Grid Grid.Row="6"
+                  ColumnDefinitions="*,Auto"
+                  Padding="8,4"
+                  BackgroundColor="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}">
+                <Label Text="{Binding ActiveTab.StatusText}" Style="{StaticResource Subtle}" FontSize="11" LineBreakMode="TailTruncation" />
+                <Label Grid.Column="1" Text="{Binding ActiveTab.Error}" TextColor="{StaticResource MarkedLight}" FontSize="11" LineBreakMode="TailTruncation" MaximumWidthRequest="320" />
+            </Grid>
+        </Grid>
+    </Border>
+</ContentView>

@@ -1,0 +1,41 @@
+<Project>
+    <!--
+        The UI is shared as linked source rather than a class library: there is no Linux TFM, the macOS
+        AppKit head is net10.0-macos and the Windows head is WinUI, so each head compiles these files
+        itself (the same pattern maui-labs and Shiny's own samples use). That also lets the source
+        generators (Shiny DI, Mediator, Shell, XAML) run per head.
+    -->
+    <PropertyGroup>
+        <RootNamespace>ShinyCommander</RootNamespace>
+        <MauiXamlInflator>SourceGen</MauiXamlInflator>
+        <ShinyMauiShell_GenerateNavExtensions>true</ShinyMauiShell_GenerateNavExtensions>
+        <!-- DevFlow's XAML source maps re-add every .xaml without the metadata the XAML source generator needs -->
+        <DevFlowXamlSourceMapsEnabled>false</DevFlowXamlSourceMapsEnabled>
+        <CommanderSharedDir>$(MSBuildThisFileDirectory)</CommanderSharedDir>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Include="$(CommanderSharedDir)**\*.cs"
+                 Exclude="$(CommanderSharedDir)bin\**;$(CommanderSharedDir)obj\**"
+                 Link="Shared\%(RecursiveDir)%(Filename)%(Extension)" />
+        <MauiXaml Include="$(CommanderSharedDir)**\*.xaml"
+                  Exclude="$(CommanderSharedDir)bin\**;$(CommanderSharedDir)obj\**"
+                  Link="Shared\%(RecursiveDir)%(Filename)%(Extension)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Maui.Controls" />
+        <PackageReference Include="CommunityToolkit.Mvvm" />
+        <PackageReference Include="Shiny.Maui.Controls" />
+        <PackageReference Include="Shiny.Maui.Controls.Markdown" />
+        <PackageReference Include="Shiny.Maui.Controls.Desktop" />
+        <PackageReference Include="Shiny.Maui.Shell" />
+        <PackageReference Include="Shiny.Mediator.Maui" />
+        <PackageReference Include="Shiny.Extensions.DependencyInjection" />
+        <PackageReference Include="Shiny.Extensions.Stores" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="$(CommanderSharedDir)..\ShinyCommander.Core\ShinyCommander.Core.csproj" />
+    </ItemGroup>
+</Project>

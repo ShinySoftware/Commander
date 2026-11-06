@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- palette: a modern take on Total Commander's classic blue cursor / red marks -->
+    <Color x:Key="Accent">#2F6FDE</Color>
+    <Color x:Key="WindowLight">#EEF1F6</Color>
+    <Color x:Key="WindowDark">#141619</Color>
+    <Color x:Key="PanelLight">#FFFFFF</Color>
+    <Color x:Key="PanelDark">#1C1E22</Color>
+    <Color x:Key="HeaderLight">#E9ECF1</Color>
+    <Color x:Key="HeaderDark">#272A30</Color>
+    <Color x:Key="BorderLight">#D0D5DD</Color>
+    <Color x:Key="BorderDark">#383D45</Color>
+    <Color x:Key="TextLight">#1D1F23</Color>
+    <Color x:Key="TextDark">#E4E6EA</Color>
+    <Color x:Key="SubtleLight">#6B7280</Color>
+    <Color x:Key="SubtleDark">#9AA1AD</Color>
+    <Color x:Key="CursorInactiveLight">#D7E3F8</Color>
+    <Color x:Key="CursorInactiveDark">#2E3A4C</Color>
+    <Color x:Key="MarkedLight">#D11A2A</Color>
+    <Color x:Key="MarkedDark">#FF6B72</Color>
+    <Color x:Key="MarkedOnCursor">#FFD3D6</Color>
+
+    <x:String x:Key="MonoFont">Menlo</x:String>
+
+    <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource WindowLight}, Dark={StaticResource WindowDark}}" />
+    </Style>
+
+    <Style TargetType="Label">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+        <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <Style x:Key="Subtle" TargetType="Label">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" />
+        <Setter Property="FontSize" Value="12" />
+    </Style>
+
+    <Style x:Key="SectionTitle" TargetType="Label">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" />
+    </Style>
+
+    <Style TargetType="Entry">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="CheckBox">
+        <Setter Property="Color" Value="{StaticResource Accent}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style x:Key="Card" TargetType="Border">
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PanelLight}, Dark={StaticResource PanelDark}}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+        <Setter Property="Shadow">
+            <Shadow Brush="Black" Opacity="0.08" Radius="10" Offset="0,2" />
+        </Setter>
+    </Style>
+
+    <Style x:Key="KeyCap" TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 7" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PanelLight}, Dark={StaticResource PanelDark}}" />
+        <Setter Property="Padding" Value="6,5" />
+        <Setter Property="HeightRequest" Value="32" />
+    </Style>
+
+    <Style x:Key="KeyCapKey" TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 4" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#E6EDFB, Dark=#24324A}" />
+        <Setter Property="Padding" Value="5,1" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style x:Key="KeyCapKeyText" TargetType="Label">
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{DynamicResource MonoFont}" />
+        <Setter Property="TextColor" Value="{StaticResource Accent}" />
+        <Setter Property="VerticalTextAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="Chip" TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 11" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}" />
+        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="HeightRequest" Value="22" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <!-- AppKit ribbon bar -->
+    <Style x:Key="RibbonAppButton" TargetType="Border">
+        <Setter Property="BackgroundColor" Value="{StaticResource Accent}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 7" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="14,0" />
+        <Setter Property="HeightRequest" Value="28" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+    <Style x:Key="RibbonTabHeader" TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 7,7,0,0" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="14,0" />
+        <Setter Property="HeightRequest" Value="32" />
+        <Setter Property="VerticalOptions" Value="End" />
+    </Style>
+    <Style x:Key="RibbonLarge" TargetType="Border">
+        <Setter Property="StrokeShape" Value="RoundRectangle 6" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="MinimumWidthRequest" Value="58" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="VisualStateManager.VisualStateGroups">
+            <VisualStateGroupList>
+                <VisualStateGroup x:Name="CommonStates">
+                    <VisualState x:Name="Normal"><VisualState.Setters><Setter Property="BackgroundColor" Value="Transparent" /></VisualState.Setters></VisualState>
+                    <VisualState x:Name="PointerOver"><VisualState.Setters><Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#EAF0FC, Dark=#26324A}" /></VisualState.Setters></VisualState>
+                </VisualStateGroup>
+            </VisualStateGroupList>
+        </Setter>
+    </Style>
+    <Style x:Key="RibbonSmall" TargetType="Border" BasedOn="{StaticResource RibbonLarge}">
+        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="MinimumWidthRequest" Value="0" />
+        <Setter Property="HeightRequest" Value="22" />
+    </Style>
+    <Style x:Key="RibbonText" TargetType="Label">
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+    </Style>
+    <Style x:Key="RibbonGroupTitle" TargetType="Label">
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="HorizontalTextAlignment" Value="Center" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" />
+    </Style>
+    <Style x:Key="RibbonDivider" TargetType="BoxView">
+        <Setter Property="WidthRequest" Value="1" />
+        <Setter Property="Margin" Value="4,6" />
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+    </Style>
+
+    <Style x:Key="Toolbar" TargetType="Grid">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}" />
+    </Style>
+</ResourceDictionary>

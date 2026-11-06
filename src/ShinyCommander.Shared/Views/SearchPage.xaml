@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             x:Class="ShinyCommander.Views.SearchPage"
+             x:DataType="vm:SearchViewModel">
+
+    <shiny:KeyboardShortcuts.Shortcuts>
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="Close" />
+        <shiny:KeyboardShortcut Gesture="Primary+Enter" Command="{Binding StartCommand}" Description="Start / stop" />
+        <shiny:KeyboardShortcut Gesture="F3" Command="{Binding ViewFileCommand}" Description="View" />
+        <shiny:KeyboardShortcut Gesture="Primary+G" Command="{Binding GoToFileCommand}" Description="Go to file" />
+    </shiny:KeyboardShortcuts.Shortcuts>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+        <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <shiny:ShinyButton Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="Find files" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
+            <HorizontalStackLayout Grid.Column="2" Spacing="4">
+
+            </HorizontalStackLayout>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="8,8,8,0" Padding="12">
+            <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
+                <Label Text="Search in" VerticalOptions="Center" />
+                <Entry Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding StartPath}" FontFamily="{DynamicResource MonoFont}" />
+
+                <Label Grid.Row="1" Text="File name" VerticalOptions="Center" />
+                <Entry x:Name="MaskEntry" Grid.Row="1" Grid.Column="1" Text="{Binding NameMask}" Placeholder="*.cs;*.xaml | bin/ obj/" ReturnCommand="{Binding StartCommand}" />
+                <Label Grid.Row="1" Grid.Column="2" Text="Containing text" VerticalOptions="Center" />
+                <Entry Grid.Row="1" Grid.Column="3" Text="{Binding ContainingText}" Placeholder="(optional)" ReturnCommand="{Binding StartCommand}" />
+
+                <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="4" Spacing="16">
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding Recursive}" /><Label Text="Subfolders" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding CaseSensitive}" /><Label Text="Case sensitive" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding IncludeHidden}" /><Label Text="Hidden files" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding FoldersOnly}" /><Label Text="Folders only" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="6"><Label Text="Min size (KB)" VerticalOptions="Center" /><Entry Text="{Binding MinSizeKb}" WidthRequest="80" Keyboard="Numeric" /></HorizontalStackLayout>
+                </HorizontalStackLayout>
+
+                <HorizontalStackLayout Grid.Row="3" Grid.ColumnSpan="4" Spacing="8">
+                    <shiny:ShinyButton Text="{Binding StartText}" Command="{Binding StartCommand}" Appearance="Filled" ContentPadding="18,4" />
+                    <shiny:ShinyButton Text="Go to file" Command="{Binding GoToFileCommand}" Appearance="Outlined" ContentPadding="12,4" />
+                    <shiny:ShinyButton Text="View (F3)" Command="{Binding ViewFileCommand}" Appearance="Outlined" ContentPadding="12,4" />
+                    <ActivityIndicator IsRunning="{Binding IsSearching}" IsVisible="{Binding IsSearching}" Color="{StaticResource Accent}" HeightRequest="18" />
+                </HorizontalStackLayout>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource Card}" Margin="8" Padding="0">
+            <shiny:DataGrid ItemsSource="{Binding Results}"
+                            SelectionMode="Single"
+                            SelectedItem="{Binding SelectedResult, Mode=TwoWay}"
+                            SortMode="Single"
+                            AllowColumnResize="True"
+                            Dense="True"
+                            Striped="True"
+                            EmptyText="No results yet">
+                <shiny:DataGridColumn Title="" PropertyName="Icon" Width="32" Sortable="False" />
+                <shiny:DataGridColumn Title="Name" PropertyName="Name" Width="2*" />
+                <shiny:DataGridColumn Title="Folder" PropertyName="Folder" Width="3*" />
+                <shiny:DataGridColumn Title="Size" PropertyName="Size" Width="100" StringFormat="{}{0:N0}" />
+                <shiny:DataGridColumn Title="Modified" PropertyName="Modified" Width="150" StringFormat="{}{0:yyyy-MM-dd HH:mm}" />
+            </shiny:DataGrid>
+        </Border>
+
+        <Grid Grid.Row="3" Style="{StaticResource Toolbar}" Padding="10,4">
+            <Label Text="{Binding Status}" Style="{StaticResource Subtle}" LineBreakMode="MiddleTruncation" />
+        </Grid>
+    </Grid>
+</ContentPage>

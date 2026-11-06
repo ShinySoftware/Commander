@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:md="http://shiny.net/maui/markdown"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             x:Class="ShinyCommander.Views.ViewerPage"
+             x:DataType="vm:ViewerViewModel">
+
+    <shiny:KeyboardShortcuts.Shortcuts>
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="Close" />
+        <shiny:KeyboardShortcut Gesture="F3" Command="{Binding CloseCommand}" Description="Close" />
+        <shiny:KeyboardShortcut Gesture="Q" Command="{Binding CloseCommand}" Description="Close" />
+        <shiny:KeyboardShortcut Gesture="1" Command="{Binding SetModeCommand}" CommandParameter="Text" Description="Text" />
+        <shiny:KeyboardShortcut Gesture="3" Command="{Binding SetModeCommand}" CommandParameter="Hex" Description="Hex" />
+        <shiny:KeyboardShortcut Gesture="4" Command="{Binding SetModeCommand}" CommandParameter="Markdown" Description="Markdown" />
+        <shiny:KeyboardShortcut Gesture="W" Command="{Binding ToggleWrapCommand}" Description="Word wrap" />
+        <shiny:KeyboardShortcut Gesture="N" Command="{Binding NextFileCommand}" Description="Next file" />
+        <shiny:KeyboardShortcut Gesture="P" Command="{Binding PreviousFileCommand}" Description="Previous file" />
+    </shiny:KeyboardShortcuts.Shortcuts>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <shiny:ShinyButton Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="{Binding Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
+            <HorizontalStackLayout Grid.Column="2" Spacing="4">
+                <shiny:ShinyButton Text="Text (1)" Command="{Binding SetModeCommand}" CommandParameter="Text" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton Text="Hex (3)" Command="{Binding SetModeCommand}" CommandParameter="Hex" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton Text="Markdown (4)" Command="{Binding SetModeCommand}" CommandParameter="Markdown" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton Text="Wrap (W)" Command="{Binding ToggleWrapCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton Text="◀ P" Command="{Binding PreviousFileCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton Text="N ▶" Command="{Binding NextFileCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            </HorizontalStackLayout>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="8" Padding="0">
+            <Grid>
+                <ScrollView IsVisible="{Binding IsText}" Orientation="Both" Padding="10">
+                    <Label x:Name="TextLabel"
+                           Text="{Binding Text}"
+                           FontFamily="{DynamicResource MonoFont}"
+                           FontSize="{Binding FontSize}" />
+                </ScrollView>
+
+                <Image IsVisible="{Binding IsImage}" Source="{Binding Image}" Aspect="AspectFit" Margin="10" />
+
+                <md:MarkdownView IsVisible="{Binding IsMarkdown}" Markdown="{Binding Text}" Padding="16" />
+
+                <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}" HorizontalOptions="Center" VerticalOptions="Center" Color="{StaticResource Accent}" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="2" Style="{StaticResource Toolbar}" Padding="10,4">
+            <Label Text="{Binding Info}" Style="{StaticResource Subtle}" />
+        </Grid>
+    </Grid>
+</ContentPage>

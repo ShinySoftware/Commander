@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             x:Class="ShinyCommander.Views.SettingsPage"
+             x:DataType="vm:SettingsViewModel">
+
+    <shiny:KeyboardShortcuts.Shortcuts>
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="Close" />
+    </shiny:KeyboardShortcuts.Shortcuts>
+
+    <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <shiny:ShinyButton Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="Settings" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
+        </Grid>
+
+        <Grid Grid.Row="1" HorizontalOptions="Center" WidthRequest="680" Padding="0,8">
+            <shiny:TableView CellAccentColor="{StaticResource Accent}">
+                <shiny:TableRoot>
+                    <shiny:TableSection Title="Panels">
+                        <shiny:SwitchCell Title="Show hidden files" Description="Dot files and hidden attribute (Ctrl/⌘+H)" On="{Binding ShowHidden, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="Friendly sizes" Description="12.3 MB instead of 12,912,640" On="{Binding FriendlySizes, Mode=TwoWay}" />
+                    </shiny:TableSection>
+
+                    <shiny:TableSection Title="Operations">
+                        <shiny:SwitchCell Title="Confirm before delete" On="{Binding ConfirmDelete, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="Delete to trash / recycle bin" Description="Shift+F8 always deletes permanently" On="{Binding UseTrash, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="Unpack each archive into its own folder" On="{Binding ExtractToFolderPerArchive, Mode=TwoWay}" />
+                        <shiny:EntryCell Title="External editor (F4)" Placeholder="blank = built-in editor" ValueText="{Binding ExternalEditor, Mode=TwoWay}" />
+                    </shiny:TableSection>
+
+                    <shiny:TableSection x:Name="ThemeSection" Title="Theme" shiny:RadioCell.SelectedValue="{Binding Theme, Mode=TwoWay}">
+                        <shiny:RadioCell Title="Follow system" Value="System" />
+                        <shiny:RadioCell Title="Light" Value="Light" />
+                        <shiny:RadioCell Title="Dark" Value="Dark" />
+                    </shiny:TableSection>
+
+                    <shiny:TableSection x:Name="FontSection" Title="Viewer / editor font size" shiny:RadioCell.SelectedValue="{Binding ViewerFontSize, Mode=TwoWay}">
+                        <shiny:RadioCell Title="Small (12)" Value="12" />
+                        <shiny:RadioCell Title="Medium (13)" Value="13" />
+                        <shiny:RadioCell Title="Large (15)" Value="15" />
+                        <shiny:RadioCell Title="Extra large (18)" Value="18" />
+                    </shiny:TableSection>
+
+                    <shiny:TableSection Title="About">
+                        <shiny:LabelCell Title="ShinyCommander" ValueText="{Binding AppVersion}" />
+                        <shiny:LabelCell Title="Runtime" Description="{Binding RuntimeInfo}" />
+                        <shiny:LabelCell Title="Built with" Description=".NET MAUI • maui-labs AppKit &amp; GTK4 backends • Shiny Controls, Shell, Mediator, Stores &amp; DI" />
+                    </shiny:TableSection>
+                </shiny:TableRoot>
+            </shiny:TableView>
+        </Grid>
+    </Grid>
+</ContentPage>

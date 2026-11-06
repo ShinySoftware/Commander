@@ -1,0 +1,13 @@
+<Project>
+    <PropertyGroup>
+        <BaseTargetFramework>net10.0</BaseTargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+        <!-- maui-labs packages are previews -->
+        <NoWarn>$(NoWarn);NU5104;NU1603</NoWarn>
+        <Authors>Allan Ritchie</Authors>
+        <Product>ShinyCommander</Product>
+    </PropertyGroup>
+</Project>

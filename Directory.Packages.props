@@ -1,0 +1,36 @@
+<Project>
+    <PropertyGroup>
+        <MauiVersion>10.0.110</MauiVersion>
+        <MauiLabsVersion>0.1.0-preview.14.26531.2</MauiLabsVersion>
+        <ShinyControlsVersion>2.4.0</ShinyControlsVersion>
+    </PropertyGroup>
+    <ItemGroup>
+        <!-- MAUI + maui-labs desktop backends -->
+        <PackageVersion Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
+        <PackageVersion Include="Microsoft.Maui.Platforms.MacOS" Version="$(MauiLabsVersion)" />
+        <PackageVersion Include="Microsoft.Maui.Platforms.MacOS.Essentials" Version="$(MauiLabsVersion)" />
+        <PackageVersion Include="Microsoft.Maui.Platforms.Linux.Gtk4" Version="$(MauiLabsVersion)" />
+        <PackageVersion Include="Microsoft.Maui.Platforms.Linux.Gtk4.Essentials" Version="$(MauiLabsVersion)" />
+
+        <!-- Shiny -->
+        <PackageVersion Include="Shiny.Maui.Controls" Version="$(ShinyControlsVersion)" />
+        <PackageVersion Include="Shiny.Maui.Controls.Markdown" Version="$(ShinyControlsVersion)" />
+        <PackageVersion Include="Shiny.Maui.Controls.Desktop" Version="$(ShinyControlsVersion)" />
+        <PackageVersion Include="Shiny.Maui.Shell" Version="7.0.3" />
+        <PackageVersion Include="Shiny.Mediator.Maui" Version="6.12.0" />
+        <PackageVersion Include="Shiny.Extensions.DependencyInjection" Version="6.0.1" />
+        <PackageVersion Include="Shiny.Extensions.Stores" Version="6.0.1" />
+
+        <!-- misc -->
+        <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+        <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+        <PackageVersion Include="Microsoft.Maui.DevFlow.Agent" Version="$(MauiLabsVersion)" />
+        <PackageVersion Include="Microsoft.Maui.DevFlow.Agent.Gtk" Version="$(MauiLabsVersion)" />
+
+        <!-- tests -->
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+        <PackageVersion Include="xunit.v3" Version="3.2.2" />
+        <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+        <PackageVersion Include="Shouldly" Version="4.3.0" />
+    </ItemGroup>
+</Project>

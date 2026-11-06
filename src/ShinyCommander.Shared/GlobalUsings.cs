@@ -1,0 +1,13 @@
+global using System.Collections.ObjectModel;
+global using CommunityToolkit.Mvvm.ComponentModel;
+global using CommunityToolkit.Mvvm.Input;
+global using ShinyCommander.Core.Models;
+global using ShinyCommander.Core.FileSystem;
+global using ShinyCommander.Core.Operations;
+global using ShinyCommander.Core.Util;
+global using ShinyCommander.Services;
+global using ShinyCommander.ViewModels;
+global using ShinyCommander.Views;
+global using ShinyCommander.Converters;
+global using Shiny;
+global using Shiny.Infrastructure;
