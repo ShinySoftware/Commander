@@ -8,6 +8,10 @@ public static class MauiProgramExtensions
     /// <summary>Everything shared by the Windows, macOS (AppKit) and Linux (GTK4) heads.</summary>
     public static MauiAppBuilder UseShinyCommander(this MauiAppBuilder builder)
     {
+#if DEBUG
+        // SHINYCOMMANDER_UITEST=1 only: in-memory settings + scripted dialogs for tests/ShinyCommander.UITests
+        Testing.UiTestMode.Configure(builder);
+#endif
         builder
             .UseShinyControls()
             // keyboard shortcuts on AppKit + GTK4 come from the Desktop add-on's key sources

@@ -24,6 +24,14 @@
                         <shiny:SwitchCell Title="Friendly sizes" Description="12.3 MB instead of 12,912,640" On="{Binding FriendlySizes, Mode=TwoWay}" />
                     </shiny:TableSection>
 
+                    <shiny:TableSection Title="Columns (Primary+Shift+K)">
+                        <shiny:SwitchCell Title="Extension" On="{Binding ShowExtColumn, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="Size" On="{Binding ShowSizeColumn, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="Date modified" On="{Binding ShowDateColumn, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="Date created" On="{Binding ShowCreatedColumn, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="Attributes" On="{Binding ShowAttrColumn, Mode=TwoWay}" />
+                    </shiny:TableSection>
+
                     <shiny:TableSection Title="Operations">
                         <shiny:SwitchCell Title="Confirm before delete" On="{Binding ConfirmDelete, Mode=TwoWay}" />
                         <shiny:SwitchCell Title="Delete to trash / recycle bin" Description="Shift+F8 always deletes permanently" On="{Binding UseTrash, Mode=TwoWay}" />

@@ -8,7 +8,8 @@ public enum SortColumn
     Extension,
     Size,
     Modified,
-    Attributes
+    Attributes,
+    Created
 }
 
 /// <summary>Parent link first, folders before files, then by the chosen column (TC's ordering).</summary>
@@ -32,6 +33,7 @@ public sealed class FileEntryComparer(SortColumn column, bool descending) : ICom
             // folders have no size until calculated - TC sorts them by name
             SortColumn.Size => x.IsDirectory ? 0 : x.Size.CompareTo(y.Size),
             SortColumn.Modified => x.Modified.CompareTo(y.Modified),
+            SortColumn.Created => x.Created.CompareTo(y.Created),
             SortColumn.Attributes => String.CompareOrdinal(x.AttributeText, y.AttributeText),
             _ => 0
         };

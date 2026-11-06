@@ -18,6 +18,11 @@
         <PackageReference Include="Microsoft.Maui.Platforms.Linux.Gtk4.Essentials" />
     </ItemGroup>
 
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+        <!-- the DevFlow agent is referenced in Debug - enables the UI test hooks (Shared/Testing) -->
+        <DefineConstants>$(DefineConstants);SHINYCOMMANDER_DEVFLOW</DefineConstants>
+    </PropertyGroup>
+
     <ItemGroup Condition="'$(Configuration)' == 'Debug'">
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
         <PackageReference Include="Microsoft.Maui.DevFlow.Agent.Gtk" />

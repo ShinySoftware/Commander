@@ -96,7 +96,39 @@ public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThre
     }
 
     public Task<string?> Choose(string title, IReadOnlyList<string> options, string? cancelText = "Cancel", string? destructive = null)
-        => this.Run(() => dialogs.ActionSheet(title, options, cancelText, destructive));
+        => this.Run(() =>
+        {
+            var task = dialogs.ActionSheet(title, options, cancelText, destructive);
+            this.SizeActionSheetOptions();
+            return task;
+        });
+
+    /// <summary>
+    /// The action sheet puts its options in a ScrollView capped with MaximumHeightRequest; the AppKit backend measures
+    /// that ScrollView at zero height (maui-labs#830), so the options vanish and only Cancel shows. Give it an
+    /// explicit height from its content until the backend fix ships.
+    /// </summary>
+    void SizeActionSheetOptions()
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher == null)
+            return;
+
+        dispatcher.Dispatch(() =>
+        {
+            var root = Application.Current?.Windows.FirstOrDefault()?.Page;
+            if (root == null)
+                return;
+
+            foreach (var scroll in Descendants(root).OfType<ScrollView>().Where(s => Ancestors(s).Any(a => a.GetType().Name == "DialogView")))
+            {
+                if (scroll.Content is not IView content)
+                    continue;
+                var size = content.Measure(Math.Max(200, scroll.Width > 0 ? scroll.Width : 460), Double.PositiveInfinity);
+                scroll.HeightRequest = Math.Min(scroll.MaximumHeightRequest > 0 ? scroll.MaximumHeightRequest : 360, size.Height);
+            }
+        });
+    }
 
     public Task Toast(string message, ToastKind kind = ToastKind.Info)
         => mainThread.InvokeOnMainThreadAsync(async () =>

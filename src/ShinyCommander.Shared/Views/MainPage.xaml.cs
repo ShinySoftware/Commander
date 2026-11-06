@@ -5,9 +5,6 @@ public partial class MainPage : ContentPage
     public MainPage()
     {
         this.InitializeComponent();
-        this.FolderTree.ChildrenLoader = item => FolderNode.LoadChildrenAsync(item, false);
-        this.FolderTree.HasChildrenSelector = _ => true;
-        this.FolderTree.ItemsSource = FolderNode.Roots().ToList();
 #if MACOS_APPKIT
         // Shiny's Ribbon builds its tab bodies after its native view exists, which the AppKit head never
         // lays out - use the ribbon-styled bar generated from the same command table (tools/ribbon.py).
@@ -18,13 +15,28 @@ public partial class MainPage : ContentPage
 
     MainViewModel? ViewModel => this.BindingContext as MainViewModel;
 
-    void OnTreeItemSelected(object? sender, Shiny.Maui.Controls.Tree.TreeItemEventArgs e)
+    /// <summary>Side by side (two columns) or stacked (two rows).</summary>
+    void ArrangePanels(bool stacked)
     {
-        if (this.ViewModel is { } vm && e.Item is FolderNode node)
+        var grid = this.PanelsGrid;
+        grid.RowDefinitions.Clear();
+        grid.ColumnDefinitions.Clear();
+        if (stacked)
         {
-            _ = vm.ActivePanel.NavigateAsync(node.Path);
-            vm.RequestCommandLineFocus();
+            grid.RowDefinitions.Add(new RowDefinition(GridLength.Star));
+            grid.RowDefinitions.Add(new RowDefinition(GridLength.Star));
+            grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         }
+        else
+        {
+            grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+            grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+            grid.RowDefinitions.Add(new RowDefinition(GridLength.Star));
+        }
+        Grid.SetRow(this.LeftPanel, 0);
+        Grid.SetColumn(this.LeftPanel, 0);
+        Grid.SetRow(this.RightPanel, stacked ? 1 : 0);
+        Grid.SetColumn(this.RightPanel, stacked ? 0 : 1);
     }
 
     protected override void OnBindingContextChanged()
@@ -36,16 +48,27 @@ public partial class MainPage : ContentPage
             vm.FocusCommandLineRequested += this.OnFocusCommandLine;
             vm.PropertyChanged -= this.OnViewModelPropertyChanged;
             vm.PropertyChanged += this.OnViewModelPropertyChanged;
+            this.ArrangePanels(vm.StackPanels);
         }
     }
 
 
     void OnViewModelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
-        if (e.PropertyName == nameof(MainViewModel.CommandOutput))
+        if (e.PropertyName == nameof(MainViewModel.StackPanels) && this.ViewModel is { } vm)
+            this.ArrangePanels(vm.StackPanels);
+        else if (e.PropertyName == nameof(MainViewModel.CommandOutput))
             this.Dispatcher.Dispatch(async () =>
             {
-                try { await this.OutputScroll.ScrollToAsync(0, Double.MaxValue, false); } catch { }
+                // scroll so the last line shows - ScrollToAsync(0, Double.MaxValue) overshoots on AppKit and leaves the
+                // pane looking empty
+                try
+                {
+                    await Task.Yield();
+                    var bottom = Math.Max(0, this.OutputLabel.Height - this.OutputScroll.Height + this.OutputScroll.Padding.VerticalThickness);
+                    await this.OutputScroll.ScrollToAsync(0, bottom, false);
+                }
+                catch { }
             });
     }
 

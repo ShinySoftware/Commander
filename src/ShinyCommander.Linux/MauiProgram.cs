@@ -17,7 +17,7 @@ public static class MauiProgram
             .UseShinyCommander();
 
 #if DEBUG
-        builder.AddMauiDevFlowAgent();
+        builder.AddMauiDevFlowAgent(o => ShinyCommander.Testing.UiTestHooks.Register(o));
 #endif
         return builder.Build();
     }

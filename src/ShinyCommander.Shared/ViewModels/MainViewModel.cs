@@ -18,6 +18,7 @@ public partial class MainViewModel : ObservableObject,
     readonly IMediator mediator;
     readonly IMainThread mainThread;
     readonly Shiny.Maui.Controls.IKeyboardShortcutService shortcuts;
+    readonly ColumnSet columns;
     CancellationTokenSource? operationCts;
     CancellationTokenSource? commandCts;
     bool initialized;
@@ -30,10 +31,15 @@ public partial class MainViewModel : ObservableObject,
         INavigator navigator,
         IMediator mediator,
         IMainThread mainThread,
-        Shiny.Maui.Controls.IKeyboardShortcutService shortcuts
+        Shiny.Maui.Controls.IKeyboardShortcutService shortcuts,
+        ColumnSet columns
     )
     {
         this.shortcuts = shortcuts;
+        this.columns = columns;
+#if DEBUG
+        Current = this; // UI test hooks (Testing/UiTestHooks.cs) drive the live instance
+#endif
         dialogs.DialogClosed += (_, _) => this.RequestCommandLineFocus();
         this.vfs = vfs;
         this.ops = ops;
@@ -43,12 +49,13 @@ public partial class MainViewModel : ObservableObject,
         this.mediator = mediator;
         this.mainThread = mainThread;
 
-        this.Left = new PanelViewModel(PanelSide.Left, vfs, settings);
-        this.Right = new PanelViewModel(PanelSide.Right, vfs, settings);
+        this.Left = new PanelViewModel(PanelSide.Left, vfs, settings, columns);
+        this.Right = new PanelViewModel(PanelSide.Right, vfs, settings, columns);
         this.Left.PropertyChanged += this.OnPanelPropertyChanged;
         this.Right.PropertyChanged += this.OnPanelPropertyChanged;
-        this.Left.TreeToggleRequested += (_, _) => this.ShowTree = !this.ShowTree;
-        this.Right.TreeToggleRequested += (_, _) => this.ShowTree = !this.ShowTree;
+        this.Left.ScrollRequested += this.OnPanelCursorMoved;
+        this.Right.ScrollRequested += this.OnPanelCursorMoved;
+        this.StackPanels = settings.StackPanels;
 
         // row colours come from converters - rebuild rows so they pick up the new palette
         if (Application.Current != null)
@@ -58,6 +65,10 @@ public partial class MainViewModel : ObservableObject,
                 _ = this.Right.ActiveTab?.RefreshAsync();
             });
     }
+
+#if DEBUG
+    public static MainViewModel? Current { get; private set; }
+#endif
 
     public PanelViewModel Left { get; }
     public PanelViewModel Right { get; }
@@ -70,7 +81,7 @@ public partial class MainViewModel : ObservableObject,
     PanelTabViewModel? Tab => this.ActivePanel?.ActiveTab;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(BackspaceCommand), nameof(SpaceCommand), nameof(HomeCommand), nameof(EndCommand))]
+    [NotifyCanExecuteChangedFor(nameof(BackspaceCommand), nameof(SpaceCommand), nameof(HomeCommand), nameof(EndCommand), nameof(CursorLeftCommand), nameof(CursorRightCommand))]
     public partial string CommandText { get; set; } = String.Empty;
 
     [ObservableProperty]
@@ -125,7 +136,7 @@ public partial class MainViewModel : ObservableObject,
 
     void RefreshKeyStates()
     {
-        foreach (var cmd in new IRelayCommand[] { this.CursorUpCommand, this.CursorDownCommand, this.MarkUpCommand, this.MarkDownCommand, this.PageUpCommand, this.PageDownCommand, this.HomeCommand, this.EndCommand, this.InsertCommand, this.SpaceCommand, this.BackspaceCommand, this.SwitchPanelCommand, this.EnterCommand })
+        foreach (var cmd in new IRelayCommand[] { this.CursorLeftCommand, this.CursorRightCommand, this.CursorUpCommand, this.CursorDownCommand, this.MarkUpCommand, this.MarkDownCommand, this.PageUpCommand, this.PageDownCommand, this.HomeCommand, this.EndCommand, this.InsertCommand, this.SpaceCommand, this.BackspaceCommand, this.SwitchPanelCommand, this.EnterCommand })
             cmd.NotifyCanExecuteChanged();
     }
 
@@ -137,9 +148,15 @@ public partial class MainViewModel : ObservableObject,
     {
         if (this.initialized)
         {
-            // coming back from viewer/editor/search etc.
-            _ = this.Left.ActiveTab?.RefreshAsync();
-            _ = this.Right.ActiveTab?.RefreshAsync();
+            // coming back from viewer/editor/search etc. Folders on disk are kept current by their watchers (and by
+            // FileSystemChangedEvent from our own operations), so only archive listings - which nothing watches - are
+            // reread. Rereading everything rebuilt both lists on every return and made "back" take seconds.
+            var listingChanged = this.listingSettings != (this.settings.ShowHidden, this.settings.FriendlySizes);
+            foreach (var tab in new[] { this.Left.ActiveTab, this.Right.ActiveTab })
+            {
+                if (listingChanged || tab is { IsArchive: true } || tab?.IsBranchView == true)
+                    _ = tab?.RefreshAsync();
+            }
             this.FocusCommandLineRequested?.Invoke(this, EventArgs.Empty);
             return;
         }
@@ -152,7 +169,10 @@ public partial class MainViewModel : ObservableObject,
         this.Activate(this.settings.RightPanelActive ? this.Right : this.Left);
     }
 
-    public void OnDisappearing() { }
+    // settings that change what a listing shows (Settings page) - compared when coming back
+    (bool, bool) listingSettings;
+
+    public void OnDisappearing() => this.listingSettings = (this.settings.ShowHidden, this.settings.FriendlySizes);
 
     static string DefaultRightPath(string home)
     {
@@ -204,8 +224,26 @@ public partial class MainViewModel : ObservableObject,
 
         this.ActivePanel = panel;
         panel.IsActive = true;
+
+        // the preview belongs to the side you're not working in - focusing it ends quick view
+        if (panel.IsQuickView)
+            panel.IsQuickView = false;
+        this.UpdateQuickView();
+
         this.UpdatePrompt();
         this.SaveState();
+    }
+
+    void OnPanelCursorMoved(object? sender, int index)
+    {
+        if (sender == this.ActivePanel)
+            this.UpdateQuickView();
+    }
+
+    void UpdateQuickView()
+    {
+        if (this.ActivePanel is { } active && this.InactivePanel.IsQuickView)
+            _ = this.InactivePanel.QuickView.ShowAsync(active.ActiveTab?.CursorItem?.Entry);
     }
 
     // Mediator events --------------------------------------------------------------------------
@@ -240,11 +278,23 @@ public partial class MainViewModel : ObservableObject,
     bool CanNavigate() => !this.IsPathEditing;
     bool CommandLineEmpty() => !this.IsPathEditing && !this.IsFilterEditing && String.IsNullOrEmpty(this.CommandText);
 
-    [RelayCommand(CanExecute = nameof(CanNavigate))]
-    void CursorUp() => this.Tab?.MoveCursor(-1);
+    // thumbnail view is a grid: Up/Down step a whole row, Left/Right one tile
+    int RowStep => this.ActivePanel is { IsThumbnails: true } p ? Math.Max(1, p.ThumbnailSpan) : 1;
 
     [RelayCommand(CanExecute = nameof(CanNavigate))]
-    void CursorDown() => this.Tab?.MoveCursor(1);
+    void CursorUp() => this.Tab?.MoveCursor(-this.RowStep);
+
+    [RelayCommand(CanExecute = nameof(CanNavigate))]
+    void CursorDown() => this.Tab?.MoveCursor(this.RowStep);
+
+    // only claimed in thumbnail view with an empty command line - otherwise the caret keeps them
+    bool CanMoveSideways() => this.CommandLineEmpty() && this.ActivePanel is { IsThumbnails: true };
+
+    [RelayCommand(CanExecute = nameof(CanMoveSideways))]
+    void CursorLeft() => this.Tab?.MoveCursor(-1);
+
+    [RelayCommand(CanExecute = nameof(CanMoveSideways))]
+    void CursorRight() => this.Tab?.MoveCursor(1);
 
     [RelayCommand(CanExecute = nameof(CanNavigate))]
     void MarkUp() => this.Tab?.MoveCursor(-1, mark: true);
@@ -444,12 +494,65 @@ public partial class MainViewModel : ObservableObject,
         await tab.RefreshAsync();
     }
 
-    /// <summary>Explorer-style folder tree down the left edge; it drives the active panel.</summary>
+    /// <summary>Each panel has its own folder tree; Primary+F8 toggles the active one's.</summary>
+    [RelayCommand]
+    void ToggleTree() => this.ActivePanel.ShowTree = !this.ActivePanel.ShowTree;
+
+    /// <summary>Panels top/bottom instead of left/right - the page re-arranges its grid when this flips.</summary>
     [ObservableProperty]
-    public partial bool ShowTree { get; set; }
+    public partial bool StackPanels { get; set; }
+
+    partial void OnStackPanelsChanged(bool value) => this.settings.StackPanels = value;
 
     [RelayCommand]
-    void ToggleTree() => this.ShowTree = !this.ShowTree;
+    void TogglePanelLayout() => this.StackPanels = !this.StackPanels;
+
+    [RelayCommand]
+    void ThumbnailView()
+    {
+        this.ActivePanel.ViewMode = this.ActivePanel.IsThumbnails ? PanelViewMode.Details : PanelViewMode.Thumbnails;
+        this.CursorLeftCommand.NotifyCanExecuteChanged();
+        this.CursorRightCommand.NotifyCanExecuteChanged();
+    }
+
+    [RelayCommand]
+    void DetailsView()
+    {
+        this.ActivePanel.ViewMode = PanelViewMode.Details;
+        this.CursorLeftCommand.NotifyCanExecuteChanged();
+        this.CursorRightCommand.NotifyCanExecuteChanged();
+    }
+
+    /// <summary>Ctrl+Q - the other panel previews the file under the cursor.</summary>
+    [RelayCommand]
+    void QuickView()
+    {
+        var target = this.InactivePanel;
+        target.IsQuickView = !target.IsQuickView;
+        this.UpdateQuickView();
+    }
+
+    /// <summary>Pick which detail columns the panels show; the list stays open until Done.</summary>
+    [RelayCommand]
+    async Task ChooseColumns()
+    {
+        const string done = "Done";
+        while (true)
+        {
+            var options = Enum.GetValues<PanelColumn>()
+                .Select(c => (this.columns.IsVisible(c) ? "✓  " : "     ") + ColumnSet.Label(c))
+                .ToList();
+
+            var choice = await this.dialogs.Choose("Columns", options, done);
+            if (choice == null || choice == done)
+                break;
+
+            var index = options.IndexOf(choice);
+            if (index >= 0)
+                this.columns.Toggle(Enum.GetValues<PanelColumn>()[index]);
+        }
+        this.RequestCommandLineFocus();
+    }
 
     [RelayCommand]
     void QuickFilter()
@@ -926,7 +1029,7 @@ public partial class MainViewModel : ObservableObject,
             return;
 
         var name = sources.Count == 1 ? sources[0].NameWithoutExtension : new DirectoryInfo(tab.Path).Name;
-        var input = await this.dialogs.Prompt("Pack files", $"Pack {sources.Count} item(s) to archive:", Path.Combine(this.InactivePanel.Path, name + ".zip"), "Pack");
+        var input = await this.dialogs.Prompt("Pack files", $"Pack {sources.Count} item(s) to archive - the extension picks the format ({String.Join(", ", ArchiveFormats.PackExtensions)}):", Path.Combine(this.InactivePanel.Path, name + ".zip"), "Pack");
         if (String.IsNullOrWhiteSpace(input))
             return;
 
@@ -948,7 +1051,7 @@ public partial class MainViewModel : ObservableObject,
 
         if (archives.Count == 0)
         {
-            await this.dialogs.Toast("Select one or more zip archives to unpack", ToastKind.Warning);
+            await this.dialogs.Toast("Select one or more archives to unpack (zip, tar, tar.gz, 7z, rar…)", ToastKind.Warning);
             return;
         }
 

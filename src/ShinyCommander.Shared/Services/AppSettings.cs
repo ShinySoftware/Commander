@@ -26,6 +26,25 @@ public partial class AppSettings
     [Bind] public partial int RightActiveTab { get; set; }
     [Bind] public partial bool RightPanelActive { get; set; }
 
+    /// <summary>Panels stacked top/bottom instead of side by side.</summary>
+    [Bind] public partial bool StackPanels { get; set; }
+
+    /// <summary>Per-panel folder tree.</summary>
+    [Bind] public partial bool LeftShowTree { get; set; }
+    [Bind] public partial bool RightShowTree { get; set; }
+
+    /// <summary>Per-panel view mode ("Details" / "Thumbnails").</summary>
+    [Bind] public partial string? LeftViewMode { get; set; }
+    [Bind] public partial string? RightViewMode { get; set; }
+    [Bind] public partial int ThumbnailSize { get; set; }
+
+    // columns - "Hide" so existing installs keep today's columns, Created is opt-in
+    [Bind] public partial bool HideExtColumn { get; set; }
+    [Bind] public partial bool HideSizeColumn { get; set; }
+    [Bind] public partial bool HideDateColumn { get; set; }
+    [Bind] public partial bool HideAttrColumn { get; set; }
+    [Bind] public partial bool ShowCreatedColumn { get; set; }
+
     /// <summary>Directory hotlist (Ctrl+D) - newline separated.</summary>
     [Bind] public partial string? Hotlist { get; set; }
 

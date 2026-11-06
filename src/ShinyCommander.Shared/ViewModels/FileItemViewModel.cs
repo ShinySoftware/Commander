@@ -20,6 +20,21 @@ public partial class FileItemViewModel(FileEntry entry, bool friendlySizes) : Ob
     public string Name => this.Entry.IsDirectory || this.Entry.IsParentLink ? this.Entry.Name : this.Entry.NameWithoutExtension;
     public string Extension => this.Entry.Extension;
     public string DateText => this.Entry.IsParentLink || this.Entry.Modified == DateTime.MinValue ? String.Empty : this.Entry.Modified.ToString("yyyy-MM-dd HH:mm");
+    public string CreatedText => this.Entry.IsParentLink || this.Entry.Created == DateTime.MinValue ? String.Empty : this.Entry.Created.ToString("yyyy-MM-dd HH:mm");
+
+    /// <summary>Shared column visibility - the row's ColumnDefinitions bind their widths to it.</summary>
+    public required ColumnLayout Columns { get; init; }
+
+    /// <summary>The full file name - thumbnails show it under the picture.</summary>
+    public string FullName => this.Entry.Name;
+
+    public bool HasThumbnail => !this.Entry.IsDirectory && !this.Entry.IsInArchive && FileIcons.IsImage(this.Entry.Extension);
+    public bool ShowIconTile => !this.HasThumbnail;
+
+    ImageSource? thumbnail;
+
+    /// <summary>Thumbnail view: local images load lazily as the cell binds; everything else shows its motion icon.</summary>
+    public ImageSource? Thumbnail => this.HasThumbnail ? this.thumbnail ??= ImageSource.FromFile(this.Entry.FullPath) : null;
     public string AttributeText => this.Entry.AttributeText;
     public bool IsDirectory => this.Entry.IsDirectory;
     public bool IsHidden => this.Entry.IsHidden;

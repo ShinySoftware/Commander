@@ -22,10 +22,12 @@
         <PackageVersion Include="Shiny.Extensions.Stores" Version="6.0.1" />
 
         <!-- misc -->
+        <PackageVersion Include="SharpCompress" Version="1.0.0" />
         <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
         <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
         <PackageVersion Include="Microsoft.Maui.DevFlow.Agent" Version="$(MauiLabsVersion)" />
         <PackageVersion Include="Microsoft.Maui.DevFlow.Agent.Gtk" Version="$(MauiLabsVersion)" />
+        <PackageVersion Include="Microsoft.Maui.DevFlow.Client" Version="$(MauiLabsVersion)" />
 
         <!-- tests -->
         <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />

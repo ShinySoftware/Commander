@@ -1,8 +1,14 @@
 namespace ShinyCommander.ViewModels;
 
 [ShellMap<SettingsPage>("Settings")]
-public partial class SettingsViewModel(AppSettings settings, INavigator navigator) : ObservableObject
+public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, INavigator navigator) : ObservableObject
 {
+    public bool ShowExtColumn { get => columns.ShowExtension; set { columns.Set(PanelColumn.Extension, value); this.OnPropertyChanged(); } }
+    public bool ShowSizeColumn { get => columns.ShowSize; set { columns.Set(PanelColumn.Size, value); this.OnPropertyChanged(); } }
+    public bool ShowDateColumn { get => columns.ShowModified; set { columns.Set(PanelColumn.Modified, value); this.OnPropertyChanged(); } }
+    public bool ShowCreatedColumn { get => columns.ShowCreated; set { columns.Set(PanelColumn.Created, value); this.OnPropertyChanged(); } }
+    public bool ShowAttrColumn { get => columns.ShowAttributes; set { columns.Set(PanelColumn.Attributes, value); this.OnPropertyChanged(); } }
+
     public bool ShowHidden { get => settings.ShowHidden; set { settings.ShowHidden = value; this.OnPropertyChanged(); } }
     public bool ConfirmDelete { get => settings.ConfirmDelete; set { settings.ConfirmDelete = value; this.OnPropertyChanged(); } }
     public bool UseTrash { get => settings.UseTrash; set { settings.UseTrash = value; this.OnPropertyChanged(); } }

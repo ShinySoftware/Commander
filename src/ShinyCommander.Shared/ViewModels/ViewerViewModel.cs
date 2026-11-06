@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace ShinyCommander.ViewModels;
 
 public enum ViewerMode
@@ -75,26 +73,20 @@ public partial class ViewerViewModel(VirtualFileSystem vfs, AppSettings settings
         {
             this.FilePath = path;
             this.Title = Path.GetFileName(path);
-            var ext = Path.GetExtension(path).TrimStart('.');
-            (this.bytes, this.truncated, var length) = await Task.Run(() =>
-            {
-                using var stream = vfs.OpenRead(path);
-                var len = stream.CanSeek ? stream.Length : -1;
-                var limit = FileIcons.IsImage(ext) ? Int32.MaxValue : MaxTextBytes;
-                using var ms = new MemoryStream();
-                var buffer = new byte[81920];
-                int read;
-                while ((read = stream.Read(buffer, 0, buffer.Length)) > 0 && ms.Length < limit)
-                    ms.Write(buffer, 0, read);
-                return (ms.ToArray(), len > ms.Length, len);
-            });
+            var content = await FilePreview.LoadAsync(vfs, path, MaxTextBytes);
+            this.bytes = content.Bytes;
+            this.truncated = content.Truncated;
+            var length = content.Length;
 
             this.Info = $"{SizeFormatter.Exact(length)} bytes" + (this.truncated ? $"  •  showing first {SizeFormatter.Friendly(this.bytes.Length)}" : String.Empty);
 
-            var mode = FileIcons.IsImage(ext) ? ViewerMode.Image
-                : FileIcons.IsMarkdown(ext) ? ViewerMode.Markdown
-                : LooksBinary(this.bytes) ? ViewerMode.Hex
-                : ViewerMode.Text;
+            var mode = content.Kind switch
+            {
+                PreviewKind.Image => ViewerMode.Image,
+                PreviewKind.Markdown => ViewerMode.Markdown,
+                PreviewKind.Hex => ViewerMode.Hex,
+                _ => ViewerMode.Text
+            };
 
             if (this.Mode == mode)
                 this.Render();
@@ -112,29 +104,17 @@ public partial class ViewerViewModel(VirtualFileSystem vfs, AppSettings settings
         }
     }
 
-    static bool LooksBinary(byte[] data)
-    {
-        var sample = Math.Min(data.Length, 8000);
-        var zeros = 0;
-        for (var i = 0; i < sample; i++)
-        {
-            if (data[i] == 0)
-                zeros++;
-        }
-        return zeros > 0;
-    }
-
     void Render()
     {
         switch (this.Mode)
         {
             case ViewerMode.Text:
             case ViewerMode.Markdown:
-                this.Text = DecodeText(this.bytes);
+                this.Text = FilePreview.DecodeText(this.bytes);
                 break;
 
             case ViewerMode.Hex:
-                this.Text = ToHex(this.bytes, MaxHexBytes);
+                this.Text = FilePreview.ToHex(this.bytes, MaxHexBytes);
                 break;
 
             case ViewerMode.Image:
@@ -142,42 +122,6 @@ public partial class ViewerViewModel(VirtualFileSystem vfs, AppSettings settings
                 this.Image = ImageSource.FromStream(() => new MemoryStream(copy));
                 break;
         }
-    }
-
-    static string DecodeText(byte[] data)
-    {
-        // BOM aware, otherwise UTF-8 with replacement
-        using var reader = new StreamReader(new MemoryStream(data), Encoding.UTF8, true);
-        return reader.ReadToEnd();
-    }
-
-    static string ToHex(byte[] data, int max)
-    {
-        var length = Math.Min(data.Length, max);
-        var sb = new StringBuilder(length * 4);
-        for (var offset = 0; offset < length; offset += 16)
-        {
-            sb.Append(offset.ToString("X8")).Append("  ");
-            for (var i = 0; i < 16; i++)
-            {
-                if (offset + i < length)
-                    sb.Append(data[offset + i].ToString("X2")).Append(' ');
-                else
-                    sb.Append("   ");
-                if (i == 7)
-                    sb.Append(' ');
-            }
-            sb.Append(' ');
-            for (var i = 0; i < 16 && offset + i < length; i++)
-            {
-                var b = data[offset + i];
-                sb.Append(b is >= 32 and < 127 ? (char)b : '.');
-            }
-            sb.AppendLine();
-        }
-        if (data.Length > max)
-            sb.AppendLine($"… {SizeFormatter.Exact(data.Length - max)} more bytes not shown");
-        return sb.ToString();
     }
 
     [RelayCommand]

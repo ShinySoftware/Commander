@@ -1,10 +1,9 @@
-using System.IO.Compression;
 using ShinyCommander.Core.Models;
 
 namespace ShinyCommander.Core.FileSystem;
 
 /// <summary>
-/// Resolves panel paths to either the local disk or a zip archive and lists/opens their contents.
+/// Resolves panel paths to either the local disk or an archive (zip, tar, 7z, rar, gz…) and lists/opens their contents.
 /// </summary>
 public sealed class VirtualFileSystem
 {
@@ -40,9 +39,9 @@ public sealed class VirtualFileSystem
             if (!loc.IsArchive || loc.IsArchiveRoot)
                 return true;
 
-            using var zip = ZipFile.OpenRead(loc.ArchiveFile!);
+            using var reader = ArchiveReader.Open(loc.ArchiveFile!);
             var prefix = loc.InnerPath + "/";
-            return zip.Entries.Any(e => e.FullName.Replace('\\', '/').StartsWith(prefix, StringComparison.Ordinal));
+            return reader.Items.Any(e => e.IsDirectory && e.Key == loc.InnerPath || e.Key.StartsWith(prefix, StringComparison.Ordinal));
         }
         catch
         {
@@ -114,26 +113,26 @@ public sealed class VirtualFileSystem
 
     static List<FileEntry> ListArchive(VfsLocation location)
     {
-        using var zip = ZipFile.OpenRead(location.ArchiveFile!);
+        using var reader = ArchiveReader.Open(location.ArchiveFile!);
         var prefix = location.InnerPath.Length == 0 ? String.Empty : location.InnerPath + "/";
         var files = new Dictionary<string, FileEntry>(StringComparer.Ordinal);
         var dirs = new Dictionary<string, DateTime>(StringComparer.Ordinal);
 
-        foreach (var entry in zip.Entries)
+        foreach (var entry in reader.Items)
         {
-            var name = entry.FullName.Replace('\\', '/');
-            if (!name.StartsWith(prefix, StringComparison.Ordinal))
+            if (!entry.Key.StartsWith(prefix, StringComparison.Ordinal))
                 continue;
 
-            var rest = name[prefix.Length..];
+            var rest = entry.Key[prefix.Length..];
             if (rest.Length == 0)
                 continue;
 
             var slash = rest.IndexOf('/');
-            if (slash >= 0)
+            if (slash >= 0 || entry.IsDirectory)
             {
-                var dirName = rest[..slash];
-                var stamp = entry.LastWriteTime.LocalDateTime;
+                // a folder entry, or a folder implied by a deeper path
+                var dirName = slash >= 0 ? rest[..slash] : rest;
+                var stamp = entry.Modified;
                 if (!dirs.TryGetValue(dirName, out var existing) || existing < stamp)
                     dirs[dirName] = stamp;
             }
@@ -143,10 +142,10 @@ public sealed class VirtualFileSystem
                 {
                     Name = rest,
                     FullPath = Path.Combine(location.Path, rest),
-                    Size = entry.Length,
-                    Modified = entry.LastWriteTime.LocalDateTime,
+                    Size = entry.Size,
+                    Modified = entry.Modified,
                     Attributes = FileAttributes.Normal,
-                    UnixMode = UnixModeFromExternal(entry.ExternalAttributes),
+                    UnixMode = entry.Mode,
                     IsInArchive = true
                 };
             }
@@ -169,12 +168,6 @@ public sealed class VirtualFileSystem
         return list;
     }
 
-    static UnixFileMode? UnixModeFromExternal(int external)
-    {
-        var mode = (external >> 16) & 0x1FF;
-        return mode == 0 ? null : (UnixFileMode)mode;
-    }
-
     /// <summary>Opens a file for reading regardless of whether it lives on disk or inside an archive.</summary>
     public Stream OpenRead(string path)
     {
@@ -185,25 +178,19 @@ public sealed class VirtualFileSystem
         if (!location.IsArchive)
             throw new FileNotFoundException(path);
 
-        var zip = ZipFile.OpenRead(location.ArchiveFile!);
-        var entry = FindEntry(zip, location.InnerPath);
-        if (entry == null)
-        {
-            zip.Dispose();
-            throw new FileNotFoundException(path);
-        }
+        using var reader = ArchiveReader.Open(location.ArchiveFile!);
+        var entry = FindItem(reader, location.InnerPath) ?? throw new FileNotFoundException(path);
 
         // copy so the caller can seek + so we can dispose the archive
         var ms = new MemoryStream();
-        using (var s = entry.Open())
+        using (var s = reader.Open(entry))
             s.CopyTo(ms);
-        zip.Dispose();
         ms.Position = 0;
         return ms;
     }
 
-    internal static ZipArchiveEntry? FindEntry(ZipArchive zip, string innerPath)
-        => zip.Entries.FirstOrDefault(e => e.FullName.Replace('\\', '/').Equals(innerPath, StringComparison.Ordinal));
+    internal static ArchiveItem? FindItem(IArchiveReader reader, string innerPath)
+        => reader.Items.FirstOrDefault(e => !e.IsDirectory && e.Key.Equals(innerPath, StringComparison.Ordinal));
 
     /// <summary>
     /// Archive files can't be handed to other processes, so extract to a temp folder (for "open with", the

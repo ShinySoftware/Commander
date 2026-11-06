@@ -2,6 +2,7 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:md="http://shiny.net/maui/markdown"
              xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
              xmlns:conv="clr-namespace:ShinyCommander.Converters"
              xmlns:core="clr-namespace:ShinyCommander.Core.Models;assembly=ShinyCommander.Core"
@@ -29,6 +30,8 @@
 
         <Style x:Key="HeaderLabel" TargetType="Label">
             <Setter Property="FontSize" Value="12" />
+            <Setter Property="MaxLines" Value="1" />
+            <Setter Property="LineBreakMode" Value="TailTruncation" />
             <Setter Property="FontAttributes" Value="Bold" />
             <Setter Property="VerticalTextAlignment" Value="Center" />
             <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" />
@@ -93,7 +96,7 @@
             </Grid>
 
             <!-- path / back / forward / up -->
-            <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,Auto,*,Auto" Padding="6,2" ColumnSpacing="2">
+            <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto" Padding="6,2" ColumnSpacing="2">
                 <shiny:ShinyButton Command="{Binding GoBackCommand}" LeftMotionIcon="arrow-left" Appearance="Text" ContentPadding="6,0" IconSize="14" />
                 <shiny:ShinyButton Grid.Column="1" Command="{Binding GoForwardCommand}" LeftMotionIcon="arrow-right" Appearance="Text" ContentPadding="6,0" IconSize="14" />
                 <shiny:ShinyButton Grid.Column="2" Command="{Binding GoUpCommand}" LeftMotionIcon="arrow-up" Appearance="Text" ContentPadding="6,0" IconSize="14" />
@@ -105,7 +108,30 @@
                        Completed="OnPathCompleted"
                        Focused="OnPathFocused"
                        Unfocused="OnPathUnfocused" />
-                <shiny:ShinyButton Grid.Column="4" Command="{Binding ToggleTreeCommand}" LeftMotionIcon="folder-open" Appearance="Text" ContentPadding="6,0" IconSize="15" />
+                <!-- what shows while not editing: head-truncated, so the folder you're in stays readable on deep paths.
+                     A click switches to the entry underneath. -->
+                <Border x:Name="PathLabelBox"
+                        Grid.Column="3"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 5"
+                        Stroke="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}"
+                        BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource PanelDark}}"
+                        Padding="6,0"
+                        Margin="0,4">
+                    <Border.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnPathLabelTapped" />
+                    </Border.GestureRecognizers>
+                    <Label x:Name="PathLabel"
+                           Text="{Binding PathText}"
+                           FontFamily="{DynamicResource MonoFont}"
+                           FontSize="12"
+                           LineBreakMode="HeadTruncation"
+                           MaxLines="1"
+                           VerticalTextAlignment="Center" />
+                </Border>
+                <shiny:PillView Grid.Column="4" Text="{Binding ActiveTab.ArchiveBadge}" IsVisible="{Binding ActiveTab.IsArchive}" Type="Warning" FontSize="10" VerticalOptions="Center" Margin="4,0" />
+                <shiny:ShinyButton Grid.Column="5" x:Name="ViewModeButton" Command="{Binding ToggleViewModeCommand}" LeftMotionIcon="image" Appearance="Text" ContentPadding="6,0" IconSize="15" ToolTipProperties.Text="Thumbnails / details" />
+                <shiny:ShinyButton Grid.Column="6" x:Name="TreeButton" Command="{Binding ToggleTreeCommand}" LeftMotionIcon="folder-open" Appearance="Text" ContentPadding="6,0" IconSize="15" ToolTipProperties.Text="Folder tree" />
             </Grid>
 
             <!-- quick filter (Ctrl+F) -->
@@ -120,64 +146,169 @@
             </Grid>
 
 
-            <!-- file list -->
-            <Grid Grid.Row="4" Grid.RowSpan="2">
-                <Grid RowDefinitions="Auto,*">
-                    <!-- column headers (click to sort) -->
-                    <Grid Grid.Row="0"
-                          ColumnDefinitions="24,*,56,92,122,84"
-                          Padding="6,3"
-                          BackgroundColor="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}">
-                        <Label Grid.Column="1" Text="{Binding ActiveTab.NameHeader}" Style="{StaticResource HeaderLabel}">
-                    <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Name" /></Label.GestureRecognizers>
-                        </Label>
-                        <Label Grid.Column="2" Text="{Binding ActiveTab.ExtHeader}" Style="{StaticResource HeaderLabel}">
-                    <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Extension" /></Label.GestureRecognizers>
-                        </Label>
-                        <Label Grid.Column="3" Text="{Binding ActiveTab.SizeHeader}" Style="{StaticResource HeaderLabel}" HorizontalTextAlignment="End" Margin="0,0,8,0">
-                    <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Size" /></Label.GestureRecognizers>
-                        </Label>
-                        <Label Grid.Column="4" Text="{Binding ActiveTab.DateHeader}" Style="{StaticResource HeaderLabel}">
-                    <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Modified" /></Label.GestureRecognizers>
-                        </Label>
-                        <Label Grid.Column="5" Text="{Binding ActiveTab.AttrHeader}" Style="{StaticResource HeaderLabel}">
-                    <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Attributes" /></Label.GestureRecognizers>
-                        </Label>
+            <!-- folder tree | files (details or thumbnails) or quick view -->
+            <Grid Grid.Row="4" Grid.RowSpan="2" ColumnDefinitions="Auto,*">
+
+                <!-- this panel's own folder tree (Primary+F8 / the folder button) -->
+                <Grid Grid.Column="0" IsVisible="{Binding ShowTree}" WidthRequest="210" ColumnDefinitions="*,1">
+                    <shiny:TreeView x:Name="FolderTree"
+                                    IndentSize="14"
+                                    RowPadding="6,3"
+                                    ChevronSize="12"
+                                    ShowGuideLines="True"
+                                    ItemSelected="OnTreeItemSelected">
+                        <shiny:TreeView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:FolderNode">
+                                <HorizontalStackLayout Spacing="6">
+                                    <shiny:MotionIconView Icon="{Binding Icon}" Color="#F5A524" Trigger="Hover" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" />
+                                    <Label Text="{Binding Name}" FontSize="12" VerticalTextAlignment="Center" LineBreakMode="TailTruncation" />
+                                </HorizontalStackLayout>
+                            </DataTemplate>
+                        </shiny:TreeView.ItemTemplate>
+                    </shiny:TreeView>
+                    <BoxView Grid.Column="1" Color="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+                </Grid>
+
+                <Grid Grid.Column="1">
+                    <!-- details: column headers (click to sort) + rows -->
+                    <Grid RowDefinitions="Auto,*" IsVisible="{Binding ShowDetailsList}">
+                        <Grid Grid.Row="0"
+                              Padding="6,3"
+                              BackgroundColor="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="24" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="{Binding Columns.ExtWidth}" />
+                                <ColumnDefinition Width="{Binding Columns.SizeWidth}" />
+                                <ColumnDefinition Width="{Binding Columns.ModifiedWidth}" />
+                                <ColumnDefinition Width="{Binding Columns.CreatedWidth}" />
+                                <ColumnDefinition Width="{Binding Columns.AttrWidth}" />
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="1" Text="{Binding ActiveTab.NameHeader}" Style="{StaticResource HeaderLabel}">
+                                <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Name" /></Label.GestureRecognizers>
+                            </Label>
+                            <Label Grid.Column="2" Text="{Binding ActiveTab.ExtHeader}" Style="{StaticResource HeaderLabel}" IsVisible="{Binding Columns.ShowExtension}">
+                                <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Extension" /></Label.GestureRecognizers>
+                            </Label>
+                            <Label Grid.Column="3" Text="{Binding ActiveTab.SizeHeader}" Style="{StaticResource HeaderLabel}" HorizontalTextAlignment="End" Margin="0,0,8,0" IsVisible="{Binding Columns.ShowSize}">
+                                <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Size" /></Label.GestureRecognizers>
+                            </Label>
+                            <Label Grid.Column="4" Text="{Binding ActiveTab.DateHeader}" Style="{StaticResource HeaderLabel}" IsVisible="{Binding Columns.ShowModified}">
+                                <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Modified" /></Label.GestureRecognizers>
+                            </Label>
+                            <Label Grid.Column="5" Text="{Binding ActiveTab.CreatedHeader}" Style="{StaticResource HeaderLabel}" IsVisible="{Binding Columns.ShowCreated}">
+                                <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Created" /></Label.GestureRecognizers>
+                            </Label>
+                            <Label Grid.Column="6" Text="{Binding ActiveTab.AttrHeader}" Style="{StaticResource HeaderLabel}" IsVisible="{Binding Columns.ShowAttributes}">
+                                <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Attributes" /></Label.GestureRecognizers>
+                            </Label>
+                        </Grid>
+
+                        <!-- ItemsSource is set from code: only the list that's showing gets items (a hidden one would
+                             realize every cell and keep them, slowing every page change) -->
+                        <CollectionView x:Name="FileList" Grid.Row="1"
+                                        SizeChanged="OnFileListSizeChanged"
+                                        SelectionMode="None"
+                                        ItemSizingStrategy="MeasureFirstItem">
+                            <CollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="vm:FileItemViewModel">
+                                    <Grid Padding="8,0" HeightRequest="24" BackgroundColor="{Binding RowState, Converter={StaticResource RowBackground}}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="24" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="{Binding Columns.ExtWidth}" />
+                                        <ColumnDefinition Width="{Binding Columns.SizeWidth}" />
+                                        <ColumnDefinition Width="{Binding Columns.ModifiedWidth}" />
+                                        <ColumnDefinition Width="{Binding Columns.CreatedWidth}" />
+                                        <ColumnDefinition Width="{Binding Columns.AttrWidth}" />
+                                    </Grid.ColumnDefinitions>
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnRowTapped" />
+                                            <TapGestureRecognizer Tapped="OnRowDoubleTapped" NumberOfTapsRequired="2" />
+                                            <TapGestureRecognizer Tapped="OnRowRightTapped" Buttons="Secondary" />
+                                        </Grid.GestureRecognizers>
+
+                                        <shiny:MotionIconView Icon="{Binding MotionIcon}"
+                                                              Color="{Binding IconColor}"
+                                                              IsPlaying="{Binding IsActiveCursor}"
+                                                              Interval="0:0:2.5"
+                                                              StrokeWidth="2"
+                                                              WidthRequest="16"
+                                                              HeightRequest="16"
+                                                              HorizontalOptions="Start"
+                                                              VerticalOptions="Center" />
+                                        <Label Grid.Column="1" Text="{Binding Name}" Style="{StaticResource RowLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
+                                        <Label Grid.Column="2" Text="{Binding Extension}" IsVisible="{Binding Columns.ShowExtension}" Style="{StaticResource RowLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
+                                        <Label Grid.Column="3" Text="{Binding SizeText}" IsVisible="{Binding Columns.ShowSize}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" HorizontalTextAlignment="End" Margin="0,0,8,0" />
+                                        <Label Grid.Column="4" Text="{Binding DateText}" IsVisible="{Binding Columns.ShowModified}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
+                                        <Label Grid.Column="5" Text="{Binding CreatedText}" IsVisible="{Binding Columns.ShowCreated}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
+                                        <Label Grid.Column="6" Text="{Binding AttributeText}" IsVisible="{Binding Columns.ShowAttributes}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
+                                    </Grid>
+                                </DataTemplate>
+                            </CollectionView.ItemTemplate>
+                        </CollectionView>
                     </Grid>
 
-                    <CollectionView x:Name="FileList" Grid.Row="1"
-                                    ItemsSource="{Binding ActiveTab.Items}"
+                    <!-- thumbnails (Primary+Shift+F1): pictures for local images, big motion icons for the rest -->
+                    <CollectionView x:Name="ThumbList"
+                                    IsVisible="{Binding ShowThumbnailList}"
                                     SelectionMode="None"
-                                    ItemSizingStrategy="MeasureFirstItem">
+                                    Margin="6"
+                                    SizeChanged="OnThumbListSizeChanged">
+                        <CollectionView.ItemsLayout>
+                            <GridItemsLayout x:Name="ThumbLayout" Orientation="Vertical" Span="4" HorizontalItemSpacing="6" VerticalItemSpacing="6" />
+                        </CollectionView.ItemsLayout>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="vm:FileItemViewModel">
-                                <Grid ColumnDefinitions="24,*,56,92,122,84" Padding="8,0" HeightRequest="24" BackgroundColor="{Binding RowState, Converter={StaticResource RowBackground}}">
-                                    <Grid.GestureRecognizers>
+                                <Border StrokeShape="RoundRectangle 8" StrokeThickness="0" Padding="6" HeightRequest="136" MinimumHeightRequest="136"
+                                        BackgroundColor="{Binding RowState, Converter={StaticResource RowBackground}}">
+                                    <Border.GestureRecognizers>
                                         <TapGestureRecognizer Tapped="OnRowTapped" />
                                         <TapGestureRecognizer Tapped="OnRowDoubleTapped" NumberOfTapsRequired="2" />
                                         <TapGestureRecognizer Tapped="OnRowRightTapped" Buttons="Secondary" />
-                                    </Grid.GestureRecognizers>
-
-                                    <shiny:MotionIconView Icon="{Binding MotionIcon}"
-                                                          Color="{Binding IconColor}"
-                                                          IsPlaying="{Binding IsActiveCursor}"
-                                                          Interval="0:0:2.5"
-                                                          StrokeWidth="2"
-                                                          WidthRequest="16"
-                                                          HeightRequest="16"
-                                                          HorizontalOptions="Start"
-                                                          VerticalOptions="Center" />
-                                    <Label Grid.Column="1" Text="{Binding Name}" Style="{StaticResource RowLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
-                                    <Label Grid.Column="2" Text="{Binding Extension}" Style="{StaticResource RowLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
-                                    <Label Grid.Column="3" Text="{Binding SizeText}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" HorizontalTextAlignment="End" Margin="0,0,8,0" />
-                                    <Label Grid.Column="4" Text="{Binding DateText}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
-                                    <Label Grid.Column="5" Text="{Binding AttributeText}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
-                                </Grid>
+                                    </Border.GestureRecognizers>
+                                    <Grid RowDefinitions="90,30" RowSpacing="4">
+                                        <Image Source="{Binding Thumbnail}" IsVisible="{Binding HasThumbnail}" Aspect="AspectFit" HeightRequest="90" />
+                                        <shiny:MotionIconView Icon="{Binding MotionIcon}"
+                                                              Color="{Binding IconColor}"
+                                                              IsPlaying="{Binding IsActiveCursor}"
+                                                              IsVisible="{Binding ShowIconTile}"
+                                                              Interval="0:0:2.5"
+                                                              StrokeWidth="1.5"
+                                                              WidthRequest="54"
+                                                              HeightRequest="54"
+                                                              HorizontalOptions="Center"
+                                                              VerticalOptions="Center" />
+                                        <Label Grid.Row="1" Text="{Binding FullName}" FontSize="11" MaxLines="2" LineBreakMode="WordWrap" HorizontalTextAlignment="Center" VerticalTextAlignment="Start"
+                                               TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
+                                    </Grid>
+                                </Border>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <shiny:MotionIconView Grid.Row="1" Icon="loader"
+                    <!-- quick view (Ctrl+Q from the other panel) -->
+                    <Grid IsVisible="{Binding IsQuickView}" RowDefinitions="Auto,*,Auto">
+                        <Grid Padding="10,6" ColumnDefinitions="Auto,*" ColumnSpacing="8" BackgroundColor="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}">
+                            <shiny:MotionIconView Icon="{Binding QuickView.MotionIcon}" Color="{Binding QuickView.IconColor}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="{Binding QuickView.Title}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" LineBreakMode="MiddleTruncation" />
+                        </Grid>
+                        <Grid Grid.Row="1">
+                            <ScrollView IsVisible="{Binding QuickView.IsText}" Orientation="Both">
+                                <Label Text="{Binding QuickView.Text}" FontFamily="{DynamicResource MonoFont}" FontSize="12" Margin="10" />
+                            </ScrollView>
+                            <Image IsVisible="{Binding QuickView.IsImage}" Source="{Binding QuickView.Image}" Aspect="AspectFit" Margin="10" />
+                            <md:MarkdownView IsVisible="{Binding QuickView.IsMarkdown}" Markdown="{Binding QuickView.Text}" Padding="14" />
+                            <VerticalStackLayout IsVisible="{Binding QuickView.IsSummary}" Spacing="12" HorizontalOptions="Center" VerticalOptions="Center" Padding="20">
+                                <shiny:MotionIconView Icon="{Binding QuickView.MotionIcon}" Color="{Binding QuickView.IconColor}" Trigger="Appear,Hover" StrokeWidth="1.5" WidthRequest="72" HeightRequest="72" HorizontalOptions="Center" />
+                                <Label Text="{Binding QuickView.Info}" Style="{StaticResource Subtle}" HorizontalTextAlignment="Center" />
+                            </VerticalStackLayout>
+                            <shiny:MotionIconView Icon="loader" IsPlaying="{Binding QuickView.IsLoading}" IsVisible="{Binding QuickView.IsLoading}" Color="{StaticResource Accent}" WidthRequest="32" HeightRequest="32" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Grid>
+                        <Label Grid.Row="2" Text="{Binding QuickView.Info}" IsVisible="{Binding QuickView.HasContent}" Style="{StaticResource Subtle}" FontSize="11" Padding="10,4" LineBreakMode="TailTruncation" />
+                    </Grid>
+
+                    <shiny:MotionIconView Icon="loader"
                                           IsPlaying="{Binding ActiveTab.IsLoading}"
                                           IsVisible="{Binding ActiveTab.IsLoading}"
                                           Color="{StaticResource Accent}"

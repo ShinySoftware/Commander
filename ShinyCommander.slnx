@@ -7,6 +7,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/ShinyCommander.Core.Tests/ShinyCommander.Core.Tests.csproj" />
+    <Project Path="tests/ShinyCommander.UITests/ShinyCommander.UITests.csproj" />
   </Folder>
   <Folder Name="/shared/">
     <File Path="src/ShinyCommander.Shared/ShinyCommander.Shared.props" />

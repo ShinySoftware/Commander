@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <!-- Plain net10.0 on purpose: the suite drives the real macOS (AppKit) app from the outside through the DevFlow
+         agent's HTTP API (Microsoft.Maui.DevFlow.Client), so it needs neither the MAUI workload nor a reference to the
+         app project. See docs/testing.md and run.sh. -->
+    <PropertyGroup>
+        <TargetFramework>$(BaseTargetFramework)</TargetFramework>
+        <OutputType>Exe</OutputType>
+        <IsPackable>false</IsPackable>
+        <IsTestProject>true</IsTestProject>
+        <!-- xUnit1051: the waits here are bounded by their own deadlines -->
+        <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+        <DefaultItemExcludes>$(DefaultItemExcludes);.app-build/**;artifacts/**</DefaultItemExcludes>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" />
+        <PackageReference Include="xunit.v3" />
+        <PackageReference Include="xunit.runner.visualstudio" />
+        <PackageReference Include="Shouldly" />
+        <PackageReference Include="Microsoft.Maui.DevFlow.Client" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit" />
+        <Using Include="Shouldly" />
+    </ItemGroup>
+
+    <!-- one app, one window: tests share it and run one after another -->
+    <ItemGroup>
+        <Content Include="xunit.runner.json" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+</Project>

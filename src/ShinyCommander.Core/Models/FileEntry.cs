@@ -10,6 +10,7 @@ public sealed record FileEntry
     public bool IsDirectory { get; init; }
     public long Size { get; init; }
     public DateTime Modified { get; init; }
+    public DateTime Created { get; init; }
     public FileAttributes Attributes { get; init; }
     public UnixFileMode? UnixMode { get; init; }
     public bool IsParentLink { get; init; }
@@ -87,8 +88,9 @@ public sealed record FileEntry
             try { size = fi.Length; } catch { }
         }
 
-        DateTime modified;
+        DateTime modified, created;
         try { modified = info.LastWriteTime; } catch { modified = DateTime.MinValue; }
+        try { created = info.CreationTime; } catch { created = DateTime.MinValue; }
 
         return new FileEntry
         {
@@ -97,6 +99,7 @@ public sealed record FileEntry
             IsDirectory = isDir,
             Size = size,
             Modified = modified,
+            Created = created,
             Attributes = SafeAttributes(info),
             UnixMode = mode,
             IsSymlink = info.LinkTarget != null

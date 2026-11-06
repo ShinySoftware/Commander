@@ -5,6 +5,9 @@
         <IsAotCompatible>true</IsAotCompatible>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="SharpCompress" />
+    </ItemGroup>
+    <ItemGroup>
         <InternalsVisibleTo Include="ShinyCommander.Core.Tests" />
     </ItemGroup>
 </Project>

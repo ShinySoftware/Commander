@@ -7,6 +7,7 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
 {
     readonly VirtualFileSystem vfs;
     readonly AppSettings settings;
+    readonly ColumnLayout columns;
     readonly Stack<string> back = new();
     readonly Stack<string> forward = new();
     List<FileItemViewModel> all = [];
@@ -14,10 +15,11 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     CancellationTokenSource? loadCts;
     Timer? refreshDebounce;
 
-    public PanelTabViewModel(VirtualFileSystem vfs, AppSettings settings, string path)
+    public PanelTabViewModel(VirtualFileSystem vfs, AppSettings settings, ColumnLayout columns, string path)
     {
         this.vfs = vfs;
         this.settings = settings;
+        this.columns = columns;
         this.Path = path;
     }
 
@@ -62,6 +64,12 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
 
     public bool IsArchive { get; private set; }
 
+    /// <summary>Inside a tar / 7z / rar / gz - browse and extract only.</summary>
+    public bool IsReadOnlyArchive { get; private set; }
+
+    /// <summary>"7z • read-only" etc. for the panel's location pill; empty on disk.</summary>
+    public string ArchiveBadge { get; private set; } = String.Empty;
+
     public string Title
     {
         get
@@ -101,7 +109,7 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
 
     void SortChanged()
     {
-        foreach (var name in new[] { nameof(this.NameHeader), nameof(this.ExtHeader), nameof(this.SizeHeader), nameof(this.DateHeader), nameof(this.AttrHeader) })
+        foreach (var name in new[] { nameof(this.NameHeader), nameof(this.ExtHeader), nameof(this.SizeHeader), nameof(this.DateHeader), nameof(this.CreatedHeader), nameof(this.AttrHeader) })
             this.OnPropertyChanged(name);
         this.ApplyView(this.CursorItem?.Entry.Name);
     }
@@ -112,6 +120,7 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     public string SizeHeader => this.Header("Size", SortColumn.Size);
     public string DateHeader => this.Header("Date", SortColumn.Modified);
     public string AttrHeader => this.Header("Attr", SortColumn.Attributes);
+    public string CreatedHeader => this.Header("Created", SortColumn.Created);
 
     partial void OnCursorIndexChanged(int oldValue, int newValue)
     {
@@ -228,13 +237,22 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
             var friendly = this.settings.FriendlySizes;
             this.all = entries.Select(e => new FileItemViewModel(e, friendly)
             {
+                Columns = this.columns,
                 IsMarked = marked.Contains(e.FullPath),
                 CalculatedSize = sizes.GetValueOrDefault(e.FullPath),
                 Location = this.IsBranchView && !e.IsParentLink ? System.IO.Path.GetRelativePath(this.Path, System.IO.Path.GetDirectoryName(e.FullPath)!) : null
             }).ToList();
 
             this.Error = null;
-            this.IsArchive = this.vfs.Resolve(this.Path).IsArchive;
+            var location = this.vfs.Resolve(this.Path);
+            this.IsArchive = location.IsArchive;
+            this.IsReadOnlyArchive = location.IsReadOnlyArchive;
+            this.ArchiveBadge = location.IsArchive
+                ? ArchiveFormats.Describe(ArchiveFormats.GetKind(location.ArchiveFile!)) + (location.IsReadOnlyArchive ? " • read-only" : String.Empty)
+                : String.Empty;
+            this.OnPropertyChanged(nameof(this.IsArchive));
+            this.OnPropertyChanged(nameof(this.IsReadOnlyArchive));
+            this.OnPropertyChanged(nameof(this.ArchiveBadge));
             this.ApplyView(focusName);
             this.Watch();
             return true;
