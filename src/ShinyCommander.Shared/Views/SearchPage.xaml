@@ -15,7 +15,7 @@
 
     <Grid RowDefinitions="Auto,Auto,*,Auto">
         <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-            <shiny:ShinyButton Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <shiny:ShinyButton AutomationId="PageBack" Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
             <Label Grid.Column="1" Text="Find files" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
             <HorizontalStackLayout Grid.Column="2" Spacing="4">
 
@@ -23,12 +23,12 @@
         </Grid>
 
         <Border Grid.Row="1" Style="{StaticResource Card}" Margin="8,8,8,0" Padding="12">
-            <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
+            <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="34,34,30,40" ColumnSpacing="10" RowSpacing="8">
                 <Label Text="Search in" VerticalOptions="Center" />
-                <Entry Grid.Column="1" Grid.ColumnSpan="3" Text="{Binding StartPath}" FontFamily="{DynamicResource MonoFont}" />
+                <Entry Grid.Column="1" Grid.ColumnSpan="3" AutomationId="SearchPath" Text="{Binding StartPath}" FontFamily="{DynamicResource MonoFont}" />
 
                 <Label Grid.Row="1" Text="File name" VerticalOptions="Center" />
-                <Entry x:Name="MaskEntry" Grid.Row="1" Grid.Column="1" Text="{Binding NameMask}" Placeholder="*.cs;*.xaml | bin/ obj/" ReturnCommand="{Binding StartCommand}" />
+                <Entry x:Name="MaskEntry" AutomationId="SearchMask" Grid.Row="1" Grid.Column="1" Text="{Binding NameMask}" Placeholder="*.cs;*.xaml | bin/ obj/" ReturnCommand="{Binding StartCommand}" />
                 <Label Grid.Row="1" Grid.Column="2" Text="Containing text" VerticalOptions="Center" />
                 <Entry Grid.Row="1" Grid.Column="3" Text="{Binding ContainingText}" Placeholder="(optional)" ReturnCommand="{Binding StartCommand}" />
 
@@ -41,7 +41,7 @@
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout Grid.Row="3" Grid.ColumnSpan="4" Spacing="8">
-                    <shiny:ShinyButton Text="{Binding StartText}" Command="{Binding StartCommand}" Appearance="Filled" ContentPadding="18,4" />
+                    <shiny:ShinyButton AutomationId="SearchStart" Text="{Binding StartText}" Command="{Binding StartCommand}" Appearance="Filled" ContentPadding="18,4" />
                     <shiny:ShinyButton Text="Go to file" Command="{Binding GoToFileCommand}" Appearance="Outlined" ContentPadding="12,4" />
                     <shiny:ShinyButton Text="View (F3)" Command="{Binding ViewFileCommand}" Appearance="Outlined" ContentPadding="12,4" />
                     <ActivityIndicator IsRunning="{Binding IsSearching}" IsVisible="{Binding IsSearching}" Color="{StaticResource Accent}" HeightRequest="18" />
@@ -58,7 +58,13 @@
                             Dense="True"
                             Striped="True"
                             EmptyText="No results yet">
-                <shiny:DataGridColumn Title="" PropertyName="Icon" Width="32" Sortable="False" />
+                <shiny:DataGridTemplateColumn Title="" Width="34" Sortable="False">
+                    <shiny:DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:SearchResultItem">
+                            <shiny:MotionIconView Icon="{Binding MotionIcon}" Color="{Binding IconColor}" Trigger="Hover" StrokeWidth="2" WidthRequest="16" HeightRequest="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </DataTemplate>
+                    </shiny:DataGridTemplateColumn.CellTemplate>
+                </shiny:DataGridTemplateColumn>
                 <shiny:DataGridColumn Title="Name" PropertyName="Name" Width="2*" />
                 <shiny:DataGridColumn Title="Folder" PropertyName="Folder" Width="3*" />
                 <shiny:DataGridColumn Title="Size" PropertyName="Size" Width="100" StringFormat="{}{0:N0}" />

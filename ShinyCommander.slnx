@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ShinyCommander.Core/ShinyCommander.Core.csproj" />
+    <Project Path="src/ShinyCommander.MacOS/ShinyCommander.MacOS.csproj" />
+    <Project Path="src/ShinyCommander.Linux/ShinyCommander.Linux.csproj" />
+    <Project Path="src/ShinyCommander.Windows/ShinyCommander.Windows.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ShinyCommander.Core.Tests/ShinyCommander.Core.Tests.csproj" />
+  </Folder>
+  <Folder Name="/shared/">
+    <File Path="src/ShinyCommander.Shared/ShinyCommander.Shared.props" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="tools/ribbon.py" />
+  </Folder>
+</Solution>

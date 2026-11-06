@@ -14,7 +14,7 @@
 
     <Grid RowDefinitions="Auto,*">
         <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-            <shiny:ShinyButton Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <shiny:ShinyButton AutomationId="PageBack" Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
             <Label Grid.Column="1" Text="Keyboard reference" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
             <HorizontalStackLayout Grid.Column="2" Spacing="4">
 

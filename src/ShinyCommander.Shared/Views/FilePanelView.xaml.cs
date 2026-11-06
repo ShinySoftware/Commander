@@ -1,5 +1,4 @@
 using ShinyCommander.Core.Models;
-using Shiny.Maui.Controls.Tree;
 
 namespace ShinyCommander.Views;
 
@@ -10,8 +9,6 @@ public partial class FilePanelView : ContentView
     public FilePanelView()
     {
         this.InitializeComponent();
-        this.FolderTree.ChildrenLoader = item => FolderNode.LoadChildrenAsync(item, false);
-        this.FolderTree.HasChildrenSelector = _ => true;
     }
 
     PanelViewModel? Panel => this.BindingContext as PanelViewModel;
@@ -51,9 +48,6 @@ public partial class FilePanelView : ContentView
                 this.Dispatcher.Dispatch(() => this.FilterEntry.Focus());
                 break;
 
-            case nameof(PanelViewModel.ShowTree) when this.panel?.ShowTree == true && this.FolderTree.ItemsSource == null:
-                this.FolderTree.ItemsSource = FolderNode.Roots().ToList();
-                break;
         }
     }
 
@@ -114,14 +108,6 @@ public partial class FilePanelView : ContentView
         }
     }
 
-    void OnTreeItemSelected(object? sender, TreeItemEventArgs e)
-    {
-        if (this.Panel is { } p && e.Item is FolderNode node)
-        {
-            this.Main?.Activate(p);
-            _ = p.NavigateAsync(node.Path);
-        }
-    }
 
     void OnPathFocused(object? sender, FocusEventArgs e)
     {

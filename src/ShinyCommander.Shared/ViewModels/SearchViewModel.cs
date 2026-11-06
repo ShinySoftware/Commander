@@ -7,6 +7,8 @@ public sealed class SearchResultItem(FileEntry entry, string startPath)
 {
     public FileEntry Entry { get; } = entry;
     public string Icon => FileIcons.For(this.Entry);
+    public string MotionIcon => FileIcons.Motion(this.Entry).Icon;
+    public Color IconColor => Color.FromArgb(FileIcons.Motion(this.Entry).Color);
     public string Name => this.Entry.Name;
     public string Folder { get; } = Path.GetRelativePath(startPath, Path.GetDirectoryName(entry.FullPath) ?? startPath);
     public string SizeText => this.Entry.IsDirectory ? "<DIR>" : SizeFormatter.Friendly(this.Entry.Size);
@@ -57,7 +59,15 @@ public partial class SearchViewModel(IMediator mediator, INavigator navigator, I
     [ObservableProperty]
     public partial object? SelectedResult { get; set; }
 
-    public ObservableCollection<SearchResultItem> Results { get; } = [];
+    const int MaxShown = 5000;
+    readonly List<SearchResultItem> found = [];
+
+    /// <summary>
+    /// Replaced wholesale in batches rather than Add-ed to: each collection change makes the DataGrid
+    /// rebuild its rows, which is quadratic when thousands of hits stream in.
+    /// </summary>
+    [ObservableProperty]
+    public partial IReadOnlyList<SearchResultItem> Results { get; set; } = [];
 
     public void OnAppearing() { }
 
@@ -77,7 +87,8 @@ public partial class SearchViewModel(IMediator mediator, INavigator navigator, I
             return;
         }
 
-        this.Results.Clear();
+        this.found.Clear();
+        this.Results = [];
         var cts = this.cts = new CancellationTokenSource();
         this.IsSearching = true;
 
@@ -93,34 +104,37 @@ public partial class SearchViewModel(IMediator mediator, INavigator navigator, I
             MinSize = Int64.TryParse(this.MinSizeKb, out var kb) ? kb * 1024 : null
         };
 
-        var progress = new Progress<SearchStatus>(s => this.Status = String.IsNullOrEmpty(s.CurrentDirectory)
+        var progress = new Progress<SearchStatus>(s =>
+        {
+            if (!this.IsSearching)
+                return; // a late report must not overwrite the final summary
+            this.Status = String.IsNullOrEmpty(s.CurrentDirectory)
             ? $"Scanned {s.Scanned:N0}, found {s.Found:N0}"
-            : $"Scanned {s.Scanned:N0}, found {s.Found:N0}  •  {s.CurrentDirectory}");
+            : $"Scanned {s.Scanned:N0}, found {s.Found:N0}  •  {s.CurrentDirectory}";
+        });
 
         var started = DateTime.Now;
         try
         {
-            var batch = new List<SearchResultItem>();
             var lastFlush = Environment.TickCount64;
             await foreach (var entry in FileSearcher.SearchAsync(options, progress, cts.Token))
             {
-                batch.Add(new SearchResultItem(entry, this.StartPath));
-                if (Environment.TickCount64 - lastFlush > 200)
+                this.found.Add(new SearchResultItem(entry, this.StartPath));
+                if (Environment.TickCount64 - lastFlush > 500 && this.found.Count <= MaxShown)
                 {
                     lastFlush = Environment.TickCount64;
-                    foreach (var b in batch)
-                        this.Results.Add(b);
-                    batch.Clear();
+                    this.Results = this.found.ToList();
                 }
             }
-            foreach (var b in batch)
-                this.Results.Add(b);
+            this.Results = this.found.Take(MaxShown).ToList();
 
-            this.Status = $"{this.Results.Count:N0} found in {(DateTime.Now - started).TotalSeconds:0.0}s";
+            var shown = this.found.Count > MaxShown ? $" (showing first {MaxShown:N0})" : String.Empty;
+            this.Status = $"{this.found.Count:N0} found in {(DateTime.Now - started).TotalSeconds:0.0}s{shown}";
         }
         catch (OperationCanceledException)
         {
-            this.Status = $"Stopped - {this.Results.Count:N0} found";
+            this.Results = this.found.Take(MaxShown).ToList();
+            this.Status = $"Stopped - {this.found.Count:N0} found";
         }
         catch (Exception ex)
         {

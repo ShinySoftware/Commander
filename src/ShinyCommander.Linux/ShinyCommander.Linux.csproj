@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <!--
+        Linux head on the maui-labs GTK4 backend. There is no Linux TFM: this is a plain net10.0 app and
+        Microsoft.Maui.Platforms.Linux.Gtk4 brings the MAUI hosting (do NOT set UseMaui here).
+        Needs GTK 4 + libadwaita/WebKitGTK typelibs on the machine - see the maui-labs Linux README.
+    -->
+    <PropertyGroup>
+        <TargetFramework>$(BaseTargetFramework)</TargetFramework>
+        <OutputType>Exe</OutputType>
+        <AssemblyName>ShinyCommander</AssemblyName>
+        <DefineConstants>$(DefineConstants);LINUX_GTK</DefineConstants>
+    </PropertyGroup>
+
+    <Import Project="..\ShinyCommander.Shared\ShinyCommander.Shared.props" />
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.Maui.Platforms.Linux.Gtk4" />
+        <PackageReference Include="Microsoft.Maui.Platforms.Linux.Gtk4.Essentials" />
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(Configuration)' == 'Debug'">
+        <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
+        <PackageReference Include="Microsoft.Maui.DevFlow.Agent.Gtk" />
+    </ItemGroup>
+</Project>

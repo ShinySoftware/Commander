@@ -5,6 +5,9 @@ public partial class MainPage : ContentPage
     public MainPage()
     {
         this.InitializeComponent();
+        this.FolderTree.ChildrenLoader = item => FolderNode.LoadChildrenAsync(item, false);
+        this.FolderTree.HasChildrenSelector = _ => true;
+        this.FolderTree.ItemsSource = FolderNode.Roots().ToList();
 #if MACOS_APPKIT
         // Shiny's Ribbon builds its tab bodies after its native view exists, which the AppKit head never
         // lays out - use the ribbon-styled bar generated from the same command table (tools/ribbon.py).
@@ -14,6 +17,15 @@ public partial class MainPage : ContentPage
     }
 
     MainViewModel? ViewModel => this.BindingContext as MainViewModel;
+
+    void OnTreeItemSelected(object? sender, Shiny.Maui.Controls.Tree.TreeItemEventArgs e)
+    {
+        if (this.ViewModel is { } vm && e.Item is FolderNode node)
+        {
+            _ = vm.ActivePanel.NavigateAsync(node.Path);
+            vm.RequestCommandLineFocus();
+        }
+    }
 
     protected override void OnBindingContextChanged()
     {

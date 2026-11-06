@@ -119,55 +119,33 @@
                        Unfocused="OnFilterUnfocused" />
             </Grid>
 
-            <!-- column headers (click to sort) -->
-            <Grid Grid.Row="4"
-                  ColumnDefinitions="24,*,56,92,122,84"
-                  Padding="6,3"
-                  BackgroundColor="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}">
-                <Label Grid.Column="1" Text="{Binding ActiveTab.NameHeader}" Style="{StaticResource HeaderLabel}">
+
+            <!-- file list -->
+            <Grid Grid.Row="4" Grid.RowSpan="2">
+                <Grid RowDefinitions="Auto,*">
+                    <!-- column headers (click to sort) -->
+                    <Grid Grid.Row="0"
+                          ColumnDefinitions="24,*,56,92,122,84"
+                          Padding="6,3"
+                          BackgroundColor="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}">
+                        <Label Grid.Column="1" Text="{Binding ActiveTab.NameHeader}" Style="{StaticResource HeaderLabel}">
                     <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Name" /></Label.GestureRecognizers>
-                </Label>
-                <Label Grid.Column="2" Text="{Binding ActiveTab.ExtHeader}" Style="{StaticResource HeaderLabel}">
+                        </Label>
+                        <Label Grid.Column="2" Text="{Binding ActiveTab.ExtHeader}" Style="{StaticResource HeaderLabel}">
                     <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Extension" /></Label.GestureRecognizers>
-                </Label>
-                <Label Grid.Column="3" Text="{Binding ActiveTab.SizeHeader}" Style="{StaticResource HeaderLabel}" HorizontalTextAlignment="End" Margin="0,0,8,0">
+                        </Label>
+                        <Label Grid.Column="3" Text="{Binding ActiveTab.SizeHeader}" Style="{StaticResource HeaderLabel}" HorizontalTextAlignment="End" Margin="0,0,8,0">
                     <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Size" /></Label.GestureRecognizers>
-                </Label>
-                <Label Grid.Column="4" Text="{Binding ActiveTab.DateHeader}" Style="{StaticResource HeaderLabel}">
+                        </Label>
+                        <Label Grid.Column="4" Text="{Binding ActiveTab.DateHeader}" Style="{StaticResource HeaderLabel}">
                     <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Modified" /></Label.GestureRecognizers>
-                </Label>
-                <Label Grid.Column="5" Text="{Binding ActiveTab.AttrHeader}" Style="{StaticResource HeaderLabel}">
+                        </Label>
+                        <Label Grid.Column="5" Text="{Binding ActiveTab.AttrHeader}" Style="{StaticResource HeaderLabel}">
                     <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Attributes" /></Label.GestureRecognizers>
-                </Label>
-            </Grid>
+                        </Label>
+                    </Grid>
 
-            <!-- tree (Ctrl+F8) + file list -->
-            <Grid Grid.Row="5" ColumnDefinitions="Auto,*">
-                <Border x:Name="TreeHost"
-                        WidthRequest="230"
-                        IsVisible="{Binding ShowTree}"
-                        StrokeThickness="0"
-                        Padding="0,0,1,0"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}">
-                    <shiny:TreeView x:Name="FolderTree"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource PanelLight}, Dark={StaticResource PanelDark}}"
-                                    IndentSize="14"
-                                    RowPadding="4,2"
-                                    ChevronSize="12"
-                                    ItemSelected="OnTreeItemSelected">
-                        <shiny:TreeView.ItemTemplate>
-                            <DataTemplate x:DataType="vm:FolderNode">
-                                <HorizontalStackLayout Spacing="4">
-                                    <Label Text="{Binding Icon}" FontSize="12" VerticalTextAlignment="Center" />
-                                    <Label Text="{Binding Name}" FontSize="12" VerticalTextAlignment="Center" LineBreakMode="TailTruncation" />
-                                </HorizontalStackLayout>
-                            </DataTemplate>
-                        </shiny:TreeView.ItemTemplate>
-                    </shiny:TreeView>
-                </Border>
-
-                <Grid Grid.Column="1">
-                    <CollectionView x:Name="FileList"
+                    <CollectionView x:Name="FileList" Grid.Row="1"
                                     ItemsSource="{Binding ActiveTab.Items}"
                                     SelectionMode="None"
                                     ItemSizingStrategy="MeasureFirstItem">
@@ -199,7 +177,7 @@
                         </CollectionView.ItemTemplate>
                     </CollectionView>
 
-                    <shiny:MotionIconView Icon="loader"
+                    <shiny:MotionIconView Grid.Row="1" Icon="loader"
                                           IsPlaying="{Binding ActiveTab.IsLoading}"
                                           IsVisible="{Binding ActiveTab.IsLoading}"
                                           Color="{StaticResource Accent}"

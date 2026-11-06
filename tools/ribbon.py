@@ -79,7 +79,7 @@ def shiny_ribbon():
 
 # ---------------------------------------------------------------- AppKit ribbon (plain layouts)
 def ak_large(text, icon, cmd, sc, color):
-    return f'''                            <Border Style="{{StaticResource RibbonLarge}}" ToolTipProperties.Text="{esc(text)} ({esc(sc)})">
+    return f'''                            <Border Style="{{StaticResource RibbonLarge}}" AutomationId="ribbon-{cmd[:-7]}" ToolTipProperties.Text="{esc(text)} ({esc(sc)})">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{{Binding {cmd}}}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="{icon}" Color="{color}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
@@ -88,7 +88,7 @@ def ak_large(text, icon, cmd, sc, color):
                             </Border>'''
 
 def ak_small(text, icon, cmd, sc, color):
-    return f'''                                <Border Style="{{StaticResource RibbonSmall}}" ToolTipProperties.Text="{esc(text)} ({esc(sc)})">
+    return f'''                                <Border Style="{{StaticResource RibbonSmall}}" AutomationId="ribbon-{cmd[:-7]}" ToolTipProperties.Text="{esc(text)} ({esc(sc)})">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{{Binding {cmd}}}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="{icon}" Color="{color}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
@@ -105,7 +105,7 @@ def appkit_ribbon():
                 </Border>
                 <HorizontalStackLayout Grid.Column="1" Spacing="2">''']
     for tab,key,color,_ in RIBBON:
-        o.append(f'''                    <Border Style="{{StaticResource RibbonTabHeader}}" BackgroundColor="{{Binding RibbonTab, Converter={{StaticResource RibbonTabBackground}}, ConverterParameter={key}}}">
+        o.append(f'''                    <Border Style="{{StaticResource RibbonTabHeader}}" AutomationId="ribbon-tab-{key}" BackgroundColor="{{Binding RibbonTab, Converter={{StaticResource RibbonTabBackground}}, ConverterParameter={key}}}">
                         <Border.GestureRecognizers><TapGestureRecognizer Command="{{Binding SelectRibbonTabCommand}}" CommandParameter="{key}" /></Border.GestureRecognizers>
                         <Label Text="{tab}" FontSize="13" VerticalTextAlignment="Center" TextColor="{{Binding RibbonTab, Converter={{StaticResource RibbonTabText}}, ConverterParameter={key}}}" />
                     </Border>''')

@@ -39,9 +39,6 @@ public partial class PanelViewModel : ObservableObject
     public partial bool IsActive { get; set; }
 
     [ObservableProperty]
-    public partial bool ShowTree { get; set; }
-
-    [ObservableProperty]
     public partial bool ShowQuickFilter { get; set; }
 
     [ObservableProperty]
@@ -216,5 +213,8 @@ public partial class PanelViewModel : ObservableObject
     Task NavigatePathText() => String.IsNullOrWhiteSpace(this.PathText) ? Task.CompletedTask : this.NavigateAsync(this.PathText);
 
     [RelayCommand]
-    void ToggleTree() => this.ShowTree = !this.ShowTree;
+    void ToggleTree() => this.TreeToggleRequested?.Invoke(this, EventArgs.Empty);
+
+    /// <summary>The folder tree is window-wide; the panel's button asks the page to toggle it.</summary>
+    public event EventHandler? TreeToggleRequested;
 }

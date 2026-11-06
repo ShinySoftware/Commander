@@ -3,10 +3,10 @@ using ShinyCommander.Core.Platform;
 namespace ShinyCommander.ViewModels;
 
 /// <summary>A node in the panel's folder tree (Shiny TreeView, lazily loaded).</summary>
-public sealed record FolderNode(string Name, string Path, string Icon = "📁")
+public sealed record FolderNode(string Name, string Path, string Icon = "folder")
 {
     public static IEnumerable<object> Roots() => DriveService.GetDrives()
-        .Select(d => new FolderNode(d.Name == "~" ? "Home" : d.Name, d.RootPath, d.Name == "~" ? "🏠" : "💽"));
+        .Select(d => new FolderNode(d.Name == "~" ? "Home" : d.Name, d.RootPath, d.Name == "~" ? "home" : "database"));
 
     public static Task<IEnumerable<object>> LoadChildrenAsync(object parent, bool showHidden) => Task.Run(() =>
     {

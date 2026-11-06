@@ -47,6 +47,8 @@ public partial class MainViewModel : ObservableObject,
         this.Right = new PanelViewModel(PanelSide.Right, vfs, settings);
         this.Left.PropertyChanged += this.OnPanelPropertyChanged;
         this.Right.PropertyChanged += this.OnPanelPropertyChanged;
+        this.Left.TreeToggleRequested += (_, _) => this.ShowTree = !this.ShowTree;
+        this.Right.TreeToggleRequested += (_, _) => this.ShowTree = !this.ShowTree;
 
         // row colours come from converters - rebuild rows so they pick up the new palette
         if (Application.Current != null)
@@ -442,8 +444,12 @@ public partial class MainViewModel : ObservableObject,
         await tab.RefreshAsync();
     }
 
+    /// <summary>Explorer-style folder tree down the left edge; it drives the active panel.</summary>
+    [ObservableProperty]
+    public partial bool ShowTree { get; set; }
+
     [RelayCommand]
-    void ToggleTree() => this.ActivePanel.ShowTree = !this.ActivePanel.ShowTree;
+    void ToggleTree() => this.ShowTree = !this.ShowTree;
 
     [RelayCommand]
     void QuickFilter()

@@ -14,14 +14,14 @@
 
     <Grid RowDefinitions="Auto,Auto,*,Auto">
         <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-            <shiny:ShinyButton Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <shiny:ShinyButton AutomationId="PageBack" Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
             <Label Grid.Column="1" Text="Multi-rename tool" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
         </Grid>
 
         <Border Grid.Row="1" Style="{StaticResource Card}" Margin="8,8,8,0" Padding="12">
-            <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="8">
+            <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="34,30,34,34,40" ColumnSpacing="10" RowSpacing="8">
                 <Label Text="Rename mask" VerticalOptions="Center" />
-                <Entry Grid.Column="1" Text="{Binding NameMask}" FontFamily="{DynamicResource MonoFont}" />
+                <Entry Grid.Column="1" AutomationId="RenameMask" Text="{Binding NameMask}" FontFamily="{DynamicResource MonoFont}" />
                 <Label Grid.Column="2" Text="Extension" VerticalOptions="Center" />
                 <Entry Grid.Column="3" Text="{Binding ExtensionMask}" FontFamily="{DynamicResource MonoFont}" />
 
@@ -50,8 +50,8 @@
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout Grid.Row="4" Grid.ColumnSpan="4" Spacing="8">
-                    <shiny:ShinyButton Text="Start!" Command="{Binding ExecuteCommand}" Appearance="Filled" ContentPadding="18,4" />
-                    <shiny:ShinyButton Text="Undo" Command="{Binding UndoCommand}" IsEnabled="{Binding CanUndo}" Appearance="Outlined" ContentPadding="12,4" />
+                    <shiny:ShinyButton AutomationId="RenameStart" Text="Start!" Command="{Binding ExecuteCommand}" Appearance="Filled" ContentPadding="18,4" />
+                    <shiny:ShinyButton AutomationId="RenameUndo" Text="Undo" Command="{Binding UndoCommand}" IsEnabled="{Binding CanUndo}" Appearance="Outlined" ContentPadding="12,4" />
                 </HorizontalStackLayout>
             </Grid>
         </Border>
