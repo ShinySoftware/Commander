@@ -17,7 +17,22 @@
         </Grid>
 
         <Grid Grid.Row="1" HorizontalOptions="Center" WidthRequest="680" Padding="0,8">
-            <shiny:TableView CellAccentColor="{StaticResource Accent}">
+            <shiny:TableView CellAccentColor="{StaticResource Accent}"
+                             CellBackgroundColor="{AppThemeBinding Light={StaticResource PanelLight}, Dark={StaticResource PanelDark}}"
+                             CellTitleColor="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}"
+                             CellDescriptionColor="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}"
+                             CellValueTextColor="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}"
+                             CellTitleFontSize="13"
+                             CellDescriptionFontSize="11"
+                             CellValueTextFontSize="13"
+                             SeparatorColor="{AppThemeBinding Light=#E6E9EE, Dark=#2C3036}"
+                             SeparatorPadding="16"
+                             HeaderBackgroundColor="Transparent"
+                             HeaderTextColor="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}"
+                             HeaderFontSize="11"
+                             HeaderFontAttributes="Bold"
+                             HeaderPadding="16,18,16,6"
+                             ShowSectionSeparator="False">
                 <shiny:TableRoot>
                     <shiny:TableSection Title="Panels">
                         <shiny:SwitchCell Title="Show hidden files" Description="Dot files and hidden attribute (Ctrl/⌘+H)" On="{Binding ShowHidden, Mode=TwoWay}" />
@@ -36,7 +51,7 @@
                         <shiny:SwitchCell Title="Confirm before delete" On="{Binding ConfirmDelete, Mode=TwoWay}" />
                         <shiny:SwitchCell Title="Delete to trash / recycle bin" Description="Shift+F8 always deletes permanently" On="{Binding UseTrash, Mode=TwoWay}" />
                         <shiny:SwitchCell Title="Unpack each archive into its own folder" On="{Binding ExtractToFolderPerArchive, Mode=TwoWay}" />
-                        <shiny:EntryCell Title="External editor (F4)" Placeholder="blank = built-in editor" ValueText="{Binding ExternalEditor, Mode=TwoWay}" />
+                        <shiny:EntryCell Title="External editor (F4)" Placeholder="built-in" ValueText="{Binding ExternalEditor, Mode=TwoWay}" />
                     </shiny:TableSection>
 
                     <shiny:TableSection x:Name="ThemeSection" Title="Theme" shiny:RadioCell.SelectedValue="{Binding Theme, Mode=TwoWay}">

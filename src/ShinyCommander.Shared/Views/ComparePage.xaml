@@ -35,7 +35,7 @@
 
                 <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="4" Spacing="8">
                     <shiny:ShinyButton AutomationId="CompareRun" Text="Compare" Command="{Binding CompareCommand}" Appearance="Filled" ContentPadding="18,4" />
-                    <shiny:ShinyButton AutomationId="CompareSync" Text="Synchronize…" Command="{Binding SynchronizeCommand}" Appearance="Outlined" ContentPadding="12,4" />
+                    <shiny:ShinyButton AutomationId="CompareSync" Text="Synchronize…" Command="{Binding SynchronizeCommand}" Appearance="Tonal" ContentPadding="12,4" />
                     <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{StaticResource Accent}" HeightRequest="18" />
                     <Label Text="Tap ⇄ (or Space) to change a row's direction" Style="{StaticResource Subtle}" VerticalOptions="Center" />
                 </HorizontalStackLayout>

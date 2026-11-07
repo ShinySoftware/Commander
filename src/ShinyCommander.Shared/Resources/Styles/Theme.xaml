@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                    xmlns:shiny="http://shiny.net/maui/controls"
+                    xmlns:conv="clr-namespace:ShinyCommander.Converters"
+                    xmlns:mdt="clr-namespace:Shiny.Maui.Controls.Markdown;assembly=Shiny.Maui.Controls.Markdown">
 
     <!-- palette: a modern take on Total Commander's classic blue cursor / red marks -->
     <Color x:Key="Accent">#2F6FDE</Color>
@@ -23,6 +26,21 @@
     <Color x:Key="MarkedOnCursor">#FFD3D6</Color>
 
     <x:String x:Key="MonoFont">Menlo</x:String>
+    <conv:MarkdownHeadingConverter x:Key="MarkdownHeadings" />
+
+    <!-- markdown at desktop sizes, with inline code (keys, file names) in the accent rather than magenta -->
+    <mdt:MarkdownTheme x:Key="MarkdownLight" TextColor="#1D1F23" MutedTextColor="#6B7280" LinkColor="#2F6FDE"
+                       CodeBackgroundColor="#E6EDFB" CodeTextColor="#2457B8" CodeBlockBackgroundColor="#F4F6FA" CodeBlockTextColor="#1D1F23"
+                       BlockquoteBorderColor="#D0D5DD" BlockquoteBackgroundColor="#F7F8FA" HorizontalRuleColor="#E3E6EB"
+                       TableBorderColor="#E3E6EB" TableHeaderBackgroundColor="#F1F3F7"
+                       BaseFontSize="13" H1FontSize="24" H2FontSize="18" H3FontSize="15" H4FontSize="14" H5FontSize="13" H6FontSize="12"
+                       CodeFontSize="12" BlockSpacing="10" CodeFontFamily="Menlo" />
+    <mdt:MarkdownTheme x:Key="MarkdownDark" TextColor="#E4E6EA" MutedTextColor="#9AA1AD" LinkColor="#6E9BF0"
+                       CodeBackgroundColor="#24324A" CodeTextColor="#9DBBF5" CodeBlockBackgroundColor="#16181C" CodeBlockTextColor="#D5D9E0"
+                       BlockquoteBorderColor="#383D45" BlockquoteBackgroundColor="#202328" HorizontalRuleColor="#30343B"
+                       TableBorderColor="#30343B" TableHeaderBackgroundColor="#24272D"
+                       BaseFontSize="13" H1FontSize="24" H2FontSize="18" H3FontSize="15" H4FontSize="14" H5FontSize="13" H6FontSize="12"
+                       CodeFontSize="12" BlockSpacing="10" CodeFontFamily="Menlo" />
 
     <Style TargetType="ContentPage" ApplyToDerivedTypes="True">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource WindowLight}, Dark={StaticResource WindowDark}}" />
@@ -47,6 +65,14 @@
     <Style TargetType="Entry">
         <Setter Property="FontSize" Value="13" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <!-- ShinyButton's 44pt minimum is a phone touch target; on a desktop it makes every form look oversized -->
+    <Style TargetType="shiny:ShinyButton">
+        <Setter Property="MinimumHeightRequest" Value="28" />
+        <Setter Property="CornerRadius" Value="7" />
+        <Setter Property="FontSize" Value="13" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 

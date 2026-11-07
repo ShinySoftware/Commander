@@ -21,7 +21,7 @@
             </HorizontalStackLayout>
         </Grid>
         <Border Grid.Row="1" Style="{StaticResource Card}" Margin="8" Padding="0">
-            <md:MarkdownView Markdown="{Binding Markdown}" Padding="20" />
+            <md:MarkdownView Theme="{AppThemeBinding Light={StaticResource MarkdownLight}, Dark={StaticResource MarkdownDark}}" Markdown="{Binding Markdown}" Padding="20" />
         </Border>
     </Grid>
 </ContentPage>

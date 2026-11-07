@@ -42,8 +42,8 @@
 
                 <HorizontalStackLayout Grid.Row="3" Grid.ColumnSpan="4" Spacing="8">
                     <shiny:ShinyButton AutomationId="SearchStart" Text="{Binding StartText}" Command="{Binding StartCommand}" Appearance="Filled" ContentPadding="18,4" />
-                    <shiny:ShinyButton Text="Go to file" Command="{Binding GoToFileCommand}" Appearance="Outlined" ContentPadding="12,4" />
-                    <shiny:ShinyButton Text="View (F3)" Command="{Binding ViewFileCommand}" Appearance="Outlined" ContentPadding="12,4" />
+                    <shiny:ShinyButton Text="Go to file" Command="{Binding GoToFileCommand}" Appearance="Tonal" ContentPadding="12,4" />
+                    <shiny:ShinyButton Text="View (F3)" Command="{Binding ViewFileCommand}" Appearance="Tonal" ContentPadding="12,4" />
                     <ActivityIndicator IsRunning="{Binding IsSearching}" IsVisible="{Binding IsSearching}" Color="{StaticResource Accent}" HeightRequest="18" />
                 </HorizontalStackLayout>
             </Grid>

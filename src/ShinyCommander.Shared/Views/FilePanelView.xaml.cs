@@ -287,6 +287,7 @@ public partial class FilePanelView : ContentView
     void OnPathLabelTapped(object? sender, TappedEventArgs e)
     {
         this.PathLabelBox.IsVisible = false;
+        this.PathEntry.Opacity = 1;
         this.PathEntry.Focus();
         this.PathEntry.CursorPosition = this.PathEntry.Text?.Length ?? 0;
     }
@@ -294,6 +295,7 @@ public partial class FilePanelView : ContentView
     void OnPathFocused(object? sender, FocusEventArgs e)
     {
         this.PathLabelBox.IsVisible = false;
+        this.PathEntry.Opacity = 1;
         if (this.Main is { } main && this.Panel is { } p)
         {
             main.Activate(p);
@@ -304,6 +306,7 @@ public partial class FilePanelView : ContentView
     void OnPathUnfocused(object? sender, FocusEventArgs e)
     {
         this.PathLabelBox.IsVisible = true;
+        this.PathEntry.Opacity = 0;
         if (this.Main is { } main)
             main.IsPathEditing = false;
 
@@ -319,6 +322,7 @@ public partial class FilePanelView : ContentView
             var text = p.PathText;
             this.PathEntry.Unfocus();
             this.PathLabelBox.IsVisible = true;
+            this.PathEntry.Opacity = 0;
             _ = p.NavigateAsync(text);
             this.Main?.RequestCommandLineFocus();
         }

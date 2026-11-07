@@ -27,13 +27,13 @@
 
                 <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="4" Spacing="4">
                     <Label Text="Insert:" Style="{StaticResource Subtle}" VerticalOptions="Center" />
-                    <shiny:ShinyButton Text="[N]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[N]" Appearance="Outlined" FontSize="11" ContentPadding="6,2" />
-                    <shiny:ShinyButton Text="[N1-8]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[N1-8]" Appearance="Outlined" FontSize="11" ContentPadding="6,2" />
-                    <shiny:ShinyButton Text="[E]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[E]" Appearance="Outlined" FontSize="11" ContentPadding="6,2" />
-                    <shiny:ShinyButton Text="[C]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[C]" Appearance="Outlined" FontSize="11" ContentPadding="6,2" />
-                    <shiny:ShinyButton Text="[P]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[P]" Appearance="Outlined" FontSize="11" ContentPadding="6,2" />
-                    <shiny:ShinyButton Text="[YMD]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[YMD]" Appearance="Outlined" FontSize="11" ContentPadding="6,2" />
-                    <shiny:ShinyButton Text="[hms]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[hms]" Appearance="Outlined" FontSize="11" ContentPadding="6,2" />
+                    <shiny:ShinyButton Text="[N]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[N]" Appearance="Tonal" FontSize="11" ContentPadding="6,2" />
+                    <shiny:ShinyButton Text="[N1-8]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[N1-8]" Appearance="Tonal" FontSize="11" ContentPadding="6,2" />
+                    <shiny:ShinyButton Text="[E]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[E]" Appearance="Tonal" FontSize="11" ContentPadding="6,2" />
+                    <shiny:ShinyButton Text="[C]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[C]" Appearance="Tonal" FontSize="11" ContentPadding="6,2" />
+                    <shiny:ShinyButton Text="[P]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[P]" Appearance="Tonal" FontSize="11" ContentPadding="6,2" />
+                    <shiny:ShinyButton Text="[YMD]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[YMD]" Appearance="Tonal" FontSize="11" ContentPadding="6,2" />
+                    <shiny:ShinyButton Text="[hms]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[hms]" Appearance="Tonal" FontSize="11" ContentPadding="6,2" />
                 </HorizontalStackLayout>
 
                 <Label Grid.Row="2" Text="Search for" VerticalOptions="Center" />
@@ -51,7 +51,7 @@
 
                 <HorizontalStackLayout Grid.Row="4" Grid.ColumnSpan="4" Spacing="8">
                     <shiny:ShinyButton AutomationId="RenameStart" Text="Start!" Command="{Binding ExecuteCommand}" Appearance="Filled" ContentPadding="18,4" />
-                    <shiny:ShinyButton AutomationId="RenameUndo" Text="Undo" Command="{Binding UndoCommand}" IsEnabled="{Binding CanUndo}" Appearance="Outlined" ContentPadding="12,4" />
+                    <shiny:ShinyButton AutomationId="RenameUndo" Text="Undo" Command="{Binding UndoCommand}" IsEnabled="{Binding CanUndo}" Appearance="Tonal" ContentPadding="12,4" />
                 </HorizontalStackLayout>
             </Grid>
         </Border>

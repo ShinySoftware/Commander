@@ -1203,12 +1203,46 @@ public partial class MainViewModel : ObservableObject,
     [RelayCommand]
     Task Settings() => this.navigator.NavigateTo<SettingsViewModel>();
 
+    /// <summary>
+    /// The help table spells out keys the Mac glyphs make cryptic (⇞ ⇟ ↖ ↘ have no glyph in the mono font and render
+    /// as specks) - modifier glyphs stay, as they read well and match the menus.
+    /// </summary>
+    static string ReadableKeys(string formatted)
+    {
+        var sb = new StringBuilder();
+        foreach (var ch in formatted)
+        {
+            var word = ch switch
+            {
+                '⇞' => "PgUp",
+                '⇟' => "PgDn",
+                '↖' => "Home",
+                '↘' => "End",
+                '↩' => "Return",
+                '⌫' => "Delete",
+                '⌦' => "Fwd Delete",
+                '⇥' => "Tab",
+                '⎋' => "Esc",
+                '␣' => "Space",
+                _ => null
+            };
+            if (word == null)
+            {
+                sb.Append(ch);
+                continue;
+            }
+            if (sb.Length > 0 && sb[^1] != ' ')
+                sb.Append(' ');
+            sb.Append(word);
+        }
+        return sb.ToString();
+    }
+
     [RelayCommand]
     Task Help()
     {
         // snapshot what is live on this page *before* navigating - the help page silences these
         var sb = new StringBuilder();
-        sb.AppendLine("# ShinyCommander keyboard reference");
         sb.AppendLine();
         sb.AppendLine("Operations act on the **marked** files, or on the file under the cursor when nothing is marked. Mark with `Insert`, `Space`, `Shift+↑/↓` or a right-click. Start typing to use the command line.");
         sb.AppendLine();
@@ -1219,21 +1253,21 @@ public partial class MainViewModel : ObservableObject,
 
         foreach (var group in active)
         {
-            sb.AppendLine($"## {group.Key}");
+            sb.AppendLine($"## **{group.Key}**");
             sb.AppendLine();
             sb.AppendLine("| Keys | Action |");
             sb.AppendLine("|---|---|");
             foreach (var s in group)
-                sb.AppendLine($"| `{this.shortcuts.Format(s.Binding.Gesture)}` | {s.Binding.Description} |");
+                sb.AppendLine($"| `{ReadableKeys(this.shortcuts.Format(s.Binding.Gesture))}` | {s.Binding.Description} |");
             sb.AppendLine();
         }
 
-        sb.AppendLine("## Command line");
+        sb.AppendLine("## **Command line**");
         sb.AppendLine();
         sb.AppendLine("* `cd <path>` changes the active panel's folder (`cd ~`, `cd ..`, `cd -`).");
         sb.AppendLine("* Anything else runs through the system shell in the active folder; output appears in the console pane.");
         sb.AppendLine();
-        sb.AppendLine("## Archives");
+        sb.AppendLine("## **Archives**");
         sb.AppendLine();
         sb.AppendLine("Press `Enter` on a `.zip` (also .jar, .nupkg, .docx, .apk…) to browse it like a folder. Copy (F5) out of it, copy into it, delete or rename inside it.");
 

@@ -974,7 +974,7 @@
                 <Label Grid.Column="1" Text="{Binding OperationTitle}" FontAttributes="Bold" />
                 <shiny:ProgressBar Grid.Column="1" Grid.Row="1" Value="{Binding OperationProgress}" Maximum="1" TrackHeight="8" UseGradient="True" PulseEnabled="True" />
                 <Label Grid.Column="1" Grid.Row="2" Text="{Binding OperationDetail}" Style="{StaticResource Subtle}" LineBreakMode="MiddleTruncation" />
-                <shiny:ShinyButton Grid.Column="2" Grid.RowSpan="3" Text="Cancel" Command="{Binding CancelOperationCommand}" Appearance="Outlined" VerticalOptions="Center" />
+                <shiny:ShinyButton Grid.Column="2" Grid.RowSpan="3" Text="Cancel" Command="{Binding CancelOperationCommand}" Appearance="Tonal" VerticalOptions="Center" />
             </Grid>
         </Border>
 
