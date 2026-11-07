@@ -14,7 +14,9 @@ public static class MauiProgram
         builder
             .UseMauiAppMacOS<App>()
             .AddMacOSEssentials()
-            .UseShinyCommander();
+            .UseShinyCommander()
+            .ConfigureMauiHandlers(h => h.AddHandler<Label, VerticallyAlignedLabelHandler>());
+        VerticallyAlignedLabelHandler.Register();
 
 #if DEBUG
         builder.AddMauiDevFlowAgent(o => ShinyCommander.Testing.UiTestHooks.Register(o));

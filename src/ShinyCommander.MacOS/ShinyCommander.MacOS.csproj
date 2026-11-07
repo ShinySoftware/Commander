@@ -22,6 +22,13 @@
         <PackageReference Include="Microsoft.Maui.Platforms.MacOS.Essentials" />
     </ItemGroup>
 
+    <ItemGroup>
+        <!-- the Shiny mark on a dark tile (tools/appicon.py); maui-labs turns it into AppIcon.icns -->
+        <MauiIcon Include="..\ShinyCommander.Shared\Resources\AppIcon\appicon.png" />
+        <!-- maui-labs writes this key in a partial plist that never reaches Info.plist, so the icon wouldn't show -->
+        <PartialAppManifest Include="AppIcon.plist" />
+    </ItemGroup>
+
     <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
         <!-- the DevFlow agent is referenced in Debug - enables the UI test hooks (Shared/Testing) -->
         <DefineConstants>$(DefineConstants);SHINYCOMMANDER_DEVFLOW</DefineConstants>
