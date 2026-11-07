@@ -101,10 +101,51 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
         await this.Ui.Tap("RightTreeToggle");
         (await this.App.State()).Right.ShowTree.ShouldBeTrue();
 
-        await this.Ui.Tap("RightTree_Node_0"); // Home
-        var s = await this.App.WaitFor(x => x.Right.Path == Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "the tree to navigate");
+        // the tree opens on the panel's own folder - its sibling "left" is right there
+        await this.App.WaitFor(x => x.Right.TreePath == this.RightTree.Path, "the tree to reveal the panel's folder", TimeSpan.FromSeconds(10));
+        await this.Ui.Click("left", within: "RightTree");
+        var s = await this.App.WaitFor(x => x.Right.Path == this.LeftTree.Path, "the tree to navigate");
         s.Left.Path.ShouldBe(this.LeftTree.Path);
         s.ActiveSide.ShouldBe("right");
+    }
+
+    [Fact]
+    public async Task Both_panels_have_a_tree_that_follows_their_own_folder()
+    {
+        await this.Start(l => l.Dir("left-a/left-b"), r => r.Dir("right-x/right-y"));
+        await this.App.Navigate(this.LeftTree["left-a/left-b"], "left");
+        await this.App.Navigate(this.RightTree["right-x/right-y"], "right");
+
+        await this.Ui.Tap("LeftTreeToggle");
+        await this.Ui.Tap("RightTreeToggle");
+        AppState s;
+        try
+        {
+            s = await this.App.WaitFor(x => x.Left.TreePath == this.LeftTree["left-a/left-b"] && x.Right.TreePath == this.RightTree["right-x/right-y"],
+                "both trees to expand to their panel's folder", TimeSpan.FromSeconds(60));
+        }
+        catch (ShouldAssertException)
+        {
+            var now = await this.App.State();
+            throw new ShouldAssertException($"trees stopped at left={now.Left.TreePath ?? "(none)"} right={now.Right.TreePath ?? "(none)"}");
+        }
+        s.Left.ShowTree.ShouldBeTrue();
+        s.Right.ShowTree.ShouldBeTrue();
+
+        // deep folders indent past the default width - drag the splitter to make room
+        var before = s.Left.TreeWidth;
+        (await this.Fixture.Client.GestureDetailedAsync("pan", (await this.Ui.ById("LeftTreeSplitter")).Id, "right", 220)).Success.ShouldBeTrue();
+        s = await this.App.State();
+        s.Left.TreeWidth.ShouldBeGreaterThan(before + 100, "dragging the splitter should widen the tree");
+        s.Right.TreeWidth.ShouldBe(240, "the other panel's tree keeps its width");
+
+        await this.Ui.ShouldBeVisible(await this.Ui.ByText("left-b", within: "LeftTree"), "the left panel's folder in its tree");
+        (await this.Fixture.Client.GestureDetailedAsync("pan", (await this.Ui.ById("RightTreeSplitter")).Id, "right", 220)).Success.ShouldBeTrue();
+        await this.Ui.ShouldBeVisible(await this.Ui.ByText("right-y", within: "RightTree"), "the right panel's folder in its tree");
+
+        // and it keeps following
+        await this.App.Navigate(this.LeftTree["left-a"], "left");
+        await this.App.WaitFor(x => x.Left.TreePath == this.LeftTree["left-a"], "the left tree to follow");
     }
 
     [Fact]

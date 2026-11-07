@@ -11,9 +11,6 @@ public partial class FilePanelView : ContentView
     public FilePanelView()
     {
         this.InitializeComponent();
-        this.FolderTree.ChildrenLoader = item => FolderNode.LoadChildrenAsync(item, false);
-        this.FolderTree.HasChildrenSelector = _ => true;
-        this.FolderTree.ItemsSource = FolderNode.Roots().ToList();
     }
 
     PanelViewModel? Panel => this.BindingContext as PanelViewModel;
@@ -48,6 +45,7 @@ public partial class FilePanelView : ContentView
             SetId(this.ViewModeButton, side + "ViewMode");
             SetId(this.TreeButton, side + "TreeToggle");
             SetId(this.FolderTree, side + "Tree");
+            SetId(this.TreeSplitter, side + "TreeSplitter");
             SetId(this.ThumbList, side + "Thumbnails");
             SetId(this.FileList, side + "Files");
             SetId(this.PathEntry, side + "Path");
@@ -76,6 +74,11 @@ public partial class FilePanelView : ContentView
                 this.UpdateListSources();
                 break;
 
+            case nameof(PanelViewModel.Path):
+            case nameof(PanelViewModel.ShowTree) when this.panel?.ShowTree == true:
+                this.RevealInTree(this.panel?.Path);
+                break;
+
             case nameof(PanelViewModel.ActiveTab):
                 this.WatchTab(this.panel?.ActiveTab);
                 this.UpdateListSources();
@@ -99,6 +102,10 @@ public partial class FilePanelView : ContentView
                     return;
 
                 var list = this.panel.IsThumbnails ? this.ThumbList : this.FileList;
+                // already on screen? then leave the list alone - a ScrollTo makes it recompute its visible rows
+                var (first, last, source) = this.visibleRange;
+                if (ReferenceEquals(source, list) && last > first && index > first && index < last)
+                    return;
                 list.ScrollTo(index, position: ScrollToPosition.MakeVisible, animate: false);
             }
             catch
@@ -128,6 +135,7 @@ public partial class FilePanelView : ContentView
     /// <summary>Only the list that's showing has items; the other is emptied so it holds no cells.</summary>
     void UpdateListSources()
     {
+        this.visibleRange = (-1, -1, null);
         var items = this.panel?.ActiveTab?.Items;
         var details = this.panel is { ShowDetailsList: true } ? items : null;
         var thumbs = this.panel is { ShowThumbnailList: true } ? items : null;
@@ -143,6 +151,11 @@ public partial class FilePanelView : ContentView
         if (element.AutomationId == null)
             element.AutomationId = id;
     }
+
+    (int First, int Last, object? Source) visibleRange = (-1, -1, null);
+
+    void OnListScrolled(object? sender, ItemsViewScrolledEventArgs e)
+        => this.visibleRange = (e.FirstVisibleItemIndex, e.LastVisibleItemIndex, sender);
 
     void OnFileListSizeChanged(object? sender, EventArgs e)
     {
@@ -164,14 +177,74 @@ public partial class FilePanelView : ContentView
             this.panel.ThumbnailSpan = span;
     }
 
-    void OnTreeItemSelected(object? sender, Shiny.Maui.Controls.Tree.TreeItemEventArgs e)
+    double splitterStart;
+
+    void OnTreeSplitterPan(object? sender, PanUpdatedEventArgs e)
     {
-        if (this.Panel is { } p && e.Item is FolderNode node)
+        if (this.panel == null)
+            return;
+
+        switch (e.StatusType)
         {
+            case GestureStatus.Started:
+                this.splitterStart = this.panel.TreeWidth;
+                break;
+
+            case GestureStatus.Running:
+                var max = Math.Max(160, this.Width * 0.7);
+                this.panel.TreeWidth = Math.Clamp(this.splitterStart + e.TotalX, 120, max);
+                break;
+
+            case GestureStatus.Completed:
+            case GestureStatus.Canceled:
+                this.panel.SaveTreeWidth();
+                break;
+        }
+    }
+
+    CancellationTokenSource? revealCts;
+
+    /// <summary>The panel's tree follows the panel: expand down to its folder, highlight it and scroll it into view.</summary>
+    async void RevealInTree(string? path)
+    {
+        if (this.panel is not { ShowTree: true } p || String.IsNullOrEmpty(path))
+            return;
+
+        this.revealCts?.Cancel();
+        var cts = this.revealCts = new CancellationTokenSource();
+        try
+        {
+            var row = await p.Tree.RevealAsync(path, cts.Token);
+            if (row == null || cts.IsCancellationRequested)
+                return;
+
+            p.TreePath = row.Path;
+            this.Dispatcher.Dispatch(() =>
+            {
+                try { this.FolderTree.ScrollTo(row, position: ScrollToPosition.MakeVisible, animate: false); } catch { }
+            });
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"[ShinyCommander] tree reveal failed: {ex}");
+        }
+    }
+
+    void OnTreeRowTapped(object? sender, TappedEventArgs e)
+    {
+        if (this.Panel is { } p && (sender as BindableObject)?.BindingContext is FolderRow row)
+        {
+            p.Tree.Selected = row;
             this.Main?.Activate(p);
-            _ = p.NavigateAsync(node.Path);
+            _ = p.NavigateAsync(row.Path);
             this.Main?.RequestCommandLineFocus();
         }
+    }
+
+    void OnTreeChevronTapped(object? sender, TappedEventArgs e)
+    {
+        if (this.Panel is { } p && (sender as BindableObject)?.BindingContext is FolderRow row)
+            _ = p.Tree.ToggleAsync(row);
     }
 
     void OnRowTapped(object? sender, TappedEventArgs e)

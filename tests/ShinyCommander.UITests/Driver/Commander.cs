@@ -38,6 +38,9 @@ public sealed class Commander(AgentClient client)
 
     public Task<AppState> State() => this.Call("state");
 
+    /// <summary>Native view counts in the state (NativeViews / NativeViewTypes) - slow, so off unless asked for.</summary>
+    public Task<AppState> Diagnostics(bool on = true) => this.Call("diag", new { on });
+
     /// <summary>
     /// Presses a gesture (<c>"F5"</c>, <c>"Primary+Shift+K"</c>, <c>"Ctrl+Q"</c>). <paramref name="textFocused"/> mirrors
     /// the app's normal state - the command line has keyboard focus - so keys the command line should keep are

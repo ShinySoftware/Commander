@@ -28,6 +28,11 @@ public static class UiTestHooks
 
         var ext = options.RegisterExtension(Namespace, "ShinyCommander UI test hooks", 1);
         Map(ext, "state", "Panels, cursor, marks, dialogs and page - the whole observable app state", (_, _) => Task.FromResult<object>(true));
+        Map(ext, "diag", "Turn the expensive state diagnostics (native view counts) on or off: { on = true }", (_, a) =>
+        {
+            diagnostics = !(a.TryGetProperty("on", out var on) && on.ValueKind == JsonValueKind.False);
+            return Task.FromResult<object>(true);
+        });
         Map(ext, "key", "Press a gesture through Shiny's shortcut engine: { gesture, textFocused = true }", Key);
         Map(ext, "type", "Replace the command line text: { text }", TypeText);
         Map(ext, "navigate", "Navigate a panel: { side = active, path }", Navigate);
@@ -227,6 +232,7 @@ public static class UiTestHooks
 
     static async Task<object> Reset(MainViewModel main, JsonElement args)
     {
+        diagnostics = false;
         await DismissDialogs();
         // back to the main page
         var nav = Shell.Current?.Navigation;
@@ -260,6 +266,7 @@ public static class UiTestHooks
         {
             panel.IsQuickView = false;
             panel.ShowTree = false;
+            panel.TreeWidth = 240;
             panel.ShowQuickFilter = false;
             panel.ViewMode = PanelViewMode.Details;
             while (panel.Tabs.Count > 1)
@@ -285,6 +292,8 @@ public static class UiTestHooks
 
     // --- state ----------------------------------------------------------------------------------
 
+    static bool diagnostics;
+
     static object Snapshot(MainViewModel main)
     {
         var dialogs = Service<UiTestDialogs>();
@@ -305,8 +314,9 @@ public static class UiTestHooks
             dialogs = dialogs.Log,
             pendingAnswers = dialogs.PendingAnswers,
             focus = NativeFocus(),
-            nativeViews = NativeViewCount(),
-            nativeViewTypes = NativeViewTypes(),
+            // counting every NSView is itself slow - only when a test asks for it (the "diag" tool)
+            nativeViews = diagnostics ? NativeViewCount() : 0,
+            nativeViewTypes = diagnostics ? NativeViewTypes() : null,
             shortcuts = Service<Shiny.Maui.Controls.IKeyboardShortcutService>().GetActiveShortcuts().Count,
             managedMb = GC.GetTotalMemory(false) / 1024 / 1024
         };
@@ -413,6 +423,8 @@ public static class UiTestHooks
             path = p.Path,
             viewMode = p.ViewMode.ToString(),
             showTree = p.ShowTree,
+            treePath = p.TreePath,
+            treeWidth = p.TreeWidth,
             showQuickFilter = p.ShowQuickFilter,
             isQuickView = p.IsQuickView,
             thumbnailSpan = p.ThumbnailSpan,

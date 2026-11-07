@@ -108,25 +108,34 @@ public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThre
     /// that ScrollView at zero height (maui-labs#830), so the options vanish and only Cancel shows. Give it an
     /// explicit height from its content until the backend fix ships.
     /// </summary>
-    void SizeActionSheetOptions()
+    void SizeActionSheetOptions() => this.SizeActionSheetOptions(0);
+
+    // the dialog builds asynchronously - keep looking for its options list for up to ~1.5s
+    void SizeActionSheetOptions(int attempt)
     {
         var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher == null)
+        if (dispatcher == null || attempt > 15)
             return;
 
-        dispatcher.Dispatch(() =>
+        dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(attempt == 0 ? 0 : 100), () =>
         {
             var root = Application.Current?.Windows.FirstOrDefault()?.Page;
-            if (root == null)
-                return;
-
-            foreach (var scroll in Descendants(root).OfType<ScrollView>().Where(s => Ancestors(s).Any(a => a.GetType().Name == "DialogView")))
+            var sized = false;
+            if (root != null)
             {
-                if (scroll.Content is not IView content)
-                    continue;
-                var size = content.Measure(Math.Max(200, scroll.Width > 0 ? scroll.Width : 460), Double.PositiveInfinity);
-                scroll.HeightRequest = Math.Min(scroll.MaximumHeightRequest > 0 ? scroll.MaximumHeightRequest : 360, size.Height);
+                foreach (var scroll in Descendants(root).OfType<ScrollView>().Where(s => Ancestors(s).Any(a => a.GetType().Name == "DialogView")))
+                {
+                    if (scroll.Content is not IView content)
+                        continue;
+                    var size = content.Measure(Math.Max(200, scroll.Width > 0 ? scroll.Width : 460), Double.PositiveInfinity);
+                    if (size.Height <= 0)
+                        continue;
+                    scroll.HeightRequest = Math.Min(scroll.MaximumHeightRequest is > 0 and < Double.PositiveInfinity ? scroll.MaximumHeightRequest : 360, size.Height);
+                    sized = true;
+                }
             }
+            if (!sized)
+                this.SizeActionSheetOptions(attempt + 1);
         });
     }
 

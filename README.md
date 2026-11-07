@@ -9,7 +9,7 @@ and **Linux** (GTK4 via maui-labs), and dressed in [Shiny Controls](https://gith
 | | |
 |---|---|
 | **Dual panels** | side by side or stacked top/bottom (Primary+Shift+L), folder tabs, drive chips with free-space meter, path box, sortable columns, TC-style cursor + red marks, status line, auto-refresh (FileSystemWatcher), tab/position restore |
-| **Views** | details or thumbnails per panel (Primary+Shift+F1 / Primary+F2), column chooser incl. date created (Primary+Shift+K), an optional folder tree in each panel (Primary+F8), quick view - the other panel previews the file under the cursor (Ctrl+Q) |
+| **Views** | details or thumbnails per panel (Primary+Shift+F1 / Primary+F2), column chooser incl. date created (Primary+Shift+K), an optional folder tree in each panel that follows the panel's folder and resizes with a drag (Primary+F8), quick view - the other panel previews the file under the cursor (Ctrl+Q) |
 | **Keyboard** | the full TC keymap (F2–F8, Insert/Space/Shift-arrows marking, Tab, Backspace, Alt+F7, Ctrl+B/R/H/T/W/U/D…) via Shiny's cross-platform keyboard-shortcut engine; `Primary` = ⌘ on Mac, Ctrl elsewhere. F1 shows a reference generated from the live shortcut registry |
 | **Command line** | typing goes to the command line; `cd` is handled internally, everything else runs through the system shell with output streamed into a console pane |
 | **Archives** | Enter browses an archive like a folder: zip (+ jar/nupkg/docx/apk/…) read/write; tar, tar.gz, tar.bz2, tar.xz, tar.zst, 7z, rar and lone .gz/.bz2/.xz read-only. Pack (Alt+F5) to zip/tar/tar.gz/tar.bz2, Unpack (Alt+F9) any of them |
@@ -24,7 +24,7 @@ and **Linux** (GTK4 via maui-labs), and dressed in [Shiny Controls](https://gith
 ## Shiny everywhere
 
 * **Shiny.Maui.Controls** — Ribbon, MotionIconView (ribbon, file icons, function bar, busy states), KeyboardShortcuts, Dialogs, Toast,
-  DataGrid (find / sync / rename preview), TreeView, TableView (settings), PillView, BadgeView (marked count on tabs), ProgressBar, ShinyButton
+  DataGrid (find / sync / rename preview), TableView (settings), PillView, BadgeView (marked count on tabs), ProgressBar, ShinyButton
 * **Shiny.Maui.Controls.Markdown** — lister + editor + F1 help · **Shiny.Maui.Controls.Desktop** — AppKit/GTK key sources
 * **Shiny.Maui.Shell** — ViewModel-first navigation (`[ShellMap]`, `[ShellProperty]`) · **Shiny.Mediator** — file-system-changed / go-to events
 * **Shiny.Extensions.Stores + DependencyInjection** — `[Bind]` persisted settings, `[Singleton]` registration

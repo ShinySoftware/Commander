@@ -71,6 +71,7 @@ public partial class ColumnSet(AppSettings settings) : ObservableObject
 /// </summary>
 public partial class ColumnLayout : ObservableObject
 {
+    public const double ExtColumnWidth = 56, SizeColumnWidth = 92, DateColumnWidth = 122, AttrColumnWidth = 84;
     const double MinNameWidth = 150;
     const double Fixed = 24 + 16; // icon column + row padding
     static readonly GridLength Hidden = new(0);
@@ -119,6 +120,11 @@ public partial class ColumnLayout : ObservableObject
     public GridLength ModifiedWidth => this.ShowModified ? new GridLength(122) : Hidden;
     public GridLength CreatedWidth => this.ShowCreated ? new GridLength(122) : Hidden;
     public GridLength AttrWidth => this.ShowAttributes ? new GridLength(84) : Hidden;
+
+    /// <summary>Total width of the detail columns that show - the drawn details view in each row (FileDetailsView).</summary>
+    public double DetailsWidth =>
+        (this.ShowExtension ? ExtColumnWidth : 0) + (this.ShowSize ? SizeColumnWidth : 0) + (this.ShowModified ? DateColumnWidth : 0)
+        + (this.ShowCreated ? DateColumnWidth : 0) + (this.ShowAttributes ? AttrColumnWidth : 0);
 
     void Recalculate()
     {

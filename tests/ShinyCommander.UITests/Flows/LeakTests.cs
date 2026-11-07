@@ -6,11 +6,13 @@ namespace ShinyCommander.UITests.Flows;
 /// Doing something and undoing it must leave the window as it was. Page changes slowed from ~2s on a fresh launch to
 /// 10s+ after an hour of use, so each test repeats one round trip and checks the native view count comes back.
 /// </summary>
+/// <remarks>Uses the native view diagnostics (each test turns them on; the next reset turns them off).</remarks>
 public class LeakTests(AppFixture fixture) : UiTest(fixture)
 {
     async Task RoundTripLeavesNoViewsBehind(string what, Func<Task> roundTrip, int rounds = 4)
     {
         await this.Start(l => { for (var i = 0; i < 20; i++) l.File($"f{i:00}.txt", "x"); l.Dir("sub"); });
+        await this.App.Diagnostics();
         await roundTrip(); // first time may build caches
         var baseline = (await this.App.State()).NativeViews;
 
@@ -81,5 +83,6 @@ public class LeakTests(AppFixture fixture) : UiTest(fixture)
     public Task Reset_between_tests() => this.RoundTripLeavesNoViewsBehind("reset", async () =>
     {
         await this.App.Reset(this.LeftTree.Path, this.RightTree.Path);
+        await this.App.Diagnostics(); // reset turns them off
     });
 }

@@ -4,6 +4,7 @@
              xmlns:shiny="http://shiny.net/maui/controls"
              xmlns:md="http://shiny.net/maui/markdown"
              xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:views="clr-namespace:ShinyCommander.Views"
              xmlns:conv="clr-namespace:ShinyCommander.Converters"
              xmlns:core="clr-namespace:ShinyCommander.Core.Models;assembly=ShinyCommander.Core"
              x:Class="ShinyCommander.Views.FilePanelView"
@@ -150,23 +151,39 @@
             <Grid Grid.Row="4" Grid.RowSpan="2" ColumnDefinitions="Auto,*">
 
                 <!-- this panel's own folder tree (Primary+F8 / the folder button) -->
-                <Grid Grid.Column="0" IsVisible="{Binding ShowTree}" WidthRequest="210" ColumnDefinitions="*,1">
-                    <shiny:TreeView x:Name="FolderTree"
-                                    IndentSize="14"
-                                    RowPadding="6,3"
-                                    ChevronSize="12"
-                                    ShowGuideLines="True"
-                                    ItemSelected="OnTreeItemSelected">
-                        <shiny:TreeView.ItemTemplate>
-                            <DataTemplate x:DataType="vm:FolderNode">
-                                <HorizontalStackLayout Spacing="6">
-                                    <shiny:MotionIconView Icon="{Binding Icon}" Color="#F5A524" Trigger="Hover" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" />
-                                    <Label Text="{Binding Name}" FontSize="12" VerticalTextAlignment="Center" LineBreakMode="TailTruncation" />
-                                </HorizontalStackLayout>
+                <Grid x:Name="TreeColumn" Grid.Column="0" IsVisible="{Binding ShowTree}" WidthRequest="{Binding TreeWidth}" ColumnDefinitions="*,7">
+                    <!-- a flat, virtualized list of the visible folders (FolderTreeViewModel) - stays quick with
+                         hundreds of subfolders and deep paths -->
+                    <CollectionView x:Name="FolderTree"
+                                    ItemsSource="{Binding Tree.Rows}"
+                                    SelectionMode="None"
+                                    ItemSizingStrategy="MeasureFirstItem">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:FolderRow">
+                                <Grid ColumnDefinitions="14,Auto,*" ColumnSpacing="5" HeightRequest="22" Padding="{Binding Indent}"
+                                      BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolColor}, ConverterParameter='CursorInactive|Transparent'}">
+                                    <Grid.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnTreeRowTapped" />
+                                    </Grid.GestureRecognizers>
+                                    <Label Text="{Binding Chevron}" FontSize="11" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnTreeChevronTapped" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                    <shiny:MotionIconView Grid.Column="1" Icon="{Binding Icon}" Color="#F5A524" Trigger="Hover" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" />
+                                    <Label Grid.Column="2" Text="{Binding Name}" FontSize="12" VerticalTextAlignment="Center" LineBreakMode="TailTruncation" MaxLines="1" />
+                                </Grid>
                             </DataTemplate>
-                        </shiny:TreeView.ItemTemplate>
-                    </shiny:TreeView>
-                    <BoxView Grid.Column="1" Color="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                    <!-- drag to resize the tree against the file list -->
+                    <Grid x:Name="TreeSplitter" Grid.Column="1" BackgroundColor="Transparent">
+                        <Grid.GestureRecognizers>
+                            <PanGestureRecognizer PanUpdated="OnTreeSplitterPan" />
+                        </Grid.GestureRecognizers>
+                        <BoxView WidthRequest="1" HorizontalOptions="Center" Color="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+                        <BoxView WidthRequest="3" HeightRequest="28" CornerRadius="1.5" HorizontalOptions="Center" VerticalOptions="Center" Color="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+                    </Grid>
                 </Grid>
 
                 <Grid Grid.Column="1">
@@ -208,20 +225,14 @@
                              realize every cell and keep them, slowing every page change) -->
                         <CollectionView x:Name="FileList" Grid.Row="1"
                                         SizeChanged="OnFileListSizeChanged"
+                                        Scrolled="OnListScrolled"
                                         SelectionMode="None"
                                         ItemSizingStrategy="MeasureFirstItem">
                             <CollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="vm:FileItemViewModel">
-                                    <Grid Padding="8,0" HeightRequest="24" BackgroundColor="{Binding RowState, Converter={StaticResource RowBackground}}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="24" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="{Binding Columns.ExtWidth}" />
-                                        <ColumnDefinition Width="{Binding Columns.SizeWidth}" />
-                                        <ColumnDefinition Width="{Binding Columns.ModifiedWidth}" />
-                                        <ColumnDefinition Width="{Binding Columns.CreatedWidth}" />
-                                        <ColumnDefinition Width="{Binding Columns.AttrWidth}" />
-                                    </Grid.ColumnDefinitions>
+                                    <!-- icon + name are real views; the detail columns are drawn (FileDetailsView) - a light
+                                         row is what keeps scrolling smooth on the AppKit head -->
+                                    <Grid Padding="8,0" HeightRequest="24" ColumnDefinitions="24,*,Auto" BackgroundColor="{Binding RowState, Converter={StaticResource RowBackground}}">
                                         <Grid.GestureRecognizers>
                                             <TapGestureRecognizer Tapped="OnRowTapped" />
                                             <TapGestureRecognizer Tapped="OnRowDoubleTapped" NumberOfTapsRequired="2" />
@@ -238,11 +249,7 @@
                                                               HorizontalOptions="Start"
                                                               VerticalOptions="Center" />
                                         <Label Grid.Column="1" Text="{Binding Name}" Style="{StaticResource RowLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
-                                        <Label Grid.Column="2" Text="{Binding Extension}" IsVisible="{Binding Columns.ShowExtension}" Style="{StaticResource RowLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
-                                        <Label Grid.Column="3" Text="{Binding SizeText}" IsVisible="{Binding Columns.ShowSize}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" HorizontalTextAlignment="End" Margin="0,0,8,0" />
-                                        <Label Grid.Column="4" Text="{Binding DateText}" IsVisible="{Binding Columns.ShowModified}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
-                                        <Label Grid.Column="5" Text="{Binding CreatedText}" IsVisible="{Binding Columns.ShowCreated}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
-                                        <Label Grid.Column="6" Text="{Binding AttributeText}" IsVisible="{Binding Columns.ShowAttributes}" Style="{StaticResource RowSubLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
+                                        <views:FileDetailsView Grid.Column="2" Item="{Binding .}" HeightRequest="24" />
                                     </Grid>
                                 </DataTemplate>
                             </CollectionView.ItemTemplate>
@@ -254,6 +261,7 @@
                                     IsVisible="{Binding ShowThumbnailList}"
                                     SelectionMode="None"
                                     Margin="6"
+                                    Scrolled="OnListScrolled"
                                     SizeChanged="OnThumbListSizeChanged">
                         <CollectionView.ItemsLayout>
                             <GridItemsLayout x:Name="ThumbLayout" Orientation="Vertical" Span="4" HorizontalItemSpacing="6" VerticalItemSpacing="6" />

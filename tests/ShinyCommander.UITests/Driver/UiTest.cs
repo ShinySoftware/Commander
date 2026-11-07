@@ -20,7 +20,9 @@ public abstract class UiTest(AppFixture fixture) : IAsyncLifetime
     public virtual ValueTask InitializeAsync()
     {
         var name = Safe(TestContext.Current.Test?.TestDisplayName ?? this.GetType().Name);
-        var dir = Path.Combine(TestConfig.WorkDir, name.Length > 80 ? name[^80..] : name) + "-" + Guid.NewGuid().ToString("N")[..6];
+        // the method name is the readable part; never start with '.' (that's a hidden folder)
+        var shortName = (name.Length > 80 ? name[^80..] : name).TrimStart('.', '_');
+        var dir = Path.Combine(TestConfig.WorkDir, shortName) + "-" + Guid.NewGuid().ToString("N")[..6];
         this.LeftTree = new TestTree(Path.Combine(dir, "left"));
         this.RightTree = new TestTree(Path.Combine(dir, "right"));
         return ValueTask.CompletedTask;

@@ -30,7 +30,10 @@ public partial class PanelViewModel : ObservableObject
         this.settings = settings;
         this.Columns = new ColumnLayout(columns);
         this.QuickView = new QuickViewViewModel(vfs);
+        this.Tree = new FolderTreeViewModel(settings);
         this.ShowTree = side == PanelSide.Left ? settings.LeftShowTree : settings.RightShowTree;
+        var savedWidth = side == PanelSide.Left ? settings.LeftTreeWidth : settings.RightTreeWidth;
+        this.TreeWidth = savedWidth >= 120 ? savedWidth : 240;
         this.ViewMode = Enum.TryParse<PanelViewMode>(side == PanelSide.Left ? settings.LeftViewMode : settings.RightViewMode, out var mode) ? mode : PanelViewMode.Details;
         this.RefreshDrives();
     }
@@ -39,6 +42,24 @@ public partial class PanelViewModel : ObservableObject
     /// <summary>This panel's columns - the user's choice, narrowed to what fits the panel.</summary>
     public ColumnLayout Columns { get; }
     public QuickViewViewModel QuickView { get; }
+
+    /// <summary>This panel's folder tree (rows for a virtualized list).</summary>
+    public FolderTreeViewModel Tree { get; }
+
+    /// <summary>Width of this panel's tree - dragged with the splitter, remembered per side.</summary>
+    [ObservableProperty]
+    public partial double TreeWidth { get; set; }
+
+    public void SaveTreeWidth()
+    {
+        if (this.Side == PanelSide.Left)
+            this.settings.LeftTreeWidth = (int)this.TreeWidth;
+        else
+            this.settings.RightTreeWidth = (int)this.TreeWidth;
+    }
+
+    /// <summary>The folder the panel's tree has highlighted (it follows the panel's location).</summary>
+    public string? TreePath { get; set; }
 
     /// <summary>This panel's own folder tree (Primary+F8 toggles the active panel's).</summary>
     [ObservableProperty]

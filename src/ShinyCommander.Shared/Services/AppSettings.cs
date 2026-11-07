@@ -32,6 +32,8 @@ public partial class AppSettings
     /// <summary>Per-panel folder tree.</summary>
     [Bind] public partial bool LeftShowTree { get; set; }
     [Bind] public partial bool RightShowTree { get; set; }
+    [Bind] public partial int LeftTreeWidth { get; set; }
+    [Bind] public partial int RightTreeWidth { get; set; }
 
     /// <summary>Per-panel view mode ("Details" / "Thumbnails").</summary>
     [Bind] public partial string? LeftViewMode { get; set; }

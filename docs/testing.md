@@ -82,6 +82,8 @@ doesn't fight your own build or the copy of the app you're using.
   - restores the default columns;
   - clears marks, the command line and the dialog log;
   - points the panels at the two folders.
+- **Diagnostics.** `App.Diagnostics()` adds native view counts to the state (`NativeViews`, `NativeViewTypes`). Walking
+  every NSView is slow, so it's off unless a test asks, and each reset turns it off again.
 - **Failure evidence** goes to `artifacts/failures/<test>/`:
   - `state.json`;
   - a screenshot of each panel;
@@ -106,9 +108,10 @@ run.sh   build + run, filters, flags
 | `ArchiveTests` | Browsing zip and tar.gz, the read-only badge, copying out of tar.gz, refusing a delete in a read-only archive, copying into a zip, Alt+F5 to tar.gz and its suggested name, Alt+F9 one folder per archive |
 | `ViewTests` | Thumbnails per panel with grid cursor moves, Left/Right left to the command line in details, Ctrl+Q quick view (text, markdown, image, folder; follows the cursor; ends on Tab), stacked layout geometry, per-panel trees, the column chooser, hidden files, quick filter, sorting, branch view |
 | `TabsAndToolsTests` | Tabs (open on folder, close, cycle, last can't close), lister (disk and archive), help, find, multi-rename, sync dirs, hotlist |
-| `RealUiTests` | Clicking and double-clicking rows, the function key bar, every ribbon tab and button, the path box, the per-panel tree, thumbnail tiles, the real prompt/confirm/choice dialogs, keyboard focus (native first responder: the dialog field on open, the command line after a dialog or page), the Settings page |
+| `RealUiTests` | Both panels' trees open at once, each following its own folder and resizing with its splitter; clicking and double-clicking rows, the function key bar, every ribbon tab and button, the path box, the per-panel tree, thumbnail tiles, the real prompt/confirm/choice dialogs, keyboard focus (native first responder: the dialog field on open, the command line after a dialog or page), the Settings page |
 | `LayoutTests` | Content that exists but can't be *seen*: the console text, choice dialog options, names with a tree open, the path label. `Ui.WhyHidden` clips an element against every ancestor |
 | `LeakTests` | Round trips (lister, help, tabs, navigation, thumbnails, quick view, dialogs, reset) leave no native views behind |
+| `ScrollTests` | A 2000-file folder stays virtualized; scroll steps, Down and PageDown keep the UI thread busy for less than a set budget (net of the test's own call overhead) |
 | `ScreensTests` (opt-in) | Screenshots of 23 screens and modes for a visual review |
 | `PerformanceTests` (explicit, known red) | How long F1/F3/back and tab switches keep the UI thread busy (see below) |
 

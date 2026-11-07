@@ -46,6 +46,8 @@ public sealed record PanelState
     public string Path { get; init; } = "";
     public string ViewMode { get; init; } = "";
     public bool ShowTree { get; init; }
+    public string? TreePath { get; init; }
+    public double TreeWidth { get; init; }
     public bool ShowQuickFilter { get; init; }
     public bool IsQuickView { get; init; }
     public int ThumbnailSpan { get; init; }
