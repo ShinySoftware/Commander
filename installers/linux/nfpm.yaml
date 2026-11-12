@@ -1,0 +1,61 @@
+# The .deb and .rpm for the GTK4 head. Run from the repository root after publishing, with
+# envsubst filling in VERSION, ARCH (amd64 or arm64) and PUBLISH_DIR - see the release workflow.
+#
+# The app is self-contained, so .NET itself is in PUBLISH_DIR. What the package depends on is what
+# it cannot carry: GTK 4 and GdkPixbuf, which the GTK4 backend loads by their versioned sonames, and
+# ICU for .NET's globalization. Not WebKitGTK: the backend only loads it when a WebView is created,
+# and ShinyCommander has none (Markdown is rendered natively). No libssl either - nothing here talks
+# TLS. xdg-open is how a file is opened in its default app, so it is recommended rather than required.
+name: shinycommander
+version: ${VERSION}
+arch: ${ARCH}
+platform: linux
+section: utils
+priority: optional
+maintainer: Shiny Software
+vendor: Shiny Software
+homepage: https://github.com/ShinySoftware/Commander
+license: Proprietary
+description: |
+  Keyboard-first, dual-pane file manager
+  In the spirit of Total Commander: archives browsed like folders, multi-rename, directory sync,
+  find files, a built-in lister and editor.
+
+contents:
+  - src: ${PUBLISH_DIR}
+    dst: /opt/shinycommander
+    type: tree
+
+  - src: /opt/shinycommander/ShinyCommander
+    dst: /usr/bin/shinycommander
+    type: symlink
+
+  - src: installers/linux/org.shiny.commander.desktop
+    dst: /usr/share/applications/org.shiny.commander.desktop
+
+  # The 1024px app icon. Into pixmaps, the spec's any-size fallback, because hicolor has no 1024 size.
+  - src: src/ShinyCommander.Shared/Resources/AppIcon/appicon.png
+    dst: /usr/share/pixmaps/org.shiny.commander.png
+
+scripts:
+  postinstall: installers/linux/after-change.sh
+  postremove: installers/linux/after-change.sh
+
+overrides:
+  deb:
+    # ICU alternatives cover each version a supported Debian/Ubuntu release ships.
+    depends:
+      - libgtk-4-1
+      - libgdk-pixbuf-2.0-0
+      - libicu78 | libicu77 | libicu76 | libicu74 | libicu72
+      - libstdc++6
+    recommends:
+      - xdg-utils
+  rpm:
+    depends:
+      - gtk4
+      - gdk-pixbuf2
+      - libicu
+      - libstdc++
+    recommends:
+      - xdg-utils

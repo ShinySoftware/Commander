@@ -42,6 +42,7 @@ tests/ShinyCommander.Core.Tests
 tools/ribbon.py              generates the ribbon markup from one command table
 tests/ShinyCommander.UITests UI tests driving the real macOS app via DevFlow (docs/testing.md)
 docs/ROADMAP.md              planned: custom button bar + user commands, side-by-side file diff
+docs/RELEASING.md            tag a version → signed/notarized macOS, Windows installer, Linux .deb/.rpm
 ```
 
 The UI is shared as linked source because there's no Linux TFM and each head compiles its own XAML and source

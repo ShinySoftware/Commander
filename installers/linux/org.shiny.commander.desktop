@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=ShinyCommander
+GenericName=File Manager
+Comment=Keyboard-first dual-pane file manager
+Exec=/usr/bin/shinycommander
+Icon=org.shiny.commander
+Terminal=false
+Categories=System;FileTools;FileManager;
+Keywords=files;folders;commander;dual;pane;archive;zip;rename;

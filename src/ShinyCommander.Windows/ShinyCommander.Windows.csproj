@@ -20,6 +20,12 @@
 
     <Import Project="..\ShinyCommander.Shared\ShinyCommander.Shared.props" />
 
+    <ItemGroup>
+        <!-- the same tile as the macOS head; Resizetizer makes the exe's .ico from it (and fills $placeholder$ in
+             Package.appxmanifest), so the installer's shortcuts and Add/Remove Programs show it -->
+        <MauiIcon Include="..\ShinyCommander.Shared\Resources\AppIcon\appicon.png" />
+    </ItemGroup>
+
     <ItemGroup Condition="'$(Configuration)' == 'Debug'">
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" />
         <PackageReference Include="Microsoft.Maui.DevFlow.Agent" />
