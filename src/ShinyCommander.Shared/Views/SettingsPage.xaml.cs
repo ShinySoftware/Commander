@@ -4,7 +4,14 @@ namespace ShinyCommander.Views;
 
 public partial class SettingsPage : ContentPage
 {
-    public SettingsPage() => this.InitializeComponent();
+    public SettingsPage()
+    {
+        this.InitializeComponent();
+
+        // only macOS installs its own updates - elsewhere there is nothing to check with
+        if (IPlatformApplication.Current?.Services.GetService<UpdateService>() is not { IsSupported: true })
+            this.AboutSection.Cells.Remove(this.UpdateCell);
+    }
 
     protected override void OnAppearing()
     {

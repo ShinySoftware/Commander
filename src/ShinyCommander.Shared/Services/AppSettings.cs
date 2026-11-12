@@ -50,6 +50,9 @@ public partial class AppSettings
     /// <summary>Directory hotlist (Ctrl+D) - newline separated.</summary>
     [Bind] public partial string? Hotlist { get; set; }
 
+    /// <summary>The release "Don't show again" was ticked for - a newer one asks again.</summary>
+    [Bind] public partial string? SkippedUpdate { get; set; }
+
     [Bind] public partial bool HasInitialized { get; set; }
 
     public void EnsureDefaults()

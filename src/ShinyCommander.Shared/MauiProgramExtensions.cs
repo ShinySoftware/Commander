@@ -29,6 +29,9 @@ public static class MauiProgramExtensions
         builder.Services.AddSingleton<ITrashService, TrashService>();
         builder.Services.AddSingleton(sp => new FileOperationService(sp.GetRequiredService<VirtualFileSystem>(), sp.GetRequiredService<ITrashService>()));
         builder.Services.TryAddSingleton<IAppDialogs, ShinyAppDialogs>();
+        // for UpdateService's hourly check
+        builder.Services.AddSingleton(TimeProvider.System);
+        builder.Services.AddSingleton(sp => sp.GetRequiredService<IDispatcherProvider>().GetForCurrentThread()!);
 
 #if DEBUG
         builder.Logging.SetMinimumLevel(LogLevel.Debug);

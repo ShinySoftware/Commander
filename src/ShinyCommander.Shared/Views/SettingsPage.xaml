@@ -67,8 +67,9 @@
                         <shiny:RadioCell Title="Extra large (18)" Value="18" />
                     </shiny:TableSection>
 
-                    <shiny:TableSection Title="About">
-                        <shiny:LabelCell Title="ShinyCommander" ValueText="{Binding AppVersion}" />
+                    <shiny:TableSection x:Name="AboutSection" Title="About">
+                        <shiny:LabelCell Title="ShinyCommander" ValueText="{Binding AppVersion}" Description="{Binding UpdateStatus}" />
+                        <shiny:ButtonCell x:Name="UpdateCell" Title="{Binding UpdateButtonText}" ButtonTextColor="{StaticResource Accent}" Command="{Binding UpdateCommand}" />
                         <shiny:LabelCell Title="Runtime" Description="{Binding RuntimeInfo}" />
                         <shiny:LabelCell Title="Built with" Description=".NET MAUI • maui-labs AppKit &amp; GTK4 backends • Shiny Controls, Shell, Mediator, Stores &amp; DI" />
                     </shiny:TableSection>

@@ -99,11 +99,22 @@ public class RibbonTabTextConverter : IValueConverter
 
 public class DriveIconConverter : IValueConverter
 {
-    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => (value as string) switch
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is DriveEntry drive ? For(drive) : "database";
+
+    public static string For(DriveEntry drive) => drive.Kind switch
     {
-        "~" => "home",
-        "/" => "database",
-        _ => "folder"
+        DriveKind.Home => "home",
+        DriveKind.Cloud => "cloud",
+        DriveKind.Network => "wifi",
+        DriveKind.Special => drive.Name switch
+        {
+            "Downloads" => "download",
+            "Documents" => "file-text",
+            _ => "folder"
+        },
+        _ => "database"
     };
+
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
 }

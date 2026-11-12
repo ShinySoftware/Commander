@@ -3,6 +3,9 @@ name: Release
 # Push a tag like v1.2.0 to build and publish a GitHub release: the macOS app (signed and notarized), a Windows
 # installer and .deb/.rpm packages for Linux, for x64 and arm64 wherever the platform has both. Each platform builds
 # on its own runner; the last job checksums everything and publishes it as one release.
+#
+# The macOS asset's name, ShinyCommander-<version>-macos-arm64.zip, is what installed copies look for to update
+# themselves (MacAppUpdater.AssetName): never rename it. Windows and Linux have no updater, so theirs are free.
 on:
   push:
     tags: [ 'v*' ]
@@ -109,6 +112,7 @@ jobs:
           -p:Version="$VERSION"
           -p:ApplicationDisplayVersion="$APP_VERSION"
           -p:ApplicationVersion="${{ github.run_number }}"
+          -p:InformationalVersion="$VERSION"
 
       - name: Verify signature
         run: codesign --verify --deep --strict --verbose=2 "$APP_PATH"
@@ -144,7 +148,7 @@ jobs:
           spctl --assess --type execute --verbose=2 "$APP_PATH"
 
       # Stapled, so the zip opens without a network check. ditto keeps the bundle's symlinks and signature intact,
-      # which a plain zip does not.
+      # which a plain zip does not. Exactly this name: installed copies find their update by it (MacAppUpdater.AssetName).
       - name: Package
         run: |
           mkdir -p artifacts
@@ -287,6 +291,8 @@ jobs:
         working-directory: artifacts
         run: sha256sum * > SHA256SUMS.txt && cat SHA256SUMS.txt
 
+      # One release with everything in it, created only once every platform has built: the Mac updater offers a
+      # release as soon as its zip is there, so a half-built release must never be published.
       - name: Publish release
         env:
           GH_TOKEN: ${{ github.token }}

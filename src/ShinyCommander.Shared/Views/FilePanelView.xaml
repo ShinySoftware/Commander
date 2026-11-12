@@ -83,7 +83,7 @@
                                 <Border Style="{StaticResource Chip}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnDriveTapped" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="4">
-                                        <shiny:MotionIconView Icon="{Binding Name, Converter={StaticResource DriveIcon}}" Trigger="Hover,Press" Color="{StaticResource Accent}" WidthRequest="13" HeightRequest="13" VerticalOptions="Center" />
+                                        <shiny:MotionIconView Icon="{Binding ., Converter={StaticResource DriveIcon}}" Trigger="Hover,Press" Color="{StaticResource Accent}" WidthRequest="13" HeightRequest="13" VerticalOptions="Center" />
                                         <Label Text="{Binding Name}" FontSize="11" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
