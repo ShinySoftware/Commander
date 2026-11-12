@@ -50,6 +50,11 @@ public partial class MainViewModel : ObservableObject,
         this.mediator = mediator;
         this.mainThread = mainThread;
 
+        // the ribbon's tab colours come from converters, which only run when RibbonTab changes - a theme switch while
+        // running would leave light colours on a dark ribbon
+        if (Application.Current is { } app)
+            app.RequestedThemeChanged += (_, _) => this.OnPropertyChanged(nameof(this.RibbonTab));
+
         this.Left = new PanelViewModel(PanelSide.Left, vfs, settings, columns, toolbar);
         this.Right = new PanelViewModel(PanelSide.Right, vfs, settings, columns, toolbar);
         this.Left.PropertyChanged += this.OnPanelPropertyChanged;

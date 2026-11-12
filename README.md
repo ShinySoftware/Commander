@@ -4,6 +4,17 @@ A modern, keyboard-first, dual-pane file manager in the spirit of Total Commande
 **Windows** (WinUI), **macOS** (native AppKit via [maui-labs](https://github.com/dotnet/maui-labs), not Catalyst)
 and **Linux** (GTK4 via maui-labs), and dressed in [Shiny Controls](https://github.com/shinyorg/controls).
 
+![ShinyCommander on macOS](docs/screenshots/main.png)
+
+| | |
+|---|---|
+| ![Quick view](docs/screenshots/quick-view.png)<br>**Quick view** - the other panel previews the file under the cursor | ![Dark mode](docs/screenshots/dark.png)<br>**Dark mode** - follows the system, or pick one in Settings |
+| ![Thumbnails](docs/screenshots/thumbnails.png)<br>**Thumbnails** per panel | ![Lister](docs/screenshots/viewer.png)<br>**Lister (F3)** - text, hex, images and rendered Markdown |
+| ![Find files](docs/screenshots/find.png)<br>**Find files (Alt+F7)** | ![Multi-rename](docs/screenshots/multi-rename.png)<br>**Multi-rename** with a live preview |
+| ![Settings](docs/screenshots/settings.png)<br>**Settings** | ![Pane toolbar](docs/screenshots/customize-toolbar.png)<br>**Pane toolbar** - choose the buttons beside each path |
+
+<sub>Regenerate with `tests/ShinyCommander.UITests/run.sh --readme-screenshots`.</sub>
+
 ## Features
 
 | | |

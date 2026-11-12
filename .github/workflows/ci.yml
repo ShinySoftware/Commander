@@ -1,0 +1,93 @@
+name: CI
+
+# Every push to main, and every pull request into it: the core tests, then each head built the way the release
+# builds it (Release, so the trimmer runs), without signing or packaging. Toolchain pins match release.yml - bump
+# them together.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# a newer push to the same branch / PR makes the running build pointless
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  WORKLOAD_VERSION: 10.0.402.1
+  DOTNET_VERSION: 10.0.4xx
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # Core is plain net10.0 - no workload. The UI tests drive a real AppKit window, so they stay local
+      # (tests/ShinyCommander.UITests/run.sh).
+      - name: Core tests
+        run: dotnet test tests/ShinyCommander.Core.Tests -c Release
+
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Build
+        run: dotnet build src/ShinyCommander.Linux/ShinyCommander.Linux.csproj -c Release
+
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Workloads
+        run: dotnet workload install maui-windows --version "$env:WORKLOAD_VERSION"
+
+      - name: Build
+        run: dotnet build src/ShinyCommander.Windows/ShinyCommander.Windows.csproj -c Release -f net10.0-windows10.0.19041.0
+
+  macos:
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v7
+
+      # The workload's macOS SDK needs Xcode 27.1 exactly (see release.yml).
+      - name: Xcode
+        run: |
+          XCODE=/Applications/Xcode_27.1.app
+          if [ ! -d "$XCODE" ]; then ls -d /Applications/Xcode*.app; echo "No $XCODE on this runner"; exit 1; fi
+          sudo xcode-select -s "$XCODE/Contents/Developer"
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Workloads
+        run: dotnet workload install macos maui --version "$WORKLOAD_VERSION"
+
+      # No CodesignKey: an unsigned build, which is all CI needs to know it compiles and trims.
+      - name: Build
+        run: dotnet build src/ShinyCommander.MacOS/ShinyCommander.MacOS.csproj -c Release -f net10.0-macos -p:CreatePackage=false

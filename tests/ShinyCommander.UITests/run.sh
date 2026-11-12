@@ -10,6 +10,7 @@
 #   tests/ShinyCommander.UITests/run.sh --fresh                 relaunch the app even if a test app is running
 #   tests/ShinyCommander.UITests/run.sh --quit                  quit the app afterwards (default: keep it running)
 #   tests/ShinyCommander.UITests/run.sh --screens               screenshot every screen/mode into artifacts/screens
+#   tests/ShinyCommander.UITests/run.sh --readme-screenshots    regenerate the README's docs/screenshots
 #   tests/ShinyCommander.UITests/run.sh --explicit -t Perf      also run [Fact(Explicit = true)] tests (known-red perf checks)
 #
 # The fast loop when fixing one thing: the test app stays running between runs and the next run attaches to it, so
@@ -30,6 +31,7 @@ while [[ $# -gt 0 ]]; do
         --fresh) export SC_UITEST_FRESH=1; shift ;;
         --quit) export SC_UITEST_QUIT=1; shift ;;
         --screens) export SC_UITEST_SCREENS=1; FILTER="${FILTER:-FullyQualifiedName~ScreensTests}"; shift ;;
+        --readme-screenshots) export SC_README_SCREENSHOTS=1; FILTER="${FILTER:-FullyQualifiedName~ReadmeScreenshotsTests}"; shift ;;
         --explicit) EXPLICIT=1; shift ;;
         *) echo "unknown option: $1" >&2; exit 2 ;;
     esac
