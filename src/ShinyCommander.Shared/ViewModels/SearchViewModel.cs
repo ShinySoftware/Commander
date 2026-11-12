@@ -8,7 +8,7 @@ public sealed class SearchResultItem(FileEntry entry, string startPath)
     public FileEntry Entry { get; } = entry;
     public string Icon => FileIcons.For(this.Entry);
     public string MotionIcon => FileIcons.Motion(this.Entry).Icon;
-    public Color IconColor => Color.FromArgb(FileIcons.Motion(this.Entry).Color);
+    public Color IconColor => ThemeColors.Get(FileIcons.Motion(this.Entry).Color);
     public string Name => this.Entry.Name;
     public string Folder { get; } = Path.GetRelativePath(startPath, Path.GetDirectoryName(entry.FullPath) ?? startPath);
     public string SizeText => this.Entry.IsDirectory ? "<DIR>" : SizeFormatter.Friendly(this.Entry.Size);

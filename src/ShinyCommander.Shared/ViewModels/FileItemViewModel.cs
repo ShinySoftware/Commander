@@ -13,7 +13,7 @@ public partial class FileItemViewModel(FileEntry entry, bool friendlySizes) : Ob
 
     public string Icon => FileIcons.For(this.Entry);
     public string MotionIcon => FileIcons.Motion(this.Entry).Icon;
-    public Color IconColor => this.Cursor == CursorState.Active ? Colors.White : Color.FromArgb(FileIcons.Motion(this.Entry).Color);
+    public Color IconColor => ThemeColors.Get(this.Cursor == CursorState.Active ? "Accent" : FileIcons.Motion(this.Entry).Color);
 
     /// <summary>The icon under the active cursor gently animates.</summary>
     public bool IsActiveCursor => this.Cursor == CursorState.Active;

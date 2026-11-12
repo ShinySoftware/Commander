@@ -47,6 +47,9 @@ public partial class AppSettings
     [Bind] public partial bool HideAttrColumn { get; set; }
     [Bind] public partial bool ShowCreatedColumn { get; set; }
 
+    /// <summary>Pane toolbar command keys, comma separated (PaneToolbar) - null until customized.</summary>
+    [Bind] public partial string? PaneToolbar { get; set; }
+
     /// <summary>Directory hotlist (Ctrl+D) - newline separated.</summary>
     [Bind] public partial string? Hotlist { get; set; }
 

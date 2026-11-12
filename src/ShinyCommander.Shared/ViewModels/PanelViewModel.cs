@@ -23,7 +23,7 @@ public partial class PanelViewModel : ObservableObject
     readonly VirtualFileSystem vfs;
     readonly AppSettings settings;
 
-    public PanelViewModel(PanelSide side, VirtualFileSystem vfs, AppSettings settings, ColumnSet columns)
+    public PanelViewModel(PanelSide side, VirtualFileSystem vfs, AppSettings settings, ColumnSet columns, PaneToolbar toolbar)
     {
         this.Side = side;
         this.vfs = vfs;
@@ -36,9 +36,16 @@ public partial class PanelViewModel : ObservableObject
         this.TreeWidth = savedWidth >= 120 ? savedWidth : 240;
         this.ViewMode = Enum.TryParse<PanelViewMode>(side == PanelSide.Left ? settings.LeftViewMode : settings.RightViewMode, out var mode) ? mode : PanelViewMode.Details;
         this.RefreshDrives();
+
+        this.ToolbarItems = PaneToolbarItem.For(side, toolbar.Items);
+        toolbar.Changed += (_, _) => this.ToolbarItems = PaneToolbarItem.For(side, toolbar.Items);
     }
 
     public PanelSide Side { get; }
+
+    /// <summary>The buttons beside the path (PaneToolbar).</summary>
+    [ObservableProperty]
+    public partial IReadOnlyList<PaneToolbarItem> ToolbarItems { get; set; }
     /// <summary>This panel's columns - the user's choice, narrowed to what fits the panel.</summary>
     public ColumnLayout Columns { get; }
     public QuickViewViewModel QuickView { get; }

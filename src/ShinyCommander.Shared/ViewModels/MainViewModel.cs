@@ -32,7 +32,8 @@ public partial class MainViewModel : ObservableObject,
         IMediator mediator,
         IMainThread mainThread,
         Shiny.Maui.Controls.IKeyboardShortcutService shortcuts,
-        ColumnSet columns
+        ColumnSet columns,
+        PaneToolbar toolbar
     )
     {
         this.shortcuts = shortcuts;
@@ -49,8 +50,8 @@ public partial class MainViewModel : ObservableObject,
         this.mediator = mediator;
         this.mainThread = mainThread;
 
-        this.Left = new PanelViewModel(PanelSide.Left, vfs, settings, columns);
-        this.Right = new PanelViewModel(PanelSide.Right, vfs, settings, columns);
+        this.Left = new PanelViewModel(PanelSide.Left, vfs, settings, columns, toolbar);
+        this.Right = new PanelViewModel(PanelSide.Right, vfs, settings, columns, toolbar);
         this.Left.PropertyChanged += this.OnPanelPropertyChanged;
         this.Right.PropertyChanged += this.OnPanelPropertyChanged;
         this.Left.ScrollRequested += this.OnPanelCursorMoved;
@@ -1202,6 +1203,17 @@ public partial class MainViewModel : ObservableObject,
 
     [RelayCommand]
     Task Settings() => this.navigator.NavigateTo<SettingsViewModel>();
+
+    [RelayCommand]
+    Task CustomizeToolbar() => this.navigator.NavigateTo<CustomizeToolbarViewModel>();
+
+    /// <summary>A pane toolbar button: the pane it sits in becomes the active one, then the command runs there.</summary>
+    public void RunToolbarCommand(PanelViewModel panel, string key)
+    {
+        this.Activate(panel);
+        if (CommandCatalog.Resolve(this, key) is { } command && command.CanExecute(null))
+            command.Execute(null);
+    }
 
     /// <summary>
     /// The help table spells out keys the Mac glyphs make cryptic (⇞ ⇟ ↖ ↘ have no glyph in the mono font and render

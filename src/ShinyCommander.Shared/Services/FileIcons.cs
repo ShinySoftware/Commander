@@ -27,22 +27,25 @@ public static class FileIcons
         return "📄";
     }
 
-    /// <summary>Motion icon name + colour per file type - animated in the panels and the ribbon.</summary>
+    /// <summary>
+    /// Motion icon name + palette key (see ThemeColors) per file type - animated in the panels and the ribbon. Only
+    /// folders take the accent; the icon shape tells file types apart, so the list stays calm.
+    /// </summary>
     public static (string Icon, string Color) Motion(FileEntry e)
     {
-        if (e.IsParentLink) return ("arrow-up", "#64748B");
-        if (e.IsDirectory) return e.IsSymlink ? ("link", "#F59E0B") : ("folder", "#F5A524");
-        if (e.IsArchive) return ("database", "#A855F7");
+        if (e.IsParentLink) return ("arrow-up", "Subtle");
+        if (e.IsDirectory) return e.IsSymlink ? ("link", "Accent") : ("folder", "Accent");
+        if (e.IsArchive) return ("database", "Subtle");
         var ext = e.Extension;
-        if (Images.Contains(ext)) return ("image", "#EC4899");
-        if (Audio.Contains(ext)) return ("music", "#06B6D4");
-        if (Video.Contains(ext)) return ("video", "#EF4444");
-        if (Markdown.Contains(ext)) return ("book", "#3B82F6");
-        if (Code.Contains(ext)) return ("file-text", "#22C55E");
-        if (Text.Contains(ext)) return ("file-text", "#94A3B8");
-        if (Exec.Contains(ext)) return ("rocket", "#F97316");
-        if (ext.Equals("pdf", StringComparison.OrdinalIgnoreCase)) return ("book", "#DC2626");
-        return ("file", "#94A3B8");
+        if (Images.Contains(ext)) return ("image", "Subtle");
+        if (Audio.Contains(ext)) return ("music", "Subtle");
+        if (Video.Contains(ext)) return ("video", "Subtle");
+        if (Markdown.Contains(ext)) return ("book", "Subtle");
+        if (Code.Contains(ext)) return ("file-text", "Subtle");
+        if (Text.Contains(ext)) return ("file-text", "Subtle");
+        if (Exec.Contains(ext)) return ("rocket", "Subtle");
+        if (ext.Equals("pdf", StringComparison.OrdinalIgnoreCase)) return ("book", "Subtle");
+        return ("file", "Subtle");
     }
 
     public static bool IsImage(string ext) => Images.Contains(ext) && !ext.Equals("svg", StringComparison.OrdinalIgnoreCase);

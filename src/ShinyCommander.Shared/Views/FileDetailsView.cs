@@ -75,15 +75,11 @@ public class FileDetailsView : GraphicsView, IDrawable
             return;
 
         var state = item.RowState;
-        canvas.FontColor = state switch
-        {
-            "Active" => Colors.White,
-            "ActiveMarked" => ThemeColors.Get("MarkedOnCursor"),
-            "Marked" or "InactiveMarked" => ThemeColors.Get("Marked"),
-            _ => ThemeColors.Get("Text")
-        };
+        // the name is the one strong column - the details sit back in the subtle colour unless marked
         var bold = state.EndsWith("Marked", StringComparison.Ordinal);
+        canvas.FontColor = ThemeColors.Get(bold ? "Marked" : "Subtle");
         var mono = new Font(MonoFamily, bold ? FontWeights.Bold : FontWeights.Normal);
+        // the system font's digits are tabular, so sizes and dates still line up
         var plain = new Font(null, bold ? FontWeights.Bold : FontWeights.Normal);
 
         float x = 0;
@@ -100,10 +96,10 @@ public class FileDetailsView : GraphicsView, IDrawable
             x += (float)width;
         }
 
-        Column(c.ShowExtension, ColumnLayout.ExtColumnWidth, item.Extension, plain, 13, HorizontalAlignment.Left);
-        Column(c.ShowSize, ColumnLayout.SizeColumnWidth, item.SizeText, mono, 12, HorizontalAlignment.Right, 8);
-        Column(c.ShowModified, ColumnLayout.DateColumnWidth, item.DateText, mono, 12, HorizontalAlignment.Left);
-        Column(c.ShowCreated, ColumnLayout.DateColumnWidth, item.CreatedText, mono, 12, HorizontalAlignment.Left);
+        Column(c.ShowExtension, ColumnLayout.ExtColumnWidth, item.Extension, plain, 12, HorizontalAlignment.Left);
+        Column(c.ShowSize, ColumnLayout.SizeColumnWidth, item.SizeText, plain, 12, HorizontalAlignment.Right, 8);
+        Column(c.ShowModified, ColumnLayout.DateColumnWidth, item.DateText, plain, 12, HorizontalAlignment.Left);
+        Column(c.ShowCreated, ColumnLayout.DateColumnWidth, item.CreatedText, plain, 12, HorizontalAlignment.Left);
         Column(c.ShowAttributes, ColumnLayout.AttrColumnWidth, item.AttributeText, mono, 12, HorizontalAlignment.Left);
     }
 }

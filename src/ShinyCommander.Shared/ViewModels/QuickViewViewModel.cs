@@ -73,7 +73,7 @@ public partial class QuickViewViewModel(VirtualFileSystem vfs) : ObservableObjec
 
         var (icon, color) = FileIcons.Motion(entry);
         this.MotionIcon = icon;
-        this.IconColor = Color.FromArgb(color);
+        this.IconColor = ThemeColors.Get(color);
         this.Title = entry.Name;
 
         if (entry.IsDirectory || entry.IsArchive)

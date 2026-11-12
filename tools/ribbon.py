@@ -4,34 +4,38 @@ Generates the ribbon markup in Views/MainPage.xaml from one command table:
   * <shiny:Ribbon>  - Shiny's ribbon, used on Windows + Linux
   * AppKitRibbon    - a ribbon-styled bar of plain layouts for the macOS AppKit head, where the Shiny
                       ribbon's body currently doesn't draw (it is built after the native view exists)
+  * Services/CommandCatalog.g.cs - every command, for the customizable pane toolbar
 Run after editing RIBBON:  python3 tools/ribbon.py
 """
 import re, pathlib
 
+# every icon in the one neutral colour: the labels and groups do the telling apart
+ICON = "{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}"
+
 RIBBON = [
- ("Files","files","#3B82F6",[
+ ("Files","files",ICON,[
    ("Transfer",[("Copy","copy","CopyCommand","L","F5"),("Move","arrow-right","MoveCommand","L","F6"),("Delete","trash","DeleteCommand","L","F8")]),
    ("Create",[("New Folder","folder","MakeDirectoryCommand","S","F7"),("New File","file","NewFileCommand","S","Shift+F4"),("Rename","edit","RenameCommand","S","F2")]),
    ("Open",[("View","eye","ViewCommand","L","F3"),("Edit","file-text","EditCommand","S","F4"),("Terminal","external-link","OpenTerminalCommand","S","Primary+O"),("Reveal","search","RevealInFileManagerCommand","S","Primary+E")]),
    ("Archive",[("Pack","download","PackCommand","S","Alt+F5"),("Unpack","upload","UnpackCommand","S","Alt+F9")]),
    ("Clipboard",[("Copy Paths","clipboard","CopyPathsToClipboardCommand","S","Primary+Shift+C"),("Name to Cmd","arrow-down","CopyNameToCommandLineCommand","S","Primary+Enter")]),
  ]),
- ("Selection","select","#8B5CF6",[
+ ("Selection","select",ICON,[
    ("Mark",[("Select All","check-circle","SelectAllCommand","L","Primary+A"),("Unselect All","x-circle","DeselectAllCommand","S","Primary+Shift+A"),("Invert","shuffle","InvertSelectionCommand","S","Primary+I")]),
    ("By pattern",[("Select Group…","filter","SelectGroupCommand","S","Primary+G"),("Unselect Group…","close","DeselectGroupCommand","S","Primary+Shift+G"),("Same Extension","tag","SelectSameExtensionCommand","S","Alt+Shift+E")]),
  ]),
- ("View","view","#14B8A6",[
+ ("View","view",ICON,[
    ("Panel",[("Reread","refresh","RefreshCommand","L","Primary+R"),("Hidden Files","eye","ToggleHiddenCommand","S","Primary+H"),("Branch View","expand","BranchViewCommand","S","Primary+B"),("Quick Filter","filter","QuickFilterCommand","S","Primary+F")]),
    ("Show",[("Thumbnails","image","ThumbnailViewCommand","L","Primary+Shift+F1"),("Details","menu","DetailsViewCommand","S","Primary+F2"),("Columns…","sort","ChooseColumnsCommand","S","Primary+Shift+K"),("Folder Tree","folder-open","ToggleTreeCommand","S","Primary+F8")]),
    ("Layout",[("Quick View","zoom-in","QuickViewCommand","L","Ctrl+Q"),("Stack Panels","collapse","TogglePanelLayoutCommand","S","Primary+Shift+L"),("Swap","repeat","SwapPanelsCommand","S","Primary+U"),("Target = Source","link","TargetEqualsSourceCommand","S","Primary+.")]),
    ("Tabs",[("New Tab","plus","NewTabCommand","S","Primary+T"),("Close Tab","close","CloseTabCommand","S","Primary+W"),("Next Tab","chevron-right","NextTabCommand","S","Ctrl+Tab")]),
  ]),
- ("Go","go","#22C55E",[
+ ("Go","go",ICON,[
    ("History",[("Back","arrow-left","GoBackCommand","L","Alt+Left"),("Forward","arrow-right","GoForwardCommand","S","Alt+Right"),("Parent","arrow-up","GoParentCommand","S","Backspace")]),
    ("Places",[("Home","home","GoHomeCommand","L","Primary+Shift+H"),("Root","database","GoRootCommand","S","Primary+\\"),("Hotlist","star","HotlistCommand","S","Primary+D")]),
    ("Drives",[("Left Drive…","compass","DriveMenuLeftCommand","S","Alt+F1"),("Right Drive…","compass","DriveMenuRightCommand","S","Alt+F2"),("Other Panel","chevron-right","OpenInOtherPanelCommand","S","Primary+Right")]),
  ]),
- ("Tools","tools","#F97316",[
+ ("Tools","tools",ICON,[
    ("Find",[("Find Files","search","FindCommand","L","Alt+F7")]),
    ("Batch",[("Multi-Rename","edit","MultiRenameCommand","L","Primary+M")]),
    ("Compare",[("Sync Dirs","refresh","SynchronizeCommand","L","Primary+Shift+S"),("Compare Files","activity","CompareFilesCommand","S","Primary+Shift+F2")]),
@@ -101,7 +105,7 @@ def appkit_ribbon():
             <Grid ColumnDefinitions="Auto,*,Auto" Padding="8,6,8,0" ColumnSpacing="10">
                 <Border Style="{StaticResource RibbonAppButton}">
                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding HelpCommand}" /></Border.GestureRecognizers>
-                    <Label Text="ShinyCommander" TextColor="White" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
+                    <Label Text="ShinyCommander" TextColor="{StaticResource Accent}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" />
                 </Border>
                 <HorizontalStackLayout Grid.Column="1" Spacing="2">''']
     for tab,key,color,_ in RIBBON:
@@ -155,4 +159,34 @@ if "RIBBON:BEGIN" in s:
 else:
     s = re.sub(r"        <shiny:Ribbon x:Name=\"MainRibbon\".*?</shiny:Ribbon>", lambda m: block, s, flags=re.S)
 root.write_text(s)
+# ---------------------------------------------------------------- command catalog (pane toolbar)
+def cs(v): return '"' + v.replace('\\', '\\\\').replace('"', '\\"') + '"'
+entries, cases = [], []
+for tab,_,_,groups in RIBBON:
+    for _,items in groups:
+        for text,icon,cmd,_,sc in items:
+            key = cmd[:-len("Command")]
+            entries.append(f"        new({cs(key)}, {cs(text)}, {cs(icon)}, {cs(sc)}, {cs(tab)}),")
+            cases.append(f"        {cs(key)} => vm.{cmd},")
+catalog = pathlib.Path(__file__).resolve().parent.parent / "src/ShinyCommander.Shared/Services/CommandCatalog.g.cs"
+catalog.write_text("""// <auto-generated> by tools/ribbon.py from the ribbon table - edit the table there, then rerun it. </auto-generated>
+namespace ShinyCommander.Services;
+
+public static partial class CommandCatalog
+{
+    /// <summary>Every command, in ribbon order.</summary>
+    public static IReadOnlyList<AppCommand> All { get; } =
+    [
+""" + "\n".join(entries) + """
+    ];
+
+    /// <summary>The command behind a key, on the main view model; null for a key that no longer exists.</summary>
+    public static System.Windows.Input.ICommand? Resolve(MainViewModel vm, string key) => key switch
+    {
+""" + "\n".join(cases) + """
+        _ => null
+    };
+}
+""")
+
 print("ribbon regenerated:", sum(len(i) for _,_,_,g in RIBBON for _,i in g), "commands")

@@ -35,8 +35,9 @@ public class RowBackgroundConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => (value as string) switch
     {
-        "Active" or "ActiveMarked" => ThemeColors.Get("Accent"),
-        "Inactive" or "InactiveMarked" => ThemeColors.Get("CursorInactive"),
+        // a soft accent tint for the active panel's cursor, a neutral one for the other panel's
+        "Active" or "ActiveMarked" => ThemeColors.Get("CursorInactive"),
+        "Inactive" or "InactiveMarked" => ThemeColors.Get("Header"),
         _ => Colors.Transparent
     };
 
@@ -47,9 +48,7 @@ public class RowTextConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => (value as string) switch
     {
-        "Active" => Colors.White,
-        "ActiveMarked" => ThemeColors.Get("MarkedOnCursor"),
-        "Marked" or "InactiveMarked" => ThemeColors.Get("Marked"),
+        "Marked" or "InactiveMarked" or "ActiveMarked" => ThemeColors.Get("Marked"),
         _ => ThemeColors.Get("Text")
     };
 

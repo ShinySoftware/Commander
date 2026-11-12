@@ -31,10 +31,9 @@
         </Style>
 
         <Style x:Key="HeaderLabel" TargetType="Label">
-            <Setter Property="FontSize" Value="12" />
+            <Setter Property="FontSize" Value="11" />
             <Setter Property="MaxLines" Value="1" />
             <Setter Property="LineBreakMode" Value="TailTruncation" />
-            <Setter Property="FontAttributes" Value="Bold" />
             <Setter Property="VerticalTextAlignment" Value="Center" />
             <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" />
         </Style>
@@ -42,7 +41,7 @@
 
     <Border x:Name="PanelBorder"
             Style="{StaticResource Card}"
-            StrokeThickness="2"
+            StrokeThickness="1"
             Stroke="{Binding IsActive, Converter={StaticResource BoolColor}, ConverterParameter='Accent|Border'}"
             Padding="0">
 
@@ -83,8 +82,8 @@
                                 <Border Style="{StaticResource Chip}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnDriveTapped" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="4">
-                                        <shiny:MotionIconView Icon="{Binding ., Converter={StaticResource DriveIcon}}" Trigger="Hover,Press" Color="{StaticResource Accent}" WidthRequest="13" HeightRequest="13" VerticalOptions="Center" />
-                                        <Label Text="{Binding Name}" FontSize="11" VerticalTextAlignment="Center" />
+                                        <shiny:MotionIconView Icon="{Binding ., Converter={StaticResource DriveIcon}}" Trigger="Hover,Press" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="13" HeightRequest="13" VerticalOptions="Center" />
+                                        <Label Text="{Binding Name}" FontSize="12" TextColor="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                             </DataTemplate>
@@ -99,6 +98,9 @@
 
             <!-- path / back / forward / up -->
             <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto" Padding="6,2,6,6" ColumnSpacing="2" HeightRequest="36">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnToolbarRightTapped" Buttons="Secondary" />
+                </Grid.GestureRecognizers>
                 <shiny:ShinyButton Command="{Binding GoBackCommand}" LeftMotionIcon="arrow-left" Appearance="Text" ContentPadding="6,0" IconSize="14" />
                 <shiny:ShinyButton Grid.Column="1" Command="{Binding GoForwardCommand}" LeftMotionIcon="arrow-right" Appearance="Text" ContentPadding="6,0" IconSize="14" />
                 <shiny:ShinyButton Grid.Column="2" Command="{Binding GoUpCommand}" LeftMotionIcon="arrow-up" Appearance="Text" ContentPadding="6,0" IconSize="14" />
@@ -115,10 +117,9 @@
                      A click switches to the entry underneath. -->
                 <Border x:Name="PathLabelBox"
                         Grid.Column="3"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 5"
-                        Stroke="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}"
-                        BackgroundColor="{AppThemeBinding Light=White, Dark={StaticResource PanelDark}}"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 6"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource WindowLight}, Dark={StaticResource WindowDark}}"
                         Padding="8,0"
                         HeightRequest="26"
                         VerticalOptions="Center"
@@ -128,15 +129,26 @@
                     </Border.GestureRecognizers>
                     <Label x:Name="PathLabel"
                            Text="{Binding PathText}"
-                           FontFamily="{DynamicResource MonoFont}"
                            FontSize="12"
                            LineBreakMode="HeadTruncation"
                            MaxLines="1"
                            VerticalTextAlignment="Center" />
                 </Border>
                 <shiny:PillView Grid.Column="4" Text="{Binding ActiveTab.ArchiveBadge}" IsVisible="{Binding ActiveTab.IsArchive}" Type="Warning" FontSize="10" VerticalOptions="Center" Margin="4,0" />
-                <shiny:ShinyButton Grid.Column="5" x:Name="ViewModeButton" Command="{Binding ToggleViewModeCommand}" LeftMotionIcon="image" Appearance="Text" ContentPadding="6,0" IconSize="15" ToolTipProperties.Text="Thumbnails / details" />
-                <shiny:ShinyButton Grid.Column="6" x:Name="TreeButton" Command="{Binding ToggleTreeCommand}" LeftMotionIcon="folder-open" Appearance="Text" ContentPadding="6,0" IconSize="15" ToolTipProperties.Text="Folder tree" />
+                <!-- the customizable part (PaneToolbar): right-click it, or Settings, to choose what goes here -->
+                <HorizontalStackLayout Grid.Column="5" Grid.ColumnSpan="2" x:Name="ToolbarStrip" Spacing="0" BindableLayout.ItemsSource="{Binding ToolbarItems}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:PaneToolbarItem">
+                            <shiny:ShinyButton LeftMotionIcon="{Binding Command.Icon}"
+                                               AutomationId="{Binding AutomationId}"
+                                               ToolTipProperties.Text="{Binding Command.Tooltip}"
+                                               Appearance="Text"
+                                               ContentPadding="6,0"
+                                               IconSize="15"
+                                               Clicked="OnToolbarItemClicked" />
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </HorizontalStackLayout>
             </Grid>
 
             <!-- quick filter (Ctrl+F) -->
@@ -174,7 +186,7 @@
                                             <TapGestureRecognizer Tapped="OnTreeChevronTapped" />
                                         </Label.GestureRecognizers>
                                     </Label>
-                                    <shiny:MotionIconView Grid.Column="1" Icon="{Binding Icon}" Color="#F5A524" Trigger="Hover" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" />
+                                    <shiny:MotionIconView Grid.Column="1" Icon="{Binding Icon}" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Hover" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" />
                                     <Label Grid.Column="2" Text="{Binding Name}" FontSize="12" VerticalTextAlignment="Center" LineBreakMode="TailTruncation" MaxLines="1" />
                                 </Grid>
                             </DataTemplate>
@@ -193,9 +205,8 @@
                 <Grid Grid.Column="1">
                     <!-- details: column headers (click to sort) + rows -->
                     <Grid RowDefinitions="Auto,*" IsVisible="{Binding ShowDetailsList}">
-                        <Grid Grid.Row="0"
-                              Padding="6,3"
-                              BackgroundColor="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}">
+                        <Grid Grid.Row="0" Padding="6,4">
+                            <BoxView Grid.ColumnSpan="7" Style="{StaticResource Hairline}" Margin="-6,0,-6,-4" />
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="24" />
                                 <ColumnDefinition Width="*" />
@@ -334,8 +345,8 @@
             <!-- status: "x k / y k in a / b file(s), c / d dir(s)" -->
             <Grid Grid.Row="6"
                   ColumnDefinitions="*,Auto"
-                  Padding="8,4"
-                  BackgroundColor="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}">
+                  Padding="8,5">
+                <BoxView Grid.ColumnSpan="2" Style="{StaticResource Hairline}" VerticalOptions="Start" Margin="-8,-5,-8,0" />
                 <Label Text="{Binding ActiveTab.StatusText}" Style="{StaticResource Subtle}" FontSize="11" LineBreakMode="TailTruncation" />
                 <Label Grid.Column="1" Text="{Binding ActiveTab.Error}" TextColor="{StaticResource MarkedLight}" FontSize="11" LineBreakMode="TailTruncation" MaximumWidthRequest="320" />
             </Grid>

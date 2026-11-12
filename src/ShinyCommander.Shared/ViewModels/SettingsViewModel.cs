@@ -98,5 +98,8 @@ public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, 
     }
 
     [RelayCommand]
+    Task CustomizeToolbar() => navigator.NavigateTo<CustomizeToolbarViewModel>();
+
+    [RelayCommand]
     Task Close() => navigator.GoBack();
 }

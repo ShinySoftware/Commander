@@ -86,16 +86,12 @@
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PanelLight}, Dark={StaticResource PanelDark}}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 10" />
-        <Setter Property="Shadow">
-            <Shadow Brush="Black" Opacity="0.08" Radius="10" Offset="0,2" />
-        </Setter>
     </Style>
 
     <Style x:Key="KeyCap" TargetType="Border">
         <Setter Property="StrokeShape" Value="RoundRectangle 7" />
-        <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PanelLight}, Dark={StaticResource PanelDark}}" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="Padding" Value="6,5" />
         <Setter Property="HeightRequest" Value="32" />
     </Style>
@@ -103,7 +99,7 @@
     <Style x:Key="KeyCapKey" TargetType="Border">
         <Setter Property="StrokeShape" Value="RoundRectangle 4" />
         <Setter Property="StrokeThickness" Value="0" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#E6EDFB, Dark=#24324A}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}" />
         <Setter Property="Padding" Value="5,1" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
@@ -112,23 +108,22 @@
         <Setter Property="FontSize" Value="10" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="FontFamily" Value="{DynamicResource MonoFont}" />
-        <Setter Property="TextColor" Value="{StaticResource Accent}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" />
         <Setter Property="VerticalTextAlignment" Value="Center" />
     </Style>
 
     <Style x:Key="Chip" TargetType="Border">
-        <Setter Property="StrokeShape" Value="RoundRectangle 11" />
-        <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource HeaderLight}, Dark={StaticResource HeaderDark}}" />
-        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 6" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="Padding" Value="6,0" />
         <Setter Property="HeightRequest" Value="22" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
     <!-- AppKit ribbon bar -->
     <Style x:Key="RibbonAppButton" TargetType="Border">
-        <Setter Property="BackgroundColor" Value="{StaticResource Accent}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="StrokeShape" Value="RoundRectangle 7" />
         <Setter Property="StrokeThickness" Value="0" />
         <Setter Property="Padding" Value="14,0" />
@@ -175,6 +170,13 @@
     <Style x:Key="RibbonDivider" TargetType="BoxView">
         <Setter Property="WidthRequest" Value="1" />
         <Setter Property="Margin" Value="4,6" />
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+    </Style>
+
+    <!-- a 1pt rule between areas - used instead of boxing them in -->
+    <Style x:Key="Hairline" TargetType="BoxView">
+        <Setter Property="HeightRequest" Value="1" />
+        <Setter Property="VerticalOptions" Value="End" />
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
     </Style>
 

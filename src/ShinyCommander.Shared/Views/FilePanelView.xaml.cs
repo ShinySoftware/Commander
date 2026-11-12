@@ -8,9 +8,36 @@ public partial class FilePanelView : ContentView
 
     const double ThumbTileWidth = 128;
 
+    bool toolbarStale;
+    Page? hostPage;
+
     public FilePanelView()
     {
         this.InitializeComponent();
+        this.Loaded += (_, _) =>
+        {
+            if (this.hostPage != null)
+                return;
+            Element? e = this;
+            while (e != null && e is not Page)
+                e = e.Parent;
+            this.hostPage = e as Page;
+            if (this.hostPage != null)
+                this.hostPage.Appearing += (_, _) => this.RemeasureToolbarIfStale();
+        };
+    }
+
+    void RemeasureToolbarIfStale()
+    {
+        if (!this.toolbarStale || this.hostPage is not { IsLoaded: true })
+            return;
+
+        this.Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
+        {
+            this.toolbarStale = false;
+            ((IView)this.ToolbarStrip).InvalidateMeasure();
+            (this.ToolbarStrip.Parent as IView)?.InvalidateMeasure();
+        });
     }
 
     PanelViewModel? Panel => this.BindingContext as PanelViewModel;
@@ -42,8 +69,6 @@ public partial class FilePanelView : ContentView
             // stable ids for DevFlow / UI automation
             var side = this.panel.Side.ToString();
             SetId(this, side + "Panel");
-            SetId(this.ViewModeButton, side + "ViewMode");
-            SetId(this.TreeButton, side + "TreeToggle");
             SetId(this.FolderTree, side + "Tree");
             SetId(this.TreeSplitter, side + "TreeSplitter");
             SetId(this.ThumbList, side + "Thumbnails");
@@ -72,6 +97,13 @@ public partial class FilePanelView : ContentView
 
             case nameof(PanelViewModel.IsQuickView):
                 this.UpdateListSources();
+                break;
+
+            case nameof(PanelViewModel.ToolbarItems):
+                // changed from the Customize page, while this page is covered: on AppKit the path row doesn't
+                // re-measure for the new buttons until something asks it to, so ask once the page is back
+                this.toolbarStale = true;
+                this.RemeasureToolbarIfStale();
                 break;
 
             case nameof(PanelViewModel.Path):
@@ -273,6 +305,14 @@ public partial class FilePanelView : ContentView
             p.ActiveTab = tab;
         }
     }
+
+    void OnToolbarItemClicked(object? sender, EventArgs e)
+    {
+        if (this.Panel is { } p && (sender as BindableObject)?.BindingContext is PaneToolbarItem item)
+            this.Main?.RunToolbarCommand(p, item.Command.Key);
+    }
+
+    void OnToolbarRightTapped(object? sender, TappedEventArgs e) => this.Main?.CustomizeToolbarCommand.Execute(null);
 
     void OnDriveTapped(object? sender, TappedEventArgs e)
     {
