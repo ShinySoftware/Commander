@@ -14,7 +14,7 @@ public sealed record AppRelease(
 )
 {
     /// <summary>"0.2.0", "0.2.0-beta2", or "0.2.0 (beta)" for a prerelease whose tag doesn't say so.</summary>
-    public string DisplayVersion => this.IsPrerelease && !this.Version.Contains('-') ? $"{this.Version} (beta)" : this.Version;
+    public string DisplayVersion => this.IsPrerelease && !this.Version.Contains('-') ? L.Update_BetaVersionFormat(this.Version) : this.Version;
 }
 
 

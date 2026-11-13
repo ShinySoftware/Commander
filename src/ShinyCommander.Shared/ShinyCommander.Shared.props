@@ -21,6 +21,15 @@
         <MauiXaml Include="$(CommanderSharedDir)**\*.xaml"
                   Exclude="$(CommanderSharedDir)bin\**;$(CommanderSharedDir)obj\**"
                   Link="Shared\%(RecursiveDir)%(Filename)%(Extension)" />
+        <!--
+            UI strings (Resources/Strings). The logical name is spelled out because linked files don't get the usual
+            folder-based name: Strings.resx -> ShinyCommander.Strings.resources (main assembly) and Strings.fr.resx ->
+            ShinyCommander.Strings.fr.resources (fr/ShinyCommander.resources.dll) - what IStringLocalizer<Strings> looks up.
+        -->
+        <EmbeddedResource Include="$(CommanderSharedDir)**\*.resx"
+                          Exclude="$(CommanderSharedDir)bin\**;$(CommanderSharedDir)obj\**"
+                          Link="Shared\%(RecursiveDir)%(Filename)%(Extension)"
+                          LogicalName="ShinyCommander.%(Filename).resources" />
     </ItemGroup>
 
     <ItemGroup>
@@ -33,6 +42,8 @@
         <PackageReference Include="Shiny.Mediator.Maui" />
         <PackageReference Include="Shiny.Extensions.DependencyInjection" />
         <PackageReference Include="Shiny.Extensions.Stores" />
+        <PackageReference Include="Microsoft.Extensions.Localization" />
+        <PackageReference Include="Shiny.Extensions.Localization.Generator" PrivateAssets="all" />
     </ItemGroup>
 
     <ItemGroup>

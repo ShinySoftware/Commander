@@ -1,0 +1,1457 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- Common -->
+  <data name="Common_OK" xml:space="preserve">
+    <value>Aceptar</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancelar</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="Common_Back" xml:space="preserve">
+    <value>Atrás</value>
+  </data>
+  <data name="Common_Done" xml:space="preserve">
+    <value>Listo</value>
+  </data>
+  <data name="Common_Yes" xml:space="preserve">
+    <value>Sí</value>
+  </data>
+  <data name="Common_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Common_Save" xml:space="preserve">
+    <value>Guardar</value>
+  </data>
+  <data name="Common_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="Common_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Common_Browse" xml:space="preserve">
+    <value>Examinar…</value>
+  </data>
+  <data name="Common_Add" xml:space="preserve">
+    <value>Agregar</value>
+  </data>
+  <data name="Common_Remove" xml:space="preserve">
+    <value>Quitar</value>
+  </data>
+  <data name="Common_Apply" xml:space="preserve">
+    <value>Aplicar</value>
+  </data>
+  <data name="Common_Stop" xml:space="preserve">
+    <value>Detener</value>
+  </data>
+  <data name="Common_Start" xml:space="preserve">
+    <value>Iniciar</value>
+  </data>
+  <data name="Common_Reset" xml:space="preserve">
+    <value>Restablecer</value>
+  </data>
+
+  <!-- Ribbon & commands (tools/ribbon.py checks these against its table) -->
+  <data name="Ribbon_Help" xml:space="preserve">
+    <value>Ayuda</value>
+  </data>
+  <data name="Ribbon_Tab_files" xml:space="preserve">
+    <value>Archivos</value>
+  </data>
+  <data name="Ribbon_Tab_select" xml:space="preserve">
+    <value>Selección</value>
+  </data>
+  <data name="Ribbon_Tab_view" xml:space="preserve">
+    <value>Ver</value>
+  </data>
+  <data name="Ribbon_Tab_go" xml:space="preserve">
+    <value>Ir</value>
+  </data>
+  <data name="Ribbon_Tab_tools" xml:space="preserve">
+    <value>Herramientas</value>
+  </data>
+  <data name="Ribbon_Group_Transfer" xml:space="preserve">
+    <value>Transferir</value>
+  </data>
+  <data name="Ribbon_Group_Create" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="Ribbon_Group_Open" xml:space="preserve">
+    <value>Abrir</value>
+  </data>
+  <data name="Ribbon_Group_Archive" xml:space="preserve">
+    <value>Archivo comprimido</value>
+  </data>
+  <data name="Ribbon_Group_Clipboard" xml:space="preserve">
+    <value>Portapapeles</value>
+  </data>
+  <data name="Ribbon_Group_Mark" xml:space="preserve">
+    <value>Marcar</value>
+  </data>
+  <data name="Ribbon_Group_ByPattern" xml:space="preserve">
+    <value>Por patrón</value>
+  </data>
+  <data name="Ribbon_Group_Panel" xml:space="preserve">
+    <value>Panel</value>
+  </data>
+  <data name="Ribbon_Group_Show" xml:space="preserve">
+    <value>Mostrar</value>
+  </data>
+  <data name="Ribbon_Group_Layout" xml:space="preserve">
+    <value>Diseño</value>
+  </data>
+  <data name="Ribbon_Group_Tabs" xml:space="preserve">
+    <value>Pestañas</value>
+  </data>
+  <data name="Ribbon_Group_History" xml:space="preserve">
+    <value>Historial</value>
+  </data>
+  <data name="Ribbon_Group_Places" xml:space="preserve">
+    <value>Lugares</value>
+  </data>
+  <data name="Ribbon_Group_Drives" xml:space="preserve">
+    <value>Unidades</value>
+  </data>
+  <data name="Ribbon_Group_Find" xml:space="preserve">
+    <value>Buscar</value>
+  </data>
+  <data name="Ribbon_Group_Batch" xml:space="preserve">
+    <value>Lote</value>
+  </data>
+  <data name="Ribbon_Group_Compare" xml:space="preserve">
+    <value>Comparar</value>
+  </data>
+  <data name="Ribbon_Group_App" xml:space="preserve">
+    <value>Aplicación</value>
+  </data>
+  <data name="Cmd_Copy" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="Cmd_Move" xml:space="preserve">
+    <value>Mover</value>
+  </data>
+  <data name="Cmd_Delete" xml:space="preserve">
+    <value>Eliminar</value>
+  </data>
+  <data name="Cmd_ToggleJobs" xml:space="preserve">
+    <value>Tareas</value>
+  </data>
+  <data name="Cmd_MakeDirectory" xml:space="preserve">
+    <value>Nueva carpeta</value>
+  </data>
+  <data name="Cmd_NewFile" xml:space="preserve">
+    <value>Nuevo archivo</value>
+  </data>
+  <data name="Cmd_Rename" xml:space="preserve">
+    <value>Cambiar nombre</value>
+  </data>
+  <data name="Cmd_View" xml:space="preserve">
+    <value>Ver</value>
+  </data>
+  <data name="Cmd_Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="Cmd_OpenTerminal" xml:space="preserve">
+    <value>Terminal</value>
+  </data>
+  <data name="Cmd_RevealInFileManager" xml:space="preserve">
+    <value>Mostrar</value>
+  </data>
+  <data name="Cmd_Pack" xml:space="preserve">
+    <value>Comprimir</value>
+  </data>
+  <data name="Cmd_Unpack" xml:space="preserve">
+    <value>Descomprimir</value>
+  </data>
+  <data name="Cmd_CopyPathsToClipboard" xml:space="preserve">
+    <value>Copiar rutas</value>
+  </data>
+  <data name="Cmd_CopyNameToCommandLine" xml:space="preserve">
+    <value>Nombre a cmd</value>
+  </data>
+  <data name="Cmd_SelectAll" xml:space="preserve">
+    <value>Seleccionar todo</value>
+  </data>
+  <data name="Cmd_DeselectAll" xml:space="preserve">
+    <value>Deseleccionar todo</value>
+  </data>
+  <data name="Cmd_InvertSelection" xml:space="preserve">
+    <value>Invertir</value>
+  </data>
+  <data name="Cmd_SelectGroup" xml:space="preserve">
+    <value>Seleccionar grupo…</value>
+  </data>
+  <data name="Cmd_DeselectGroup" xml:space="preserve">
+    <value>Deseleccionar grupo…</value>
+  </data>
+  <data name="Cmd_SelectSameExtension" xml:space="preserve">
+    <value>Misma extensión</value>
+  </data>
+  <data name="Cmd_Refresh" xml:space="preserve">
+    <value>Actualizar</value>
+  </data>
+  <data name="Cmd_ToggleHidden" xml:space="preserve">
+    <value>Archivos ocultos</value>
+  </data>
+  <data name="Cmd_BranchView" xml:space="preserve">
+    <value>Vista de rama</value>
+  </data>
+  <data name="Cmd_QuickFilter" xml:space="preserve">
+    <value>Filtro rápido</value>
+  </data>
+  <data name="Cmd_ThumbnailView" xml:space="preserve">
+    <value>Miniaturas</value>
+  </data>
+  <data name="Cmd_DetailsView" xml:space="preserve">
+    <value>Detalles</value>
+  </data>
+  <data name="Cmd_ChooseColumns" xml:space="preserve">
+    <value>Columnas…</value>
+  </data>
+  <data name="Cmd_ToggleTree" xml:space="preserve">
+    <value>Árbol de carpetas</value>
+  </data>
+  <data name="Cmd_QuickView" xml:space="preserve">
+    <value>Vista rápida</value>
+  </data>
+  <data name="Cmd_TogglePanelLayout" xml:space="preserve">
+    <value>Apilar paneles</value>
+  </data>
+  <data name="Cmd_SwapPanels" xml:space="preserve">
+    <value>Intercambiar</value>
+  </data>
+  <data name="Cmd_TargetEqualsSource" xml:space="preserve">
+    <value>Destino = origen</value>
+  </data>
+  <data name="Cmd_NewTab" xml:space="preserve">
+    <value>Nueva pestaña</value>
+  </data>
+  <data name="Cmd_CloseTab" xml:space="preserve">
+    <value>Cerrar pestaña</value>
+  </data>
+  <data name="Cmd_NextTab" xml:space="preserve">
+    <value>Pestaña siguiente</value>
+  </data>
+  <data name="Cmd_GoBack" xml:space="preserve">
+    <value>Atrás</value>
+  </data>
+  <data name="Cmd_GoForward" xml:space="preserve">
+    <value>Adelante</value>
+  </data>
+  <data name="Cmd_GoParent" xml:space="preserve">
+    <value>Superior</value>
+  </data>
+  <data name="Cmd_GoHome" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
+  <data name="Cmd_GoRoot" xml:space="preserve">
+    <value>Raíz</value>
+  </data>
+  <data name="Cmd_Hotlist" xml:space="preserve">
+    <value>Favoritos</value>
+  </data>
+  <data name="Cmd_DriveMenuLeft" xml:space="preserve">
+    <value>Unidad izquierda…</value>
+  </data>
+  <data name="Cmd_DriveMenuRight" xml:space="preserve">
+    <value>Unidad derecha…</value>
+  </data>
+  <data name="Cmd_OpenInOtherPanel" xml:space="preserve">
+    <value>Otro panel</value>
+  </data>
+  <data name="Cmd_Find" xml:space="preserve">
+    <value>Buscar archivos</value>
+  </data>
+  <data name="Cmd_MultiRename" xml:space="preserve">
+    <value>Cambio de nombre múltiple</value>
+  </data>
+  <data name="Cmd_Synchronize" xml:space="preserve">
+    <value>Sincronizar</value>
+  </data>
+  <data name="Cmd_CompareFiles" xml:space="preserve">
+    <value>Comparar archivos</value>
+  </data>
+  <data name="Cmd_Settings" xml:space="preserve">
+    <value>Configuración</value>
+  </data>
+  <data name="Cmd_Help" xml:space="preserve">
+    <value>Ayuda de teclado</value>
+  </data>
+
+  <!-- Shortcut categories -->
+  <data name="Cat_Navigation" xml:space="preserve">
+    <value>Navegación</value>
+  </data>
+  <data name="Cat_Selection" xml:space="preserve">
+    <value>Selección</value>
+  </data>
+  <data name="Cat_Files" xml:space="preserve">
+    <value>Archivos</value>
+  </data>
+  <data name="Cat_View" xml:space="preserve">
+    <value>Ver</value>
+  </data>
+  <data name="Cat_Tools" xml:space="preserve">
+    <value>Herramientas</value>
+  </data>
+
+  <!-- Keyboard shortcut descriptions (F1 help) -->
+  <data name="Key_CursorUp" xml:space="preserve">
+    <value>Subir el cursor</value>
+  </data>
+  <data name="Key_CursorDown" xml:space="preserve">
+    <value>Bajar el cursor</value>
+  </data>
+  <data name="Key_PageUp" xml:space="preserve">
+    <value>Página anterior</value>
+  </data>
+  <data name="Key_PageDown" xml:space="preserve">
+    <value>Página siguiente</value>
+  </data>
+  <data name="Key_Home" xml:space="preserve">
+    <value>Primer elemento</value>
+  </data>
+  <data name="Key_End" xml:space="preserve">
+    <value>Último elemento</value>
+  </data>
+  <data name="Key_Enter" xml:space="preserve">
+    <value>Abrir carpeta / archivo comprimido / archivo, o ejecutar la línea de comandos</value>
+  </data>
+  <data name="Key_ParentFolder" xml:space="preserve">
+    <value>Carpeta superior</value>
+  </data>
+  <data name="Key_SwitchPanel" xml:space="preserve">
+    <value>Cambiar de panel activo</value>
+  </data>
+  <data name="Key_Escape" xml:space="preserve">
+    <value>Borrar la línea de comandos / cerrar el filtro / cancelar</value>
+  </data>
+  <data name="Key_RootFolder" xml:space="preserve">
+    <value>Carpeta raíz</value>
+  </data>
+  <data name="Key_HomeFolder" xml:space="preserve">
+    <value>Carpeta personal</value>
+  </data>
+  <data name="Key_Back" xml:space="preserve">
+    <value>Atrás (historial)</value>
+  </data>
+  <data name="Key_Forward" xml:space="preserve">
+    <value>Adelante (historial)</value>
+  </data>
+  <data name="Key_OpenInOtherPanel" xml:space="preserve">
+    <value>Abrir la carpeta bajo el cursor en el otro panel</value>
+  </data>
+  <data name="Key_DriveLeft" xml:space="preserve">
+    <value>Cambiar de unidad - panel izquierdo</value>
+  </data>
+  <data name="Key_DriveRight" xml:space="preserve">
+    <value>Cambiar de unidad - panel derecho</value>
+  </data>
+  <data name="Key_Hotlist" xml:space="preserve">
+    <value>Carpetas favoritas</value>
+  </data>
+  <data name="Key_Insert" xml:space="preserve">
+    <value>Marcar / desmarcar y bajar</value>
+  </data>
+  <data name="Key_Space" xml:space="preserve">
+    <value>Marcar / desmarcar (calcula el tamaño de la carpeta)</value>
+  </data>
+  <data name="Key_MarkUp" xml:space="preserve">
+    <value>Marcar y subir</value>
+  </data>
+  <data name="Key_MarkDown" xml:space="preserve">
+    <value>Marcar y bajar</value>
+  </data>
+  <data name="Key_SelectAll" xml:space="preserve">
+    <value>Seleccionar todo</value>
+  </data>
+  <data name="Key_DeselectAll" xml:space="preserve">
+    <value>Deseleccionar todo</value>
+  </data>
+  <data name="Key_SelectGroup" xml:space="preserve">
+    <value>Seleccionar grupo (máscara)</value>
+  </data>
+  <data name="Key_DeselectGroup" xml:space="preserve">
+    <value>Deseleccionar grupo (máscara)</value>
+  </data>
+  <data name="Key_InvertSelection" xml:space="preserve">
+    <value>Invertir la selección</value>
+  </data>
+  <data name="Key_SameExtension" xml:space="preserve">
+    <value>Seleccionar archivos con la misma extensión</value>
+  </data>
+  <data name="Key_Rename" xml:space="preserve">
+    <value>Cambiar nombre</value>
+  </data>
+  <data name="Key_View" xml:space="preserve">
+    <value>Ver (visor)</value>
+  </data>
+  <data name="Key_Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="Key_NewFile" xml:space="preserve">
+    <value>Nuevo archivo + editar</value>
+  </data>
+  <data name="Key_Copy" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="Key_Move" xml:space="preserve">
+    <value>Mover / cambiar nombre</value>
+  </data>
+  <data name="Key_NewFolder" xml:space="preserve">
+    <value>Nueva carpeta</value>
+  </data>
+  <data name="Key_Delete" xml:space="preserve">
+    <value>Eliminar (a la papelera)</value>
+  </data>
+  <data name="Key_DeletePermanently" xml:space="preserve">
+    <value>Eliminar permanentemente</value>
+  </data>
+  <data name="Key_DeleteFinder" xml:space="preserve">
+    <value>Eliminar (a la papelera) - ⌘⌫ como en el Finder</value>
+  </data>
+  <data name="Key_Pack" xml:space="preserve">
+    <value>Comprimir (zip, tar, tar.gz, tar.bz2)</value>
+  </data>
+  <data name="Key_Unpack" xml:space="preserve">
+    <value>Descomprimir archivos comprimidos</value>
+  </data>
+  <data name="Key_CopyPaths" xml:space="preserve">
+    <value>Copiar las rutas completas al portapapeles</value>
+  </data>
+  <data name="Key_NameToCommandLine" xml:space="preserve">
+    <value>Nombre a la línea de comandos</value>
+  </data>
+  <data name="Key_PathToCommandLine" xml:space="preserve">
+    <value>Ruta completa a la línea de comandos</value>
+  </data>
+  <data name="Key_Refresh" xml:space="preserve">
+    <value>Volver a leer la carpeta</value>
+  </data>
+  <data name="Key_ToggleHidden" xml:space="preserve">
+    <value>Mostrar / ocultar archivos ocultos</value>
+  </data>
+  <data name="Key_BranchView" xml:space="preserve">
+    <value>Vista de rama (todos los archivos de las subcarpetas)</value>
+  </data>
+  <data name="Key_ToggleTree" xml:space="preserve">
+    <value>Árbol de carpetas (panel activo)</value>
+  </data>
+  <data name="Key_Thumbnails" xml:space="preserve">
+    <value>Vista de miniaturas sí / no</value>
+  </data>
+  <data name="Key_Details" xml:space="preserve">
+    <value>Vista de detalles</value>
+  </data>
+  <data name="Key_Columns" xml:space="preserve">
+    <value>Elegir columnas</value>
+  </data>
+  <data name="Key_QuickView" xml:space="preserve">
+    <value>Vista rápida en el otro panel</value>
+  </data>
+  <data name="Key_Jobs" xml:space="preserve">
+    <value>Tareas en segundo plano - progreso, detener, ir a</value>
+  </data>
+  <data name="Key_PanelLayout" xml:space="preserve">
+    <value>Paneles lado a lado / apilados</value>
+  </data>
+  <data name="Key_TileLeft" xml:space="preserve">
+    <value>Miniatura anterior (vista de miniaturas)</value>
+  </data>
+  <data name="Key_TileRight" xml:space="preserve">
+    <value>Miniatura siguiente (vista de miniaturas)</value>
+  </data>
+  <data name="Key_QuickFilter" xml:space="preserve">
+    <value>Filtro rápido</value>
+  </data>
+  <data name="Key_NewTab" xml:space="preserve">
+    <value>Nueva pestaña</value>
+  </data>
+  <data name="Key_CloseTab" xml:space="preserve">
+    <value>Cerrar pestaña</value>
+  </data>
+  <data name="Key_NextTab" xml:space="preserve">
+    <value>Pestaña siguiente</value>
+  </data>
+  <data name="Key_PreviousTab" xml:space="preserve">
+    <value>Pestaña anterior</value>
+  </data>
+  <data name="Key_SwapPanels" xml:space="preserve">
+    <value>Intercambiar paneles</value>
+  </data>
+  <data name="Key_TargetEqualsSource" xml:space="preserve">
+    <value>Destino = origen</value>
+  </data>
+  <data name="Key_Find" xml:space="preserve">
+    <value>Buscar archivos</value>
+  </data>
+  <data name="Key_MultiRename" xml:space="preserve">
+    <value>Herramienta de cambio de nombre múltiple</value>
+  </data>
+  <data name="Key_Synchronize" xml:space="preserve">
+    <value>Sincronizar carpetas</value>
+  </data>
+  <data name="Key_CompareFiles" xml:space="preserve">
+    <value>Comparar archivos por contenido</value>
+  </data>
+  <data name="Key_Terminal" xml:space="preserve">
+    <value>Abrir una terminal aquí</value>
+  </data>
+  <data name="Key_Reveal" xml:space="preserve">
+    <value>Mostrar en el administrador de archivos</value>
+  </data>
+  <data name="Key_Settings" xml:space="preserve">
+    <value>Configuración</value>
+  </data>
+  <data name="Key_Help" xml:space="preserve">
+    <value>Referencia de teclado</value>
+  </data>
+
+  <!-- Main page -->
+  <data name="Main_Console" xml:space="preserve">
+    <value>Consola</value>
+  </data>
+  <data name="Jobs_Title" xml:space="preserve">
+    <value>Tareas</value>
+  </data>
+  <data name="Jobs_ClearCompleted" xml:space="preserve">
+    <value>Borrar completadas</value>
+  </data>
+  <data name="Jobs_Hide" xml:space="preserve">
+    <value>Ocultar - las tareas siguen en marcha</value>
+  </data>
+  <data name="Jobs_Empty" xml:space="preserve">
+    <value>Nada en curso. Aquí aparecen las copias, movimientos, eliminaciones, compresiones y descompresiones.</value>
+  </data>
+  <data name="Jobs_GoTo" xml:space="preserve">
+    <value>Ir a</value>
+  </data>
+  <data name="Jobs_Errors" xml:space="preserve">
+    <value>Errores</value>
+  </data>
+  <data name="Jobs_Remove" xml:space="preserve">
+    <value>Quitar de la lista</value>
+  </data>
+  <data name="Main_CommandPlaceholder" xml:space="preserve">
+    <value>escriba un comando, o use las teclas de abajo…</value>
+  </data>
+  <data name="Jobs_Chip" xml:space="preserve">
+    <value>Tareas en segundo plano</value>
+  </data>
+  <data name="FKey_Find" xml:space="preserve">
+    <value>Buscar</value>
+  </data>
+  <data name="Page_Back" xml:space="preserve">
+    <value>‹ Atrás</value>
+  </data>
+  <data name="Page_Save" xml:space="preserve">
+    <value>💾 Guardar</value>
+  </data>
+
+  <!-- Main window -->
+  <data name="Main_CannotOpen" xml:space="preserve">
+    <value>No se puede abrir</value>
+  </data>
+  <data name="Main_ShowingHidden" xml:space="preserve">
+    <value>Mostrando archivos ocultos</value>
+  </data>
+  <data name="Main_HidingHidden" xml:space="preserve">
+    <value>Ocultando archivos ocultos</value>
+  </data>
+  <data name="Main_Columns" xml:space="preserve">
+    <value>Columnas</value>
+  </data>
+  <data name="Main_DriveFree" xml:space="preserve">
+    <value>{0} libres</value>
+  </data>
+  <data name="Main_DriveMenuLeft" xml:space="preserve">
+    <value>Panel izquierdo - unidad</value>
+  </data>
+  <data name="Main_DriveMenuRight" xml:space="preserve">
+    <value>Panel derecho - unidad</value>
+  </data>
+  <data name="Main_HotlistAdd" xml:space="preserve">
+    <value>Agregar la carpeta actual</value>
+  </data>
+  <data name="Main_HotlistRemove" xml:space="preserve">
+    <value>Quitar una carpeta…</value>
+  </data>
+  <data name="Main_Hotlist" xml:space="preserve">
+    <value>Carpetas favoritas</value>
+  </data>
+  <data name="Main_HotlistAdded" xml:space="preserve">
+    <value>Se agregó {0}</value>
+  </data>
+  <data name="Main_HotlistRemoveTitle" xml:space="preserve">
+    <value>Quitar de favoritos</value>
+  </data>
+  <data name="Main_SelectFiles" xml:space="preserve">
+    <value>Seleccionar archivos</value>
+  </data>
+  <data name="Main_SelectMask" xml:space="preserve">
+    <value>Máscara (p. ej. *.txt;*.md)</value>
+  </data>
+  <data name="Main_UnselectFiles" xml:space="preserve">
+    <value>Deseleccionar archivos</value>
+  </data>
+  <data name="Main_UnselectMask" xml:space="preserve">
+    <value>Máscara (p. ej. *.tmp)</value>
+  </data>
+  <data name="Main_CopiedPaths" xml:space="preserve">
+    <value>{0} ruta(s) copiada(s)</value>
+  </data>
+  <data name="Main_NoCommandsInArchive" xml:space="preserve">
+    <value>Los comandos no se pueden ejecutar dentro de un archivo comprimido</value>
+  </data>
+  <data name="Main_ConsoleCancelled" xml:space="preserve">
+    <value>[cancelado]</value>
+  </data>
+  <data name="Main_ReadOnly" xml:space="preserve">
+    <value>Solo lectura</value>
+  </data>
+  <data name="Main_ReadOnlyArchive" xml:space="preserve">
+    <value>Los archivos dentro de un archivo comprimido se pueden ver (F3) pero no editar. Cópielo fuera primero.</value>
+  </data>
+  <data name="Main_NewFile" xml:space="preserve">
+    <value>Nuevo archivo</value>
+  </data>
+  <data name="Main_NewFileMessage" xml:space="preserve">
+    <value>Nombre del archivo que se creará y editará</value>
+  </data>
+  <data name="Main_NewFolder" xml:space="preserve">
+    <value>Nueva carpeta</value>
+  </data>
+  <data name="Main_NewFolderMessage" xml:space="preserve">
+    <value>Nombre de la carpeta (use / para carpetas anidadas)</value>
+  </data>
+  <data name="Main_RenameMessage" xml:space="preserve">
+    <value>Nuevo nombre para «{0}»</value>
+  </data>
+  <data name="Main_SelectToRename" xml:space="preserve">
+    <value>Seleccione primero los archivos a renombrar (Insert / Espacio / clic derecho)</value>
+  </data>
+  <data name="Main_CompareNeedsTwo" xml:space="preserve">
+    <value>Marque dos archivos, o ponga el cursor sobre un archivo en cada panel</value>
+  </data>
+  <data name="Op_Quoted" xml:space="preserve">
+    <value>«{0}»</value>
+  </data>
+  <data name="Op_Items" xml:space="preserve">
+    <value>{0} elementos</value>
+  </data>
+  <data name="Op_Archives" xml:space="preserve">
+    <value>{0} archivos comprimidos</value>
+  </data>
+  <data name="Op_CopyTitle" xml:space="preserve">
+    <value>Copiar {0}</value>
+  </data>
+  <data name="Op_MoveTitle" xml:space="preserve">
+    <value>Mover {0}</value>
+  </data>
+  <data name="Op_DeleteTitle" xml:space="preserve">
+    <value>Eliminar {0}</value>
+  </data>
+  <data name="Op_PackTitle" xml:space="preserve">
+    <value>Comprimir {0} en {1}</value>
+  </data>
+  <data name="Op_UnpackTitle" xml:space="preserve">
+    <value>Descomprimir {0}</value>
+  </data>
+  <data name="Op_CopyTo" xml:space="preserve">
+    <value>Copiar a:</value>
+  </data>
+  <data name="Op_MoveTo" xml:space="preserve">
+    <value>Mover a:</value>
+  </data>
+  <data name="Conflict_Overwrite" xml:space="preserve">
+    <value>Sobrescribir</value>
+  </data>
+  <data name="Conflict_OverwriteAll" xml:space="preserve">
+    <value>Sobrescribir todo</value>
+  </data>
+  <data name="Conflict_OverwriteAllOlder" xml:space="preserve">
+    <value>Sobrescribir todos los más antiguos</value>
+  </data>
+  <data name="Conflict_Skip" xml:space="preserve">
+    <value>Omitir</value>
+  </data>
+  <data name="Conflict_SkipAll" xml:space="preserve">
+    <value>Omitir todo</value>
+  </data>
+  <data name="Conflict_KeepBoth" xml:space="preserve">
+    <value>Conservar ambos</value>
+  </data>
+  <data name="Conflict_Message" xml:space="preserve">
+    <value>{0} ya existe
+
+Nuevo:     {1} bytes  {2}
+Existente: {3} bytes  {4}</value>
+  </data>
+  <data name="Delete_TrashTitle" xml:space="preserve">
+    <value>Mover a la papelera</value>
+  </data>
+  <data name="Delete_PermanentTitle" xml:space="preserve">
+    <value>Eliminar permanentemente</value>
+  </data>
+  <data name="Delete_TrashMessage" xml:space="preserve">
+    <value>¿Mover {0} a la papelera?</value>
+  </data>
+  <data name="Delete_PermanentMessage" xml:space="preserve">
+    <value>¿Eliminar permanentemente {0}? No se puede deshacer.</value>
+  </data>
+  <data name="Delete_TrashButton" xml:space="preserve">
+    <value>Mover a la papelera</value>
+  </data>
+  <data name="Pack_Title" xml:space="preserve">
+    <value>Comprimir archivos</value>
+  </data>
+  <data name="Pack_Message" xml:space="preserve">
+    <value>Comprimir {0} elemento(s) en un archivo comprimido - la extensión elige el formato ({1}):</value>
+  </data>
+  <data name="Unpack_SelectArchives" xml:space="preserve">
+    <value>Seleccione uno o más archivos comprimidos para descomprimir (zip, tar, tar.gz, 7z, rar…)</value>
+  </data>
+  <data name="Unpack_Message" xml:space="preserve">
+    <value>Descomprimir {0} archivo(s) comprimido(s) en:</value>
+  </data>
+  <data name="Job_Done" xml:space="preserve">
+    <value>{0}: listo ({1} elemento(s))</value>
+  </data>
+  <data name="Job_DoneSkipped" xml:space="preserve">
+    <value>{0}: listo ({1} elemento(s), {2} omitido(s))</value>
+  </data>
+  <data name="Job_FinishedWithErrors" xml:space="preserve">
+    <value>{0}: terminó con {1} error(es) - vea Tareas</value>
+  </data>
+  <data name="Job_Failed" xml:space="preserve">
+    <value>{0} falló: {1}</value>
+  </data>
+  <data name="Job_Stopped" xml:space="preserve">
+    <value>{0}: detenido</value>
+  </data>
+  <data name="Job_AndMore" xml:space="preserve">
+    <value>… y {0} más</value>
+  </data>
+  <data name="Job_FailedTitle" xml:space="preserve">
+    <value>{0} - falló</value>
+  </data>
+  <data name="Job_ErrorsTitle" xml:space="preserve">
+    <value>{0} - terminó con errores</value>
+  </data>
+  <data name="Main_CompareByContent" xml:space="preserve">
+    <value>Comparar por contenido</value>
+  </data>
+  <data name="Compare_Identical" xml:space="preserve">
+    <value>Los archivos son idénticos.
+
+{0}
+{1}</value>
+  </data>
+  <data name="Compare_Different" xml:space="preserve">
+    <value>Los archivos son diferentes.
+
+{0}: {1} bytes
+{2}: {3} bytes</value>
+  </data>
+  <data name="Help_Intro" xml:space="preserve">
+    <value>Las operaciones actúan sobre los archivos **marcados**, o sobre el archivo bajo el cursor si no hay nada marcado. Marque con `Insert`, `Space`, `Shift+↑/↓` o un clic derecho. Empiece a escribir para usar la línea de comandos.</value>
+  </data>
+  <data name="Help_General" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="Help_Keys" xml:space="preserve">
+    <value>Teclas</value>
+  </data>
+  <data name="Help_Action" xml:space="preserve">
+    <value>Acción</value>
+  </data>
+  <data name="Help_CommandLine" xml:space="preserve">
+    <value>Línea de comandos</value>
+  </data>
+  <data name="Help_Cd" xml:space="preserve">
+    <value>`cd &lt;ruta&gt;` cambia la carpeta del panel activo (`cd ~`, `cd ..`, `cd -`).</value>
+  </data>
+  <data name="Help_Shell" xml:space="preserve">
+    <value>Cualquier otro comando se ejecuta con el shell del sistema en la carpeta activa; la salida aparece en la consola.</value>
+  </data>
+  <data name="Help_Archives" xml:space="preserve">
+    <value>Archivos comprimidos</value>
+  </data>
+  <data name="Help_ArchivesText" xml:space="preserve">
+    <value>Pulse `Enter` sobre un `.zip` (también .jar, .nupkg, .docx, .apk…) para explorarlo como una carpeta. Copie (F5) desde él o hacia él, elimine o cambie nombres dentro.</value>
+  </data>
+
+  <!-- Jobs & quitting -->
+  <data name="FKey_NewFolder" xml:space="preserve">
+    <value>Carpeta</value>
+  </data>
+  <data name="Job_StateRunning" xml:space="preserve">
+    <value>En curso</value>
+  </data>
+  <data name="Job_StateDone" xml:space="preserve">
+    <value>Listo</value>
+  </data>
+  <data name="Job_StateErrors" xml:space="preserve">
+    <value>Errores</value>
+  </data>
+  <data name="Job_StateFailed" xml:space="preserve">
+    <value>Falló</value>
+  </data>
+  <data name="Job_StateStopped" xml:space="preserve">
+    <value>Detenido</value>
+  </data>
+  <data name="Job_StoppedPartWay" xml:space="preserve">
+    <value>Detenido a medias - lo que ya se hizo se mantiene</value>
+  </data>
+  <data name="Job_Summary" xml:space="preserve">
+    <value>{0} elemento(s) en {1}</value>
+  </data>
+  <data name="Job_SummarySkipped" xml:space="preserve">
+    <value>{0} elemento(s), {1} omitido(s) en {2}</value>
+  </data>
+  <data name="Job_SummaryErrors" xml:space="preserve">
+    <value>{0} error(es), {1} elemento(s) en {2}</value>
+  </data>
+  <data name="Job_Preparing" xml:space="preserve">
+    <value>Preparando…</value>
+  </data>
+  <data name="Jobs_Running" xml:space="preserve">
+    <value>{0} en curso</value>
+  </data>
+  <data name="Jobs_Failed" xml:space="preserve">
+    <value>{0} con error</value>
+  </data>
+  <data name="Jobs_Done" xml:space="preserve">
+    <value>{0} lista(s)</value>
+  </data>
+  <data name="Quit_Title" xml:space="preserve">
+    <value>Tareas en curso</value>
+  </data>
+  <data name="Quit_Message" xml:space="preserve">
+    <value>{0} tarea(s) en segundo plano no han terminado:
+
+{1}
+
+Salir las detiene a medias. Lo que ya se copió, movió o eliminó se queda así.</value>
+  </data>
+  <data name="Quit_StopAndQuit" xml:space="preserve">
+    <value>Detener y salir</value>
+  </data>
+  <data name="Quit_KeepRunning" xml:space="preserve">
+    <value>Seguir</value>
+  </data>
+  <data name="Update_WindowTitle" xml:space="preserve">
+    <value>Actualización de ShinyCommander</value>
+  </data>
+
+  <!-- Settings, find, compare, multi-rename, toolbar -->
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Configuración</value>
+  </data>
+  <data name="Settings_Panels" xml:space="preserve">
+    <value>Paneles</value>
+  </data>
+  <data name="Settings_ShowHidden" xml:space="preserve">
+    <value>Mostrar archivos ocultos</value>
+  </data>
+  <data name="Settings_ShowHiddenDesc" xml:space="preserve">
+    <value>Archivos que empiezan por punto y atributo oculto (Ctrl/⌘+H)</value>
+  </data>
+  <data name="Settings_FriendlySizes" xml:space="preserve">
+    <value>Tamaños legibles</value>
+  </data>
+  <data name="Settings_FriendlySizesDesc" xml:space="preserve">
+    <value>12,3 MB en lugar de 12.912.640</value>
+  </data>
+  <data name="Settings_CustomizeToolbar" xml:space="preserve">
+    <value>Personalizar la barra de herramientas del panel…</value>
+  </data>
+  <data name="Settings_Columns" xml:space="preserve">
+    <value>Columnas (Primary+Shift+K)</value>
+  </data>
+  <data name="Settings_ColExtension" xml:space="preserve">
+    <value>Extensión</value>
+  </data>
+  <data name="Settings_ColSize" xml:space="preserve">
+    <value>Tamaño</value>
+  </data>
+  <data name="Settings_ColModified" xml:space="preserve">
+    <value>Fecha de modificación</value>
+  </data>
+  <data name="Settings_ColCreated" xml:space="preserve">
+    <value>Fecha de creación</value>
+  </data>
+  <data name="Settings_ColAttributes" xml:space="preserve">
+    <value>Atributos</value>
+  </data>
+  <data name="Settings_Operations" xml:space="preserve">
+    <value>Operaciones</value>
+  </data>
+  <data name="Settings_ConfirmDelete" xml:space="preserve">
+    <value>Confirmar antes de eliminar</value>
+  </data>
+  <data name="Settings_UseTrash" xml:space="preserve">
+    <value>Eliminar a la papelera</value>
+  </data>
+  <data name="Settings_UseTrashDesc" xml:space="preserve">
+    <value>Mayús+F8 siempre elimina de forma permanente</value>
+  </data>
+  <data name="Settings_ExtractPerArchive" xml:space="preserve">
+    <value>Extraer cada archivo comprimido en su propia carpeta</value>
+  </data>
+  <data name="Settings_ExternalEditor" xml:space="preserve">
+    <value>Editor externo (F4)</value>
+  </data>
+  <data name="Settings_ExternalEditorBuiltIn" xml:space="preserve">
+    <value>integrado</value>
+  </data>
+  <data name="Settings_Language" xml:space="preserve">
+    <value>Idioma</value>
+  </data>
+  <data name="Settings_LanguageSystem" xml:space="preserve">
+    <value>Seguir el sistema</value>
+  </data>
+  <data name="Settings_LanguageRestart" xml:space="preserve">
+    <value>Reinicie ShinyCommander para cambiar el idioma.</value>
+  </data>
+  <data name="Settings_Theme" xml:space="preserve">
+    <value>Tema</value>
+  </data>
+  <data name="Settings_ThemeSystem" xml:space="preserve">
+    <value>Seguir el sistema</value>
+  </data>
+  <data name="Settings_ThemeLight" xml:space="preserve">
+    <value>Claro</value>
+  </data>
+  <data name="Settings_ThemeDark" xml:space="preserve">
+    <value>Oscuro</value>
+  </data>
+  <data name="Settings_FontSize" xml:space="preserve">
+    <value>Tamaño de fuente del visor / editor</value>
+  </data>
+  <data name="Settings_FontSmall" xml:space="preserve">
+    <value>Pequeña (12)</value>
+  </data>
+  <data name="Settings_FontMedium" xml:space="preserve">
+    <value>Mediana (13)</value>
+  </data>
+  <data name="Settings_FontLarge" xml:space="preserve">
+    <value>Grande (15)</value>
+  </data>
+  <data name="Settings_FontExtraLarge" xml:space="preserve">
+    <value>Muy grande (18)</value>
+  </data>
+  <data name="Settings_About" xml:space="preserve">
+    <value>Acerca de</value>
+  </data>
+  <data name="Settings_Runtime" xml:space="preserve">
+    <value>Entorno de ejecución</value>
+  </data>
+  <data name="Settings_BuiltWith" xml:space="preserve">
+    <value>Creado con</value>
+  </data>
+  <data name="Settings_BuiltWithDesc" xml:space="preserve">
+    <value>.NET MAUI • backends AppKit y GTK4 de maui-labs • Shiny Controls, Shell, Mediator, Stores y DI</value>
+  </data>
+  <data name="Settings_UpdateAvailable" xml:space="preserve">
+    <value>{0} está disponible</value>
+  </data>
+  <data name="Settings_InstallUpdate" xml:space="preserve">
+    <value>Instalar {0}…</value>
+  </data>
+  <data name="Settings_CheckForUpdates" xml:space="preserve">
+    <value>Buscar actualizaciones</value>
+  </data>
+  <data name="Settings_Checking" xml:space="preserve">
+    <value>Comprobando…</value>
+  </data>
+  <data name="Settings_UpdateUnreachable" xml:space="preserve">
+    <value>No se pudo conectar con GitHub. Inténtelo de nuevo en un momento.</value>
+  </data>
+  <data name="Settings_UpToDate" xml:space="preserve">
+    <value>Tiene la última versión.</value>
+  </data>
+  <data name="Search_Title" xml:space="preserve">
+    <value>Buscar archivos</value>
+  </data>
+  <data name="Search_StartStop" xml:space="preserve">
+    <value>Iniciar / detener</value>
+  </data>
+  <data name="Search_View" xml:space="preserve">
+    <value>Ver</value>
+  </data>
+  <data name="Search_GoToFile" xml:space="preserve">
+    <value>Ir al archivo</value>
+  </data>
+  <data name="Search_SearchIn" xml:space="preserve">
+    <value>Buscar en</value>
+  </data>
+  <data name="Search_FileName" xml:space="preserve">
+    <value>Nombre de archivo</value>
+  </data>
+  <data name="Search_ContainingText" xml:space="preserve">
+    <value>Que contenga el texto</value>
+  </data>
+  <data name="Search_Optional" xml:space="preserve">
+    <value>(opcional)</value>
+  </data>
+  <data name="Search_Subfolders" xml:space="preserve">
+    <value>Subcarpetas</value>
+  </data>
+  <data name="Search_CaseSensitive" xml:space="preserve">
+    <value>Distinguir mayúsculas</value>
+  </data>
+  <data name="Search_HiddenFiles" xml:space="preserve">
+    <value>Archivos ocultos</value>
+  </data>
+  <data name="Search_FoldersOnly" xml:space="preserve">
+    <value>Solo carpetas</value>
+  </data>
+  <data name="Search_MinSize" xml:space="preserve">
+    <value>Tamaño mín. (KB)</value>
+  </data>
+  <data name="Search_ViewF3" xml:space="preserve">
+    <value>Ver (F3)</value>
+  </data>
+  <data name="Search_NoResults" xml:space="preserve">
+    <value>Aún no hay resultados</value>
+  </data>
+  <data name="Search_ColName" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="Search_ColFolder" xml:space="preserve">
+    <value>Carpeta</value>
+  </data>
+  <data name="Search_ColSize" xml:space="preserve">
+    <value>Tamaño</value>
+  </data>
+  <data name="Search_ColModified" xml:space="preserve">
+    <value>Modificado</value>
+  </data>
+  <data name="Search_Prompt" xml:space="preserve">
+    <value>Escriba una máscara y pulse Iniciar (Intro)</value>
+  </data>
+  <data name="Search_FolderNotFound" xml:space="preserve">
+    <value>No se encontró la carpeta: {0}</value>
+  </data>
+  <data name="Search_Progress" xml:space="preserve">
+    <value>{0} analizado(s), {1} encontrado(s)</value>
+  </data>
+  <data name="Search_ProgressIn" xml:space="preserve">
+    <value>{0} analizado(s), {1} encontrado(s)  •  {2}</value>
+  </data>
+  <data name="Search_Done" xml:space="preserve">
+    <value>{0} encontrado(s) en {1} s</value>
+  </data>
+  <data name="Search_DoneTruncated" xml:space="preserve">
+    <value>{0} encontrado(s) en {1} s (se muestran los primeros {2})</value>
+  </data>
+  <data name="Search_Stopped" xml:space="preserve">
+    <value>Detenido - {0} encontrado(s)</value>
+  </data>
+  <data name="Compare_Title" xml:space="preserve">
+    <value>Sincronizar carpetas</value>
+  </data>
+  <data name="Compare_Compare" xml:space="preserve">
+    <value>Comparar</value>
+  </data>
+  <data name="Compare_ChangeDirection" xml:space="preserve">
+    <value>Cambiar dirección</value>
+  </data>
+  <data name="Compare_Left" xml:space="preserve">
+    <value>Izquierda</value>
+  </data>
+  <data name="Compare_Right" xml:space="preserve">
+    <value>Derecha</value>
+  </data>
+  <data name="Compare_Subfolders" xml:space="preserve">
+    <value>Subcarpetas</value>
+  </data>
+  <data name="Compare_ByContent" xml:space="preserve">
+    <value>Por contenido</value>
+  </data>
+  <data name="Compare_IgnoreDate" xml:space="preserve">
+    <value>Ignorar fecha</value>
+  </data>
+  <data name="Compare_ShowEqual" xml:space="preserve">
+    <value>Mostrar iguales</value>
+  </data>
+  <data name="Compare_Mask" xml:space="preserve">
+    <value>Máscara</value>
+  </data>
+  <data name="Compare_SynchronizeEllipsis" xml:space="preserve">
+    <value>Sincronizar…</value>
+  </data>
+  <data name="Compare_DirectionHint" xml:space="preserve">
+    <value>Pulse ⇄ (o Espacio) para cambiar la dirección de una fila</value>
+  </data>
+  <data name="Compare_PressCompare" xml:space="preserve">
+    <value>Pulse Comparar</value>
+  </data>
+  <data name="Compare_ColFile" xml:space="preserve">
+    <value>Archivo</value>
+  </data>
+  <data name="Compare_ColLeftSize" xml:space="preserve">
+    <value>Tamaño izq.</value>
+  </data>
+  <data name="Compare_ColLeftDate" xml:space="preserve">
+    <value>Fecha izq.</value>
+  </data>
+  <data name="Compare_ColState" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+  <data name="Compare_ColRightDate" xml:space="preserve">
+    <value>Fecha der.</value>
+  </data>
+  <data name="Compare_ColRightSize" xml:space="preserve">
+    <value>Tamaño der.</value>
+  </data>
+  <data name="Compare_StateLeftNewer" xml:space="preserve">
+    <value>más reciente →</value>
+  </data>
+  <data name="Compare_StateRightNewer" xml:space="preserve">
+    <value>← más reciente</value>
+  </data>
+  <data name="Compare_StateLeftOnly" xml:space="preserve">
+    <value>solo izquierda</value>
+  </data>
+  <data name="Compare_StateRightOnly" xml:space="preserve">
+    <value>solo derecha</value>
+  </data>
+  <data name="Compare_Status" xml:space="preserve">
+    <value>{0} elemento(s)  •  {1} igual(es)  •  {2} → derecha  •  {3} ← izquierda</value>
+  </data>
+  <data name="Compare_NothingToSync" xml:space="preserve">
+    <value>Nada que sincronizar</value>
+  </data>
+  <data name="Compare_Synchronize" xml:space="preserve">
+    <value>Sincronizar</value>
+  </data>
+  <data name="Compare_ConfirmSync" xml:space="preserve">
+    <value>¿Copiar {0} elemento(s) a la derecha y {1} a la izquierda? Los archivos existentes se sobrescribirán.</value>
+  </data>
+  <data name="Compare_Copying" xml:space="preserve">
+    <value>Copiando {0}…</value>
+  </data>
+  <data name="Compare_SyncErrors" xml:space="preserve">
+    <value>La sincronización terminó con errores</value>
+  </data>
+  <data name="Compare_Synchronized" xml:space="preserve">
+    <value>Sincronizado</value>
+  </data>
+  <data name="Rename_Title" xml:space="preserve">
+    <value>Herramienta de cambio de nombre múltiple</value>
+  </data>
+  <data name="Rename_StartRenaming" xml:space="preserve">
+    <value>Iniciar el cambio de nombre</value>
+  </data>
+  <data name="Rename_Undo" xml:space="preserve">
+    <value>Deshacer</value>
+  </data>
+  <data name="Rename_NameMask" xml:space="preserve">
+    <value>Máscara de nombre</value>
+  </data>
+  <data name="Rename_Extension" xml:space="preserve">
+    <value>Extensión</value>
+  </data>
+  <data name="Rename_Insert" xml:space="preserve">
+    <value>Insertar:</value>
+  </data>
+  <data name="Rename_SearchFor" xml:space="preserve">
+    <value>Buscar</value>
+  </data>
+  <data name="Rename_SearchPlaceholder" xml:space="preserve">
+    <value>texto (a|b para varios) o regex</value>
+  </data>
+  <data name="Rename_ReplaceWith" xml:space="preserve">
+    <value>Reemplazar con</value>
+  </data>
+  <data name="Rename_Regex" xml:space="preserve">
+    <value>Expresiones regulares</value>
+  </data>
+  <data name="Rename_Case" xml:space="preserve">
+    <value>Mayúsculas</value>
+  </data>
+  <data name="Rename_CounterStart" xml:space="preserve">
+    <value>Inicio del contador</value>
+  </data>
+  <data name="Rename_CounterStep" xml:space="preserve">
+    <value>incremento</value>
+  </data>
+  <data name="Rename_CounterDigits" xml:space="preserve">
+    <value>dígitos</value>
+  </data>
+  <data name="Rename_Start" xml:space="preserve">
+    <value>¡Iniciar!</value>
+  </data>
+  <data name="Rename_ColOldName" xml:space="preserve">
+    <value>Nombre anterior</value>
+  </data>
+  <data name="Rename_ColNewName" xml:space="preserve">
+    <value>Nombre nuevo</value>
+  </data>
+  <data name="Rename_Unchanged" xml:space="preserve">
+    <value>sin cambios</value>
+  </data>
+  <data name="Rename_CaseUnchanged" xml:space="preserve">
+    <value>Sin cambios</value>
+  </data>
+  <data name="Rename_CaseLower" xml:space="preserve">
+    <value>minúsculas</value>
+  </data>
+  <data name="Rename_CaseUpper" xml:space="preserve">
+    <value>MAYÚSCULAS</value>
+  </data>
+  <data name="Rename_CaseFirstUpper" xml:space="preserve">
+    <value>Primera letra en mayúscula</value>
+  </data>
+  <data name="Rename_CaseTitle" xml:space="preserve">
+    <value>Mayúscula En Cada Palabra</value>
+  </data>
+  <data name="Rename_Status" xml:space="preserve">
+    <value>Se cambiará el nombre de {0} de {1}</value>
+  </data>
+  <data name="Rename_StatusProblems" xml:space="preserve">
+    <value>Se cambiará el nombre de {0} de {1}  •  {2} problema(s)</value>
+  </data>
+  <data name="Rename_AlertTitle" xml:space="preserve">
+    <value>Cambio de nombre múltiple</value>
+  </data>
+  <data name="Rename_FixProblems" xml:space="preserve">
+    <value>Corrija primero los problemas indicados en la vista previa.</value>
+  </data>
+  <data name="Rename_Done" xml:space="preserve">
+    <value>Se cambió el nombre de {0} elemento(s)</value>
+  </data>
+  <data name="CustomizeToolbar_Title" xml:space="preserve">
+    <value>Barra de herramientas del panel</value>
+  </data>
+  <data name="CustomizeToolbar_ResetToDefault" xml:space="preserve">
+    <value>Restablecer valores predeterminados</value>
+  </data>
+  <data name="CustomizeToolbar_Intro" xml:space="preserve">
+    <value>Los botones junto a la ruta en cada panel. Un botón actúa sobre el panel en el que se pulsa. Haga clic derecho en esa fila para volver aquí.</value>
+  </data>
+  <data name="CustomizeToolbar_OnToolbar" xml:space="preserve">
+    <value>EN LA BARRA DE HERRAMIENTAS</value>
+  </data>
+  <data name="CustomizeToolbar_Available" xml:space="preserve">
+    <value>DISPONIBLES</value>
+  </data>
+  <data name="CustomizeToolbar_Empty" xml:space="preserve">
+    <value>Nada todavía: añada comandos desde la derecha.</value>
+  </data>
+  <data name="CustomizeToolbar_MoveLeft" xml:space="preserve">
+    <value>Mover a la izquierda</value>
+  </data>
+  <data name="CustomizeToolbar_MoveRight" xml:space="preserve">
+    <value>Mover a la derecha</value>
+  </data>
+
+  <!-- Panels, viewer, editor, help, updates -->
+  <data name="Viewer_ModeText" xml:space="preserve">
+    <value>Texto</value>
+  </data>
+  <data name="Viewer_ModeHex" xml:space="preserve">
+    <value>Hex</value>
+  </data>
+  <data name="Viewer_ModeMarkdown" xml:space="preserve">
+    <value>Markdown</value>
+  </data>
+  <data name="Viewer_WordWrap" xml:space="preserve">
+    <value>Ajuste de línea</value>
+  </data>
+  <data name="Viewer_NextFile" xml:space="preserve">
+    <value>Archivo siguiente</value>
+  </data>
+  <data name="Viewer_PreviousFile" xml:space="preserve">
+    <value>Archivo anterior</value>
+  </data>
+  <data name="Viewer_TextButton" xml:space="preserve">
+    <value>Texto (1)</value>
+  </data>
+  <data name="Viewer_HexButton" xml:space="preserve">
+    <value>Hex (3)</value>
+  </data>
+  <data name="Viewer_MarkdownButton" xml:space="preserve">
+    <value>Markdown (4)</value>
+  </data>
+  <data name="Viewer_WrapButton" xml:space="preserve">
+    <value>Ajustar (W)</value>
+  </data>
+  <data name="Viewer_PrevButton" xml:space="preserve">
+    <value>◀ Anterior</value>
+  </data>
+  <data name="Viewer_NextButton" xml:space="preserve">
+    <value>Siguiente ▶</value>
+  </data>
+  <data name="Viewer_Info" xml:space="preserve">
+    <value>{0} bytes</value>
+  </data>
+  <data name="Viewer_InfoTruncated" xml:space="preserve">
+    <value>{0} bytes  •  se muestran los primeros {1}</value>
+  </data>
+  <data name="Editor_Status" xml:space="preserve">
+    <value>{0}  •  {1} líneas</value>
+  </data>
+  <data name="Editor_CannotOpen" xml:space="preserve">
+    <value>No se puede abrir el archivo</value>
+  </data>
+  <data name="Editor_Saved" xml:space="preserve">
+    <value>Guardado</value>
+  </data>
+  <data name="Editor_SaveFailed" xml:space="preserve">
+    <value>Error al guardar</value>
+  </data>
+  <data name="Editor_SaveChanges" xml:space="preserve">
+    <value>¿Guardar los cambios?</value>
+  </data>
+  <data name="Editor_Discard" xml:space="preserve">
+    <value>Descartar</value>
+  </data>
+  <data name="Help_Title" xml:space="preserve">
+    <value>Referencia de teclado</value>
+  </data>
+  <data name="Update_Heading" xml:space="preserve">
+    <value>Hay una nueva versión de ShinyCommander disponible</value>
+  </data>
+  <data name="Update_Version" xml:space="preserve">
+    <value>Versión {0} - tienes la {1}</value>
+  </data>
+  <data name="Update_Released" xml:space="preserve">
+    <value>Publicada el {0}</value>
+  </data>
+  <data name="Update_NoNotes" xml:space="preserve">
+    <value>Sin notas de la versión.</value>
+  </data>
+  <data name="Update_ViewOnGitHub" xml:space="preserve">
+    <value>Ver en GitHub</value>
+  </data>
+  <data name="Update_DontShowAgain" xml:space="preserve">
+    <value>No volver a mostrar</value>
+  </data>
+  <data name="Update_Later" xml:space="preserve">
+    <value>Más tarde</value>
+  </data>
+  <data name="Update_InstallAndRestart" xml:space="preserve">
+    <value>Instalar y reiniciar</value>
+  </data>
+  <data name="Update_Downloading" xml:space="preserve">
+    <value>Descargando…</value>
+  </data>
+  <data name="Update_Installing" xml:space="preserve">
+    <value>Instalando…</value>
+  </data>
+  <data name="Update_InstallFailed" xml:space="preserve">
+    <value>No se pudo instalar la actualización: {0}</value>
+  </data>
+  <data name="Update_BetaVersion" xml:space="preserve">
+    <value>{0} (beta)</value>
+  </data>
+  <data name="Update_ErrorTranslocated" xml:space="preserve">
+    <value>mueve primero ShinyCommander a tu carpeta Aplicaciones y ábrelo desde ahí.</value>
+  </data>
+  <data name="Update_ErrorCantWrite" xml:space="preserve">
+    <value>ShinyCommander no puede escribir en {0}.</value>
+  </data>
+  <data name="Update_ErrorBadZip" xml:space="preserve">
+    <value>la descarga no es un zip que se pueda abrir.</value>
+  </data>
+  <data name="Update_ErrorNoApp" xml:space="preserve">
+    <value>la descarga no contiene la aplicación.</value>
+  </data>
+  <data name="Update_ErrorInstallerStart" xml:space="preserve">
+    <value>no se pudo iniciar el instalador.</value>
+  </data>
+  <data name="Update_ErrorCopy" xml:space="preserve">
+    <value>no se pudo copiar la nueva versión en {0}.</value>
+  </data>
+  <data name="Update_ErrorMove" xml:space="preserve">
+    <value>no se pudo mover la nueva versión a {0}.</value>
+  </data>
+  <data name="Update_ErrorNotTheApp" xml:space="preserve">
+    <value>la descarga no es ShinyCommander.</value>
+  </data>
+  <data name="Update_ErrorSignature" xml:space="preserve">
+    <value>la firma de la nueva versión no es válida.</value>
+  </data>
+  <data name="Update_ErrorDeveloper" xml:space="preserve">
+    <value>la nueva versión no está firmada por el mismo desarrollador.</value>
+  </data>
+  <data name="Panel_Filter" xml:space="preserve">
+    <value>Filtro:</value>
+  </data>
+  <data name="Panel_FilterPlaceholder" xml:space="preserve">
+    <value>*.cs;*.md   (Esc para cerrar)</value>
+  </data>
+  <data name="Panel_FreeSpace" xml:space="preserve">
+    <value>{0} libres de {1}</value>
+  </data>
+  <data name="Panel_ArchiveReadOnly" xml:space="preserve">
+    <value>{0} • solo lectura</value>
+  </data>
+  <data name="Panel_Status" xml:space="preserve">
+    <value>{0} / {1} en {2} / {3} archivo(s), {4} / {5} carpeta(s)</value>
+  </data>
+  <data name="Column_Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="Column_Ext" xml:space="preserve">
+    <value>Ext</value>
+  </data>
+  <data name="Column_Size" xml:space="preserve">
+    <value>Tamaño</value>
+  </data>
+  <data name="Column_Date" xml:space="preserve">
+    <value>Fecha</value>
+  </data>
+  <data name="Column_Attr" xml:space="preserve">
+    <value>Atrib</value>
+  </data>
+  <data name="Column_Created" xml:space="preserve">
+    <value>Creación</value>
+  </data>
+  <data name="Column_Extension" xml:space="preserve">
+    <value>Extensión</value>
+  </data>
+  <data name="Column_DateModified" xml:space="preserve">
+    <value>Fecha de modificación</value>
+  </data>
+  <data name="Column_DateCreated" xml:space="preserve">
+    <value>Fecha de creación</value>
+  </data>
+  <data name="Column_Attributes" xml:space="preserve">
+    <value>Atributos</value>
+  </data>
+  <data name="Tree_Home" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
+  <data name="QuickView_Title" xml:space="preserve">
+    <value>Vista rápida</value>
+  </data>
+  <data name="QuickView_NothingToPreview" xml:space="preserve">
+    <value>Nada que previsualizar</value>
+  </data>
+  <data name="QuickView_Folder" xml:space="preserve">
+    <value>Carpeta</value>
+  </data>
+  <data name="QuickView_Archive" xml:space="preserve">
+    <value>Archivo comprimido {0}  •  {1}  •  Intro para abrirlo</value>
+  </data>
+  <data name="QuickView_InfoTruncated" xml:space="preserve">
+    <value>{0}  •  {1}  •  se muestran los primeros {2}</value>
+  </data>
+  <data name="QuickView_FolderSummary" xml:space="preserve">
+    <value>Carpeta  •  {0} archivo(s), {1} carpeta(s)  •  {2}</value>
+  </data>
+  <data name="Preview_MoreBytes" xml:space="preserve">
+    <value>… {0} bytes más no mostrados</value>
+  </data>
+</root>

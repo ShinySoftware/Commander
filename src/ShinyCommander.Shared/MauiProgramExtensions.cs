@@ -23,6 +23,9 @@ public static class MauiProgramExtensions
             );
 
         builder.Services.AddShinyStores();
+        // UI text: Resources/Strings/Strings*.resx -> StringsLocalized (Shiny.Extensions.Localization.Generator)
+        builder.Services.AddLocalization();
+        builder.Services.AddStronglyTypedLocalizations();
         builder.Services.AddGeneratedServices();   // [Singleton] AppSettings etc. (Shiny.Extensions.DependencyInjection)
 
         builder.Services.AddSingleton<VirtualFileSystem>();

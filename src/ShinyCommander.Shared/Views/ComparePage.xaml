@@ -3,41 +3,42 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shiny="http://shiny.net/maui/controls"
              xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:l="clr-namespace:ShinyCommander"
              x:Class="ShinyCommander.Views.ComparePage"
              x:DataType="vm:CompareViewModel">
 
     <shiny:KeyboardShortcuts.Shortcuts>
-        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="Close" />
-        <shiny:KeyboardShortcut Gesture="Primary+Enter" Command="{Binding CompareCommand}" Description="Compare" />
-        <shiny:KeyboardShortcut Gesture="Space" Command="{Binding CycleSelectedCommand}" Description="Change direction" />
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Enter" Command="{Binding CompareCommand}" Description="{l:Tr Compare_Compare}" />
+        <shiny:KeyboardShortcut Gesture="Space" Command="{Binding CycleSelectedCommand}" Description="{l:Tr Compare_ChangeDirection}" />
     </shiny:KeyboardShortcuts.Shortcuts>
 
     <Grid RowDefinitions="Auto,Auto,*,Auto">
         <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-            <shiny:ShinyButton AutomationId="PageBack" Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
-            <Label Grid.Column="1" Text="Synchronize directories" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
+            <shiny:ShinyButton AutomationId="PageBack" Text="{l:Tr Page_Back}" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="{l:Tr Compare_Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
         </Grid>
 
         <Border Grid.Row="1" Style="{StaticResource Card}" Margin="8,8,8,0" Padding="12">
             <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="34,30,40" ColumnSpacing="10" RowSpacing="8">
-                <Label Text="Left" VerticalOptions="Center" />
+                <Label Text="{l:Tr Compare_Left}" VerticalOptions="Center" />
                 <Entry Grid.Column="1" AutomationId="CompareLeft" Text="{Binding LeftPath}" FontFamily="{DynamicResource MonoFont}" />
-                <Label Grid.Column="2" Text="Right" VerticalOptions="Center" />
+                <Label Grid.Column="2" Text="{l:Tr Compare_Right}" VerticalOptions="Center" />
                 <Entry Grid.Column="3" AutomationId="CompareRight" Text="{Binding RightPath}" FontFamily="{DynamicResource MonoFont}" />
 
                 <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="4" Spacing="16">
-                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding Recursive}" /><Label Text="Subfolders" VerticalOptions="Center" /></HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding CompareContent}" /><Label Text="By content" VerticalOptions="Center" /></HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding IgnoreDate}" /><Label Text="Ignore date" VerticalOptions="Center" /></HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding ShowEqual}" /><Label Text="Show equal" VerticalOptions="Center" /></HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="6"><Label Text="Mask" VerticalOptions="Center" /><Entry Text="{Binding Mask}" WidthRequest="160" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding Recursive}" /><Label Text="{l:Tr Compare_Subfolders}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding CompareContent}" /><Label Text="{l:Tr Compare_ByContent}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding IgnoreDate}" /><Label Text="{l:Tr Compare_IgnoreDate}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding ShowEqual}" /><Label Text="{l:Tr Compare_ShowEqual}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="6"><Label Text="{l:Tr Compare_Mask}" VerticalOptions="Center" /><Entry Text="{Binding Mask}" WidthRequest="160" /></HorizontalStackLayout>
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="4" Spacing="8">
-                    <shiny:ShinyButton AutomationId="CompareRun" Text="Compare" Command="{Binding CompareCommand}" Appearance="Filled" ContentPadding="18,4" />
-                    <shiny:ShinyButton AutomationId="CompareSync" Text="Synchronize…" Command="{Binding SynchronizeCommand}" Appearance="Tonal" ContentPadding="12,4" />
+                    <shiny:ShinyButton AutomationId="CompareRun" Text="{l:Tr Compare_Compare}" Command="{Binding CompareCommand}" Appearance="Filled" ContentPadding="18,4" />
+                    <shiny:ShinyButton AutomationId="CompareSync" Text="{l:Tr Compare_SynchronizeEllipsis}" Command="{Binding SynchronizeCommand}" Appearance="Tonal" ContentPadding="12,4" />
                     <ActivityIndicator IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Color="{StaticResource Accent}" HeightRequest="18" />
-                    <Label Text="Tap ⇄ (or Space) to change a row's direction" Style="{StaticResource Subtle}" VerticalOptions="Center" />
+                    <Label Text="{l:Tr Compare_DirectionHint}" Style="{StaticResource Subtle}" VerticalOptions="Center" />
                 </HorizontalStackLayout>
             </Grid>
         </Border>
@@ -50,11 +51,11 @@
                             AllowColumnResize="True"
                             Dense="True"
                             Striped="True"
-                            EmptyText="Press Compare">
-                <shiny:DataGridColumn Title="File" PropertyName="RelativePath" Width="3*" />
-                <shiny:DataGridColumn Title="Left size" PropertyName="LeftSize" Width="100" />
-                <shiny:DataGridColumn Title="Left date" PropertyName="LeftDate" Width="140" />
-                <shiny:DataGridTemplateColumn Title="State" Width="110" Sortable="False">
+                            EmptyText="{l:Tr Compare_PressCompare}">
+                <shiny:DataGridColumn Title="{l:Tr Compare_ColFile}" PropertyName="RelativePath" Width="3*" />
+                <shiny:DataGridColumn Title="{l:Tr Compare_ColLeftSize}" PropertyName="LeftSize" Width="100" />
+                <shiny:DataGridColumn Title="{l:Tr Compare_ColLeftDate}" PropertyName="LeftDate" Width="140" />
+                <shiny:DataGridTemplateColumn Title="{l:Tr Compare_ColState}" Width="110" Sortable="False">
                     <shiny:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:CompareRowViewModel">
                             <shiny:PillView Text="{Binding StateText}" Type="{Binding StatePill}" FontSize="10" HorizontalOptions="Center" VerticalOptions="Center" />
@@ -68,8 +69,8 @@
                         </DataTemplate>
                     </shiny:DataGridTemplateColumn.CellTemplate>
                 </shiny:DataGridTemplateColumn>
-                <shiny:DataGridColumn Title="Right date" PropertyName="RightDate" Width="140" />
-                <shiny:DataGridColumn Title="Right size" PropertyName="RightSize" Width="100" />
+                <shiny:DataGridColumn Title="{l:Tr Compare_ColRightDate}" PropertyName="RightDate" Width="140" />
+                <shiny:DataGridColumn Title="{l:Tr Compare_ColRightSize}" PropertyName="RightSize" Width="100" />
             </shiny:DataGrid>
         </Border>
 

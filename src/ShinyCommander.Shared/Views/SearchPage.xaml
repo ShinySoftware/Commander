@@ -3,20 +3,21 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shiny="http://shiny.net/maui/controls"
              xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:l="clr-namespace:ShinyCommander"
              x:Class="ShinyCommander.Views.SearchPage"
              x:DataType="vm:SearchViewModel">
 
     <shiny:KeyboardShortcuts.Shortcuts>
-        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="Close" />
-        <shiny:KeyboardShortcut Gesture="Primary+Enter" Command="{Binding StartCommand}" Description="Start / stop" />
-        <shiny:KeyboardShortcut Gesture="F3" Command="{Binding ViewFileCommand}" Description="View" />
-        <shiny:KeyboardShortcut Gesture="Primary+G" Command="{Binding GoToFileCommand}" Description="Go to file" />
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Enter" Command="{Binding StartCommand}" Description="{l:Tr Search_StartStop}" />
+        <shiny:KeyboardShortcut Gesture="F3" Command="{Binding ViewFileCommand}" Description="{l:Tr Search_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+G" Command="{Binding GoToFileCommand}" Description="{l:Tr Search_GoToFile}" />
     </shiny:KeyboardShortcuts.Shortcuts>
 
     <Grid RowDefinitions="Auto,Auto,*,Auto">
         <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-            <shiny:ShinyButton AutomationId="PageBack" Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
-            <Label Grid.Column="1" Text="Find files" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
+            <shiny:ShinyButton AutomationId="PageBack" Text="{l:Tr Page_Back}" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="{l:Tr Search_Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
             <HorizontalStackLayout Grid.Column="2" Spacing="4">
 
             </HorizontalStackLayout>
@@ -24,26 +25,26 @@
 
         <Border Grid.Row="1" Style="{StaticResource Card}" Margin="8,8,8,0" Padding="12">
             <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="34,34,30,40" ColumnSpacing="10" RowSpacing="8">
-                <Label Text="Search in" VerticalOptions="Center" />
+                <Label Text="{l:Tr Search_SearchIn}" VerticalOptions="Center" />
                 <Entry Grid.Column="1" Grid.ColumnSpan="3" AutomationId="SearchPath" Text="{Binding StartPath}" FontFamily="{DynamicResource MonoFont}" />
 
-                <Label Grid.Row="1" Text="File name" VerticalOptions="Center" />
+                <Label Grid.Row="1" Text="{l:Tr Search_FileName}" VerticalOptions="Center" />
                 <Entry x:Name="MaskEntry" AutomationId="SearchMask" Grid.Row="1" Grid.Column="1" Text="{Binding NameMask}" Placeholder="*.cs;*.xaml | bin/ obj/" ReturnCommand="{Binding StartCommand}" />
-                <Label Grid.Row="1" Grid.Column="2" Text="Containing text" VerticalOptions="Center" />
-                <Entry Grid.Row="1" Grid.Column="3" Text="{Binding ContainingText}" Placeholder="(optional)" ReturnCommand="{Binding StartCommand}" />
+                <Label Grid.Row="1" Grid.Column="2" Text="{l:Tr Search_ContainingText}" VerticalOptions="Center" />
+                <Entry Grid.Row="1" Grid.Column="3" Text="{Binding ContainingText}" Placeholder="{l:Tr Search_Optional}" ReturnCommand="{Binding StartCommand}" />
 
                 <HorizontalStackLayout Grid.Row="2" Grid.ColumnSpan="4" Spacing="16">
-                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding Recursive}" /><Label Text="Subfolders" VerticalOptions="Center" /></HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding CaseSensitive}" /><Label Text="Case sensitive" VerticalOptions="Center" /></HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding IncludeHidden}" /><Label Text="Hidden files" VerticalOptions="Center" /></HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding FoldersOnly}" /><Label Text="Folders only" VerticalOptions="Center" /></HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="6"><Label Text="Min size (KB)" VerticalOptions="Center" /><Entry Text="{Binding MinSizeKb}" WidthRequest="80" Keyboard="Numeric" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding Recursive}" /><Label Text="{l:Tr Search_Subfolders}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding CaseSensitive}" /><Label Text="{l:Tr Search_CaseSensitive}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding IncludeHidden}" /><Label Text="{l:Tr Search_HiddenFiles}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding FoldersOnly}" /><Label Text="{l:Tr Search_FoldersOnly}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="6"><Label Text="{l:Tr Search_MinSize}" VerticalOptions="Center" /><Entry Text="{Binding MinSizeKb}" WidthRequest="80" Keyboard="Numeric" /></HorizontalStackLayout>
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout Grid.Row="3" Grid.ColumnSpan="4" Spacing="8">
                     <shiny:ShinyButton AutomationId="SearchStart" Text="{Binding StartText}" Command="{Binding StartCommand}" Appearance="Filled" ContentPadding="18,4" />
-                    <shiny:ShinyButton Text="Go to file" Command="{Binding GoToFileCommand}" Appearance="Tonal" ContentPadding="12,4" />
-                    <shiny:ShinyButton Text="View (F3)" Command="{Binding ViewFileCommand}" Appearance="Tonal" ContentPadding="12,4" />
+                    <shiny:ShinyButton Text="{l:Tr Search_GoToFile}" Command="{Binding GoToFileCommand}" Appearance="Tonal" ContentPadding="12,4" />
+                    <shiny:ShinyButton Text="{l:Tr Search_ViewF3}" Command="{Binding ViewFileCommand}" Appearance="Tonal" ContentPadding="12,4" />
                     <ActivityIndicator IsRunning="{Binding IsSearching}" IsVisible="{Binding IsSearching}" Color="{StaticResource Accent}" HeightRequest="18" />
                 </HorizontalStackLayout>
             </Grid>
@@ -57,7 +58,7 @@
                             AllowColumnResize="True"
                             Dense="True"
                             Striped="True"
-                            EmptyText="No results yet">
+                            EmptyText="{l:Tr Search_NoResults}">
                 <shiny:DataGridTemplateColumn Title="" Width="34" Sortable="False">
                     <shiny:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SearchResultItem">
@@ -65,10 +66,10 @@
                         </DataTemplate>
                     </shiny:DataGridTemplateColumn.CellTemplate>
                 </shiny:DataGridTemplateColumn>
-                <shiny:DataGridColumn Title="Name" PropertyName="Name" Width="2*" />
-                <shiny:DataGridColumn Title="Folder" PropertyName="Folder" Width="3*" />
-                <shiny:DataGridColumn Title="Size" PropertyName="Size" Width="100" StringFormat="{}{0:N0}" />
-                <shiny:DataGridColumn Title="Modified" PropertyName="Modified" Width="150" StringFormat="{}{0:yyyy-MM-dd HH:mm}" />
+                <shiny:DataGridColumn Title="{l:Tr Search_ColName}" PropertyName="Name" Width="2*" />
+                <shiny:DataGridColumn Title="{l:Tr Search_ColFolder}" PropertyName="Folder" Width="3*" />
+                <shiny:DataGridColumn Title="{l:Tr Search_ColSize}" PropertyName="Size" Width="100" StringFormat="{}{0:N0}" />
+                <shiny:DataGridColumn Title="{l:Tr Search_ColModified}" PropertyName="Modified" Width="150" StringFormat="{}{0:yyyy-MM-dd HH:mm}" />
             </shiny:DataGrid>
         </Border>
 

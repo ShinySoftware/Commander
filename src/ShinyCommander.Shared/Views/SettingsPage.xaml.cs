@@ -21,7 +21,7 @@ public partial class SettingsPage : ContentPage
         // before the cells are built, so re-apply it once the table is up.
         this.Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
         {
-            foreach (var section in new BindableObject[] { this.ThemeSection, this.FontSection })
+            foreach (var section in new BindableObject[] { this.LanguageSection, this.ThemeSection, this.FontSection })
             {
                 var value = RadioCell.GetSelectedValue(section);
                 RadioCell.SetSelectedValue(section, null);

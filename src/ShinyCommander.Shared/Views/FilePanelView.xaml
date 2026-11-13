@@ -5,6 +5,7 @@
              xmlns:md="http://shiny.net/maui/markdown"
              xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
              xmlns:views="clr-namespace:ShinyCommander.Views"
+             xmlns:l="clr-namespace:ShinyCommander"
              xmlns:conv="clr-namespace:ShinyCommander.Converters"
              xmlns:core="clr-namespace:ShinyCommander.Core.Models;assembly=ShinyCommander.Core"
              x:Class="ShinyCommander.Views.FilePanelView"
@@ -153,10 +154,10 @@
 
             <!-- quick filter (Ctrl+F) -->
             <Grid Grid.Row="3" ColumnDefinitions="Auto,*" Padding="8,0,8,4" ColumnSpacing="6" IsVisible="{Binding ShowQuickFilter}">
-                <Label Text="Filter:" Style="{StaticResource Subtle}" VerticalOptions="Center" />
+                <Label Text="{l:Tr Panel_Filter}" Style="{StaticResource Subtle}" VerticalOptions="Center" />
                 <Entry x:Name="FilterEntry"
                        Grid.Column="1"
-                       Placeholder="*.cs;*.md   (Esc closes)"
+                       Placeholder="{l:Tr Panel_FilterPlaceholder}"
                        Text="{Binding ActiveTab.QuickFilter}"
                        Focused="OnFilterFocused"
                        Unfocused="OnFilterUnfocused" />

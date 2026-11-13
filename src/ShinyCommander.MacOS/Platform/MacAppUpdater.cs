@@ -35,10 +35,10 @@ sealed class MacAppUpdater : IAppUpdater
         var bundle = NSBundle.MainBundle.BundlePath;
         // Run from a quarantined download, macOS runs a read-only copy somewhere random.
         if (bundle.Contains("/AppTranslocation/", StringComparison.Ordinal))
-            throw new InvalidOperationException("move ShinyCommander to your Applications folder and open it from there first.");
+            throw new InvalidOperationException(ShinyCommander.Strings.L.Update_ErrorTranslocated);
         var folder = Path.GetDirectoryName(bundle)!;
         if (!CanWrite(folder))
-            throw new InvalidOperationException($"ShinyCommander can't write to {folder}.");
+            throw new InvalidOperationException(ShinyCommander.Strings.L.Update_ErrorCantWriteFormat(folder));
 
         var work = Directory.CreateTempSubdirectory("ShinyCommander-update-").FullName;
         try
@@ -48,11 +48,11 @@ sealed class MacAppUpdater : IAppUpdater
 
             var unpacked = Path.Combine(work, "unpacked");
             if (await Run("/usr/bin/ditto", "-x", "-k", zip, unpacked) is not { ExitCode: 0 })
-                throw new InvalidOperationException("the download isn't a zip that could be opened.");
+                throw new InvalidOperationException(ShinyCommander.Strings.L.Update_ErrorBadZip);
 
             var apps = Directory.GetDirectories(unpacked, "*.app");
             if (apps.Length != 1)
-                throw new InvalidOperationException("the download doesn't hold the app.");
+                throw new InvalidOperationException(ShinyCommander.Strings.L.Update_ErrorNoApp);
             var fresh = apps[0];
             Verify(fresh, bundle);
             await VerifySignatureAsync(fresh, bundle).ConfigureAwait(false);
@@ -70,12 +70,12 @@ sealed class MacAppUpdater : IAppUpdater
             {
                 ArgumentList = { script, Environment.ProcessId.ToString(), old, bundle, work },
                 UseShellExecute = false
-            }) ?? throw new InvalidOperationException("the installer couldn't be started.");
+            }) ?? throw new InvalidOperationException(ShinyCommander.Strings.L.Update_ErrorInstallerStart);
 
             try
             {
                 if (await Run("/usr/bin/ditto", fresh, staged) is not { ExitCode: 0 })
-                    throw new InvalidOperationException($"the new version couldn't be copied into {folder}.");
+                    throw new InvalidOperationException(ShinyCommander.Strings.L.Update_ErrorCopyFormat(folder));
 
                 Directory.Move(bundle, old);
                 try
@@ -85,7 +85,7 @@ sealed class MacAppUpdater : IAppUpdater
                 catch
                 {
                     Directory.Move(old, bundle);
-                    throw new InvalidOperationException($"the new version couldn't be moved into {folder}.");
+                    throw new InvalidOperationException(ShinyCommander.Strings.L.Update_ErrorMoveFormat(folder));
                 }
             }
             catch
@@ -134,7 +134,7 @@ sealed class MacAppUpdater : IAppUpdater
             => NSDictionary.FromFile(Path.Combine(app, "Contents", "Info.plist"))?["CFBundleIdentifier"]?.ToString();
 
         if (BundleId(fresh) is not { } id || id != BundleId(running))
-            throw new InvalidOperationException("the download isn't ShinyCommander.");
+            throw new InvalidOperationException(ShinyCommander.Strings.L.Update_ErrorNotTheApp);
     }
 
     /// <summary>
@@ -144,10 +144,10 @@ sealed class MacAppUpdater : IAppUpdater
     static async Task VerifySignatureAsync(string fresh, string running)
     {
         if (await Run("/usr/bin/codesign", "--verify", "--deep", "--strict", fresh) is not { ExitCode: 0 })
-            throw new InvalidOperationException("the new version's signature didn't check out.");
+            throw new InvalidOperationException(ShinyCommander.Strings.L.Update_ErrorSignature);
 
         if (await TeamAsync(running) is { } team && await TeamAsync(fresh) != team)
-            throw new InvalidOperationException("the new version wasn't signed by the same developer.");
+            throw new InvalidOperationException(ShinyCommander.Strings.L.Update_ErrorDeveloper);
     }
 
     static async Task<string?> TeamAsync(string app)

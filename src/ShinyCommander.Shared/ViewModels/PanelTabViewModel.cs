@@ -115,12 +115,12 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     }
 
     string Header(string text, SortColumn column) => this.SortColumn == column ? text + (this.SortDescending ? " ▼" : " ▲") : text;
-    public string NameHeader => this.Header("Name", SortColumn.Name);
-    public string ExtHeader => this.Header("Ext", SortColumn.Extension);
-    public string SizeHeader => this.Header("Size", SortColumn.Size);
-    public string DateHeader => this.Header("Date", SortColumn.Modified);
-    public string AttrHeader => this.Header("Attr", SortColumn.Attributes);
-    public string CreatedHeader => this.Header("Created", SortColumn.Created);
+    public string NameHeader => this.Header(L.Column_Name, SortColumn.Name);
+    public string ExtHeader => this.Header(L.Column_Ext, SortColumn.Extension);
+    public string SizeHeader => this.Header(L.Column_Size, SortColumn.Size);
+    public string DateHeader => this.Header(L.Column_Date, SortColumn.Modified);
+    public string AttrHeader => this.Header(L.Column_Attr, SortColumn.Attributes);
+    public string CreatedHeader => this.Header(L.Column_Created, SortColumn.Created);
 
     partial void OnCursorIndexChanged(int oldValue, int newValue)
     {
@@ -248,7 +248,9 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
             this.IsArchive = location.IsArchive;
             this.IsReadOnlyArchive = location.IsReadOnlyArchive;
             this.ArchiveBadge = location.IsArchive
-                ? ArchiveFormats.Describe(ArchiveFormats.GetKind(location.ArchiveFile!)) + (location.IsReadOnlyArchive ? " • read-only" : String.Empty)
+                ? (location.IsReadOnlyArchive
+                    ? L.Panel_ArchiveReadOnlyFormat(ArchiveFormats.Describe(ArchiveFormats.GetKind(location.ArchiveFile!)))
+                    : ArchiveFormats.Describe(ArchiveFormats.GetKind(location.ArchiveFile!)))
                 : String.Empty;
             this.OnPropertyChanged(nameof(this.IsArchive));
             this.OnPropertyChanged(nameof(this.IsReadOnlyArchive));
@@ -346,7 +348,7 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
         var totalSize = files.Sum(x => x.Entry.Size);
 
         this.MarkedCount = markedFiles.Count + markedDirs;
-        this.StatusText = $"{SizeFormatter.Format(markedSize, friendly)} / {SizeFormatter.Format(totalSize, friendly)} in {markedFiles.Count} / {files.Count} file(s), {markedDirs} / {dirs.Count} dir(s)";
+        this.StatusText = L.Panel_StatusFormat(SizeFormatter.Format(markedSize, friendly), SizeFormatter.Format(totalSize, friendly), markedFiles.Count, files.Count, markedDirs, dirs.Count);
     }
 
     // --- cursor & marking -------------------------------------------------------------------

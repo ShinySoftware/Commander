@@ -47,11 +47,11 @@ public partial class EditorViewModel(IAppDialogs dialogs, INavigator navigator, 
             }
             this.IsMarkdown = FileIcons.IsMarkdown(Path.GetExtension(this.FilePath).TrimStart('.'));
             this.Text = this.original;
-            this.Status = $"{this.encoding.WebName}  •  {this.original.Split('\n').Length} lines";
+            this.Status = L.Editor_StatusFormat(this.encoding.WebName, this.original.Split('\n').Length);
         }
         catch (Exception ex)
         {
-            await dialogs.Alert("Cannot open file", ex.Message);
+            await dialogs.Alert(L.Editor_CannotOpen, ex.Message);
             await navigator.GoBack();
         }
     }
@@ -67,11 +67,11 @@ public partial class EditorViewModel(IAppDialogs dialogs, INavigator navigator, 
             this.original = this.Text;
             this.OnPropertyChanged(nameof(this.IsDirty));
             this.OnPropertyChanged(nameof(this.Title));
-            await dialogs.Toast("Saved", ToastKind.Success);
+            await dialogs.Toast(L.Editor_Saved, ToastKind.Success);
         }
         catch (Exception ex)
         {
-            await dialogs.Alert("Save failed", ex.Message);
+            await dialogs.Alert(L.Editor_SaveFailed, ex.Message);
         }
     }
 
@@ -80,10 +80,10 @@ public partial class EditorViewModel(IAppDialogs dialogs, INavigator navigator, 
     {
         if (this.IsDirty)
         {
-            var choice = await dialogs.Choose("Save changes?", ["Save", "Discard"], "Cancel");
+            var choice = await dialogs.Choose(L.Editor_SaveChanges, [L.Common_Save, L.Editor_Discard], L.Common_Cancel);
             if (choice == null)
                 return;
-            if (choice == "Save")
+            if (choice == L.Common_Save)
                 await this.Save();
         }
         await navigator.GoBack();

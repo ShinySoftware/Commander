@@ -6,6 +6,9 @@ Generates the ribbon markup in Views/MainPage.xaml from one command table:
                       ribbon's body currently doesn't draw (it is built after the native view exists)
   * Services/CommandCatalog.g.cs - every command, for the customizable pane toolbar
 Run after editing RIBBON:  python3 tools/ribbon.py
+
+The text is localized: the table's English is what Strings.resx must hold for each key (Cmd_<command>,
+Ribbon_Tab_<key>, Ribbon_Group_<title>) - the script lists keys missing from Strings.resx / .fr / .es.
 """
 import re, pathlib
 
@@ -14,7 +17,7 @@ ICON = "{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResourc
 
 RIBBON = [
  ("Files","files",ICON,[
-   ("Transfer",[("Copy","copy","CopyCommand","L","F5"),("Move","arrow-right","MoveCommand","L","F6"),("Delete","trash","DeleteCommand","L","F8")]),
+   ("Transfer",[("Copy","copy","CopyCommand","L","F5"),("Move","arrow-right","MoveCommand","L","F6"),("Delete","trash","DeleteCommand","L","F8"),("Jobs","hourglass","ToggleJobsCommand","S","Primary+J")]),
    ("Create",[("New Folder","folder","MakeDirectoryCommand","S","F7"),("New File","file","NewFileCommand","S","Shift+F4"),("Rename","edit","RenameCommand","S","F2")]),
    ("Open",[("View","eye","ViewCommand","L","F3"),("Edit","file-text","EditCommand","S","F4"),("Terminal","external-link","OpenTerminalCommand","S","Primary+O"),("Reveal","search","RevealInFileManagerCommand","S","Primary+E")]),
    ("Archive",[("Pack","download","PackCommand","S","Alt+F5"),("Unpack","upload","UnpackCommand","S","Alt+F9")]),
@@ -45,11 +48,20 @@ RIBBON = [
 
 def esc(s): return s.replace("&","&amp;").replace('"',"&quot;")
 
+# --------------------------------------------------------------- localization keys
+def cmd_key(cmd): return "Cmd_" + cmd[:-len("Command")]
+def tab_key(key): return "Ribbon_Tab_" + key
+def group_key(title): return "Ribbon_Group_" + re.sub(r"[^A-Za-z0-9]", "", title.title())
+def tr(key): return "{l:Tr " + key + "}"
+def tr_tip(key, sc):
+    # the markup parser treats \ as an escape - "Primary+\\" must arrive doubled
+    return "{l:Tr " + key + ", Suffix=' (" + esc(sc).replace("\\", "\\\\") + ")'}"
+
 # ---------------------------------------------------------------- Shiny Ribbon (Windows / Linux)
 def shiny_item(text, icon, cmd, size, sc, color):
     sz = 'Large' if size=='L' else 'Small'
     px = 30 if size=='L' else 18
-    return f'''                    <shiny:RibbonButton Text="{esc(text)}" Size="{sz}" Command="{{Binding {cmd}}}" Shortcut="{esc(sc)}" Tooltip="{esc(text)} ({esc(sc)})">
+    return f'''                    <shiny:RibbonButton Text="{tr(cmd_key(cmd))}" Size="{sz}" Command="{{Binding {cmd}}}" Shortcut="{esc(sc)}" Tooltip="{tr_tip(cmd_key(cmd), sc)}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="{icon}" Color="{color}" Trigger="Appear" StrokeWidth="2" WidthRequest="{px}" HeightRequest="{px}" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
@@ -64,17 +76,17 @@ def shiny_ribbon():
                       AllowCollapse="True"
                       ShowTooltips="True">
             <shiny:Ribbon.QuickAccessItems>
-                <shiny:RibbonButton Text="Settings" Size="Small" Command="{Binding SettingsCommand}" Tooltip="Settings">
+                <shiny:RibbonButton Text="{l:Tr Cmd_Settings}" Size="Small" Command="{Binding SettingsCommand}" Tooltip="{l:Tr Cmd_Settings}">
                     <shiny:RibbonButton.IconTemplate><DataTemplate><shiny:MotionIconView Icon="settings" Trigger="Appear" WidthRequest="16" HeightRequest="16" /></DataTemplate></shiny:RibbonButton.IconTemplate>
                 </shiny:RibbonButton>
-                <shiny:RibbonButton Text="Help" Size="Small" Command="{Binding HelpCommand}" Tooltip="Keyboard reference (F1)">
+                <shiny:RibbonButton Text="{l:Tr Ribbon_Help}" Size="Small" Command="{Binding HelpCommand}" Tooltip="{l:Tr Cmd_Help, Suffix=' (F1)'}">
                     <shiny:RibbonButton.IconTemplate><DataTemplate><shiny:MotionIconView Icon="help" Trigger="Appear" WidthRequest="16" HeightRequest="16" /></DataTemplate></shiny:RibbonButton.IconTemplate>
                 </shiny:RibbonButton>
             </shiny:Ribbon.QuickAccessItems>''']
     for tab,key,color,groups in RIBBON:
-        o.append(f'            <shiny:RibbonTab Title="{tab}" Key="{key}">')
+        o.append(f'            <shiny:RibbonTab Title="{tr(tab_key(key))}" Key="{key}">')
         for gt,items in groups:
-            o.append(f'                <shiny:RibbonGroup Title="{esc(gt)}">')
+            o.append(f'                <shiny:RibbonGroup Title="{tr(group_key(gt))}">')
             o += [shiny_item(*it, color) for it in items]
             o.append('                </shiny:RibbonGroup>')
         o.append('            </shiny:RibbonTab>')
@@ -83,20 +95,20 @@ def shiny_ribbon():
 
 # ---------------------------------------------------------------- AppKit ribbon (plain layouts)
 def ak_large(text, icon, cmd, sc, color):
-    return f'''                            <Border Style="{{StaticResource RibbonLarge}}" AutomationId="ribbon-{cmd[:-7]}" ToolTipProperties.Text="{esc(text)} ({esc(sc)})">
+    return f'''                            <Border Style="{{StaticResource RibbonLarge}}" AutomationId="ribbon-{cmd[:-7]}" ToolTipProperties.Text="{tr_tip(cmd_key(cmd), sc)}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{{Binding {cmd}}}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="{icon}" Color="{color}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="{esc(text)}" Style="{{StaticResource RibbonText}}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{tr(cmd_key(cmd))}" Style="{{StaticResource RibbonText}}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>'''
 
 def ak_small(text, icon, cmd, sc, color):
-    return f'''                                <Border Style="{{StaticResource RibbonSmall}}" AutomationId="ribbon-{cmd[:-7]}" ToolTipProperties.Text="{esc(text)} ({esc(sc)})">
+    return f'''                                <Border Style="{{StaticResource RibbonSmall}}" AutomationId="ribbon-{cmd[:-7]}" ToolTipProperties.Text="{tr_tip(cmd_key(cmd), sc)}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{{Binding {cmd}}}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="{icon}" Color="{color}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="{esc(text)}" Style="{{StaticResource RibbonText}}" VerticalTextAlignment="Center" />
+                                        <Label Text="{tr(cmd_key(cmd))}" Style="{{StaticResource RibbonText}}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>'''
 
@@ -111,7 +123,7 @@ def appkit_ribbon():
     for tab,key,color,_ in RIBBON:
         o.append(f'''                    <Border Style="{{StaticResource RibbonTabHeader}}" AutomationId="ribbon-tab-{key}" BackgroundColor="{{Binding RibbonTab, Converter={{StaticResource RibbonTabBackground}}, ConverterParameter={key}}}">
                         <Border.GestureRecognizers><TapGestureRecognizer Command="{{Binding SelectRibbonTabCommand}}" CommandParameter="{key}" /></Border.GestureRecognizers>
-                        <Label Text="{tab}" FontSize="13" VerticalTextAlignment="Center" TextColor="{{Binding RibbonTab, Converter={{StaticResource RibbonTabText}}, ConverterParameter={key}}}" />
+                        <Label Text="{tr(tab_key(key))}" FontSize="13" VerticalTextAlignment="Center" TextColor="{{Binding RibbonTab, Converter={{StaticResource RibbonTabText}}, ConverterParameter={key}}}" />
                     </Border>''')
     o.append('''                </HorizontalStackLayout>
                 <HorizontalStackLayout Grid.Column="2" Spacing="4">
@@ -143,7 +155,7 @@ def appkit_ribbon():
                     if len(col)==3: flush()
             flush()
             o.append(f'''                            </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="{esc(gt)}" Style="{{StaticResource RibbonGroupTitle}}" />
+                            <Label Grid.Row="1" Text="{tr(group_key(gt))}" Style="{{StaticResource RibbonGroupTitle}}" />
                         </Grid>''')
         o.append('                    </HorizontalStackLayout>')
     o.append('''                </Grid>
@@ -162,11 +174,11 @@ root.write_text(s)
 # ---------------------------------------------------------------- command catalog (pane toolbar)
 def cs(v): return '"' + v.replace('\\', '\\\\').replace('"', '\\"') + '"'
 entries, cases = [], []
-for tab,_,_,groups in RIBBON:
+for tab,tkey,_,groups in RIBBON:
     for _,items in groups:
         for text,icon,cmd,_,sc in items:
             key = cmd[:-len("Command")]
-            entries.append(f"        new({cs(key)}, {cs(text)}, {cs(icon)}, {cs(sc)}, {cs(tab)}),")
+            entries.append(f"        new({cs(key)}, {cs(icon)}, {cs(sc)}, {cs(tkey)}),")
             cases.append(f"        {cs(key)} => vm.{cmd},")
 catalog = pathlib.Path(__file__).resolve().parent.parent / "src/ShinyCommander.Shared/Services/CommandCatalog.g.cs"
 catalog.write_text("""// <auto-generated> by tools/ribbon.py from the ribbon table - edit the table there, then rerun it. </auto-generated>
@@ -190,3 +202,25 @@ public static partial class CommandCatalog
 """)
 
 print("ribbon regenerated:", sum(len(i) for _,_,_,g in RIBBON for _,i in g), "commands")
+
+# ---------------------------------------------------------------- check the strings
+expected = {"Ribbon_Help": "Help"}
+for tab,key,_,groups in RIBBON:
+    expected[tab_key(key)] = tab
+    for gt,items in groups:
+        expected[group_key(gt)] = gt
+        for text,_,cmd,_,_ in items:
+            expected[cmd_key(cmd)] = text
+
+import xml.etree.ElementTree as ET
+res = pathlib.Path(__file__).resolve().parent.parent / "src/ShinyCommander.Shared/Resources/Strings"
+for name in ["Strings.resx", "Strings.fr.resx", "Strings.es.resx"]:
+    have = {d.get("name"): d.findtext("value") for d in ET.parse(res / name).getroot().iter("data")}
+    missing = [k for k in expected if k not in have]
+    wrong = [k for k in expected if name == "Strings.resx" and k in have and have[k] != expected[k]]
+    if missing: print(f"{name}: missing {', '.join(missing)}")
+    if wrong: print(f"{name}: differs from the table: {', '.join(wrong)}")
+
+if "--keys" in __import__("sys").argv:
+    import json
+    print(json.dumps(expected, ensure_ascii=False, indent=1))

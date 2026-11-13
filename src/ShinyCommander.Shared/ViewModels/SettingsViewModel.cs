@@ -1,7 +1,7 @@
 namespace ShinyCommander.ViewModels;
 
 [ShellMap<SettingsPage>("Settings")]
-public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, UpdateService updates, INavigator navigator) : ObservableObject
+public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, UpdateService updates, INavigator navigator, IAppDialogs dialogs) : ObservableObject
 {
     public bool ShowExtColumn { get => columns.ShowExtension; set { columns.Set(PanelColumn.Extension, value); this.OnPropertyChanged(); } }
     public bool ShowSizeColumn { get => columns.ShowSize; set { columns.Set(PanelColumn.Size, value); this.OnPropertyChanged(); } }
@@ -26,6 +26,20 @@ public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, 
             settings.Theme = value;
             ApplyTheme(value);
             this.OnPropertyChanged();
+        }
+    }
+
+    /// <summary>"System" or a culture name. The pages take their text when they're built, so it applies on the next launch.</summary>
+    public string Language
+    {
+        get => settings.Language ?? "System";
+        set
+        {
+            if (value == null || value == this.Language)
+                return;
+            settings.Language = value;
+            this.OnPropertyChanged();
+            _ = dialogs.Toast(L.Settings_LanguageRestart);
         }
     }
 
@@ -55,9 +69,9 @@ public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, 
     public bool IsUpdateSupported => updates.IsSupported;
 
     [ObservableProperty]
-    public partial string UpdateStatus { get; set; } = updates.Available is { } release ? $"{release.DisplayVersion} is available" : String.Empty;
+    public partial string UpdateStatus { get; set; } = updates.Available is { } release ? L.Settings_UpdateAvailableFormat(release.DisplayVersion) : String.Empty;
 
-    public string UpdateButtonText => updates.Available is { } release ? $"Install {release.DisplayVersion}…" : "Check for updates";
+    public string UpdateButtonText => updates.Available is { } release ? L.Settings_InstallUpdateFormat(release.DisplayVersion) : L.Settings_CheckForUpdates;
 
     /// <summary>Checks GitHub - or, once a newer release is known, opens its notes with Install.</summary>
     [RelayCommand]
@@ -69,13 +83,13 @@ public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, 
             return;
         }
 
-        this.UpdateStatus = "Checking…";
+        this.UpdateStatus = L.Settings_Checking;
         var reached = await updates.CheckAsync();
         this.UpdateStatus = !reached
-            ? "Couldn't reach GitHub. Try again in a bit."
+            ? L.Settings_UpdateUnreachable
             : updates.Available is { } release
-                ? $"{release.DisplayVersion} is available"
-                : "You're up to date.";
+                ? L.Settings_UpdateAvailableFormat(release.DisplayVersion)
+                : L.Settings_UpToDate;
         this.OnPropertyChanged(nameof(this.UpdateButtonText));
 
         // "Don't show again" only stops the automatic window - asking by hand always shows it

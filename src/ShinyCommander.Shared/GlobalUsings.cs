@@ -11,3 +11,4 @@ global using ShinyCommander.Views;
 global using ShinyCommander.Converters;
 global using Shiny;
 global using Shiny.Infrastructure;
+global using static ShinyCommander.Strings;

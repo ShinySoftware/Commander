@@ -41,6 +41,10 @@ public static class UiTestHooks
         Map(ext, "command", "Execute a MainViewModel command by name (without the Command suffix): { name, parameter }", Command);
         Map(ext, "answer", "Queue dialog answers: { answers: [] }", Answer);
         Map(ext, "reset", "Known state for the next test: { left, right }", Reset);
+        Map(ext, "hold_job", "Start a background job that runs until stopped (or { seconds = 30 }) - Settle doesn't wait for it", HoldJob);
+        Map(ext, "job", "Act on a job in the jobs pane, newest first: { index = 0, action = stop|goto|dismiss|errors|clear }", JobAction);
+        Map(ext, "close_window", "Press the main window's close button (macOS) - the quit guard may stop it", CloseWindow);
+        Map(ext, "culture", "Switch the UI language live: { name = \"fr\" } - text already on screen stays; new pages and dialogs use it. Reset goes back to en", SetCulture);
         Map(ext, "real_dialogs", "Show the real dialogs instead of answering from the queue: { on = true }", RealDialogs);
         ext.MapTool("state_now", "The state without waiting for the app to settle (while a real dialog is open)", "POST", "state_now",
             async _ => HttpResponse.Json(await MainThread.InvokeOnMainThreadAsync(() => new { result = (object)true, state = Snapshot(MainViewModel.Current!) })));
@@ -86,7 +90,7 @@ public static class UiTestHooks
         var deadline = DateTime.UtcNow.AddMilliseconds(timeoutMs);
         while (DateTime.UtcNow < deadline)
         {
-            var busy = main.IsOperationRunning
+            var busy = (main.IsOperationRunning && !OnlyHeldJobs(main))
                 || main.IsCommandRunning
                 || main.Left.ActiveTab?.IsLoading == true
                 || main.Right.ActiveTab?.IsLoading == true
@@ -97,6 +101,15 @@ public static class UiTestHooks
             await Task.Delay(25);
         }
         await Task.Delay(30); // let dispatched follow-ups (cursor scroll, quick view debounce) run
+    }
+
+    const string HoldTitle = "Test hold";
+
+    // a hold_job runs until a test stops it - waiting for it would only time out
+    static bool OnlyHeldJobs(MainViewModel main)
+    {
+        var running = main.Jobs.Jobs.Where(x => x.IsRunning).ToList();
+        return running.Count > 0 && running.Count == main.Jobs.PendingCount && running.All(x => x.Title == HoldTitle);
     }
 
     // --- tools ----------------------------------------------------------------------------------
@@ -189,6 +202,74 @@ public static class UiTestHooks
         return new { executed = true };
     }
 
+    static Task<object> HoldJob(MainViewModel main, JsonElement args)
+    {
+        var seconds = args.ValueKind == JsonValueKind.Object && args.TryGetProperty("seconds", out var s) ? s.GetInt32() : 30;
+        main.Jobs.Start(HoldTitle, FileOperationKind.Copy, null, async (progress, ct) =>
+        {
+            for (var i = 0; i < seconds * 10; i++)
+            {
+                await Task.Delay(100, ct);
+                progress.Report(new OperationProgress(FileOperationKind.Copy, "held", i, seconds * 10, 0, 1));
+            }
+            return new OperationResult(1, 0, []);
+        });
+        return Task.FromResult<object>(true);
+    }
+
+    static async Task<object> JobAction(MainViewModel main, JsonElement args)
+    {
+        var action = Str(args, "action") ?? throw new ArgumentException("action is required");
+        if (action == "clear")
+        {
+            main.ClearCompletedJobsCommand.Execute(null);
+            return true;
+        }
+
+        var index = args.TryGetProperty("index", out var i) ? i.GetInt32() : 0;
+        var job = main.Jobs.Jobs.ElementAtOrDefault(index) ?? throw new ArgumentException($"no job {index} (there are {main.Jobs.Jobs.Count})");
+        switch (action)
+        {
+            case "stop":
+                main.StopJobCommand.Execute(job);
+                await job.Completion;
+                break;
+            case "goto":
+                await main.GoToJobCommand.ExecuteAsync(job);
+                break;
+            case "dismiss":
+                main.DismissJobCommand.Execute(job);
+                break;
+            case "errors":
+                await main.ShowJobErrorsCommand.ExecuteAsync(job);
+                break;
+            default:
+                throw new ArgumentException($"unknown action '{action}'");
+        }
+        return true;
+    }
+
+    static async Task<object> CloseWindow(MainViewModel main, JsonElement args)
+    {
+#if MACOS_APPKIT
+        if (Application.Current?.Windows.FirstOrDefault()?.Handler?.PlatformView is AppKit.NSWindow ns)
+        {
+            // what the red button does: ask the delegate, close if it agrees
+            var closing = ns.Delegate?.WindowShouldClose(ns) ?? true;
+            await Task.Delay(100); // the guard's question is asked asynchronously
+            return new { closing };
+        }
+#endif
+        await Task.CompletedTask;
+        throw new NotSupportedException("close_window is macOS only");
+    }
+
+    static Task<object> SetCulture(MainViewModel main, JsonElement args)
+    {
+        Strings.ApplyLanguage(Str(args, "name") ?? "en");
+        return Task.FromResult<object>(System.Globalization.CultureInfo.CurrentUICulture.Name);
+    }
+
     static Task<object> Answer(MainViewModel main, JsonElement args)
     {
         Service<UiTestDialogs>().Enqueue(args.GetProperty("answers").EnumerateArray().Select(x => x.GetString() ?? String.Empty));
@@ -244,6 +325,7 @@ public static class UiTestHooks
                 await nav.PopToRootAsync(false);
         }
 
+        Strings.ApplyLanguage(Environment.GetEnvironmentVariable("SHINYCOMMANDER_LANG") is { Length: > 0 } lang ? lang : "en");
         var settings = Service<AppSettings>();
         settings.ShowHidden = false;
         settings.ConfirmDelete = true;
@@ -258,6 +340,9 @@ public static class UiTestHooks
         Service<UiTestDialogs>().Reset();
         main.CommandText = String.Empty;
         main.ShowOutput = false;
+        await main.Jobs.StopAllAndWait(TimeSpan.FromSeconds(5));
+        main.Jobs.ClearFinished();
+        main.ShowJobs = false;
         main.StackPanels = false;
         main.IsPathEditing = false;
         main.IsFilterEditing = false;
@@ -307,6 +392,16 @@ public static class UiTestHooks
             commandOutput = main.CommandOutput.Length > 4000 ? main.CommandOutput[^4000..] : main.CommandOutput,
             showOutput = main.ShowOutput,
             isOperationRunning = main.IsOperationRunning,
+            showJobs = main.ShowJobs,
+            jobs = main.Jobs.Jobs.Select(j => new
+            {
+                title = j.Title,
+                state = j.State.ToString(),
+                subtitle = j.Subtitle,
+                canGoTo = j.CanGoTo,
+                destination = j.Destination?.Directory,
+                errors = j.Errors
+            }).ToList(),
             ribbonTab = main.RibbonTab,
             columns = Enum.GetValues<PanelColumn>().Where(columns.IsVisible).Select(x => x.ToString()).ToList(),
             left = PanelState(main.Left),

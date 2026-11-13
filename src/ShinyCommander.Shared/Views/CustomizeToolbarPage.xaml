@@ -3,43 +3,44 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shiny="http://shiny.net/maui/controls"
              xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:l="clr-namespace:ShinyCommander"
              xmlns:svc="clr-namespace:ShinyCommander.Services"
              x:Class="ShinyCommander.Views.CustomizeToolbarPage"
              x:DataType="vm:CustomizeToolbarViewModel">
 
     <shiny:KeyboardShortcuts.Shortcuts>
-        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="Close" />
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
     </shiny:KeyboardShortcuts.Shortcuts>
 
     <Grid RowDefinitions="Auto,Auto,*">
         <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-            <shiny:ShinyButton AutomationId="PageBack" Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
-            <Label Grid.Column="1" Text="Pane toolbar" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
-            <shiny:ShinyButton Grid.Column="2" Text="Reset to default" Command="{Binding ResetCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <shiny:ShinyButton AutomationId="PageBack" Text="{l:Tr Page_Back}" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="{l:Tr CustomizeToolbar_Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
+            <shiny:ShinyButton Grid.Column="2" Text="{l:Tr CustomizeToolbar_ResetToDefault}" Command="{Binding ResetCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
         </Grid>
 
         <Label Grid.Row="1" Style="{StaticResource Subtle}" Padding="16,12,16,4"
-               Text="The buttons beside the path in each pane. A button acts on the pane it's clicked in. Right-click that row to come back here." />
+               Text="{l:Tr CustomizeToolbar_Intro}" />
 
         <Grid Grid.Row="2" ColumnDefinitions="*,*" ColumnSpacing="12" Padding="12,8,12,12">
             <!-- on the toolbar, in order -->
             <Border Style="{StaticResource Card}" Padding="0">
                 <Grid RowDefinitions="Auto,*">
-                    <Label Text="ON THE TOOLBAR" Style="{StaticResource SectionTitle}" FontSize="11" Padding="14,10,14,6" />
+                    <Label Text="{l:Tr CustomizeToolbar_OnToolbar}" Style="{StaticResource SectionTitle}" FontSize="11" Padding="14,10,14,6" />
                     <CollectionView Grid.Row="1" ItemsSource="{Binding Current}" SelectionMode="None">
                         <CollectionView.EmptyView>
-                            <Label Text="Nothing yet - add commands from the right." Style="{StaticResource Subtle}" Padding="14,8" />
+                            <Label Text="{l:Tr CustomizeToolbar_Empty}" Style="{StaticResource Subtle}" Padding="14,8" />
                         </CollectionView.EmptyView>
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="svc:AppCommand">
                                 <Grid ColumnDefinitions="24,*,Auto,Auto,Auto" Padding="14,0,8,0" HeightRequest="32" ColumnSpacing="6">
                                     <shiny:MotionIconView Icon="{Binding Icon}" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Hover" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
                                     <Label Grid.Column="1" Text="{Binding Text}" VerticalOptions="Center" LineBreakMode="TailTruncation" />
-                                    <shiny:ShinyButton Grid.Column="2" LeftMotionIcon="arrow-up" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="Move left"
+                                    <shiny:ShinyButton Grid.Column="2" LeftMotionIcon="arrow-up" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="{l:Tr CustomizeToolbar_MoveLeft}"
                                                        Command="{Binding MoveUpCommand, Source={RelativeSource AncestorType={x:Type vm:CustomizeToolbarViewModel}}, x:DataType=vm:CustomizeToolbarViewModel}" CommandParameter="{Binding .}" />
-                                    <shiny:ShinyButton Grid.Column="3" LeftMotionIcon="arrow-down" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="Move right"
+                                    <shiny:ShinyButton Grid.Column="3" LeftMotionIcon="arrow-down" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="{l:Tr CustomizeToolbar_MoveRight}"
                                                        Command="{Binding MoveDownCommand, Source={RelativeSource AncestorType={x:Type vm:CustomizeToolbarViewModel}}, x:DataType=vm:CustomizeToolbarViewModel}" CommandParameter="{Binding .}" />
-                                    <shiny:ShinyButton Grid.Column="4" LeftMotionIcon="close" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="Remove"
+                                    <shiny:ShinyButton Grid.Column="4" LeftMotionIcon="close" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="{l:Tr Common_Remove}"
                                                        Command="{Binding RemoveCommand, Source={RelativeSource AncestorType={x:Type vm:CustomizeToolbarViewModel}}, x:DataType=vm:CustomizeToolbarViewModel}" CommandParameter="{Binding .}" />
                                 </Grid>
                             </DataTemplate>
@@ -51,7 +52,7 @@
             <!-- everything else, in ribbon order -->
             <Border Grid.Column="1" Style="{StaticResource Card}" Padding="0">
                 <Grid RowDefinitions="Auto,*">
-                    <Label Text="AVAILABLE" Style="{StaticResource SectionTitle}" FontSize="11" Padding="14,10,14,6" />
+                    <Label Text="{l:Tr CustomizeToolbar_Available}" Style="{StaticResource SectionTitle}" FontSize="11" Padding="14,10,14,6" />
                     <CollectionView Grid.Row="1" ItemsSource="{Binding Available}" SelectionMode="None">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="svc:AppCommand">
@@ -62,7 +63,7 @@
                                     <shiny:MotionIconView Icon="{Binding Icon}" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Hover" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
                                     <Label Grid.Column="1" Text="{Binding Text}" VerticalOptions="Center" LineBreakMode="TailTruncation" />
                                     <Label Grid.Column="2" Text="{Binding Group}" Style="{StaticResource Subtle}" VerticalOptions="Center" />
-                                    <shiny:ShinyButton Grid.Column="3" LeftMotionIcon="plus" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="Add"
+                                    <shiny:ShinyButton Grid.Column="3" LeftMotionIcon="plus" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="{l:Tr Common_Add}"
                                                        Command="{Binding AddCommand, Source={RelativeSource AncestorType={x:Type vm:CustomizeToolbarViewModel}}, x:DataType=vm:CustomizeToolbarViewModel}" CommandParameter="{Binding .}" />
                                 </Grid>
                             </DataTemplate>

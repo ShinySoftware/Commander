@@ -13,6 +13,8 @@ public sealed record AppState
     public string CommandOutput { get; init; } = "";
     public bool ShowOutput { get; init; }
     public bool IsOperationRunning { get; init; }
+    public bool ShowJobs { get; init; }
+    public List<JobRecord> Jobs { get; init; } = [];
     public string? RibbonTab { get; init; }
     public List<string> Columns { get; init; } = [];
     public PanelState Left { get; init; } = new();
@@ -96,6 +98,18 @@ public sealed record ItemState
     public bool Marked { get; init; }
     public long Size { get; init; }
     public string SizeText { get; init; } = "";
+}
+
+public sealed record JobRecord
+{
+    public string Title { get; init; } = "";
+    public string State { get; init; } = "";
+    public string Subtitle { get; init; } = "";
+    public bool CanGoTo { get; init; }
+    public string? Destination { get; init; }
+    public List<string> Errors { get; init; } = [];
+
+    public override string ToString() => $"{this.Title} [{this.State}] {this.Subtitle}";
 }
 
 public sealed record DialogRecord

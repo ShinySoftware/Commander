@@ -4,18 +4,19 @@
              xmlns:shiny="http://shiny.net/maui/controls"
              xmlns:md="http://shiny.net/maui/markdown"
              xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:l="clr-namespace:ShinyCommander"
              x:Class="ShinyCommander.Views.HelpPage"
              x:DataType="vm:HelpViewModel">
 
     <shiny:KeyboardShortcuts.Shortcuts>
-        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="Close" />
-        <shiny:KeyboardShortcut Gesture="F1" Command="{Binding CloseCommand}" Description="Close" />
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
+        <shiny:KeyboardShortcut Gesture="F1" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
     </shiny:KeyboardShortcuts.Shortcuts>
 
     <Grid RowDefinitions="Auto,*">
         <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-            <shiny:ShinyButton AutomationId="PageBack" Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
-            <Label Grid.Column="1" Text="Keyboard reference" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
+            <shiny:ShinyButton AutomationId="PageBack" Text="{l:Tr Page_Back}" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="{l:Tr Help_Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
             <HorizontalStackLayout Grid.Column="2" Spacing="4">
 
             </HorizontalStackLayout>

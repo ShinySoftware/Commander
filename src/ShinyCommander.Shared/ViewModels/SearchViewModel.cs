@@ -51,10 +51,10 @@ public partial class SearchViewModel(IMediator mediator, INavigator navigator, I
     [NotifyPropertyChangedFor(nameof(StartText))]
     public partial bool IsSearching { get; set; }
 
-    public string StartText => this.IsSearching ? "Stop" : "Start";
+    public string StartText => this.IsSearching ? L.Common_Stop : L.Common_Start;
 
     [ObservableProperty]
-    public partial string Status { get; set; } = "Enter a mask and press Start (Enter)";
+    public partial string Status { get; set; } = L.Search_Prompt;
 
     [ObservableProperty]
     public partial object? SelectedResult { get; set; }
@@ -83,7 +83,7 @@ public partial class SearchViewModel(IMediator mediator, INavigator navigator, I
         }
         if (!Directory.Exists(this.StartPath))
         {
-            await dialogs.Alert("Find files", $"Folder not found: {this.StartPath}");
+            await dialogs.Alert(L.Search_Title, L.Search_FolderNotFoundFormat(this.StartPath));
             return;
         }
 
@@ -109,8 +109,8 @@ public partial class SearchViewModel(IMediator mediator, INavigator navigator, I
             if (!this.IsSearching)
                 return; // a late report must not overwrite the final summary
             this.Status = String.IsNullOrEmpty(s.CurrentDirectory)
-            ? $"Scanned {s.Scanned:N0}, found {s.Found:N0}"
-            : $"Scanned {s.Scanned:N0}, found {s.Found:N0}  •  {s.CurrentDirectory}";
+            ? L.Search_ProgressFormat(s.Scanned.ToString("N0"), s.Found.ToString("N0"))
+            : L.Search_ProgressInFormat(s.Scanned.ToString("N0"), s.Found.ToString("N0"), s.CurrentDirectory);
         });
 
         var started = DateTime.Now;
@@ -128,13 +128,16 @@ public partial class SearchViewModel(IMediator mediator, INavigator navigator, I
             }
             this.Results = this.found.Take(MaxShown).ToList();
 
-            var shown = this.found.Count > MaxShown ? $" (showing first {MaxShown:N0})" : String.Empty;
-            this.Status = $"{this.found.Count:N0} found in {(DateTime.Now - started).TotalSeconds:0.0}s{shown}";
+            var count = this.found.Count.ToString("N0");
+            var seconds = (DateTime.Now - started).TotalSeconds.ToString("0.0");
+            this.Status = this.found.Count > MaxShown
+                ? L.Search_DoneTruncatedFormat(count, seconds, MaxShown.ToString("N0"))
+                : L.Search_DoneFormat(count, seconds);
         }
         catch (OperationCanceledException)
         {
             this.Results = this.found.Take(MaxShown).ToList();
-            this.Status = $"Stopped - {this.found.Count:N0} found";
+            this.Status = L.Search_StoppedFormat(this.found.Count.ToString("N0"));
         }
         catch (Exception ex)
         {

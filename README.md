@@ -24,12 +24,14 @@ and **Linux** (GTK4 via maui-labs), and dressed in [Shiny Controls](https://gith
 | **Keyboard** | the full TC keymap (F2–F8, Insert/Space/Shift-arrows marking, Tab, Backspace, Alt+F7, Ctrl+B/R/H/T/W/U/D…) via Shiny's cross-platform keyboard-shortcut engine; `Primary` = ⌘ on Mac, Ctrl elsewhere. F1 shows a reference generated from the live shortcut registry |
 | **Command line** | typing goes to the command line; `cd` is handled internally, everything else runs through the system shell with output streamed into a console pane |
 | **Archives** | Enter browses an archive like a folder: zip (+ jar/nupkg/docx/apk/…) read/write; tar, tar.gz, tar.bz2, tar.xz, tar.zst, 7z, rar and lone .gz/.bz2/.xz read-only. Pack (Alt+F5) to zip/tar/tar.gz/tar.bz2, Unpack (Alt+F9) any of them |
-| **Operations** | copy/move/delete with byte progress, cancel, conflict resolution (overwrite / all / older / skip / keep both), move-by-rename fast path, trash/recycle bin |
+| **Operations** | copy/move/delete with byte progress, conflict resolution (overwrite / all / older / skip / keep both), move-by-rename fast path, trash/recycle bin (⌘⌫ on a Mac, like Finder) |
+| **Background jobs (Primary+J)** | copy, move, delete, pack and unpack run in the background while you keep working: live progress per job, Stop, Go To (opens where the result went, cursor on it), Clear Completed. Closing or quitting while a job runs asks first |
 | **Lister (F3)** | text, hex, images, rendered Markdown — also for files inside archives; N/P walks the folder |
 | **Editor (F4)** | built-in editor (Markdown files get Shiny's MarkdownEditor with live preview) or your external editor |
 | **Find files** | wildcard masks with TC syntax (`*.cs;*.xaml \| bin/ obj/`), content search, size filter, go-to-file |
 | **Multi-rename (Ctrl/⌘+M)** | `[N] [N2-5] [E] [C] [P] [YMD] [hms]` placeholders, search/replace (plain or regex), case, counters, live preview, undo |
 | **Synchronize dirs** | compare trees by date/size/content, per-row direction, copy both ways |
+| **Languages** | English, French and Spanish - follows the system language, or pick one in Settings (applies on the next launch) |
 | **Folder tree, branch view, quick filter, hotlist, swap panels, compare files by content** | |
 
 ## Shiny everywhere
@@ -39,7 +41,22 @@ and **Linux** (GTK4 via maui-labs), and dressed in [Shiny Controls](https://gith
 * **Shiny.Maui.Controls.Markdown** — lister + editor + F1 help · **Shiny.Maui.Controls.Desktop** — AppKit/GTK key sources
 * **Shiny.Maui.Shell** — ViewModel-first navigation (`[ShellMap]`, `[ShellProperty]`) · **Shiny.Mediator** — file-system-changed / go-to events
 * **Shiny.Extensions.Stores + DependencyInjection** — `[Bind]` persisted settings, `[Singleton]` registration
+* **Shiny.Extensions.Localization.Generator** — strongly typed `StringsLocalized` from the `.resx` files (see [Translations](#translations))
 * **SharpCompress** — 7z / rar / compressed-tar reading (System.IO.Compression for zip, System.Formats.Tar for writing tars)
+
+## Translations
+
+Every piece of UI text lives in `src/ShinyCommander.Shared/Resources/Strings/`: `Strings.resx` (English) plus
+`Strings.fr.resx` and `Strings.es.resx`. The generator turns each key into a property on `StringsLocalized` (a method
+ending in `Format` when the text has `{0}` placeholders). Code reads them through `L` (`L.Delete_TrashTitle`,
+`L.Op_CopyTitleFormat(what)`), XAML through `{l:Tr Key}` - `{l:Tr Cmd_Copy, Suffix=' (F5)'}` appends untranslated
+text such as a shortcut. The ribbon's keys (`Cmd_*`, `Ribbon_*`) come from the table in `tools/ribbon.py`, which
+reports any it can't find.
+
+To add a language, copy `Strings.resx` to `Strings.<culture>.resx`, translate the values, and add it to
+`Strings.Languages` so Settings offers it. `tests/ShinyCommander.Core.Tests/LocalizationTests.cs` fails if a
+language is missing a key or a `{0}` placeholder, or if the XAML uses a key that doesn't exist. In Debug, an unknown
+`{l:Tr}` key throws as the page is built.
 
 ## Layout
 

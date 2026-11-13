@@ -15,10 +15,10 @@ public partial class CompareRowViewModel(CompareItem item, bool friendly) : Obse
     public string StateText => this.Item.State switch
     {
         CompareState.Equal => "=",
-        CompareState.LeftNewer => "newer →",
-        CompareState.RightNewer => "← newer",
-        CompareState.LeftOnly => "left only",
-        CompareState.RightOnly => "right only",
+        CompareState.LeftNewer => L.Compare_StateLeftNewer,
+        CompareState.RightNewer => L.Compare_StateRightNewer,
+        CompareState.LeftOnly => L.Compare_StateLeftOnly,
+        CompareState.RightOnly => L.Compare_StateRightOnly,
         _ => "≠"
     };
 
@@ -87,7 +87,7 @@ public partial class CompareViewModel(FileOperationService ops, AppSettings sett
     public partial bool IsBusy { get; set; }
 
     [ObservableProperty]
-    public partial string Status { get; set; } = "Press Compare";
+    public partial string Status { get; set; } = L.Compare_PressCompare;
 
     [ObservableProperty]
     public partial object? SelectedRow { get; set; }
@@ -102,7 +102,7 @@ public partial class CompareViewModel(FileOperationService ops, AppSettings sett
         this.Rows = new ObservableCollection<CompareRowViewModel>(this.ShowEqual ? this.all : this.all.Where(x => x.Item.State != CompareState.Equal));
         var toRight = this.all.Count(x => x.Action == SyncAction.CopyToRight);
         var toLeft = this.all.Count(x => x.Action == SyncAction.CopyToLeft);
-        this.Status = $"{this.all.Count} item(s)  •  {this.all.Count(x => x.Item.State == CompareState.Equal)} equal  •  {toRight} → right  •  {toLeft} ← left";
+        this.Status = L.Compare_StatusFormat(this.all.Count, this.all.Count(x => x.Item.State == CompareState.Equal), toRight, toLeft);
     }
 
     [RelayCommand]
@@ -130,7 +130,7 @@ public partial class CompareViewModel(FileOperationService ops, AppSettings sett
         }
         catch (Exception ex)
         {
-            await dialogs.Alert("Compare", ex.Message);
+            await dialogs.Alert(L.Compare_Compare, ex.Message);
         }
         finally
         {
@@ -147,11 +147,11 @@ public partial class CompareViewModel(FileOperationService ops, AppSettings sett
         var work = this.all.Where(x => x.Action != SyncAction.None).ToList();
         if (work.Count == 0)
         {
-            await dialogs.Toast("Nothing to synchronize");
+            await dialogs.Toast(L.Compare_NothingToSync);
             return;
         }
 
-        var ok = await dialogs.Confirm("Synchronize", $"Copy {work.Count(x => x.Action == SyncAction.CopyToRight)} item(s) to the right and {work.Count(x => x.Action == SyncAction.CopyToLeft)} to the left? Existing files are overwritten.", "Synchronize");
+        var ok = await dialogs.Confirm(L.Compare_Synchronize, L.Compare_ConfirmSyncFormat(work.Count(x => x.Action == SyncAction.CopyToRight), work.Count(x => x.Action == SyncAction.CopyToLeft)), L.Compare_Synchronize);
         if (!ok)
             return;
 
@@ -165,7 +165,7 @@ public partial class CompareViewModel(FileOperationService ops, AppSettings sett
                     ? (row.Item.Left!, this.RightPath)
                     : (row.Item.Right!, this.LeftPath);
 
-                this.Status = $"Copying {row.Item.RelativePath}…";
+                this.Status = L.Compare_CopyingFormat(row.Item.RelativePath);
                 var targetDir = Path.Combine(targetRoot, Path.GetDirectoryName(row.Item.RelativePath) ?? String.Empty);
                 var result = await ops.CopyAsync([source], new OperationTarget(targetDir), (_, _) => Task.FromResult(ConflictAction.Overwrite));
                 errors.AddRange(result.Errors);
@@ -182,9 +182,9 @@ public partial class CompareViewModel(FileOperationService ops, AppSettings sett
 
         await mediator.Publish(new FileSystemChangedEvent([this.LeftPath, this.RightPath]));
         if (errors.Count > 0)
-            await dialogs.Alert("Synchronize finished with errors", String.Join("\n", errors.Take(15)));
+            await dialogs.Alert(L.Compare_SyncErrors, String.Join("\n", errors.Take(15)));
         else
-            await dialogs.Toast("Synchronized", ToastKind.Success);
+            await dialogs.Toast(L.Compare_Synchronized, ToastKind.Success);
 
         await this.Compare();
     }

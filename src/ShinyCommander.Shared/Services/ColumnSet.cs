@@ -56,11 +56,11 @@ public partial class ColumnSet(AppSettings settings) : ObservableObject
 
     public static string Label(PanelColumn column) => column switch
     {
-        PanelColumn.Extension => "Extension",
-        PanelColumn.Size => "Size",
-        PanelColumn.Modified => "Date modified",
-        PanelColumn.Created => "Date created",
-        _ => "Attributes"
+        PanelColumn.Extension => L.Column_Extension,
+        PanelColumn.Size => L.Column_Size,
+        PanelColumn.Modified => L.Column_DateModified,
+        PanelColumn.Created => L.Column_DateCreated,
+        _ => L.Column_Attributes
     };
 }
 

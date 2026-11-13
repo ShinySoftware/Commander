@@ -3,17 +3,18 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shiny="http://shiny.net/maui/controls"
              xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:l="clr-namespace:ShinyCommander"
              x:Class="ShinyCommander.Views.SettingsPage"
              x:DataType="vm:SettingsViewModel">
 
     <shiny:KeyboardShortcuts.Shortcuts>
-        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="Close" />
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
     </shiny:KeyboardShortcuts.Shortcuts>
 
     <Grid RowDefinitions="Auto,*">
         <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-            <shiny:ShinyButton AutomationId="PageBack" Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
-            <Label Grid.Column="1" Text="Settings" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
+            <shiny:ShinyButton AutomationId="PageBack" Text="{l:Tr Page_Back}" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="{l:Tr Settings_Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
         </Grid>
 
         <Grid Grid.Row="1" HorizontalOptions="Center" WidthRequest="680" Padding="0,8">
@@ -34,45 +35,52 @@
                              HeaderPadding="16,18,16,6"
                              ShowSectionSeparator="False">
                 <shiny:TableRoot>
-                    <shiny:TableSection Title="Panels">
-                        <shiny:SwitchCell Title="Show hidden files" Description="Dot files and hidden attribute (Ctrl/⌘+H)" On="{Binding ShowHidden, Mode=TwoWay}" />
-                        <shiny:SwitchCell Title="Friendly sizes" Description="12.3 MB instead of 12,912,640" On="{Binding FriendlySizes, Mode=TwoWay}" />
-                        <shiny:ButtonCell Title="Customize pane toolbar…" ButtonTextColor="{StaticResource Accent}" Command="{Binding CustomizeToolbarCommand}" />
+                    <shiny:TableSection Title="{l:Tr Settings_Panels}">
+                        <shiny:SwitchCell Title="{l:Tr Settings_ShowHidden}" Description="{l:Tr Settings_ShowHiddenDesc}" On="{Binding ShowHidden, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="{l:Tr Settings_FriendlySizes}" Description="{l:Tr Settings_FriendlySizesDesc}" On="{Binding FriendlySizes, Mode=TwoWay}" />
+                        <shiny:ButtonCell Title="{l:Tr Settings_CustomizeToolbar}" ButtonTextColor="{StaticResource Accent}" Command="{Binding CustomizeToolbarCommand}" />
                     </shiny:TableSection>
 
-                    <shiny:TableSection Title="Columns (Primary+Shift+K)">
-                        <shiny:SwitchCell Title="Extension" On="{Binding ShowExtColumn, Mode=TwoWay}" />
-                        <shiny:SwitchCell Title="Size" On="{Binding ShowSizeColumn, Mode=TwoWay}" />
-                        <shiny:SwitchCell Title="Date modified" On="{Binding ShowDateColumn, Mode=TwoWay}" />
-                        <shiny:SwitchCell Title="Date created" On="{Binding ShowCreatedColumn, Mode=TwoWay}" />
-                        <shiny:SwitchCell Title="Attributes" On="{Binding ShowAttrColumn, Mode=TwoWay}" />
+                    <shiny:TableSection Title="{l:Tr Settings_Columns}">
+                        <shiny:SwitchCell Title="{l:Tr Settings_ColExtension}" On="{Binding ShowExtColumn, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="{l:Tr Settings_ColSize}" On="{Binding ShowSizeColumn, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="{l:Tr Settings_ColModified}" On="{Binding ShowDateColumn, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="{l:Tr Settings_ColCreated}" On="{Binding ShowCreatedColumn, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="{l:Tr Settings_ColAttributes}" On="{Binding ShowAttrColumn, Mode=TwoWay}" />
                     </shiny:TableSection>
 
-                    <shiny:TableSection Title="Operations">
-                        <shiny:SwitchCell Title="Confirm before delete" On="{Binding ConfirmDelete, Mode=TwoWay}" />
-                        <shiny:SwitchCell Title="Delete to trash / recycle bin" Description="Shift+F8 always deletes permanently" On="{Binding UseTrash, Mode=TwoWay}" />
-                        <shiny:SwitchCell Title="Unpack each archive into its own folder" On="{Binding ExtractToFolderPerArchive, Mode=TwoWay}" />
-                        <shiny:EntryCell Title="External editor (F4)" Placeholder="built-in" ValueText="{Binding ExternalEditor, Mode=TwoWay}" />
+                    <shiny:TableSection Title="{l:Tr Settings_Operations}">
+                        <shiny:SwitchCell Title="{l:Tr Settings_ConfirmDelete}" On="{Binding ConfirmDelete, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="{l:Tr Settings_UseTrash}" Description="{l:Tr Settings_UseTrashDesc}" On="{Binding UseTrash, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="{l:Tr Settings_ExtractPerArchive}" On="{Binding ExtractToFolderPerArchive, Mode=TwoWay}" />
+                        <shiny:EntryCell Title="{l:Tr Settings_ExternalEditor}" Placeholder="{l:Tr Settings_ExternalEditorBuiltIn}" ValueText="{Binding ExternalEditor, Mode=TwoWay}" />
                     </shiny:TableSection>
 
-                    <shiny:TableSection x:Name="ThemeSection" Title="Theme" shiny:RadioCell.SelectedValue="{Binding Theme, Mode=TwoWay}">
-                        <shiny:RadioCell Title="Follow system" Value="System" />
-                        <shiny:RadioCell Title="Light" Value="Light" />
-                        <shiny:RadioCell Title="Dark" Value="Dark" />
+                    <shiny:TableSection x:Name="LanguageSection" Title="{l:Tr Settings_Language}" shiny:RadioCell.SelectedValue="{Binding Language, Mode=TwoWay}">
+                        <shiny:RadioCell Title="{l:Tr Settings_LanguageSystem}" Value="System" />
+                        <shiny:RadioCell Title="English" Value="en" />
+                        <shiny:RadioCell Title="Français" Value="fr" />
+                        <shiny:RadioCell Title="Español" Value="es" />
                     </shiny:TableSection>
 
-                    <shiny:TableSection x:Name="FontSection" Title="Viewer / editor font size" shiny:RadioCell.SelectedValue="{Binding ViewerFontSize, Mode=TwoWay}">
-                        <shiny:RadioCell Title="Small (12)" Value="12" />
-                        <shiny:RadioCell Title="Medium (13)" Value="13" />
-                        <shiny:RadioCell Title="Large (15)" Value="15" />
-                        <shiny:RadioCell Title="Extra large (18)" Value="18" />
+                    <shiny:TableSection x:Name="ThemeSection" Title="{l:Tr Settings_Theme}" shiny:RadioCell.SelectedValue="{Binding Theme, Mode=TwoWay}">
+                        <shiny:RadioCell Title="{l:Tr Settings_ThemeSystem}" Value="System" />
+                        <shiny:RadioCell Title="{l:Tr Settings_ThemeLight}" Value="Light" />
+                        <shiny:RadioCell Title="{l:Tr Settings_ThemeDark}" Value="Dark" />
                     </shiny:TableSection>
 
-                    <shiny:TableSection x:Name="AboutSection" Title="About">
+                    <shiny:TableSection x:Name="FontSection" Title="{l:Tr Settings_FontSize}" shiny:RadioCell.SelectedValue="{Binding ViewerFontSize, Mode=TwoWay}">
+                        <shiny:RadioCell Title="{l:Tr Settings_FontSmall}" Value="12" />
+                        <shiny:RadioCell Title="{l:Tr Settings_FontMedium}" Value="13" />
+                        <shiny:RadioCell Title="{l:Tr Settings_FontLarge}" Value="15" />
+                        <shiny:RadioCell Title="{l:Tr Settings_FontExtraLarge}" Value="18" />
+                    </shiny:TableSection>
+
+                    <shiny:TableSection x:Name="AboutSection" Title="{l:Tr Settings_About}">
                         <shiny:LabelCell Title="ShinyCommander" ValueText="{Binding AppVersion}" Description="{Binding UpdateStatus}" />
                         <shiny:ButtonCell x:Name="UpdateCell" Title="{Binding UpdateButtonText}" ButtonTextColor="{StaticResource Accent}" Command="{Binding UpdateCommand}" />
-                        <shiny:LabelCell Title="Runtime" Description="{Binding RuntimeInfo}" />
-                        <shiny:LabelCell Title="Built with" Description=".NET MAUI • maui-labs AppKit &amp; GTK4 backends • Shiny Controls, Shell, Mediator, Stores &amp; DI" />
+                        <shiny:LabelCell Title="{l:Tr Settings_Runtime}" Description="{Binding RuntimeInfo}" />
+                        <shiny:LabelCell Title="{l:Tr Settings_BuiltWith}" Description="{l:Tr Settings_BuiltWithDesc}" />
                     </shiny:TableSection>
                 </shiny:TableRoot>
             </shiny:TableView>

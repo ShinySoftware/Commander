@@ -19,7 +19,9 @@ public partial class MainViewModel : ObservableObject,
     readonly IMainThread mainThread;
     readonly Shiny.Maui.Controls.IKeyboardShortcutService shortcuts;
     readonly ColumnSet columns;
-    CancellationTokenSource? operationCts;
+    readonly QuitGuard quitGuard;
+    // one conflict question at a time, whichever job asks
+    readonly SemaphoreSlim conflictGate = new(1, 1);
     CancellationTokenSource? commandCts;
     bool initialized;
 
@@ -33,11 +35,21 @@ public partial class MainViewModel : ObservableObject,
         IMainThread mainThread,
         Shiny.Maui.Controls.IKeyboardShortcutService shortcuts,
         ColumnSet columns,
-        PaneToolbar toolbar
+        PaneToolbar toolbar,
+        JobQueue jobs,
+        QuitGuard quitGuard
     )
     {
         this.shortcuts = shortcuts;
         this.columns = columns;
+        this.Jobs = jobs;
+        this.quitGuard = quitGuard;
+        jobs.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(JobQueue.IsBusy))
+                this.OnPropertyChanged(nameof(this.IsOperationRunning));
+        };
+        jobs.Started += this.OnJobStarted;
 #if DEBUG
         Current = this; // UI test hooks (Testing/UiTestHooks.cs) drive the live instance
 #endif
@@ -87,7 +99,7 @@ public partial class MainViewModel : ObservableObject,
     PanelTabViewModel? Tab => this.ActivePanel?.ActiveTab;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(BackspaceCommand), nameof(SpaceCommand), nameof(HomeCommand), nameof(EndCommand), nameof(CursorLeftCommand), nameof(CursorRightCommand))]
+    [NotifyCanExecuteChangedFor(nameof(BackspaceCommand), nameof(SpaceCommand), nameof(HomeCommand), nameof(EndCommand), nameof(CursorLeftCommand), nameof(CursorRightCommand), nameof(DeleteKeyCommand), nameof(DeletePermanentlyKeyCommand))]
     public partial string CommandText { get; set; } = String.Empty;
 
     [ObservableProperty]
@@ -100,18 +112,16 @@ public partial class MainViewModel : ObservableObject,
     [ObservableProperty]
     public partial bool IsFilterEditing { get; set; }
 
-    // --- operation progress -------------------------------------------------------------------
-    [ObservableProperty]
-    public partial bool IsOperationRunning { get; set; }
+    // --- background jobs ----------------------------------------------------------------------
+    /// <summary>Copy/move/delete/pack/unpack run here - the panels stay usable meanwhile.</summary>
+    public JobQueue Jobs { get; }
 
-    [ObservableProperty]
-    public partial string OperationTitle { get; set; } = String.Empty;
+    /// <summary>True until every job (and its refresh/toast) has finished.</summary>
+    public bool IsOperationRunning => this.Jobs.IsBusy;
 
+    /// <summary>The jobs pane above the command line (Primary+J).</summary>
     [ObservableProperty]
-    public partial string OperationDetail { get; set; } = String.Empty;
-
-    [ObservableProperty]
-    public partial double OperationProgress { get; set; }
+    public partial bool ShowJobs { get; set; }
 
     // --- command output -----------------------------------------------------------------------
     [ObservableProperty]
@@ -142,7 +152,7 @@ public partial class MainViewModel : ObservableObject,
 
     void RefreshKeyStates()
     {
-        foreach (var cmd in new IRelayCommand[] { this.CursorLeftCommand, this.CursorRightCommand, this.CursorUpCommand, this.CursorDownCommand, this.MarkUpCommand, this.MarkDownCommand, this.PageUpCommand, this.PageDownCommand, this.HomeCommand, this.EndCommand, this.InsertCommand, this.SpaceCommand, this.BackspaceCommand, this.SwitchPanelCommand, this.EnterCommand })
+        foreach (var cmd in new IRelayCommand[] { this.CursorLeftCommand, this.CursorRightCommand, this.CursorUpCommand, this.CursorDownCommand, this.MarkUpCommand, this.MarkDownCommand, this.PageUpCommand, this.PageDownCommand, this.HomeCommand, this.EndCommand, this.InsertCommand, this.SpaceCommand, this.BackspaceCommand, this.SwitchPanelCommand, this.EnterCommand, this.DeleteKeyCommand, this.DeletePermanentlyKeyCommand })
             cmd.NotifyCanExecuteChanged();
     }
 
@@ -359,13 +369,15 @@ public partial class MainViewModel : ObservableObject,
         {
             this.CommandText = String.Empty;
         }
-        else if (this.IsOperationRunning)
-        {
-            this.operationCts?.Cancel();
-        }
         else if (this.ShowOutput)
         {
             this.ShowOutput = false;
+        }
+        else if (this.ShowJobs)
+        {
+            // jobs keep running - Esc only hides the pane; each job has its own Stop
+            this.jobsPaneToggles++;
+            this.ShowJobs = false;
         }
     }
 
@@ -407,7 +419,7 @@ public partial class MainViewModel : ObservableObject,
         }
         catch (Exception ex)
         {
-            await this.dialogs.Alert("Cannot open", ex.Message);
+            await this.dialogs.Alert(L.Main_CannotOpen, ex.Message);
         }
     }
 
@@ -487,7 +499,7 @@ public partial class MainViewModel : ObservableObject,
         this.settings.ShowHidden = !this.settings.ShowHidden;
         await (this.Left.ActiveTab?.RefreshAsync() ?? Task.CompletedTask);
         await (this.Right.ActiveTab?.RefreshAsync() ?? Task.CompletedTask);
-        await this.dialogs.Toast(this.settings.ShowHidden ? "Showing hidden files" : "Hiding hidden files");
+        await this.dialogs.Toast(this.settings.ShowHidden ? L.Main_ShowingHidden : L.Main_HidingHidden);
     }
 
     [RelayCommand]
@@ -542,14 +554,14 @@ public partial class MainViewModel : ObservableObject,
     [RelayCommand]
     async Task ChooseColumns()
     {
-        const string done = "Done";
+        var done = L.Common_Done;
         while (true)
         {
             var options = Enum.GetValues<PanelColumn>()
                 .Select(c => (this.columns.IsVisible(c) ? "✓  " : "     ") + ColumnSet.Label(c))
                 .ToList();
 
-            var choice = await this.dialogs.Choose("Columns", options, done);
+            var choice = await this.dialogs.Choose(L.Main_Columns, options, done);
             if (choice == null || choice == done)
                 break;
 
@@ -585,8 +597,8 @@ public partial class MainViewModel : ObservableObject,
     async Task DriveMenu(PanelViewModel panel)
     {
         panel.RefreshDrives();
-        var options = panel.Drives.Select(d => $"{d.Name}   {d.Label}   ({SizeFormatter.Friendly(d.FreeSpace)} free)").ToList();
-        var choice = await this.dialogs.Choose($"{panel.Side} panel - drive", options);
+        var options = panel.Drives.Select(d => $"{d.Name}   {d.Label}   ({L.Main_DriveFreeFormat(SizeFormatter.Friendly(d.FreeSpace))})").ToList();
+        var choice = await this.dialogs.Choose(panel.Side == PanelSide.Left ? L.Main_DriveMenuLeft : L.Main_DriveMenuRight, options);
         var index = choice == null ? -1 : options.IndexOf(choice);
         if (index >= 0)
         {
@@ -598,12 +610,12 @@ public partial class MainViewModel : ObservableObject,
     [RelayCommand]
     async Task Hotlist()
     {
-        const string add = "➕ Add current folder";
-        const string remove = "➖ Remove a folder…";
+        var add = "➕ " + L.Main_HotlistAdd;
+        var remove = "➖ " + L.Main_HotlistRemove;
         var list = AppSettings.SplitLines(this.settings.Hotlist).ToList();
         var options = list.Concat([add]).Concat(list.Count > 0 ? [remove] : Array.Empty<string>()).ToList();
 
-        var choice = await this.dialogs.Choose("Directory hotlist", options);
+        var choice = await this.dialogs.Choose(L.Main_Hotlist, options);
         if (choice == null)
             return;
 
@@ -612,11 +624,11 @@ public partial class MainViewModel : ObservableObject,
             if (!list.Contains(this.ActivePanel.Path))
                 list.Add(this.ActivePanel.Path);
             this.settings.Hotlist = AppSettings.JoinLines(list);
-            await this.dialogs.Toast($"Added {this.ActivePanel.Path}", ToastKind.Success);
+            await this.dialogs.Toast(L.Main_HotlistAddedFormat(this.ActivePanel.Path), ToastKind.Success);
         }
         else if (choice == remove)
         {
-            var doomed = await this.dialogs.Choose("Remove from hotlist", list, destructive: null);
+            var doomed = await this.dialogs.Choose(L.Main_HotlistRemoveTitle, list, destructive: null);
             if (doomed != null)
             {
                 list.Remove(doomed);
@@ -663,7 +675,7 @@ public partial class MainViewModel : ObservableObject,
     [RelayCommand]
     async Task SelectGroup()
     {
-        var mask = await this.dialogs.Prompt("Select files", "Mask (e.g. *.txt;*.md)", "*.*");
+        var mask = await this.dialogs.Prompt(L.Main_SelectFiles, L.Main_SelectMask, "*.*");
         if (!String.IsNullOrWhiteSpace(mask))
             this.Tab?.MarkByMask(mask, true);
     }
@@ -671,7 +683,7 @@ public partial class MainViewModel : ObservableObject,
     [RelayCommand]
     async Task DeselectGroup()
     {
-        var mask = await this.dialogs.Prompt("Unselect files", "Mask (e.g. *.tmp)", "*.*");
+        var mask = await this.dialogs.Prompt(L.Main_UnselectFiles, L.Main_UnselectMask, "*.*");
         if (!String.IsNullOrWhiteSpace(mask))
             this.Tab?.MarkByMask(mask, false);
     }
@@ -710,7 +722,7 @@ public partial class MainViewModel : ObservableObject,
             return;
 
         await Clipboard.Default.SetTextAsync(String.Join(Environment.NewLine, paths));
-        await this.dialogs.Toast($"Copied {paths.Count} path(s)", ToastKind.Success);
+        await this.dialogs.Toast(L.Main_CopiedPathsFormat(paths.Count), ToastKind.Success);
     }
 
     async Task RunCommandLine()
@@ -740,7 +752,7 @@ public partial class MainViewModel : ObservableObject,
 
         if (tab.IsArchive)
         {
-            await this.dialogs.Toast("Commands can't run inside an archive", ToastKind.Warning);
+            await this.dialogs.Toast(L.Main_NoCommandsInArchive, ToastKind.Warning);
             return;
         }
 
@@ -776,7 +788,7 @@ public partial class MainViewModel : ObservableObject,
         }
         catch (OperationCanceledException)
         {
-            output.AppendLine("[cancelled]");
+            output.AppendLine(L.Main_ConsoleCancelled);
         }
         catch (Exception ex)
         {
@@ -851,7 +863,7 @@ public partial class MainViewModel : ObservableObject,
             }
             if (entry.IsInArchive)
             {
-                await this.dialogs.Alert("Read only", "Files inside archives can be viewed (F3) but not edited. Copy it out first.");
+                await this.dialogs.Alert(L.Main_ReadOnly, L.Main_ReadOnlyArchive);
                 return;
             }
             if (entry.Size > 20 * 1024 * 1024)
@@ -863,7 +875,7 @@ public partial class MainViewModel : ObservableObject,
         }
         catch (Exception ex)
         {
-            await this.dialogs.Alert("Edit", ex.Message);
+            await this.dialogs.Alert(L.Cmd_Edit, ex.Message);
         }
     }
 
@@ -874,11 +886,11 @@ public partial class MainViewModel : ObservableObject,
         if (tab == null)
             return;
 
-        var name = await this.dialogs.Prompt("New file", "File name to create and edit", "new.txt");
+        var name = await this.dialogs.Prompt(L.Main_NewFile, L.Main_NewFileMessage, "new.txt");
         if (String.IsNullOrWhiteSpace(name))
             return;
 
-        await this.Try("New file", async () =>
+        await this.Try(L.Main_NewFile, async () =>
         {
             await this.ops.CreateFileAsync(tab.Path, name);
             await tab.LoadAsync(name);
@@ -895,11 +907,11 @@ public partial class MainViewModel : ObservableObject,
             return;
 
         var suggestion = tab.CursorItem is { IsDirectory: true, Entry.IsParentLink: false } c ? c.Entry.Name : String.Empty;
-        var name = await this.dialogs.Prompt("New folder", "Folder name (use / for nested folders)", suggestion);
+        var name = await this.dialogs.Prompt(L.Main_NewFolder, L.Main_NewFolderMessage, suggestion);
         if (String.IsNullOrWhiteSpace(name))
             return;
 
-        await this.Try("New folder", async () =>
+        await this.Try(L.Main_NewFolder, async () =>
         {
             await this.ops.CreateDirectoryAsync(tab.Path, name);
             await tab.LoadAsync(name.Replace('\\', '/').Split('/')[0]);
@@ -914,11 +926,11 @@ public partial class MainViewModel : ObservableObject,
         if (tab?.CursorItem is not { Entry.IsParentLink: false } item)
             return;
 
-        var name = await this.dialogs.Prompt("Rename", $"New name for '{item.Entry.Name}'", item.Entry.Name);
+        var name = await this.dialogs.Prompt(L.Cmd_Rename, L.Main_RenameMessageFormat(item.Entry.Name), item.Entry.Name);
         if (String.IsNullOrWhiteSpace(name) || name == item.Entry.Name)
             return;
 
-        await this.Try("Rename", async () =>
+        await this.Try(L.Cmd_Rename, async () =>
         {
             await this.ops.RenameAsync(item.Entry, name);
             await tab.LoadAsync(name);
@@ -939,13 +951,14 @@ public partial class MainViewModel : ObservableObject,
         if (tab == null || sources.Count == 0)
             return;
 
-        var verb = move ? "Move" : "Copy";
-        var what = sources.Count == 1 ? $"'{sources[0].Name}'" : $"{sources.Count} items";
+        var verb = move ? L.Cmd_Move : L.Cmd_Copy;
+        var what = What(sources);
+        var title = move ? L.Op_MoveTitleFormat(what) : L.Op_CopyTitleFormat(what);
         var defaultTarget = this.InactivePanel.Path + Path.DirectorySeparatorChar;
         if (sources.Count == 1 && move && this.InactivePanel.Path == tab.Path)
             defaultTarget = sources[0].Name; // F6 with both panels on the same folder == rename
 
-        var input = await this.dialogs.Prompt($"{verb} {what}", $"{verb} to:", defaultTarget, verb);
+        var input = await this.dialogs.Prompt(title, move ? L.Op_MoveTo : L.Op_CopyTo, defaultTarget, verb);
         if (String.IsNullOrWhiteSpace(input))
             return;
 
@@ -961,7 +974,8 @@ public partial class MainViewModel : ObservableObject,
         }
 
         var sourceDir = tab.Path;
-        await this.RunOperation($"{verb} {what}", async (progress, ct) =>
+        var destination = new JobDestination(target.Directory, sources.Count == 1 ? target.RenameTo ?? sources[0].Name : null);
+        this.RunOperation(title, move ? FileOperationKind.Move : FileOperationKind.Copy, destination, async (progress, ct) =>
         {
             var result = move
                 ? await this.ops.MoveAsync(sources, target, this.ResolveConflict, progress, ct)
@@ -969,16 +983,31 @@ public partial class MainViewModel : ObservableObject,
             await this.Changed(sourceDir, target.Directory);
             return result;
         });
+        tab.MarkAll(false);
     }
+
+    /// <summary>"'a.txt'" for one item, "3 items" for more - what a title or question is about.</summary>
+    static string What(IReadOnlyList<FileEntry> items) => items.Count == 1 ? L.Op_QuotedFormat(items[0].Name) : L.Op_ItemsFormat(items.Count);
 
     async Task<ConflictAction> ResolveConflict(FileConflict conflict, CancellationToken ct)
     {
-        string[] options = ["Overwrite", "Overwrite all", "Overwrite all older", "Skip", "Skip all", "Keep both"];
-        var msg = $"{Path.GetFileName(conflict.TargetPath)} already exists\n\n" +
-                  $"New:      {SizeFormatter.Exact(conflict.SourceSize)} bytes  {conflict.SourceModified:g}\n" +
-                  $"Existing: {SizeFormatter.Exact(conflict.TargetSize)} bytes  {conflict.TargetModified:g}";
+        string[] options = [L.Conflict_Overwrite, L.Conflict_OverwriteAll, L.Conflict_OverwriteAllOlder, L.Conflict_Skip, L.Conflict_SkipAll, L.Conflict_KeepBoth];
+        var msg = L.Conflict_MessageFormat(
+            Path.GetFileName(conflict.TargetPath),
+            SizeFormatter.Exact(conflict.SourceSize), conflict.SourceModified.ToString("g"),
+            SizeFormatter.Exact(conflict.TargetSize), conflict.TargetModified.ToString("g"));
 
-        var choice = await this.mainThread.InvokeOnMainThreadAsync(() => this.dialogs.Choose(msg, options, "Cancel"));
+        // jobs run side by side - their questions take turns
+        await this.conflictGate.WaitAsync(ct);
+        string? choice;
+        try
+        {
+            choice = await this.mainThread.InvokeOnMainThreadAsync(() => this.dialogs.Choose(msg, options, L.Common_Cancel));
+        }
+        finally
+        {
+            this.conflictGate.Release();
+        }
         return Array.IndexOf(options, choice) switch
         {
             0 => ConflictAction.Overwrite,
@@ -997,6 +1026,14 @@ public partial class MainViewModel : ObservableObject,
     [RelayCommand]
     Task DeletePermanently() => this.DeleteItems(false);
 
+    // ⌘⌫ / ⌥⌘⌫ like Finder: a Mac keyboard has no F8 without fn and its ⌫ is Backspace (parent folder). While the
+    // command line has text the keys stay with it (Ctrl+Backspace deletes a word on Windows/Linux).
+    [RelayCommand(CanExecute = nameof(CommandLineEmpty))]
+    Task DeleteKey() => this.Delete();
+
+    [RelayCommand(CanExecute = nameof(CommandLineEmpty))]
+    Task DeletePermanentlyKey() => this.DeletePermanently();
+
     async Task DeleteItems(bool trash)
     {
         var tab = this.Tab;
@@ -1005,25 +1042,31 @@ public partial class MainViewModel : ObservableObject,
             return;
 
         trash = trash && !tab.IsArchive;
-        var what = items.Count == 1 ? $"'{items[0].Name}'" : $"{items.Count} items";
+        var what = What(items);
         if (this.settings.ConfirmDelete || !trash)
         {
             var ok = await this.dialogs.Confirm(
-                trash ? "Move to trash" : "Delete permanently",
-                trash ? $"Move {what} to the trash?" : $"Permanently delete {what}? This cannot be undone.",
-                trash ? "Move to Trash" : "Delete");
+                trash ? L.Delete_TrashTitle : L.Delete_PermanentTitle,
+                trash ? L.Delete_TrashMessageFormat(what) : L.Delete_PermanentMessageFormat(what),
+                trash ? L.Delete_TrashButton : L.Common_Delete);
             if (!ok)
                 return;
         }
 
         var index = tab.CursorIndex;
-        await this.RunOperation($"Delete {what}", async (progress, ct) =>
+        var path = tab.Path;
+        this.RunOperation(L.Op_DeleteTitleFormat(what), FileOperationKind.Delete, null, async (progress, ct) =>
         {
             var result = await this.ops.DeleteAsync(items, trash, progress, ct);
-            await this.Changed(tab.Path);
+            await this.Changed(path);
             return result;
+        }, () =>
+        {
+            // the cursor stays at the same row - unless you've gone elsewhere meanwhile
+            if (tab.Path == path)
+                tab.SetCursor(index);
         });
-        tab.SetCursor(index);
+        tab.MarkAll(false);
     }
 
     [RelayCommand]
@@ -1035,16 +1078,20 @@ public partial class MainViewModel : ObservableObject,
             return;
 
         var name = sources.Count == 1 ? sources[0].NameWithoutExtension : new DirectoryInfo(tab.Path).Name;
-        var input = await this.dialogs.Prompt("Pack files", $"Pack {sources.Count} item(s) to archive - the extension picks the format ({String.Join(", ", ArchiveFormats.PackExtensions)}):", Path.Combine(this.InactivePanel.Path, name + ".zip"), "Pack");
+        var input = await this.dialogs.Prompt(L.Pack_Title, L.Pack_MessageFormat(sources.Count, String.Join(", ", ArchiveFormats.PackExtensions)), Path.Combine(this.InactivePanel.Path, name + ".zip"), L.Cmd_Pack);
         if (String.IsNullOrWhiteSpace(input))
             return;
 
-        await this.RunOperation("Pack", async (progress, ct) =>
+        var archive = VirtualFileSystem.Normalize(input);
+        var what = What(sources);
+        var destination = new JobDestination(Path.GetDirectoryName(archive) ?? archive, Path.GetFileName(archive));
+        this.RunOperation(L.Op_PackTitleFormat(what, Path.GetFileName(archive)), FileOperationKind.Pack, destination, async (progress, ct) =>
         {
             var result = await this.ops.PackAsync(sources, input, this.ResolveConflict, progress, ct);
-            await this.Changed(Path.GetDirectoryName(VirtualFileSystem.Normalize(input)));
+            await this.Changed(Path.GetDirectoryName(archive));
             return result;
         });
+        tab.MarkAll(false);
     }
 
     [RelayCommand]
@@ -1057,86 +1104,123 @@ public partial class MainViewModel : ObservableObject,
 
         if (archives.Count == 0)
         {
-            await this.dialogs.Toast("Select one or more archives to unpack (zip, tar, tar.gz, 7z, rar…)", ToastKind.Warning);
+            await this.dialogs.Toast(L.Unpack_SelectArchives, ToastKind.Warning);
             return;
         }
 
-        var target = await this.dialogs.Prompt("Unpack", $"Unpack {archives.Count} archive(s) to:", this.InactivePanel.Path, "Unpack");
+        var target = await this.dialogs.Prompt(L.Cmd_Unpack, L.Unpack_MessageFormat(archives.Count), this.InactivePanel.Path, L.Cmd_Unpack);
         if (String.IsNullOrWhiteSpace(target))
             return;
 
-        await this.RunOperation("Unpack", async (progress, ct) =>
+        var what = archives.Count == 1 ? L.Op_QuotedFormat(archives[0].Name) : L.Op_ArchivesFormat(archives.Count);
+        this.RunOperation(L.Op_UnpackTitleFormat(what), FileOperationKind.Extract, new JobDestination(VirtualFileSystem.Normalize(target)), async (progress, ct) =>
         {
             var result = await this.ops.ExtractAsync(archives, VirtualFileSystem.Normalize(target), this.settings.ExtractToFolderPerArchive, this.ResolveConflict, progress, ct);
             await this.Changed(target);
             return result;
         });
+        tab.MarkAll(false);
     }
 
-    async Task RunOperation(string title, Func<IProgress<OperationProgress>, CancellationToken, Task<OperationResult>> work)
-    {
-        if (this.IsOperationRunning)
+    /// <summary>Hands the work to the background job queue and returns straight away.</summary>
+    void RunOperation(
+        string title,
+        FileOperationKind kind,
+        JobDestination? destination,
+        Func<IProgress<OperationProgress>, CancellationToken, Task<OperationResult>> work,
+        Action? finished = null
+    )
+        => this.Jobs.Start(title, kind, destination, work, async job =>
         {
-            await this.dialogs.Toast("Another operation is still running", ToastKind.Warning);
-            return;
-        }
-
-        var cts = this.operationCts = new CancellationTokenSource();
-        this.OperationTitle = title;
-        this.OperationDetail = "Preparing…";
-        this.OperationProgress = 0;
-        this.IsOperationRunning = true;
-
-        var lastUpdate = 0L;
-        var progress = new Progress<OperationProgress>(p =>
-        {
-            // throttle UI updates
-            var now = Environment.TickCount64;
-            if (now - lastUpdate < 50 && p.ItemsDone < p.ItemsTotal)
-                return;
-            lastUpdate = now;
-            this.OperationProgress = p.Fraction;
-            this.OperationDetail = p.BytesTotal > 0
-                ? $"{p.CurrentItem}  •  {SizeFormatter.Friendly(p.BytesDone)} / {SizeFormatter.Friendly(p.BytesTotal)}  •  {p.ItemsDone}/{p.ItemsTotal}"
-                : $"{p.CurrentItem}  •  {p.ItemsDone}/{p.ItemsTotal}";
-        });
-
-        try
-        {
-            var result = await work(progress, cts.Token);
-            if (result.HasErrors)
-            {
-                var errors = String.Join("\n", result.Errors.Take(15));
-                if (result.Errors.Count > 15)
-                    errors += $"\n… and {result.Errors.Count - 15} more";
-                await this.dialogs.Alert($"{title} - finished with errors", errors);
-            }
-            else
-            {
-                var skipped = result.Skipped > 0 ? $", {result.Skipped} skipped" : String.Empty;
-                await this.dialogs.Toast($"{title}: done ({result.Processed} item(s){skipped})", ToastKind.Success);
-            }
-            this.Tab?.MarkAll(false);
-        }
-        catch (OperationCanceledException)
-        {
-            await this.dialogs.Toast($"{title}: cancelled", ToastKind.Warning);
-        }
-        catch (Exception ex)
-        {
-            await this.dialogs.Alert(title, ex.Message);
-        }
-        finally
-        {
-            this.IsOperationRunning = false;
-            this.operationCts = null;
+            finished?.Invoke();
             await (this.Left.ActiveTab?.RefreshAsync() ?? Task.CompletedTask);
             await (this.Right.ActiveTab?.RefreshAsync() ?? Task.CompletedTask);
-        }
+
+            switch (job.State)
+            {
+                case JobState.Completed:
+                    var done = job.Result is { Skipped: > 0 } r
+                        ? L.Job_DoneSkippedFormat(title, r.Processed, r.Skipped)
+                        : L.Job_DoneFormat(title, job.Result?.Processed ?? 0);
+                    await this.dialogs.Toast(done, ToastKind.Success);
+                    break;
+
+                case JobState.CompletedWithErrors:
+                    this.ShowJobs = true;
+                    await this.dialogs.Toast(L.Job_FinishedWithErrorsFormat(title, job.Errors.Count), ToastKind.Warning);
+                    break;
+
+                case JobState.Failed:
+                    this.ShowJobs = true;
+                    await this.dialogs.Toast(L.Job_FailedFormat(title, job.Errors.FirstOrDefault() ?? String.Empty), ToastKind.Error);
+                    break;
+
+                case JobState.Cancelled:
+                    await this.dialogs.Toast(L.Job_StoppedFormat(title), ToastKind.Warning);
+                    break;
+            }
+        });
+
+    // bumped whenever you show/hide the pane yourself - the auto-open never overrides that
+    int jobsPaneToggles;
+
+    // a quick job is over before the pane would be any use - only one still going after a moment opens it
+    async void OnJobStarted(object? sender, JobViewModel job)
+    {
+        var toggles = this.jobsPaneToggles;
+        await Task.Delay(700);
+        if (job.IsRunning && toggles == this.jobsPaneToggles)
+            this.ShowJobs = true;
     }
 
     [RelayCommand]
-    void CancelOperation() => this.operationCts?.Cancel();
+    void ToggleJobs()
+    {
+        this.jobsPaneToggles++;
+        this.ShowJobs = !this.ShowJobs;
+    }
+
+    [RelayCommand]
+    void StopJob(JobViewModel? job) => job?.Stop();
+
+    [RelayCommand]
+    void DismissJob(JobViewModel? job)
+    {
+        if (job != null)
+            this.Jobs.Remove(job);
+    }
+
+    [RelayCommand]
+    void ClearCompletedJobs() => this.Jobs.ClearFinished();
+
+    [RelayCommand]
+    Task ShowJobErrors(JobViewModel? job)
+    {
+        if (job is not { HasErrors: true })
+            return Task.CompletedTask;
+
+        var errors = String.Join("\n", job.Errors.Take(15));
+        if (job.Errors.Count > 15)
+            errors += "\n" + L.Job_AndMoreFormat(job.Errors.Count - 15);
+        return this.dialogs.Alert(job.State == JobState.Failed ? L.Job_FailedTitleFormat(job.Title) : L.Job_ErrorsTitleFormat(job.Title), errors);
+    }
+
+    /// <summary>
+    /// Shows where a finished job put things, cursor on the item. A panel already showing that folder takes it;
+    /// otherwise the other panel goes there, so the folder you copied from stays open beside it.
+    /// </summary>
+    [RelayCommand]
+    async Task GoToJob(JobViewModel? job)
+    {
+        if (job is not { CanGoTo: true, Destination: { } dest })
+            return;
+
+        var dir = VirtualFileSystem.Normalize(dest.Directory);
+        var panel = this.ActivePanel.Path == dir ? this.ActivePanel : this.InactivePanel;
+        this.Activate(panel);
+        await panel.NavigateAsync(dir, dest.FocusName);
+        this.RequestCommandLineFocus();
+    }
 
     async Task Try(string title, Func<Task> action)
     {
@@ -1163,7 +1247,7 @@ public partial class MainViewModel : ObservableObject,
         var items = this.Tab?.SelectedEntries.Where(x => !x.IsInArchive).ToList() ?? [];
         if (items.Count == 0)
         {
-            await this.dialogs.Toast("Select the files to rename first (Insert / Space / right-click)", ToastKind.Warning);
+            await this.dialogs.Toast(L.Main_SelectToRename, ToastKind.Warning);
             return;
         }
         await this.navigator.NavigateTo<MultiRenameViewModel>(vm => vm.Items = items);
@@ -1194,16 +1278,16 @@ public partial class MainViewModel : ObservableObject,
 
         if (a is not { IsDirectory: false } || b is not { IsDirectory: false })
         {
-            await this.dialogs.Toast("Mark two files, or put the cursor on a file in each panel", ToastKind.Warning);
+            await this.dialogs.Toast(L.Main_CompareNeedsTwo, ToastKind.Warning);
             return;
         }
 
         var la = await this.vfs.MaterializeAsync(a.FullPath);
         var lb = await this.vfs.MaterializeAsync(b.FullPath);
         var equal = await ShinyCommander.Core.Compare.DirectoryComparer.ContentEqualAsync(la, lb, CancellationToken.None);
-        await this.dialogs.Alert("Compare by content", equal
-            ? $"The files are identical.\n\n{a.Name}\n{b.Name}"
-            : $"The files are different.\n\n{a.Name}: {SizeFormatter.Exact(a.Size)} bytes\n{b.Name}: {SizeFormatter.Exact(b.Size)} bytes");
+        await this.dialogs.Alert(L.Main_CompareByContent, equal
+            ? L.Compare_IdenticalFormat(a.Name, b.Name)
+            : L.Compare_DifferentFormat(a.Name, SizeFormatter.Exact(a.Size), b.Name, SizeFormatter.Exact(b.Size)));
     }
 
     [RelayCommand]
@@ -1261,37 +1345,41 @@ public partial class MainViewModel : ObservableObject,
         // snapshot what is live on this page *before* navigating - the help page silences these
         var sb = new StringBuilder();
         sb.AppendLine();
-        sb.AppendLine("Operations act on the **marked** files, or on the file under the cursor when nothing is marked. Mark with `Insert`, `Space`, `Shift+↑/↓` or a right-click. Start typing to use the command line.");
+        sb.AppendLine(L.Help_Intro);
         sb.AppendLine();
 
         var active = this.shortcuts.GetActiveShortcuts()
             .Where(x => !x.IsShadowed && !String.IsNullOrEmpty(x.Binding.Description))
-            .GroupBy(x => x.Binding.Category ?? "General");
+            .GroupBy(x => x.Binding.Category ?? L.Help_General);
 
         foreach (var group in active)
         {
             sb.AppendLine($"## **{group.Key}**");
             sb.AppendLine();
-            sb.AppendLine("| Keys | Action |");
+            sb.AppendLine($"| {L.Help_Keys} | {L.Help_Action} |");
             sb.AppendLine("|---|---|");
             foreach (var s in group)
                 sb.AppendLine($"| `{ReadableKeys(this.shortcuts.Format(s.Binding.Gesture))}` | {s.Binding.Description} |");
             sb.AppendLine();
         }
 
-        sb.AppendLine("## **Command line**");
+        sb.AppendLine($"## **{L.Help_CommandLine}**");
         sb.AppendLine();
-        sb.AppendLine("* `cd <path>` changes the active panel's folder (`cd ~`, `cd ..`, `cd -`).");
-        sb.AppendLine("* Anything else runs through the system shell in the active folder; output appears in the console pane.");
+        sb.AppendLine("* " + L.Help_Cd);
+        sb.AppendLine("* " + L.Help_Shell);
         sb.AppendLine();
-        sb.AppendLine("## **Archives**");
+        sb.AppendLine($"## **{L.Help_Archives}**");
         sb.AppendLine();
-        sb.AppendLine("Press `Enter` on a `.zip` (also .jar, .nupkg, .docx, .apk…) to browse it like a folder. Copy (F5) out of it, copy into it, delete or rename inside it.");
+        sb.AppendLine(L.Help_ArchivesText);
 
         var markdown = sb.ToString();
         return this.navigator.NavigateTo<HelpViewModel>(vm => vm.Markdown = markdown);
     }
 
     [RelayCommand]
-    void Exit() => Application.Current?.Quit();
+    async Task Exit()
+    {
+        if (await this.quitGuard.ConfirmAsync())
+            Application.Current?.Quit();
+    }
 }

@@ -19,9 +19,9 @@ public partial class UpdatePage : ContentPage
         this.release = release;
         this.InitializeComponent();
 
-        this.VersionLabel.Text = $"Version {release.DisplayVersion} - you have {updates.CurrentVersion}";
-        this.ReleasedLabel.Text = $"Released {release.PublishedAt.LocalDateTime:D}";
-        this.Notes.Markdown = release.Notes.Length > 0 ? release.Notes : "_No release notes._";
+        this.VersionLabel.Text = L.Update_VersionFormat(release.DisplayVersion, updates.CurrentVersion);
+        this.ReleasedLabel.Text = L.Update_ReleasedFormat(release.PublishedAt.LocalDateTime.ToString("D"));
+        this.Notes.Markdown = release.Notes.Length > 0 ? release.Notes : $"_{L.Update_NoNotes}_";
     }
 
     protected override void OnDisappearing()
@@ -43,7 +43,7 @@ public partial class UpdatePage : ContentPage
         this.Progress.Value = 0;
         this.Progress.IsVisible = true;
         this.Status.ClearValue(Label.TextColorProperty);
-        this.Status.Text = "Downloading…";
+        this.Status.Text = L.Update_Downloading;
         this.Status.IsVisible = true;
         try
         {
@@ -51,7 +51,7 @@ public partial class UpdatePage : ContentPage
             {
                 this.Progress.Value = p;
                 if (p >= 1)
-                    this.Status.Text = "Installing…";
+                    this.Status.Text = L.Update_Installing;
             }));
             // installed: the app is quitting to come back as the new version
         }
@@ -59,7 +59,7 @@ public partial class UpdatePage : ContentPage
         {
             this.Progress.IsVisible = false;
             this.Status.TextColor = Colors.IndianRed;
-            this.Status.Text = $"Couldn't install the update: {ex.Message}";
+            this.Status.Text = L.Update_InstallFailedFormat(ex.Message);
             this.InstallButton.IsEnabled = this.LaterButton.IsEnabled = true;
         }
     }

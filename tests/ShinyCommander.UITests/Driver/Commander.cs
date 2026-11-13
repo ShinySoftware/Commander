@@ -77,6 +77,18 @@ public sealed class Commander(AgentClient client)
     /// </summary>
     public Task<AppState> Answer(params string[] answers) => this.Call("answer", new { answers });
 
+    /// <summary>A background job that runs until stopped (or <paramref name="seconds"/> pass); settling doesn't wait for it.</summary>
+    public Task<AppState> HoldJob(int seconds = 30) => this.Call("hold_job", new { seconds });
+
+    /// <summary>A jobs pane action on job <paramref name="index"/> (newest first): stop, goto, dismiss, errors - or clear (completed).</summary>
+    public Task<AppState> Job(string action, int index = 0) => this.Call("job", new { action, index });
+
+    /// <summary>The main window's close button (macOS). <see cref="LastResult"/> has <c>closing</c>.</summary>
+    public Task<AppState> CloseWindow() => this.Call("close_window");
+
+    /// <summary>The UI language from here on ("fr", "es") - dialogs and newly opened pages. Reset goes back to English.</summary>
+    public Task<AppState> Culture(string name) => this.Call("culture", new { name });
+
     public Task<AppState> Reset(string left, string right) => this.Call("reset", new { left, right });
 
     /// <summary>Real (Shiny) dialogs from here on, for this test - driven with DevFlow taps/fills. Reset turns it off.</summary>

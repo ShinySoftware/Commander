@@ -67,7 +67,7 @@ public partial class QuickViewViewModel(VirtualFileSystem vfs) : ObservableObjec
 
         if (entry == null || entry.IsParentLink)
         {
-            this.ShowSummary(entry, "Nothing to preview", null);
+            this.ShowSummary(entry, L.QuickView_NothingToPreview, null);
             return;
         }
 
@@ -78,7 +78,7 @@ public partial class QuickViewViewModel(VirtualFileSystem vfs) : ObservableObjec
 
         if (entry.IsDirectory || entry.IsArchive)
         {
-            this.ShowSummary(entry, entry.IsArchive ? $"{ArchiveFormats.Describe(ArchiveFormats.GetKind(entry.Name))} archive  •  {SizeFormatter.Friendly(entry.Size)}  •  Enter opens it" : "Folder", null);
+            this.ShowSummary(entry, entry.IsArchive ? L.QuickView_ArchiveFormat(ArchiveFormats.Describe(ArchiveFormats.GetKind(entry.Name)), SizeFormatter.Friendly(entry.Size)) : L.QuickView_Folder, null);
             if (entry.IsDirectory && !entry.IsInArchive)
                 await this.SummarizeFolderAsync(entry, cts.Token);
             return;
@@ -92,7 +92,10 @@ public partial class QuickViewViewModel(VirtualFileSystem vfs) : ObservableObjec
             if (cts.IsCancellationRequested)
                 return;
 
-            this.Info = $"{SizeFormatter.Friendly(content.Length)}  •  {entry.Modified:yyyy-MM-dd HH:mm}" + (content.Truncated ? $"  •  first {SizeFormatter.Friendly(content.Bytes.Length)} shown" : String.Empty);
+            var modified = entry.Modified.ToString("yyyy-MM-dd HH:mm");
+            this.Info = content.Truncated
+                ? L.QuickView_InfoTruncatedFormat(SizeFormatter.Friendly(content.Length), modified, SizeFormatter.Friendly(content.Bytes.Length))
+                : $"{SizeFormatter.Friendly(content.Length)}  •  {modified}";
             switch (content.Kind)
             {
                 case PreviewKind.Image:
@@ -134,7 +137,7 @@ public partial class QuickViewViewModel(VirtualFileSystem vfs) : ObservableObjec
         {
             this.MotionIcon = "eye";
             this.IconColor = Colors.Gray;
-            this.Title = "Quick view";
+            this.Title = L.QuickView_Title;
         }
         this.Info = info;
         this.Image = null;
@@ -170,7 +173,7 @@ public partial class QuickViewViewModel(VirtualFileSystem vfs) : ObservableObjec
             }, ct);
 
             if (!ct.IsCancellationRequested)
-                this.Info = $"Folder  •  {files:N0} file(s), {dirs:N0} folder(s)  •  {SizeFormatter.Friendly(bytes)}";
+                this.Info = L.QuickView_FolderSummaryFormat(files.ToString("N0"), dirs.ToString("N0"), SizeFormatter.Friendly(bytes));
         }
         catch (OperationCanceledException)
         {

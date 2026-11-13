@@ -220,7 +220,7 @@ public partial class PanelViewModel : ObservableObject
         {
             // re-query free space - it changes as we copy
             var fresh = DriveService.FromPath(drive.Name, drive.RootPath, drive.Label);
-            this.FreeSpaceText = $"{SizeFormatter.Friendly(fresh.FreeSpace)} free of {SizeFormatter.Friendly(fresh.TotalSize)}";
+            this.FreeSpaceText = L.Panel_FreeSpaceFormat(SizeFormatter.Friendly(fresh.FreeSpace), SizeFormatter.Friendly(fresh.TotalSize));
             this.DriveUsage = fresh.UsedRatio;
         }
     }

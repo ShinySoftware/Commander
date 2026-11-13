@@ -4,32 +4,33 @@
              xmlns:shiny="http://shiny.net/maui/controls"
              xmlns:md="http://shiny.net/maui/markdown"
              xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:l="clr-namespace:ShinyCommander"
              x:Class="ShinyCommander.Views.ViewerPage"
              x:DataType="vm:ViewerViewModel">
 
     <shiny:KeyboardShortcuts.Shortcuts>
-        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="Close" />
-        <shiny:KeyboardShortcut Gesture="F3" Command="{Binding CloseCommand}" Description="Close" />
-        <shiny:KeyboardShortcut Gesture="Q" Command="{Binding CloseCommand}" Description="Close" />
-        <shiny:KeyboardShortcut Gesture="1" Command="{Binding SetModeCommand}" CommandParameter="Text" Description="Text" />
-        <shiny:KeyboardShortcut Gesture="3" Command="{Binding SetModeCommand}" CommandParameter="Hex" Description="Hex" />
-        <shiny:KeyboardShortcut Gesture="4" Command="{Binding SetModeCommand}" CommandParameter="Markdown" Description="Markdown" />
-        <shiny:KeyboardShortcut Gesture="W" Command="{Binding ToggleWrapCommand}" Description="Word wrap" />
-        <shiny:KeyboardShortcut Gesture="N" Command="{Binding NextFileCommand}" Description="Next file" />
-        <shiny:KeyboardShortcut Gesture="P" Command="{Binding PreviousFileCommand}" Description="Previous file" />
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
+        <shiny:KeyboardShortcut Gesture="F3" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
+        <shiny:KeyboardShortcut Gesture="Q" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
+        <shiny:KeyboardShortcut Gesture="1" Command="{Binding SetModeCommand}" CommandParameter="Text" Description="{l:Tr Viewer_ModeText}" />
+        <shiny:KeyboardShortcut Gesture="3" Command="{Binding SetModeCommand}" CommandParameter="Hex" Description="{l:Tr Viewer_ModeHex}" />
+        <shiny:KeyboardShortcut Gesture="4" Command="{Binding SetModeCommand}" CommandParameter="Markdown" Description="{l:Tr Viewer_ModeMarkdown}" />
+        <shiny:KeyboardShortcut Gesture="W" Command="{Binding ToggleWrapCommand}" Description="{l:Tr Viewer_WordWrap}" />
+        <shiny:KeyboardShortcut Gesture="N" Command="{Binding NextFileCommand}" Description="{l:Tr Viewer_NextFile}" />
+        <shiny:KeyboardShortcut Gesture="P" Command="{Binding PreviousFileCommand}" Description="{l:Tr Viewer_PreviousFile}" />
     </shiny:KeyboardShortcuts.Shortcuts>
 
     <Grid RowDefinitions="Auto,*,Auto">
         <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-            <shiny:ShinyButton AutomationId="PageBack" Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <shiny:ShinyButton AutomationId="PageBack" Text="{l:Tr Page_Back}" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
             <Label Grid.Column="1" Text="{Binding Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
             <HorizontalStackLayout Grid.Column="2" Spacing="4">
-                <shiny:ShinyButton Text="Text (1)" Command="{Binding SetModeCommand}" CommandParameter="Text" Appearance="Text" FontSize="12" ContentPadding="6,2" />
-                <shiny:ShinyButton Text="Hex (3)" Command="{Binding SetModeCommand}" CommandParameter="Hex" Appearance="Text" FontSize="12" ContentPadding="6,2" />
-                <shiny:ShinyButton Text="Markdown (4)" Command="{Binding SetModeCommand}" CommandParameter="Markdown" Appearance="Text" FontSize="12" ContentPadding="6,2" />
-                <shiny:ShinyButton Text="Wrap (W)" Command="{Binding ToggleWrapCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
-                <shiny:ShinyButton Text="◀ Prev" Command="{Binding PreviousFileCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
-                <shiny:ShinyButton Text="Next ▶" Command="{Binding NextFileCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton Text="{l:Tr Viewer_TextButton}" Command="{Binding SetModeCommand}" CommandParameter="Text" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton Text="{l:Tr Viewer_HexButton}" Command="{Binding SetModeCommand}" CommandParameter="Hex" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton Text="{l:Tr Viewer_MarkdownButton}" Command="{Binding SetModeCommand}" CommandParameter="Markdown" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton Text="{l:Tr Viewer_WrapButton}" Command="{Binding ToggleWrapCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton Text="{l:Tr Viewer_PrevButton}" Command="{Binding PreviousFileCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton Text="{l:Tr Viewer_NextButton}" Command="{Binding NextFileCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
             </HorizontalStackLayout>
         </Grid>
 

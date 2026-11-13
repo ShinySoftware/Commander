@@ -35,6 +35,9 @@ doesn't fight your own build or the copy of the app you're using.
   engine, and clicks go through the DevFlow agent inside the app, so you can keep working while it runs.
 - **In-memory settings.** Launched with `SHINYCOMMANDER_UITEST=1`, the app keeps its settings in memory, so your real
   preferences are never read or written.
+- **English.** The app starts in English whatever your system language, as tests assert on English text. Set
+  `SHINYCOMMANDER_LANG=fr` (with `--fresh`) to run it in another language, e.g. `--screens` to screenshot every screen
+  in French. `LocalizationTests` switch languages live through the `culture` tool.
 - **Throwaway folders.** Each test works in its own folder under `tests/ShinyCommander.UITests/artifacts/work`.
 - **No Trash.** Deletes are permanent in test mode, so nothing lands in your Trash.
 
@@ -48,6 +51,7 @@ doesn't fight your own build or the copy of the app you're using.
  Commander ── extension tools org.shiny.commander ───▶  └─ Shared/Testing/UiTestHooks.cs
                                                             state · key · type · navigate · cursor · mark
                                                             command · answer · real_dialogs · reset
+                                                            hold_job · job · close_window
 ```
 
 - **Keys.** DevFlow can tap and fill but can't press keys, and ShinyCommander is a keyboard program. The app's `key`

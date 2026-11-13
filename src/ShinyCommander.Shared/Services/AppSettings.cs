@@ -15,6 +15,9 @@ public partial class AppSettings
     [Bind] public partial bool ExtractToFolderPerArchive { get; set; }
     [Bind] public partial bool OpenFoldersInNewTabOnMiddle { get; set; }
     [Bind] public partial string? Theme { get; set; }
+
+    /// <summary>UI language: "System" (or null) follows the OS, otherwise a culture name ("fr") - Strings.ApplyLanguage.</summary>
+    [Bind] public partial string? Language { get; set; }
     [Bind] public partial string? ExternalEditor { get; set; }
     [Bind] public partial int ViewerFontSize { get; set; }
     [Bind] public partial int PanelFontSize { get; set; }

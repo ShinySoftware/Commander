@@ -1,0 +1,1609 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+
+  <!-- Common -->
+  <data name="Common_OK" xml:space="preserve">
+    <value>OK</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Close</value>
+  </data>
+  <data name="Common_Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Common_Done" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="Common_Yes" xml:space="preserve">
+    <value>Yes</value>
+  </data>
+  <data name="Common_No" xml:space="preserve">
+    <value>No</value>
+  </data>
+  <data name="Common_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Common_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Common_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Common_Browse" xml:space="preserve">
+    <value>Browse…</value>
+  </data>
+  <data name="Common_Add" xml:space="preserve">
+    <value>Add</value>
+  </data>
+  <data name="Common_Remove" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Common_Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="Common_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="Common_Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="Common_Reset" xml:space="preserve">
+    <value>Reset</value>
+  </data>
+
+  <!-- Ribbon & commands (tools/ribbon.py checks these against its table) -->
+  <data name="Ribbon_Help" xml:space="preserve">
+    <value>Help</value>
+  </data>
+  <data name="Ribbon_Tab_files" xml:space="preserve">
+    <value>Files</value>
+  </data>
+  <data name="Ribbon_Tab_select" xml:space="preserve">
+    <value>Selection</value>
+  </data>
+  <data name="Ribbon_Tab_view" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Ribbon_Tab_go" xml:space="preserve">
+    <value>Go</value>
+  </data>
+  <data name="Ribbon_Tab_tools" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+  <data name="Ribbon_Group_Transfer" xml:space="preserve">
+    <value>Transfer</value>
+  </data>
+  <data name="Ribbon_Group_Create" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="Ribbon_Group_Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Ribbon_Group_Archive" xml:space="preserve">
+    <value>Archive</value>
+  </data>
+  <data name="Ribbon_Group_Clipboard" xml:space="preserve">
+    <value>Clipboard</value>
+  </data>
+  <data name="Ribbon_Group_Mark" xml:space="preserve">
+    <value>Mark</value>
+  </data>
+  <data name="Ribbon_Group_ByPattern" xml:space="preserve">
+    <value>By pattern</value>
+  </data>
+  <data name="Ribbon_Group_Panel" xml:space="preserve">
+    <value>Panel</value>
+  </data>
+  <data name="Ribbon_Group_Show" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="Ribbon_Group_Layout" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="Ribbon_Group_Tabs" xml:space="preserve">
+    <value>Tabs</value>
+  </data>
+  <data name="Ribbon_Group_History" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="Ribbon_Group_Places" xml:space="preserve">
+    <value>Places</value>
+  </data>
+  <data name="Ribbon_Group_Drives" xml:space="preserve">
+    <value>Drives</value>
+  </data>
+  <data name="Ribbon_Group_Find" xml:space="preserve">
+    <value>Find</value>
+  </data>
+  <data name="Ribbon_Group_Batch" xml:space="preserve">
+    <value>Batch</value>
+  </data>
+  <data name="Ribbon_Group_Compare" xml:space="preserve">
+    <value>Compare</value>
+  </data>
+  <data name="Ribbon_Group_App" xml:space="preserve">
+    <value>App</value>
+  </data>
+  <data name="Cmd_Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Cmd_Move" xml:space="preserve">
+    <value>Move</value>
+  </data>
+  <data name="Cmd_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Cmd_ToggleJobs" xml:space="preserve">
+    <value>Jobs</value>
+  </data>
+  <data name="Cmd_MakeDirectory" xml:space="preserve">
+    <value>New Folder</value>
+  </data>
+  <data name="Cmd_NewFile" xml:space="preserve">
+    <value>New File</value>
+  </data>
+  <data name="Cmd_Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Cmd_View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Cmd_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Cmd_OpenTerminal" xml:space="preserve">
+    <value>Terminal</value>
+  </data>
+  <data name="Cmd_RevealInFileManager" xml:space="preserve">
+    <value>Reveal</value>
+  </data>
+  <data name="Cmd_Pack" xml:space="preserve">
+    <value>Pack</value>
+  </data>
+  <data name="Cmd_Unpack" xml:space="preserve">
+    <value>Unpack</value>
+  </data>
+  <data name="Cmd_CopyPathsToClipboard" xml:space="preserve">
+    <value>Copy Paths</value>
+  </data>
+  <data name="Cmd_CopyNameToCommandLine" xml:space="preserve">
+    <value>Name to Cmd</value>
+  </data>
+  <data name="Cmd_SelectAll" xml:space="preserve">
+    <value>Select All</value>
+  </data>
+  <data name="Cmd_DeselectAll" xml:space="preserve">
+    <value>Unselect All</value>
+  </data>
+  <data name="Cmd_InvertSelection" xml:space="preserve">
+    <value>Invert</value>
+  </data>
+  <data name="Cmd_SelectGroup" xml:space="preserve">
+    <value>Select Group…</value>
+  </data>
+  <data name="Cmd_DeselectGroup" xml:space="preserve">
+    <value>Unselect Group…</value>
+  </data>
+  <data name="Cmd_SelectSameExtension" xml:space="preserve">
+    <value>Same Extension</value>
+  </data>
+  <data name="Cmd_Refresh" xml:space="preserve">
+    <value>Reread</value>
+  </data>
+  <data name="Cmd_ToggleHidden" xml:space="preserve">
+    <value>Hidden Files</value>
+  </data>
+  <data name="Cmd_BranchView" xml:space="preserve">
+    <value>Branch View</value>
+  </data>
+  <data name="Cmd_QuickFilter" xml:space="preserve">
+    <value>Quick Filter</value>
+  </data>
+  <data name="Cmd_ThumbnailView" xml:space="preserve">
+    <value>Thumbnails</value>
+  </data>
+  <data name="Cmd_DetailsView" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Cmd_ChooseColumns" xml:space="preserve">
+    <value>Columns…</value>
+  </data>
+  <data name="Cmd_ToggleTree" xml:space="preserve">
+    <value>Folder Tree</value>
+  </data>
+  <data name="Cmd_QuickView" xml:space="preserve">
+    <value>Quick View</value>
+  </data>
+  <data name="Cmd_TogglePanelLayout" xml:space="preserve">
+    <value>Stack Panels</value>
+  </data>
+  <data name="Cmd_SwapPanels" xml:space="preserve">
+    <value>Swap</value>
+  </data>
+  <data name="Cmd_TargetEqualsSource" xml:space="preserve">
+    <value>Target = Source</value>
+  </data>
+  <data name="Cmd_NewTab" xml:space="preserve">
+    <value>New Tab</value>
+  </data>
+  <data name="Cmd_CloseTab" xml:space="preserve">
+    <value>Close Tab</value>
+  </data>
+  <data name="Cmd_NextTab" xml:space="preserve">
+    <value>Next Tab</value>
+  </data>
+  <data name="Cmd_GoBack" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Cmd_GoForward" xml:space="preserve">
+    <value>Forward</value>
+  </data>
+  <data name="Cmd_GoParent" xml:space="preserve">
+    <value>Parent</value>
+  </data>
+  <data name="Cmd_GoHome" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="Cmd_GoRoot" xml:space="preserve">
+    <value>Root</value>
+  </data>
+  <data name="Cmd_Hotlist" xml:space="preserve">
+    <value>Hotlist</value>
+  </data>
+  <data name="Cmd_DriveMenuLeft" xml:space="preserve">
+    <value>Left Drive…</value>
+  </data>
+  <data name="Cmd_DriveMenuRight" xml:space="preserve">
+    <value>Right Drive…</value>
+  </data>
+  <data name="Cmd_OpenInOtherPanel" xml:space="preserve">
+    <value>Other Panel</value>
+  </data>
+  <data name="Cmd_Find" xml:space="preserve">
+    <value>Find Files</value>
+  </data>
+  <data name="Cmd_MultiRename" xml:space="preserve">
+    <value>Multi-Rename</value>
+  </data>
+  <data name="Cmd_Synchronize" xml:space="preserve">
+    <value>Sync Dirs</value>
+  </data>
+  <data name="Cmd_CompareFiles" xml:space="preserve">
+    <value>Compare Files</value>
+  </data>
+  <data name="Cmd_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Cmd_Help" xml:space="preserve">
+    <value>Keyboard Help</value>
+  </data>
+
+  <!-- Shortcut categories -->
+  <data name="Cat_Navigation" xml:space="preserve">
+    <value>Navigation</value>
+  </data>
+  <data name="Cat_Selection" xml:space="preserve">
+    <value>Selection</value>
+  </data>
+  <data name="Cat_Files" xml:space="preserve">
+    <value>Files</value>
+  </data>
+  <data name="Cat_View" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Cat_Tools" xml:space="preserve">
+    <value>Tools</value>
+  </data>
+
+  <!-- Keyboard shortcut descriptions (F1 help) -->
+  <data name="Key_CursorUp" xml:space="preserve">
+    <value>Move cursor up</value>
+  </data>
+  <data name="Key_CursorDown" xml:space="preserve">
+    <value>Move cursor down</value>
+  </data>
+  <data name="Key_PageUp" xml:space="preserve">
+    <value>Page up</value>
+  </data>
+  <data name="Key_PageDown" xml:space="preserve">
+    <value>Page down</value>
+  </data>
+  <data name="Key_Home" xml:space="preserve">
+    <value>First item</value>
+  </data>
+  <data name="Key_End" xml:space="preserve">
+    <value>Last item</value>
+  </data>
+  <data name="Key_Enter" xml:space="preserve">
+    <value>Open folder / archive / file, or run the command line</value>
+  </data>
+  <data name="Key_ParentFolder" xml:space="preserve">
+    <value>Parent folder</value>
+  </data>
+  <data name="Key_SwitchPanel" xml:space="preserve">
+    <value>Switch active panel</value>
+  </data>
+  <data name="Key_Escape" xml:space="preserve">
+    <value>Clear command line / close filter / cancel</value>
+  </data>
+  <data name="Key_RootFolder" xml:space="preserve">
+    <value>Root folder</value>
+  </data>
+  <data name="Key_HomeFolder" xml:space="preserve">
+    <value>Home folder</value>
+  </data>
+  <data name="Key_Back" xml:space="preserve">
+    <value>Back (history)</value>
+  </data>
+  <data name="Key_Forward" xml:space="preserve">
+    <value>Forward (history)</value>
+  </data>
+  <data name="Key_OpenInOtherPanel" xml:space="preserve">
+    <value>Open folder under cursor in other panel</value>
+  </data>
+  <data name="Key_DriveLeft" xml:space="preserve">
+    <value>Change drive - left panel</value>
+  </data>
+  <data name="Key_DriveRight" xml:space="preserve">
+    <value>Change drive - right panel</value>
+  </data>
+  <data name="Key_Hotlist" xml:space="preserve">
+    <value>Directory hotlist</value>
+  </data>
+  <data name="Key_Insert" xml:space="preserve">
+    <value>Mark / unmark and move down</value>
+  </data>
+  <data name="Key_Space" xml:space="preserve">
+    <value>Mark / unmark (calculates folder size)</value>
+  </data>
+  <data name="Key_MarkUp" xml:space="preserve">
+    <value>Mark and move up</value>
+  </data>
+  <data name="Key_MarkDown" xml:space="preserve">
+    <value>Mark and move down</value>
+  </data>
+  <data name="Key_SelectAll" xml:space="preserve">
+    <value>Select all</value>
+  </data>
+  <data name="Key_DeselectAll" xml:space="preserve">
+    <value>Unselect all</value>
+  </data>
+  <data name="Key_SelectGroup" xml:space="preserve">
+    <value>Select group (mask)</value>
+  </data>
+  <data name="Key_DeselectGroup" xml:space="preserve">
+    <value>Unselect group (mask)</value>
+  </data>
+  <data name="Key_InvertSelection" xml:space="preserve">
+    <value>Invert selection</value>
+  </data>
+  <data name="Key_SameExtension" xml:space="preserve">
+    <value>Select files with same extension</value>
+  </data>
+  <data name="Key_Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Key_View" xml:space="preserve">
+    <value>View (lister)</value>
+  </data>
+  <data name="Key_Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Key_NewFile" xml:space="preserve">
+    <value>New file + edit</value>
+  </data>
+  <data name="Key_Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Key_Move" xml:space="preserve">
+    <value>Move / rename</value>
+  </data>
+  <data name="Key_NewFolder" xml:space="preserve">
+    <value>New folder</value>
+  </data>
+  <data name="Key_Delete" xml:space="preserve">
+    <value>Delete (to trash)</value>
+  </data>
+  <data name="Key_DeletePermanently" xml:space="preserve">
+    <value>Delete permanently</value>
+  </data>
+  <data name="Key_DeleteFinder" xml:space="preserve">
+    <value>Delete (to trash) - Finder's ⌘⌫</value>
+  </data>
+  <data name="Key_Pack" xml:space="preserve">
+    <value>Pack (zip, tar, tar.gz, tar.bz2)</value>
+  </data>
+  <data name="Key_Unpack" xml:space="preserve">
+    <value>Unpack archives</value>
+  </data>
+  <data name="Key_CopyPaths" xml:space="preserve">
+    <value>Copy full paths to clipboard</value>
+  </data>
+  <data name="Key_NameToCommandLine" xml:space="preserve">
+    <value>Name to command line</value>
+  </data>
+  <data name="Key_PathToCommandLine" xml:space="preserve">
+    <value>Full path to command line</value>
+  </data>
+  <data name="Key_Refresh" xml:space="preserve">
+    <value>Reread folder</value>
+  </data>
+  <data name="Key_ToggleHidden" xml:space="preserve">
+    <value>Show / hide hidden files</value>
+  </data>
+  <data name="Key_BranchView" xml:space="preserve">
+    <value>Branch view (all files in subfolders)</value>
+  </data>
+  <data name="Key_ToggleTree" xml:space="preserve">
+    <value>Folder tree (active panel)</value>
+  </data>
+  <data name="Key_Thumbnails" xml:space="preserve">
+    <value>Thumbnail view on / off</value>
+  </data>
+  <data name="Key_Details" xml:space="preserve">
+    <value>Details view</value>
+  </data>
+  <data name="Key_Columns" xml:space="preserve">
+    <value>Choose columns</value>
+  </data>
+  <data name="Key_QuickView" xml:space="preserve">
+    <value>Quick view in the other panel</value>
+  </data>
+  <data name="Key_Jobs" xml:space="preserve">
+    <value>Background jobs - progress, stop, go to</value>
+  </data>
+  <data name="Key_PanelLayout" xml:space="preserve">
+    <value>Panels side by side / stacked</value>
+  </data>
+  <data name="Key_TileLeft" xml:space="preserve">
+    <value>Previous tile (thumbnail view)</value>
+  </data>
+  <data name="Key_TileRight" xml:space="preserve">
+    <value>Next tile (thumbnail view)</value>
+  </data>
+  <data name="Key_QuickFilter" xml:space="preserve">
+    <value>Quick filter</value>
+  </data>
+  <data name="Key_NewTab" xml:space="preserve">
+    <value>New tab</value>
+  </data>
+  <data name="Key_CloseTab" xml:space="preserve">
+    <value>Close tab</value>
+  </data>
+  <data name="Key_NextTab" xml:space="preserve">
+    <value>Next tab</value>
+  </data>
+  <data name="Key_PreviousTab" xml:space="preserve">
+    <value>Previous tab</value>
+  </data>
+  <data name="Key_SwapPanels" xml:space="preserve">
+    <value>Swap panels</value>
+  </data>
+  <data name="Key_TargetEqualsSource" xml:space="preserve">
+    <value>Target = source</value>
+  </data>
+  <data name="Key_Find" xml:space="preserve">
+    <value>Find files</value>
+  </data>
+  <data name="Key_MultiRename" xml:space="preserve">
+    <value>Multi-rename tool</value>
+  </data>
+  <data name="Key_Synchronize" xml:space="preserve">
+    <value>Synchronize directories</value>
+  </data>
+  <data name="Key_CompareFiles" xml:space="preserve">
+    <value>Compare files by content</value>
+  </data>
+  <data name="Key_Terminal" xml:space="preserve">
+    <value>Open terminal here</value>
+  </data>
+  <data name="Key_Reveal" xml:space="preserve">
+    <value>Reveal in system file manager</value>
+  </data>
+  <data name="Key_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Key_Help" xml:space="preserve">
+    <value>Keyboard reference</value>
+  </data>
+
+  <!-- Main page -->
+  <data name="Main_Console" xml:space="preserve">
+    <value>Console</value>
+  </data>
+  <data name="Jobs_Title" xml:space="preserve">
+    <value>Jobs</value>
+  </data>
+  <data name="Jobs_ClearCompleted" xml:space="preserve">
+    <value>Clear Completed</value>
+  </data>
+  <data name="Jobs_Hide" xml:space="preserve">
+    <value>Hide - jobs keep running</value>
+  </data>
+  <data name="Jobs_Empty" xml:space="preserve">
+    <value>Nothing running. Copies, moves, deletes, packs and unpacks show up here.</value>
+  </data>
+  <data name="Jobs_GoTo" xml:space="preserve">
+    <value>Go To</value>
+  </data>
+  <data name="Jobs_Errors" xml:space="preserve">
+    <value>Errors</value>
+  </data>
+  <data name="Jobs_Remove" xml:space="preserve">
+    <value>Remove from the list</value>
+  </data>
+  <data name="Main_CommandPlaceholder" xml:space="preserve">
+    <value>type a command, or use the keys below…</value>
+  </data>
+  <data name="Jobs_Chip" xml:space="preserve">
+    <value>Background jobs</value>
+  </data>
+  <data name="FKey_Find" xml:space="preserve">
+    <value>Find</value>
+  </data>
+  <data name="Page_Back" xml:space="preserve">
+    <value>‹ Back</value>
+  </data>
+  <data name="Page_Save" xml:space="preserve">
+    <value>💾 Save</value>
+  </data>
+
+  <!-- Main window -->
+  <data name="Main_CannotOpen" xml:space="preserve">
+    <value>Cannot open</value>
+  </data>
+  <data name="Main_ShowingHidden" xml:space="preserve">
+    <value>Showing hidden files</value>
+  </data>
+  <data name="Main_HidingHidden" xml:space="preserve">
+    <value>Hiding hidden files</value>
+  </data>
+  <data name="Main_Columns" xml:space="preserve">
+    <value>Columns</value>
+  </data>
+  <data name="Main_DriveFree" xml:space="preserve">
+    <value>{0} free</value>
+  </data>
+  <data name="Main_DriveMenuLeft" xml:space="preserve">
+    <value>Left panel - drive</value>
+  </data>
+  <data name="Main_DriveMenuRight" xml:space="preserve">
+    <value>Right panel - drive</value>
+  </data>
+  <data name="Main_HotlistAdd" xml:space="preserve">
+    <value>Add current folder</value>
+  </data>
+  <data name="Main_HotlistRemove" xml:space="preserve">
+    <value>Remove a folder…</value>
+  </data>
+  <data name="Main_Hotlist" xml:space="preserve">
+    <value>Directory hotlist</value>
+  </data>
+  <data name="Main_HotlistAdded" xml:space="preserve">
+    <value>Added {0}</value>
+  </data>
+  <data name="Main_HotlistRemoveTitle" xml:space="preserve">
+    <value>Remove from hotlist</value>
+  </data>
+  <data name="Main_SelectFiles" xml:space="preserve">
+    <value>Select files</value>
+  </data>
+  <data name="Main_SelectMask" xml:space="preserve">
+    <value>Mask (e.g. *.txt;*.md)</value>
+  </data>
+  <data name="Main_UnselectFiles" xml:space="preserve">
+    <value>Unselect files</value>
+  </data>
+  <data name="Main_UnselectMask" xml:space="preserve">
+    <value>Mask (e.g. *.tmp)</value>
+  </data>
+  <data name="Main_CopiedPaths" xml:space="preserve">
+    <value>Copied {0} path(s)</value>
+  </data>
+  <data name="Main_NoCommandsInArchive" xml:space="preserve">
+    <value>Commands can't run inside an archive</value>
+  </data>
+  <data name="Main_ConsoleCancelled" xml:space="preserve">
+    <value>[cancelled]</value>
+  </data>
+  <data name="Main_ReadOnly" xml:space="preserve">
+    <value>Read only</value>
+  </data>
+  <data name="Main_ReadOnlyArchive" xml:space="preserve">
+    <value>Files inside archives can be viewed (F3) but not edited. Copy it out first.</value>
+  </data>
+  <data name="Main_NewFile" xml:space="preserve">
+    <value>New file</value>
+  </data>
+  <data name="Main_NewFileMessage" xml:space="preserve">
+    <value>File name to create and edit</value>
+  </data>
+  <data name="Main_NewFolder" xml:space="preserve">
+    <value>New folder</value>
+  </data>
+  <data name="Main_NewFolderMessage" xml:space="preserve">
+    <value>Folder name (use / for nested folders)</value>
+  </data>
+  <data name="Main_RenameMessage" xml:space="preserve">
+    <value>New name for '{0}'</value>
+  </data>
+  <data name="Main_SelectToRename" xml:space="preserve">
+    <value>Select the files to rename first (Insert / Space / right-click)</value>
+  </data>
+  <data name="Main_CompareNeedsTwo" xml:space="preserve">
+    <value>Mark two files, or put the cursor on a file in each panel</value>
+  </data>
+  <data name="Op_Quoted" xml:space="preserve">
+    <value>'{0}'</value>
+  </data>
+  <data name="Op_Items" xml:space="preserve">
+    <value>{0} items</value>
+  </data>
+  <data name="Op_Archives" xml:space="preserve">
+    <value>{0} archives</value>
+  </data>
+  <data name="Op_CopyTitle" xml:space="preserve">
+    <value>Copy {0}</value>
+  </data>
+  <data name="Op_MoveTitle" xml:space="preserve">
+    <value>Move {0}</value>
+  </data>
+  <data name="Op_DeleteTitle" xml:space="preserve">
+    <value>Delete {0}</value>
+  </data>
+  <data name="Op_PackTitle" xml:space="preserve">
+    <value>Pack {0} to {1}</value>
+  </data>
+  <data name="Op_UnpackTitle" xml:space="preserve">
+    <value>Unpack {0}</value>
+  </data>
+  <data name="Op_CopyTo" xml:space="preserve">
+    <value>Copy to:</value>
+  </data>
+  <data name="Op_MoveTo" xml:space="preserve">
+    <value>Move to:</value>
+  </data>
+  <data name="Conflict_Overwrite" xml:space="preserve">
+    <value>Overwrite</value>
+  </data>
+  <data name="Conflict_OverwriteAll" xml:space="preserve">
+    <value>Overwrite all</value>
+  </data>
+  <data name="Conflict_OverwriteAllOlder" xml:space="preserve">
+    <value>Overwrite all older</value>
+  </data>
+  <data name="Conflict_Skip" xml:space="preserve">
+    <value>Skip</value>
+  </data>
+  <data name="Conflict_SkipAll" xml:space="preserve">
+    <value>Skip all</value>
+  </data>
+  <data name="Conflict_KeepBoth" xml:space="preserve">
+    <value>Keep both</value>
+  </data>
+  <data name="Conflict_Message" xml:space="preserve">
+    <value>{0} already exists
+
+New:      {1} bytes  {2}
+Existing: {3} bytes  {4}</value>
+  </data>
+  <data name="Delete_TrashTitle" xml:space="preserve">
+    <value>Move to trash</value>
+  </data>
+  <data name="Delete_PermanentTitle" xml:space="preserve">
+    <value>Delete permanently</value>
+  </data>
+  <data name="Delete_TrashMessage" xml:space="preserve">
+    <value>Move {0} to the trash?</value>
+  </data>
+  <data name="Delete_PermanentMessage" xml:space="preserve">
+    <value>Permanently delete {0}? This cannot be undone.</value>
+  </data>
+  <data name="Delete_TrashButton" xml:space="preserve">
+    <value>Move to Trash</value>
+  </data>
+  <data name="Pack_Title" xml:space="preserve">
+    <value>Pack files</value>
+  </data>
+  <data name="Pack_Message" xml:space="preserve">
+    <value>Pack {0} item(s) to archive - the extension picks the format ({1}):</value>
+  </data>
+  <data name="Unpack_SelectArchives" xml:space="preserve">
+    <value>Select one or more archives to unpack (zip, tar, tar.gz, 7z, rar…)</value>
+  </data>
+  <data name="Unpack_Message" xml:space="preserve">
+    <value>Unpack {0} archive(s) to:</value>
+  </data>
+  <data name="Job_Done" xml:space="preserve">
+    <value>{0}: done ({1} item(s))</value>
+  </data>
+  <data name="Job_DoneSkipped" xml:space="preserve">
+    <value>{0}: done ({1} item(s), {2} skipped)</value>
+  </data>
+  <data name="Job_FinishedWithErrors" xml:space="preserve">
+    <value>{0}: finished with {1} error(s) - see Jobs</value>
+  </data>
+  <data name="Job_Failed" xml:space="preserve">
+    <value>{0} failed: {1}</value>
+  </data>
+  <data name="Job_Stopped" xml:space="preserve">
+    <value>{0}: stopped</value>
+  </data>
+  <data name="Job_AndMore" xml:space="preserve">
+    <value>… and {0} more</value>
+  </data>
+  <data name="Job_FailedTitle" xml:space="preserve">
+    <value>{0} - failed</value>
+  </data>
+  <data name="Job_ErrorsTitle" xml:space="preserve">
+    <value>{0} - finished with errors</value>
+  </data>
+  <data name="Main_CompareByContent" xml:space="preserve">
+    <value>Compare by content</value>
+  </data>
+  <data name="Compare_Identical" xml:space="preserve">
+    <value>The files are identical.
+
+{0}
+{1}</value>
+  </data>
+  <data name="Compare_Different" xml:space="preserve">
+    <value>The files are different.
+
+{0}: {1} bytes
+{2}: {3} bytes</value>
+  </data>
+  <data name="Help_Intro" xml:space="preserve">
+    <value>Operations act on the **marked** files, or on the file under the cursor when nothing is marked. Mark with `Insert`, `Space`, `Shift+↑/↓` or a right-click. Start typing to use the command line.</value>
+  </data>
+  <data name="Help_General" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="Help_Keys" xml:space="preserve">
+    <value>Keys</value>
+  </data>
+  <data name="Help_Action" xml:space="preserve">
+    <value>Action</value>
+  </data>
+  <data name="Help_CommandLine" xml:space="preserve">
+    <value>Command line</value>
+  </data>
+  <data name="Help_Cd" xml:space="preserve">
+    <value>`cd &lt;path&gt;` changes the active panel's folder (`cd ~`, `cd ..`, `cd -`).</value>
+  </data>
+  <data name="Help_Shell" xml:space="preserve">
+    <value>Anything else runs through the system shell in the active folder; output appears in the console pane.</value>
+  </data>
+  <data name="Help_Archives" xml:space="preserve">
+    <value>Archives</value>
+  </data>
+  <data name="Help_ArchivesText" xml:space="preserve">
+    <value>Press `Enter` on a `.zip` (also .jar, .nupkg, .docx, .apk…) to browse it like a folder. Copy (F5) out of it, copy into it, delete or rename inside it.</value>
+  </data>
+
+  <!-- Jobs & quitting -->
+  <data name="FKey_NewFolder" xml:space="preserve">
+    <value>New Folder</value>
+    <comment>Function key bar (F7) - one eighth of the window wide, keep it short</comment>
+  </data>
+  <data name="Job_StateRunning" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="Job_StateDone" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="Job_StateErrors" xml:space="preserve">
+    <value>Errors</value>
+  </data>
+  <data name="Job_StateFailed" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="Job_StateStopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="Job_StoppedPartWay" xml:space="preserve">
+    <value>Stopped part-way - what was already done stays done</value>
+  </data>
+  <data name="Job_Summary" xml:space="preserve">
+    <value>{0} item(s) in {1}</value>
+  </data>
+  <data name="Job_SummarySkipped" xml:space="preserve">
+    <value>{0} item(s), {1} skipped in {2}</value>
+  </data>
+  <data name="Job_SummaryErrors" xml:space="preserve">
+    <value>{0} error(s), {1} item(s) in {2}</value>
+  </data>
+  <data name="Job_Preparing" xml:space="preserve">
+    <value>Preparing…</value>
+  </data>
+  <data name="Jobs_Running" xml:space="preserve">
+    <value>{0} running</value>
+  </data>
+  <data name="Jobs_Failed" xml:space="preserve">
+    <value>{0} failed</value>
+  </data>
+  <data name="Jobs_Done" xml:space="preserve">
+    <value>{0} done</value>
+  </data>
+  <data name="Quit_Title" xml:space="preserve">
+    <value>Jobs still running</value>
+  </data>
+  <data name="Quit_Message" xml:space="preserve">
+    <value>{0} background job(s) haven't finished:
+
+{1}
+
+Quitting stops them part-way. What's already been copied, moved or deleted stays that way.</value>
+  </data>
+  <data name="Quit_StopAndQuit" xml:space="preserve">
+    <value>Stop Jobs and Quit</value>
+  </data>
+  <data name="Quit_KeepRunning" xml:space="preserve">
+    <value>Keep Running</value>
+  </data>
+  <data name="Update_WindowTitle" xml:space="preserve">
+    <value>ShinyCommander Update</value>
+  </data>
+
+  <!-- Settings, find, compare, multi-rename, toolbar -->
+  <data name="Settings_Title" xml:space="preserve">
+    <value>Settings</value>
+    <comment>Page title</comment>
+  </data>
+  <data name="Settings_Panels" xml:space="preserve">
+    <value>Panels</value>
+    <comment>Section header</comment>
+  </data>
+  <data name="Settings_ShowHidden" xml:space="preserve">
+    <value>Show hidden files</value>
+  </data>
+  <data name="Settings_ShowHiddenDesc" xml:space="preserve">
+    <value>Dot files and hidden attribute (Ctrl/⌘+H)</value>
+  </data>
+  <data name="Settings_FriendlySizes" xml:space="preserve">
+    <value>Friendly sizes</value>
+  </data>
+  <data name="Settings_FriendlySizesDesc" xml:space="preserve">
+    <value>12.3 MB instead of 12,912,640</value>
+    <comment>Example of the size format, use local number formatting</comment>
+  </data>
+  <data name="Settings_CustomizeToolbar" xml:space="preserve">
+    <value>Customize pane toolbar…</value>
+  </data>
+  <data name="Settings_Columns" xml:space="preserve">
+    <value>Columns (Primary+Shift+K)</value>
+    <comment>Keep the shortcut as is</comment>
+  </data>
+  <data name="Settings_ColExtension" xml:space="preserve">
+    <value>Extension</value>
+    <comment>File list column</comment>
+  </data>
+  <data name="Settings_ColSize" xml:space="preserve">
+    <value>Size</value>
+    <comment>File list column</comment>
+  </data>
+  <data name="Settings_ColModified" xml:space="preserve">
+    <value>Date modified</value>
+    <comment>File list column</comment>
+  </data>
+  <data name="Settings_ColCreated" xml:space="preserve">
+    <value>Date created</value>
+    <comment>File list column</comment>
+  </data>
+  <data name="Settings_ColAttributes" xml:space="preserve">
+    <value>Attributes</value>
+    <comment>File list column</comment>
+  </data>
+  <data name="Settings_Operations" xml:space="preserve">
+    <value>Operations</value>
+    <comment>Section header</comment>
+  </data>
+  <data name="Settings_ConfirmDelete" xml:space="preserve">
+    <value>Confirm before delete</value>
+  </data>
+  <data name="Settings_UseTrash" xml:space="preserve">
+    <value>Delete to trash / recycle bin</value>
+  </data>
+  <data name="Settings_UseTrashDesc" xml:space="preserve">
+    <value>Shift+F8 always deletes permanently</value>
+  </data>
+  <data name="Settings_ExtractPerArchive" xml:space="preserve">
+    <value>Unpack each archive into its own folder</value>
+  </data>
+  <data name="Settings_ExternalEditor" xml:space="preserve">
+    <value>External editor (F4)</value>
+  </data>
+  <data name="Settings_ExternalEditorBuiltIn" xml:space="preserve">
+    <value>built-in</value>
+    <comment>Placeholder when no external editor is set</comment>
+  </data>
+  <data name="Settings_Language" xml:space="preserve">
+    <value>Language</value>
+    <comment>Section header</comment>
+  </data>
+  <data name="Settings_LanguageSystem" xml:space="preserve">
+    <value>Follow system</value>
+    <comment>Language option: use the OS language</comment>
+  </data>
+  <data name="Settings_LanguageRestart" xml:space="preserve">
+    <value>Restart ShinyCommander to switch the language.</value>
+    <comment>Toast after picking a language</comment>
+  </data>
+  <data name="Settings_Theme" xml:space="preserve">
+    <value>Theme</value>
+    <comment>Section header</comment>
+  </data>
+  <data name="Settings_ThemeSystem" xml:space="preserve">
+    <value>Follow system</value>
+    <comment>Theme option: use the OS appearance</comment>
+  </data>
+  <data name="Settings_ThemeLight" xml:space="preserve">
+    <value>Light</value>
+    <comment>Theme option</comment>
+  </data>
+  <data name="Settings_ThemeDark" xml:space="preserve">
+    <value>Dark</value>
+    <comment>Theme option</comment>
+  </data>
+  <data name="Settings_FontSize" xml:space="preserve">
+    <value>Viewer / editor font size</value>
+    <comment>Section header</comment>
+  </data>
+  <data name="Settings_FontSmall" xml:space="preserve">
+    <value>Small (12)</value>
+  </data>
+  <data name="Settings_FontMedium" xml:space="preserve">
+    <value>Medium (13)</value>
+  </data>
+  <data name="Settings_FontLarge" xml:space="preserve">
+    <value>Large (15)</value>
+  </data>
+  <data name="Settings_FontExtraLarge" xml:space="preserve">
+    <value>Extra large (18)</value>
+  </data>
+  <data name="Settings_About" xml:space="preserve">
+    <value>About</value>
+    <comment>Section header</comment>
+  </data>
+  <data name="Settings_Runtime" xml:space="preserve">
+    <value>Runtime</value>
+    <comment>Followed by the .NET and OS versions</comment>
+  </data>
+  <data name="Settings_BuiltWith" xml:space="preserve">
+    <value>Built with</value>
+  </data>
+  <data name="Settings_BuiltWithDesc" xml:space="preserve">
+    <value>.NET MAUI • maui-labs AppKit &amp; GTK4 backends • Shiny Controls, Shell, Mediator, Stores &amp; DI</value>
+    <comment>Product/library names stay in English</comment>
+  </data>
+  <data name="Settings_UpdateAvailable" xml:space="preserve">
+    <value>{0} is available</value>
+    <comment>{0} = version number</comment>
+  </data>
+  <data name="Settings_InstallUpdate" xml:space="preserve">
+    <value>Install {0}…</value>
+    <comment>{0} = version number</comment>
+  </data>
+  <data name="Settings_CheckForUpdates" xml:space="preserve">
+    <value>Check for updates</value>
+  </data>
+  <data name="Settings_Checking" xml:space="preserve">
+    <value>Checking…</value>
+  </data>
+  <data name="Settings_UpdateUnreachable" xml:space="preserve">
+    <value>Couldn't reach GitHub. Try again in a bit.</value>
+  </data>
+  <data name="Settings_UpToDate" xml:space="preserve">
+    <value>You're up to date.</value>
+  </data>
+  <data name="Search_Title" xml:space="preserve">
+    <value>Find files</value>
+    <comment>Page title and alert title</comment>
+  </data>
+  <data name="Search_StartStop" xml:space="preserve">
+    <value>Start / stop</value>
+    <comment>Keyboard shortcut description</comment>
+  </data>
+  <data name="Search_View" xml:space="preserve">
+    <value>View</value>
+    <comment>Keyboard shortcut description: open the file in the viewer</comment>
+  </data>
+  <data name="Search_GoToFile" xml:space="preserve">
+    <value>Go to file</value>
+    <comment>Button and shortcut: show the file in the panel</comment>
+  </data>
+  <data name="Search_SearchIn" xml:space="preserve">
+    <value>Search in</value>
+  </data>
+  <data name="Search_FileName" xml:space="preserve">
+    <value>File name</value>
+  </data>
+  <data name="Search_ContainingText" xml:space="preserve">
+    <value>Containing text</value>
+  </data>
+  <data name="Search_Optional" xml:space="preserve">
+    <value>(optional)</value>
+    <comment>Placeholder</comment>
+  </data>
+  <data name="Search_Subfolders" xml:space="preserve">
+    <value>Subfolders</value>
+    <comment>Checkbox</comment>
+  </data>
+  <data name="Search_CaseSensitive" xml:space="preserve">
+    <value>Case sensitive</value>
+    <comment>Checkbox</comment>
+  </data>
+  <data name="Search_HiddenFiles" xml:space="preserve">
+    <value>Hidden files</value>
+    <comment>Checkbox</comment>
+  </data>
+  <data name="Search_FoldersOnly" xml:space="preserve">
+    <value>Folders only</value>
+    <comment>Checkbox</comment>
+  </data>
+  <data name="Search_MinSize" xml:space="preserve">
+    <value>Min size (KB)</value>
+  </data>
+  <data name="Search_ViewF3" xml:space="preserve">
+    <value>View (F3)</value>
+    <comment>Button</comment>
+  </data>
+  <data name="Search_NoResults" xml:space="preserve">
+    <value>No results yet</value>
+    <comment>Empty results list</comment>
+  </data>
+  <data name="Search_ColName" xml:space="preserve">
+    <value>Name</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Search_ColFolder" xml:space="preserve">
+    <value>Folder</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Search_ColSize" xml:space="preserve">
+    <value>Size</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Search_ColModified" xml:space="preserve">
+    <value>Modified</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Search_Prompt" xml:space="preserve">
+    <value>Enter a mask and press Start (Enter)</value>
+    <comment>Initial status line - 'Start' is the button text</comment>
+  </data>
+  <data name="Search_FolderNotFound" xml:space="preserve">
+    <value>Folder not found: {0}</value>
+    <comment>{0} = path</comment>
+  </data>
+  <data name="Search_Progress" xml:space="preserve">
+    <value>Scanned {0}, found {1}</value>
+    <comment>Status while searching; {0} = items scanned, {1} = matches</comment>
+  </data>
+  <data name="Search_ProgressIn" xml:space="preserve">
+    <value>Scanned {0}, found {1}  •  {2}</value>
+    <comment>As Search_Progress; {2} = folder being scanned</comment>
+  </data>
+  <data name="Search_Done" xml:space="preserve">
+    <value>{0} found in {1}s</value>
+    <comment>{0} = matches, {1} = seconds</comment>
+  </data>
+  <data name="Search_DoneTruncated" xml:space="preserve">
+    <value>{0} found in {1}s (showing first {2})</value>
+    <comment>{0} = matches, {1} = seconds, {2} = how many are listed</comment>
+  </data>
+  <data name="Search_Stopped" xml:space="preserve">
+    <value>Stopped - {0} found</value>
+    <comment>{0} = matches</comment>
+  </data>
+  <data name="Compare_Title" xml:space="preserve">
+    <value>Synchronize directories</value>
+    <comment>Page title</comment>
+  </data>
+  <data name="Compare_Compare" xml:space="preserve">
+    <value>Compare</value>
+    <comment>Button, shortcut description and error alert title</comment>
+  </data>
+  <data name="Compare_ChangeDirection" xml:space="preserve">
+    <value>Change direction</value>
+    <comment>Keyboard shortcut: change a row's copy direction</comment>
+  </data>
+  <data name="Compare_Left" xml:space="preserve">
+    <value>Left</value>
+    <comment>Label for the left folder path</comment>
+  </data>
+  <data name="Compare_Right" xml:space="preserve">
+    <value>Right</value>
+    <comment>Label for the right folder path</comment>
+  </data>
+  <data name="Compare_Subfolders" xml:space="preserve">
+    <value>Subfolders</value>
+    <comment>Checkbox</comment>
+  </data>
+  <data name="Compare_ByContent" xml:space="preserve">
+    <value>By content</value>
+    <comment>Checkbox: compare file contents</comment>
+  </data>
+  <data name="Compare_IgnoreDate" xml:space="preserve">
+    <value>Ignore date</value>
+    <comment>Checkbox</comment>
+  </data>
+  <data name="Compare_ShowEqual" xml:space="preserve">
+    <value>Show equal</value>
+    <comment>Checkbox: also list identical files</comment>
+  </data>
+  <data name="Compare_Mask" xml:space="preserve">
+    <value>Mask</value>
+    <comment>File mask, e.g. *.txt</comment>
+  </data>
+  <data name="Compare_SynchronizeEllipsis" xml:space="preserve">
+    <value>Synchronize…</value>
+    <comment>Button</comment>
+  </data>
+  <data name="Compare_DirectionHint" xml:space="preserve">
+    <value>Tap ⇄ (or Space) to change a row's direction</value>
+  </data>
+  <data name="Compare_PressCompare" xml:space="preserve">
+    <value>Press Compare</value>
+    <comment>Empty list / initial status; 'Compare' is the button text</comment>
+  </data>
+  <data name="Compare_ColFile" xml:space="preserve">
+    <value>File</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Compare_ColLeftSize" xml:space="preserve">
+    <value>Left size</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Compare_ColLeftDate" xml:space="preserve">
+    <value>Left date</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Compare_ColState" xml:space="preserve">
+    <value>State</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Compare_ColRightDate" xml:space="preserve">
+    <value>Right date</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Compare_ColRightSize" xml:space="preserve">
+    <value>Right size</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Compare_StateLeftNewer" xml:space="preserve">
+    <value>newer →</value>
+    <comment>Small badge: the left file is newer (arrow points right)</comment>
+  </data>
+  <data name="Compare_StateRightNewer" xml:space="preserve">
+    <value>← newer</value>
+    <comment>Small badge: the right file is newer</comment>
+  </data>
+  <data name="Compare_StateLeftOnly" xml:space="preserve">
+    <value>left only</value>
+    <comment>Small badge: exists only on the left</comment>
+  </data>
+  <data name="Compare_StateRightOnly" xml:space="preserve">
+    <value>right only</value>
+    <comment>Small badge: exists only on the right</comment>
+  </data>
+  <data name="Compare_Status" xml:space="preserve">
+    <value>{0} item(s)  •  {1} equal  •  {2} → right  •  {3} ← left</value>
+    <comment>Status line; {2}/{3} = items to copy right/left</comment>
+  </data>
+  <data name="Compare_NothingToSync" xml:space="preserve">
+    <value>Nothing to synchronize</value>
+    <comment>Toast</comment>
+  </data>
+  <data name="Compare_Synchronize" xml:space="preserve">
+    <value>Synchronize</value>
+    <comment>Confirm dialog title and button</comment>
+  </data>
+  <data name="Compare_ConfirmSync" xml:space="preserve">
+    <value>Copy {0} item(s) to the right and {1} to the left? Existing files are overwritten.</value>
+  </data>
+  <data name="Compare_Copying" xml:space="preserve">
+    <value>Copying {0}…</value>
+    <comment>{0} = relative path</comment>
+  </data>
+  <data name="Compare_SyncErrors" xml:space="preserve">
+    <value>Synchronize finished with errors</value>
+    <comment>Alert title</comment>
+  </data>
+  <data name="Compare_Synchronized" xml:space="preserve">
+    <value>Synchronized</value>
+    <comment>Toast</comment>
+  </data>
+  <data name="Rename_Title" xml:space="preserve">
+    <value>Multi-rename tool</value>
+    <comment>Page title</comment>
+  </data>
+  <data name="Rename_StartRenaming" xml:space="preserve">
+    <value>Start renaming</value>
+    <comment>Keyboard shortcut description</comment>
+  </data>
+  <data name="Rename_Undo" xml:space="preserve">
+    <value>Undo</value>
+    <comment>Button and shortcut</comment>
+  </data>
+  <data name="Rename_NameMask" xml:space="preserve">
+    <value>Rename mask</value>
+  </data>
+  <data name="Rename_Extension" xml:space="preserve">
+    <value>Extension</value>
+    <comment>Extension mask field</comment>
+  </data>
+  <data name="Rename_Insert" xml:space="preserve">
+    <value>Insert:</value>
+    <comment>Followed by placeholder buttons [N] [E]…</comment>
+  </data>
+  <data name="Rename_SearchFor" xml:space="preserve">
+    <value>Search for</value>
+  </data>
+  <data name="Rename_SearchPlaceholder" xml:space="preserve">
+    <value>text (a|b for several) or regex</value>
+    <comment>Placeholder; keep a|b</comment>
+  </data>
+  <data name="Rename_ReplaceWith" xml:space="preserve">
+    <value>Replace with</value>
+  </data>
+  <data name="Rename_Regex" xml:space="preserve">
+    <value>Regular expressions</value>
+    <comment>Checkbox</comment>
+  </data>
+  <data name="Rename_Case" xml:space="preserve">
+    <value>Case</value>
+    <comment>Label for the upper/lower case picker</comment>
+  </data>
+  <data name="Rename_CounterStart" xml:space="preserve">
+    <value>Counter start</value>
+  </data>
+  <data name="Rename_CounterStep" xml:space="preserve">
+    <value>step</value>
+    <comment>Counter step, lower case on purpose</comment>
+  </data>
+  <data name="Rename_CounterDigits" xml:space="preserve">
+    <value>digits</value>
+    <comment>Counter width, lower case on purpose</comment>
+  </data>
+  <data name="Rename_Start" xml:space="preserve">
+    <value>Start!</value>
+    <comment>Button that renames the files</comment>
+  </data>
+  <data name="Rename_ColOldName" xml:space="preserve">
+    <value>Old name</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Rename_ColNewName" xml:space="preserve">
+    <value>New name</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Rename_Unchanged" xml:space="preserve">
+    <value>unchanged</value>
+    <comment>Preview row status</comment>
+  </data>
+  <data name="Rename_CaseUnchanged" xml:space="preserve">
+    <value>Unchanged</value>
+    <comment>Case option</comment>
+  </data>
+  <data name="Rename_CaseLower" xml:space="preserve">
+    <value>lowercase</value>
+    <comment>Case option, written in lower case</comment>
+  </data>
+  <data name="Rename_CaseUpper" xml:space="preserve">
+    <value>UPPERCASE</value>
+    <comment>Case option, written in upper case</comment>
+  </data>
+  <data name="Rename_CaseFirstUpper" xml:space="preserve">
+    <value>First letter upper</value>
+    <comment>Case option</comment>
+  </data>
+  <data name="Rename_CaseTitle" xml:space="preserve">
+    <value>Title Case</value>
+    <comment>Case option, written in title case</comment>
+  </data>
+  <data name="Rename_Status" xml:space="preserve">
+    <value>{0} of {1} will be renamed</value>
+    <comment>Status line</comment>
+  </data>
+  <data name="Rename_StatusProblems" xml:space="preserve">
+    <value>{0} of {1} will be renamed  •  {2} problem(s)</value>
+    <comment>Status line with errors</comment>
+  </data>
+  <data name="Rename_AlertTitle" xml:space="preserve">
+    <value>Multi-rename</value>
+    <comment>Alert title</comment>
+  </data>
+  <data name="Rename_FixProblems" xml:space="preserve">
+    <value>Fix the problems shown in the preview first.</value>
+  </data>
+  <data name="Rename_Done" xml:space="preserve">
+    <value>Renamed {0} item(s)</value>
+    <comment>Toast</comment>
+  </data>
+  <data name="CustomizeToolbar_Title" xml:space="preserve">
+    <value>Pane toolbar</value>
+    <comment>Page title</comment>
+  </data>
+  <data name="CustomizeToolbar_ResetToDefault" xml:space="preserve">
+    <value>Reset to default</value>
+    <comment>Button</comment>
+  </data>
+  <data name="CustomizeToolbar_Intro" xml:space="preserve">
+    <value>The buttons beside the path in each pane. A button acts on the pane it's clicked in. Right-click that row to come back here.</value>
+  </data>
+  <data name="CustomizeToolbar_OnToolbar" xml:space="preserve">
+    <value>ON THE TOOLBAR</value>
+    <comment>List header, all caps</comment>
+  </data>
+  <data name="CustomizeToolbar_Available" xml:space="preserve">
+    <value>AVAILABLE</value>
+    <comment>List header, all caps</comment>
+  </data>
+  <data name="CustomizeToolbar_Empty" xml:space="preserve">
+    <value>Nothing yet - add commands from the right.</value>
+    <comment>Empty list</comment>
+  </data>
+  <data name="CustomizeToolbar_MoveLeft" xml:space="preserve">
+    <value>Move left</value>
+    <comment>Tooltip</comment>
+  </data>
+  <data name="CustomizeToolbar_MoveRight" xml:space="preserve">
+    <value>Move right</value>
+    <comment>Tooltip</comment>
+  </data>
+
+  <!-- Panels, viewer, editor, help, updates -->
+  <data name="Viewer_ModeText" xml:space="preserve">
+    <value>Text</value>
+    <comment>Viewer shortcut description: show as text</comment>
+  </data>
+  <data name="Viewer_ModeHex" xml:space="preserve">
+    <value>Hex</value>
+    <comment>Viewer shortcut description: show as hex dump</comment>
+  </data>
+  <data name="Viewer_ModeMarkdown" xml:space="preserve">
+    <value>Markdown</value>
+    <comment>Viewer shortcut description: rendered Markdown</comment>
+  </data>
+  <data name="Viewer_WordWrap" xml:space="preserve">
+    <value>Word wrap</value>
+  </data>
+  <data name="Viewer_NextFile" xml:space="preserve">
+    <value>Next file</value>
+  </data>
+  <data name="Viewer_PreviousFile" xml:space="preserve">
+    <value>Previous file</value>
+  </data>
+  <data name="Viewer_TextButton" xml:space="preserve">
+    <value>Text (1)</value>
+    <comment>Viewer toolbar button; (1) is the keyboard key, keep it</comment>
+  </data>
+  <data name="Viewer_HexButton" xml:space="preserve">
+    <value>Hex (3)</value>
+    <comment>Keep the key (3)</comment>
+  </data>
+  <data name="Viewer_MarkdownButton" xml:space="preserve">
+    <value>Markdown (4)</value>
+    <comment>Keep the key (4)</comment>
+  </data>
+  <data name="Viewer_WrapButton" xml:space="preserve">
+    <value>Wrap (W)</value>
+    <comment>Toggles word wrap; W is the keyboard key, keep it</comment>
+  </data>
+  <data name="Viewer_PrevButton" xml:space="preserve">
+    <value>◀ Prev</value>
+    <comment>Previous file in the folder</comment>
+  </data>
+  <data name="Viewer_NextButton" xml:space="preserve">
+    <value>Next ▶</value>
+    <comment>Next file in the folder</comment>
+  </data>
+  <data name="Viewer_Info" xml:space="preserve">
+    <value>{0} bytes</value>
+    <comment>Viewer status line; {0} = exact byte count</comment>
+  </data>
+  <data name="Viewer_InfoTruncated" xml:space="preserve">
+    <value>{0} bytes  •  showing first {1}</value>
+    <comment>{0} = exact byte count, {1} = size shown (e.g. 4 MB)</comment>
+  </data>
+  <data name="Editor_Status" xml:space="preserve">
+    <value>{0}  •  {1} lines</value>
+    <comment>{0} = text encoding (utf-8), {1} = line count</comment>
+  </data>
+  <data name="Editor_CannotOpen" xml:space="preserve">
+    <value>Cannot open file</value>
+  </data>
+  <data name="Editor_Saved" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="Editor_SaveFailed" xml:space="preserve">
+    <value>Save failed</value>
+  </data>
+  <data name="Editor_SaveChanges" xml:space="preserve">
+    <value>Save changes?</value>
+  </data>
+  <data name="Editor_Discard" xml:space="preserve">
+    <value>Discard</value>
+    <comment>Close the editor without saving</comment>
+  </data>
+  <data name="Help_Title" xml:space="preserve">
+    <value>Keyboard reference</value>
+  </data>
+  <data name="Update_Heading" xml:space="preserve">
+    <value>A new version of ShinyCommander is available</value>
+  </data>
+  <data name="Update_Version" xml:space="preserve">
+    <value>Version {0} - you have {1}</value>
+    <comment>{0} = new version, {1} = installed version</comment>
+  </data>
+  <data name="Update_Released" xml:space="preserve">
+    <value>Released {0}</value>
+    <comment>{0} = long date</comment>
+  </data>
+  <data name="Update_NoNotes" xml:space="preserve">
+    <value>No release notes.</value>
+  </data>
+  <data name="Update_ViewOnGitHub" xml:space="preserve">
+    <value>View on GitHub</value>
+  </data>
+  <data name="Update_DontShowAgain" xml:space="preserve">
+    <value>Don't show again</value>
+  </data>
+  <data name="Update_Later" xml:space="preserve">
+    <value>Later</value>
+  </data>
+  <data name="Update_InstallAndRestart" xml:space="preserve">
+    <value>Install and Restart</value>
+  </data>
+  <data name="Update_Downloading" xml:space="preserve">
+    <value>Downloading…</value>
+  </data>
+  <data name="Update_Installing" xml:space="preserve">
+    <value>Installing…</value>
+  </data>
+  <data name="Update_InstallFailed" xml:space="preserve">
+    <value>Couldn't install the update: {0}</value>
+    <comment>{0} = one of the Update_Error* reasons (lower-case sentence) or a system message</comment>
+  </data>
+  <data name="Update_BetaVersion" xml:space="preserve">
+    <value>{0} (beta)</value>
+    <comment>{0} = version number</comment>
+  </data>
+  <data name="Update_ErrorTranslocated" xml:space="preserve">
+    <value>move ShinyCommander to your Applications folder and open it from there first.</value>
+    <comment>Follows "Couldn't install the update: " - starts lower-case</comment>
+  </data>
+  <data name="Update_ErrorCantWrite" xml:space="preserve">
+    <value>ShinyCommander can't write to {0}.</value>
+    <comment>{0} = folder path</comment>
+  </data>
+  <data name="Update_ErrorBadZip" xml:space="preserve">
+    <value>the download isn't a zip that could be opened.</value>
+    <comment>Follows "Couldn't install the update: " - starts lower-case</comment>
+  </data>
+  <data name="Update_ErrorNoApp" xml:space="preserve">
+    <value>the download doesn't hold the app.</value>
+    <comment>Starts lower-case</comment>
+  </data>
+  <data name="Update_ErrorInstallerStart" xml:space="preserve">
+    <value>the installer couldn't be started.</value>
+    <comment>Starts lower-case</comment>
+  </data>
+  <data name="Update_ErrorCopy" xml:space="preserve">
+    <value>the new version couldn't be copied into {0}.</value>
+    <comment>{0} = folder path; starts lower-case</comment>
+  </data>
+  <data name="Update_ErrorMove" xml:space="preserve">
+    <value>the new version couldn't be moved into {0}.</value>
+    <comment>{0} = folder path; starts lower-case</comment>
+  </data>
+  <data name="Update_ErrorNotTheApp" xml:space="preserve">
+    <value>the download isn't ShinyCommander.</value>
+    <comment>Starts lower-case</comment>
+  </data>
+  <data name="Update_ErrorSignature" xml:space="preserve">
+    <value>the new version's signature didn't check out.</value>
+    <comment>Starts lower-case</comment>
+  </data>
+  <data name="Update_ErrorDeveloper" xml:space="preserve">
+    <value>the new version wasn't signed by the same developer.</value>
+    <comment>Starts lower-case</comment>
+  </data>
+  <data name="Panel_Filter" xml:space="preserve">
+    <value>Filter:</value>
+    <comment>Label before the quick filter box</comment>
+  </data>
+  <data name="Panel_FilterPlaceholder" xml:space="preserve">
+    <value>*.cs;*.md   (Esc closes)</value>
+    <comment>Keep the *.cs;*.md patterns</comment>
+  </data>
+  <data name="Panel_FreeSpace" xml:space="preserve">
+    <value>{0} free of {1}</value>
+    <comment>Drive free space; {0} = free size, {1} = total size</comment>
+  </data>
+  <data name="Panel_ArchiveReadOnly" xml:space="preserve">
+    <value>{0} • read-only</value>
+    <comment>Archive badge; {0} = archive format (zip, tar.gz)</comment>
+  </data>
+  <data name="Panel_Status" xml:space="preserve">
+    <value>{0} / {1} in {2} / {3} file(s), {4} / {5} dir(s)</value>
+    <comment>Panel status: marked size / total size in marked / total files, marked / total folders</comment>
+  </data>
+  <data name="Column_Name" xml:space="preserve">
+    <value>Name</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Column_Ext" xml:space="preserve">
+    <value>Ext</value>
+    <comment>Short column header for file extension (narrow column)</comment>
+  </data>
+  <data name="Column_Size" xml:space="preserve">
+    <value>Size</value>
+    <comment>Column header</comment>
+  </data>
+  <data name="Column_Date" xml:space="preserve">
+    <value>Date</value>
+    <comment>Column header (modified date)</comment>
+  </data>
+  <data name="Column_Attr" xml:space="preserve">
+    <value>Attr</value>
+    <comment>Short column header for attributes (narrow column)</comment>
+  </data>
+  <data name="Column_Created" xml:space="preserve">
+    <value>Created</value>
+    <comment>Column header (creation date)</comment>
+  </data>
+  <data name="Column_Extension" xml:space="preserve">
+    <value>Extension</value>
+    <comment>Column name in the Columns menu</comment>
+  </data>
+  <data name="Column_DateModified" xml:space="preserve">
+    <value>Date modified</value>
+    <comment>Column name in the Columns menu</comment>
+  </data>
+  <data name="Column_DateCreated" xml:space="preserve">
+    <value>Date created</value>
+    <comment>Column name in the Columns menu</comment>
+  </data>
+  <data name="Column_Attributes" xml:space="preserve">
+    <value>Attributes</value>
+    <comment>Column name in the Columns menu</comment>
+  </data>
+  <data name="Tree_Home" xml:space="preserve">
+    <value>Home</value>
+    <comment>The user's home folder in the folder tree</comment>
+  </data>
+  <data name="QuickView_Title" xml:space="preserve">
+    <value>Quick view</value>
+  </data>
+  <data name="QuickView_NothingToPreview" xml:space="preserve">
+    <value>Nothing to preview</value>
+  </data>
+  <data name="QuickView_Folder" xml:space="preserve">
+    <value>Folder</value>
+  </data>
+  <data name="QuickView_Archive" xml:space="preserve">
+    <value>{0} archive  •  {1}  •  Enter opens it</value>
+    <comment>{0} = archive format (ZIP, 7z), {1} = size</comment>
+  </data>
+  <data name="QuickView_InfoTruncated" xml:space="preserve">
+    <value>{0}  •  {1}  •  first {2} shown</value>
+    <comment>{0} = file size, {1} = modified date, {2} = size shown</comment>
+  </data>
+  <data name="QuickView_FolderSummary" xml:space="preserve">
+    <value>Folder  •  {0} file(s), {1} folder(s)  •  {2}</value>
+    <comment>{0} = file count, {1} = folder count, {2} = total size</comment>
+  </data>
+  <data name="Preview_MoreBytes" xml:space="preserve">
+    <value>… {0} more bytes not shown</value>
+    <comment>End of a hex dump; {0} = byte count</comment>
+  </data>
+</root>

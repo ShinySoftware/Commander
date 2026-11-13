@@ -3,30 +3,31 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shiny="http://shiny.net/maui/controls"
              xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:l="clr-namespace:ShinyCommander"
              x:Class="ShinyCommander.Views.MultiRenamePage"
              x:DataType="vm:MultiRenameViewModel">
 
     <shiny:KeyboardShortcuts.Shortcuts>
-        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="Close" />
-        <shiny:KeyboardShortcut Gesture="Primary+Enter" Command="{Binding ExecuteCommand}" Description="Start renaming" />
-        <shiny:KeyboardShortcut Gesture="Primary+Z" Command="{Binding UndoCommand}" Description="Undo" />
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Enter" Command="{Binding ExecuteCommand}" Description="{l:Tr Rename_StartRenaming}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Z" Command="{Binding UndoCommand}" Description="{l:Tr Rename_Undo}" />
     </shiny:KeyboardShortcuts.Shortcuts>
 
     <Grid RowDefinitions="Auto,Auto,*,Auto">
         <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
-            <shiny:ShinyButton AutomationId="PageBack" Text="‹ Back" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
-            <Label Grid.Column="1" Text="Multi-rename tool" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
+            <shiny:ShinyButton AutomationId="PageBack" Text="{l:Tr Page_Back}" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="{l:Tr Rename_Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
         </Grid>
 
         <Border Grid.Row="1" Style="{StaticResource Card}" Margin="8,8,8,0" Padding="12">
             <Grid ColumnDefinitions="Auto,*,Auto,*" RowDefinitions="34,30,34,34,40" ColumnSpacing="10" RowSpacing="8">
-                <Label Text="Rename mask" VerticalOptions="Center" />
+                <Label Text="{l:Tr Rename_NameMask}" VerticalOptions="Center" />
                 <Entry Grid.Column="1" AutomationId="RenameMask" Text="{Binding NameMask}" FontFamily="{DynamicResource MonoFont}" />
-                <Label Grid.Column="2" Text="Extension" VerticalOptions="Center" />
+                <Label Grid.Column="2" Text="{l:Tr Rename_Extension}" VerticalOptions="Center" />
                 <Entry Grid.Column="3" Text="{Binding ExtensionMask}" FontFamily="{DynamicResource MonoFont}" />
 
                 <HorizontalStackLayout Grid.Row="1" Grid.ColumnSpan="4" Spacing="4">
-                    <Label Text="Insert:" Style="{StaticResource Subtle}" VerticalOptions="Center" />
+                    <Label Text="{l:Tr Rename_Insert}" Style="{StaticResource Subtle}" VerticalOptions="Center" />
                     <shiny:ShinyButton Text="[N]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[N]" Appearance="Tonal" FontSize="11" ContentPadding="6,2" />
                     <shiny:ShinyButton Text="[N1-8]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[N1-8]" Appearance="Tonal" FontSize="11" ContentPadding="6,2" />
                     <shiny:ShinyButton Text="[E]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[E]" Appearance="Tonal" FontSize="11" ContentPadding="6,2" />
@@ -36,30 +37,30 @@
                     <shiny:ShinyButton Text="[hms]" Command="{Binding InsertPlaceholderCommand}" CommandParameter="[hms]" Appearance="Tonal" FontSize="11" ContentPadding="6,2" />
                 </HorizontalStackLayout>
 
-                <Label Grid.Row="2" Text="Search for" VerticalOptions="Center" />
-                <Entry Grid.Row="2" Grid.Column="1" Text="{Binding Search}" Placeholder="text (a|b for several) or regex" />
-                <Label Grid.Row="2" Grid.Column="2" Text="Replace with" VerticalOptions="Center" />
+                <Label Grid.Row="2" Text="{l:Tr Rename_SearchFor}" VerticalOptions="Center" />
+                <Entry Grid.Row="2" Grid.Column="1" Text="{Binding Search}" Placeholder="{l:Tr Rename_SearchPlaceholder}" />
+                <Label Grid.Row="2" Grid.Column="2" Text="{l:Tr Rename_ReplaceWith}" VerticalOptions="Center" />
                 <Entry Grid.Row="2" Grid.Column="3" Text="{Binding Replace}" />
 
                 <HorizontalStackLayout Grid.Row="3" Grid.ColumnSpan="4" Spacing="16">
-                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding UseRegex}" /><Label Text="Regular expressions" VerticalOptions="Center" /></HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="6"><Label Text="Case" VerticalOptions="Center" /><Picker ItemsSource="{Binding CaseOptions}" SelectedIndex="{Binding CaseIndex}" WidthRequest="170" /></HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="6"><Label Text="Counter start" VerticalOptions="Center" /><Entry Text="{Binding CounterStart}" WidthRequest="60" /></HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="6"><Label Text="step" VerticalOptions="Center" /><Entry Text="{Binding CounterStep}" WidthRequest="50" /></HorizontalStackLayout>
-                    <HorizontalStackLayout Spacing="6"><Label Text="digits" VerticalOptions="Center" /><Entry Text="{Binding CounterDigits}" WidthRequest="50" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="2"><CheckBox IsChecked="{Binding UseRegex}" /><Label Text="{l:Tr Rename_Regex}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="6"><Label Text="{l:Tr Rename_Case}" VerticalOptions="Center" /><Picker ItemsSource="{Binding CaseOptions}" SelectedIndex="{Binding CaseIndex}" WidthRequest="170" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="6"><Label Text="{l:Tr Rename_CounterStart}" VerticalOptions="Center" /><Entry Text="{Binding CounterStart}" WidthRequest="60" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="6"><Label Text="{l:Tr Rename_CounterStep}" VerticalOptions="Center" /><Entry Text="{Binding CounterStep}" WidthRequest="50" /></HorizontalStackLayout>
+                    <HorizontalStackLayout Spacing="6"><Label Text="{l:Tr Rename_CounterDigits}" VerticalOptions="Center" /><Entry Text="{Binding CounterDigits}" WidthRequest="50" /></HorizontalStackLayout>
                 </HorizontalStackLayout>
 
                 <HorizontalStackLayout Grid.Row="4" Grid.ColumnSpan="4" Spacing="8">
-                    <shiny:ShinyButton AutomationId="RenameStart" Text="Start!" Command="{Binding ExecuteCommand}" Appearance="Filled" ContentPadding="18,4" />
-                    <shiny:ShinyButton AutomationId="RenameUndo" Text="Undo" Command="{Binding UndoCommand}" IsEnabled="{Binding CanUndo}" Appearance="Tonal" ContentPadding="12,4" />
+                    <shiny:ShinyButton AutomationId="RenameStart" Text="{l:Tr Rename_Start}" Command="{Binding ExecuteCommand}" Appearance="Filled" ContentPadding="18,4" />
+                    <shiny:ShinyButton AutomationId="RenameUndo" Text="{l:Tr Rename_Undo}" Command="{Binding UndoCommand}" IsEnabled="{Binding CanUndo}" Appearance="Tonal" ContentPadding="12,4" />
                 </HorizontalStackLayout>
             </Grid>
         </Border>
 
         <Border Grid.Row="2" Style="{StaticResource Card}" Margin="8" Padding="0">
             <shiny:DataGrid ItemsSource="{Binding Preview}" SelectionMode="None" Dense="True" Striped="True" AllowColumnResize="True">
-                <shiny:DataGridColumn Title="Old name" PropertyName="OldName" Width="*" />
-                <shiny:DataGridColumn Title="New name" PropertyName="NewName" Width="*" />
+                <shiny:DataGridColumn Title="{l:Tr Rename_ColOldName}" PropertyName="OldName" Width="*" />
+                <shiny:DataGridColumn Title="{l:Tr Rename_ColNewName}" PropertyName="NewName" Width="*" />
                 <shiny:DataGridColumn Title="" PropertyName="Status" Width="140" />
             </shiny:DataGrid>
         </Border>

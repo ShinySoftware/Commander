@@ -5,6 +5,7 @@
              xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
              xmlns:views="clr-namespace:ShinyCommander.Views"
              xmlns:conv="clr-namespace:ShinyCommander.Converters"
+             xmlns:l="clr-namespace:ShinyCommander"
              x:Class="ShinyCommander.Views.MainPage"
              x:DataType="vm:MainViewModel"
              Title="ShinyCommander">
@@ -13,79 +14,82 @@
          monitor) and Linux (GTK capture controller). CanExecute == false hands the key back to the focused
          text box, which is how typing into the command line coexists with Space/Backspace/Home/End. -->
     <shiny:KeyboardShortcuts.Shortcuts>
-        <shiny:KeyboardShortcut Gesture="Up" Command="{Binding CursorUpCommand}" Description="Move cursor up" Category="Navigation" TextInput="Always" AllowRepeat="True" />
-        <shiny:KeyboardShortcut Gesture="Down" Command="{Binding CursorDownCommand}" Description="Move cursor down" Category="Navigation" TextInput="Always" AllowRepeat="True" />
-        <shiny:KeyboardShortcut Gesture="PageUp" Command="{Binding PageUpCommand}" Description="Page up" Category="Navigation" TextInput="Always" AllowRepeat="True" />
-        <shiny:KeyboardShortcut Gesture="PageDown" Command="{Binding PageDownCommand}" Description="Page down" Category="Navigation" TextInput="Always" AllowRepeat="True" />
-        <shiny:KeyboardShortcut Gesture="Home" Command="{Binding HomeCommand}" Description="First item" Category="Navigation" TextInput="Always" />
-        <shiny:KeyboardShortcut Gesture="End" Command="{Binding EndCommand}" Description="Last item" Category="Navigation" TextInput="Always" />
-        <shiny:KeyboardShortcut Gesture="Enter" Command="{Binding EnterCommand}" Description="Open folder / archive / file, or run the command line" Category="Navigation" TextInput="Always" />
-        <shiny:KeyboardShortcut Gesture="Backspace" Command="{Binding BackspaceCommand}" Description="Parent folder" Category="Navigation" TextInput="Always" AllowRepeat="True" />
-        <shiny:KeyboardShortcut Gesture="Tab" Command="{Binding SwitchPanelCommand}" Description="Switch active panel" Category="Navigation" TextInput="Always" />
-        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding EscapeCommand}" Description="Clear command line / close filter / cancel" Category="Navigation" />
-        <shiny:KeyboardShortcut Gesture="Primary+PageUp" Command="{Binding GoParentCommand}" Description="Parent folder" Category="Navigation" />
-        <shiny:KeyboardShortcut Gesture="Primary+Backslash" Command="{Binding GoRootCommand}" Description="Root folder" Category="Navigation" />
-        <shiny:KeyboardShortcut Gesture="Primary+Shift+H" Command="{Binding GoHomeCommand}" Description="Home folder" Category="Navigation" />
-        <shiny:KeyboardShortcut Gesture="Alt+Left" Command="{Binding GoBackCommand}" Description="Back (history)" Category="Navigation" />
-        <shiny:KeyboardShortcut Gesture="Alt+Right" Command="{Binding GoForwardCommand}" Description="Forward (history)" Category="Navigation" />
-        <shiny:KeyboardShortcut Gesture="Primary+Left" Command="{Binding OpenInOtherPanelCommand}" Description="Open folder under cursor in other panel" Category="Navigation" />
-        <shiny:KeyboardShortcut Gesture="Primary+Right" Command="{Binding OpenInOtherPanelCommand}" Description="Open folder under cursor in other panel" Category="Navigation" />
-        <shiny:KeyboardShortcut Gesture="Alt+F1" Command="{Binding DriveMenuLeftCommand}" Description="Change drive - left panel" Category="Navigation" />
-        <shiny:KeyboardShortcut Gesture="Alt+F2" Command="{Binding DriveMenuRightCommand}" Description="Change drive - right panel" Category="Navigation" />
-        <shiny:KeyboardShortcut Gesture="Primary+D" Command="{Binding HotlistCommand}" Description="Directory hotlist" Category="Navigation" />
-        <shiny:KeyboardShortcut Gesture="Insert" Command="{Binding InsertCommand}" Description="Mark / unmark and move down" Category="Selection" TextInput="Always" AllowRepeat="True" />
-        <shiny:KeyboardShortcut Gesture="Space" Command="{Binding SpaceCommand}" Description="Mark / unmark (calculates folder size)" Category="Selection" TextInput="Always" />
-        <shiny:KeyboardShortcut Gesture="Shift+Up" Command="{Binding MarkUpCommand}" Description="Mark and move up" Category="Selection" TextInput="Always" AllowRepeat="True" />
-        <shiny:KeyboardShortcut Gesture="Shift+Down" Command="{Binding MarkDownCommand}" Description="Mark and move down" Category="Selection" TextInput="Always" AllowRepeat="True" />
-        <shiny:KeyboardShortcut Gesture="Primary+A" Command="{Binding SelectAllCommand}" Description="Select all" Category="Selection" />
-        <shiny:KeyboardShortcut Gesture="Primary+Shift+A" Command="{Binding DeselectAllCommand}" Description="Unselect all" Category="Selection" />
-        <shiny:KeyboardShortcut Gesture="Primary+G" Command="{Binding SelectGroupCommand}" Description="Select group (mask)" Category="Selection" />
-        <shiny:KeyboardShortcut Gesture="Primary+Shift+G" Command="{Binding DeselectGroupCommand}" Description="Unselect group (mask)" Category="Selection" />
-        <shiny:KeyboardShortcut Gesture="Primary+I" Command="{Binding InvertSelectionCommand}" Description="Invert selection" Category="Selection" />
-        <shiny:KeyboardShortcut Gesture="Alt+Shift+E" Command="{Binding SelectSameExtensionCommand}" Description="Select files with same extension" Category="Selection" />
-        <shiny:KeyboardShortcut Gesture="F2" Command="{Binding RenameCommand}" Description="Rename" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="Shift+F6" Command="{Binding RenameCommand}" Description="Rename" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="F3" Command="{Binding ViewCommand}" Description="View (lister)" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="F4" Command="{Binding EditCommand}" Description="Edit" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="Shift+F4" Command="{Binding NewFileCommand}" Description="New file + edit" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="F5" Command="{Binding CopyCommand}" Description="Copy" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="F6" Command="{Binding MoveCommand}" Description="Move / rename" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="F7" Command="{Binding MakeDirectoryCommand}" Description="New folder" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="F8" Command="{Binding DeleteCommand}" Description="Delete (to trash)" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="Delete" Command="{Binding DeleteCommand}" Description="Delete (to trash)" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="Shift+F8" Command="{Binding DeletePermanentlyCommand}" Description="Delete permanently" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="Shift+Delete" Command="{Binding DeletePermanentlyCommand}" Description="Delete permanently" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="Alt+F5" Command="{Binding PackCommand}" Description="Pack (zip, tar, tar.gz, tar.bz2)" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="Alt+F9" Command="{Binding UnpackCommand}" Description="Unpack archives" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="Primary+Shift+C" Command="{Binding CopyPathsToClipboardCommand}" Description="Copy full paths to clipboard" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="Primary+Enter" Command="{Binding CopyNameToCommandLineCommand}" Description="Name to command line" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="Primary+Shift+Enter" Command="{Binding CopyPathToCommandLineCommand}" Description="Full path to command line" Category="Files" />
-        <shiny:KeyboardShortcut Gesture="Primary+R" Command="{Binding RefreshCommand}" Description="Reread folder" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Primary+H" Command="{Binding ToggleHiddenCommand}" Description="Show / hide hidden files" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Primary+B" Command="{Binding BranchViewCommand}" Description="Branch view (all files in subfolders)" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Primary+F8" Command="{Binding ToggleTreeCommand}" Description="Folder tree (active panel)" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Primary+Shift+F1" Command="{Binding ThumbnailViewCommand}" Description="Thumbnail view on / off" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Primary+F2" Command="{Binding DetailsViewCommand}" Description="Details view" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Primary+Shift+K" Command="{Binding ChooseColumnsCommand}" Description="Choose columns" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Ctrl+Q" Command="{Binding QuickViewCommand}" Description="Quick view in the other panel" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Primary+Shift+L" Command="{Binding TogglePanelLayoutCommand}" Description="Panels side by side / stacked" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Left" Command="{Binding CursorLeftCommand}" Description="Previous tile (thumbnail view)" Category="Navigation" TextInput="Always" AllowRepeat="True" />
-        <shiny:KeyboardShortcut Gesture="Right" Command="{Binding CursorRightCommand}" Description="Next tile (thumbnail view)" Category="Navigation" TextInput="Always" AllowRepeat="True" />
-        <shiny:KeyboardShortcut Gesture="Primary+F" Command="{Binding QuickFilterCommand}" Description="Quick filter" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Primary+T" Command="{Binding NewTabCommand}" Description="New tab" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Primary+W" Command="{Binding CloseTabCommand}" Description="Close tab" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Ctrl+Tab" Command="{Binding NextTabCommand}" Description="Next tab" Category="View" TextInput="Always" />
-        <shiny:KeyboardShortcut Gesture="Ctrl+Shift+Tab" Command="{Binding PreviousTabCommand}" Description="Previous tab" Category="View" TextInput="Always" />
-        <shiny:KeyboardShortcut Gesture="Primary+U" Command="{Binding SwapPanelsCommand}" Description="Swap panels" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Primary+Period" Command="{Binding TargetEqualsSourceCommand}" Description="Target = source" Category="View" />
-        <shiny:KeyboardShortcut Gesture="Alt+F7" Command="{Binding FindCommand}" Description="Find files" Category="Tools" />
-        <shiny:KeyboardShortcut Gesture="Primary+M" Command="{Binding MultiRenameCommand}" Description="Multi-rename tool" Category="Tools" />
-        <shiny:KeyboardShortcut Gesture="Primary+Shift+S" Command="{Binding SynchronizeCommand}" Description="Synchronize directories" Category="Tools" />
-        <shiny:KeyboardShortcut Gesture="Primary+Shift+F2" Command="{Binding CompareFilesCommand}" Description="Compare files by content" Category="Tools" />
-        <shiny:KeyboardShortcut Gesture="Primary+O" Command="{Binding OpenTerminalCommand}" Description="Open terminal here" Category="Tools" />
-        <shiny:KeyboardShortcut Gesture="Primary+E" Command="{Binding RevealInFileManagerCommand}" Description="Reveal in system file manager" Category="Tools" />
-        <shiny:KeyboardShortcut Gesture="Primary+Comma" Command="{Binding SettingsCommand}" Description="Settings" Category="Tools" />
-        <shiny:KeyboardShortcut Gesture="F1" Command="{Binding HelpCommand}" Description="Keyboard reference" Category="Tools" />
+        <shiny:KeyboardShortcut Gesture="Up" Command="{Binding CursorUpCommand}" Description="{l:Tr Key_CursorUp}" Category="{l:Tr Cat_Navigation}" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Down" Command="{Binding CursorDownCommand}" Description="{l:Tr Key_CursorDown}" Category="{l:Tr Cat_Navigation}" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="PageUp" Command="{Binding PageUpCommand}" Description="{l:Tr Key_PageUp}" Category="{l:Tr Cat_Navigation}" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="PageDown" Command="{Binding PageDownCommand}" Description="{l:Tr Key_PageDown}" Category="{l:Tr Cat_Navigation}" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Home" Command="{Binding HomeCommand}" Description="{l:Tr Key_Home}" Category="{l:Tr Cat_Navigation}" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="End" Command="{Binding EndCommand}" Description="{l:Tr Key_End}" Category="{l:Tr Cat_Navigation}" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Enter" Command="{Binding EnterCommand}" Description="{l:Tr Key_Enter}" Category="{l:Tr Cat_Navigation}" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Backspace" Command="{Binding BackspaceCommand}" Description="{l:Tr Key_ParentFolder}" Category="{l:Tr Cat_Navigation}" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Tab" Command="{Binding SwitchPanelCommand}" Description="{l:Tr Key_SwitchPanel}" Category="{l:Tr Cat_Navigation}" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding EscapeCommand}" Description="{l:Tr Key_Escape}" Category="{l:Tr Cat_Navigation}" />
+        <shiny:KeyboardShortcut Gesture="Primary+PageUp" Command="{Binding GoParentCommand}" Description="{l:Tr Key_ParentFolder}" Category="{l:Tr Cat_Navigation}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Backslash" Command="{Binding GoRootCommand}" Description="{l:Tr Key_RootFolder}" Category="{l:Tr Cat_Navigation}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+H" Command="{Binding GoHomeCommand}" Description="{l:Tr Key_HomeFolder}" Category="{l:Tr Cat_Navigation}" />
+        <shiny:KeyboardShortcut Gesture="Alt+Left" Command="{Binding GoBackCommand}" Description="{l:Tr Key_Back}" Category="{l:Tr Cat_Navigation}" />
+        <shiny:KeyboardShortcut Gesture="Alt+Right" Command="{Binding GoForwardCommand}" Description="{l:Tr Key_Forward}" Category="{l:Tr Cat_Navigation}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Left" Command="{Binding OpenInOtherPanelCommand}" Description="{l:Tr Key_OpenInOtherPanel}" Category="{l:Tr Cat_Navigation}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Right" Command="{Binding OpenInOtherPanelCommand}" Description="{l:Tr Key_OpenInOtherPanel}" Category="{l:Tr Cat_Navigation}" />
+        <shiny:KeyboardShortcut Gesture="Alt+F1" Command="{Binding DriveMenuLeftCommand}" Description="{l:Tr Key_DriveLeft}" Category="{l:Tr Cat_Navigation}" />
+        <shiny:KeyboardShortcut Gesture="Alt+F2" Command="{Binding DriveMenuRightCommand}" Description="{l:Tr Key_DriveRight}" Category="{l:Tr Cat_Navigation}" />
+        <shiny:KeyboardShortcut Gesture="Primary+D" Command="{Binding HotlistCommand}" Description="{l:Tr Key_Hotlist}" Category="{l:Tr Cat_Navigation}" />
+        <shiny:KeyboardShortcut Gesture="Insert" Command="{Binding InsertCommand}" Description="{l:Tr Key_Insert}" Category="{l:Tr Cat_Selection}" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Space" Command="{Binding SpaceCommand}" Description="{l:Tr Key_Space}" Category="{l:Tr Cat_Selection}" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Shift+Up" Command="{Binding MarkUpCommand}" Description="{l:Tr Key_MarkUp}" Category="{l:Tr Cat_Selection}" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Shift+Down" Command="{Binding MarkDownCommand}" Description="{l:Tr Key_MarkDown}" Category="{l:Tr Cat_Selection}" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Primary+A" Command="{Binding SelectAllCommand}" Description="{l:Tr Key_SelectAll}" Category="{l:Tr Cat_Selection}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+A" Command="{Binding DeselectAllCommand}" Description="{l:Tr Key_DeselectAll}" Category="{l:Tr Cat_Selection}" />
+        <shiny:KeyboardShortcut Gesture="Primary+G" Command="{Binding SelectGroupCommand}" Description="{l:Tr Key_SelectGroup}" Category="{l:Tr Cat_Selection}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+G" Command="{Binding DeselectGroupCommand}" Description="{l:Tr Key_DeselectGroup}" Category="{l:Tr Cat_Selection}" />
+        <shiny:KeyboardShortcut Gesture="Primary+I" Command="{Binding InvertSelectionCommand}" Description="{l:Tr Key_InvertSelection}" Category="{l:Tr Cat_Selection}" />
+        <shiny:KeyboardShortcut Gesture="Alt+Shift+E" Command="{Binding SelectSameExtensionCommand}" Description="{l:Tr Key_SameExtension}" Category="{l:Tr Cat_Selection}" />
+        <shiny:KeyboardShortcut Gesture="F2" Command="{Binding RenameCommand}" Description="{l:Tr Key_Rename}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Shift+F6" Command="{Binding RenameCommand}" Description="{l:Tr Key_Rename}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="F3" Command="{Binding ViewCommand}" Description="{l:Tr Key_View}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="F4" Command="{Binding EditCommand}" Description="{l:Tr Key_Edit}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Shift+F4" Command="{Binding NewFileCommand}" Description="{l:Tr Key_NewFile}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="F5" Command="{Binding CopyCommand}" Description="{l:Tr Key_Copy}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="F6" Command="{Binding MoveCommand}" Description="{l:Tr Key_Move}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="F7" Command="{Binding MakeDirectoryCommand}" Description="{l:Tr Key_NewFolder}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="F8" Command="{Binding DeleteCommand}" Description="{l:Tr Key_Delete}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Delete" Command="{Binding DeleteCommand}" Description="{l:Tr Key_Delete}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Shift+F8" Command="{Binding DeletePermanentlyCommand}" Description="{l:Tr Key_DeletePermanently}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Shift+Delete" Command="{Binding DeletePermanentlyCommand}" Description="{l:Tr Key_DeletePermanently}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Backspace" Command="{Binding DeleteKeyCommand}" Description="{l:Tr Key_DeleteFinder}" Category="{l:Tr Cat_Files}" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Primary+Alt+Backspace" Command="{Binding DeletePermanentlyKeyCommand}" Description="{l:Tr Key_DeletePermanently}" Category="{l:Tr Cat_Files}" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Alt+F5" Command="{Binding PackCommand}" Description="{l:Tr Key_Pack}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Alt+F9" Command="{Binding UnpackCommand}" Description="{l:Tr Key_Unpack}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+C" Command="{Binding CopyPathsToClipboardCommand}" Description="{l:Tr Key_CopyPaths}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Enter" Command="{Binding CopyNameToCommandLineCommand}" Description="{l:Tr Key_NameToCommandLine}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+Enter" Command="{Binding CopyPathToCommandLineCommand}" Description="{l:Tr Key_PathToCommandLine}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Primary+R" Command="{Binding RefreshCommand}" Description="{l:Tr Key_Refresh}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+H" Command="{Binding ToggleHiddenCommand}" Description="{l:Tr Key_ToggleHidden}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+B" Command="{Binding BranchViewCommand}" Description="{l:Tr Key_BranchView}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+F8" Command="{Binding ToggleTreeCommand}" Description="{l:Tr Key_ToggleTree}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+F1" Command="{Binding ThumbnailViewCommand}" Description="{l:Tr Key_Thumbnails}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+F2" Command="{Binding DetailsViewCommand}" Description="{l:Tr Key_Details}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+K" Command="{Binding ChooseColumnsCommand}" Description="{l:Tr Key_Columns}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Ctrl+Q" Command="{Binding QuickViewCommand}" Description="{l:Tr Key_QuickView}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+J" Command="{Binding ToggleJobsCommand}" Description="{l:Tr Key_Jobs}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+L" Command="{Binding TogglePanelLayoutCommand}" Description="{l:Tr Key_PanelLayout}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Left" Command="{Binding CursorLeftCommand}" Description="{l:Tr Key_TileLeft}" Category="{l:Tr Cat_Navigation}" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Right" Command="{Binding CursorRightCommand}" Description="{l:Tr Key_TileRight}" Category="{l:Tr Cat_Navigation}" TextInput="Always" AllowRepeat="True" />
+        <shiny:KeyboardShortcut Gesture="Primary+F" Command="{Binding QuickFilterCommand}" Description="{l:Tr Key_QuickFilter}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+T" Command="{Binding NewTabCommand}" Description="{l:Tr Key_NewTab}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+W" Command="{Binding CloseTabCommand}" Description="{l:Tr Key_CloseTab}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Ctrl+Tab" Command="{Binding NextTabCommand}" Description="{l:Tr Key_NextTab}" Category="{l:Tr Cat_View}" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Ctrl+Shift+Tab" Command="{Binding PreviousTabCommand}" Description="{l:Tr Key_PreviousTab}" Category="{l:Tr Cat_View}" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Primary+U" Command="{Binding SwapPanelsCommand}" Description="{l:Tr Key_SwapPanels}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Period" Command="{Binding TargetEqualsSourceCommand}" Description="{l:Tr Key_TargetEqualsSource}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Alt+F7" Command="{Binding FindCommand}" Description="{l:Tr Key_Find}" Category="{l:Tr Cat_Tools}" />
+        <shiny:KeyboardShortcut Gesture="Primary+M" Command="{Binding MultiRenameCommand}" Description="{l:Tr Key_MultiRename}" Category="{l:Tr Cat_Tools}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+S" Command="{Binding SynchronizeCommand}" Description="{l:Tr Key_Synchronize}" Category="{l:Tr Cat_Tools}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+F2" Command="{Binding CompareFilesCommand}" Description="{l:Tr Key_CompareFiles}" Category="{l:Tr Cat_Tools}" />
+        <shiny:KeyboardShortcut Gesture="Primary+O" Command="{Binding OpenTerminalCommand}" Description="{l:Tr Key_Terminal}" Category="{l:Tr Cat_Tools}" />
+        <shiny:KeyboardShortcut Gesture="Primary+E" Command="{Binding RevealInFileManagerCommand}" Description="{l:Tr Key_Reveal}" Category="{l:Tr Cat_Tools}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Comma" Command="{Binding SettingsCommand}" Description="{l:Tr Key_Settings}" Category="{l:Tr Cat_Tools}" />
+        <shiny:KeyboardShortcut Gesture="F1" Command="{Binding HelpCommand}" Description="{l:Tr Key_Help}" Category="{l:Tr Cat_Tools}" />
     </shiny:KeyboardShortcuts.Shortcuts>
 
     <ContentPage.Resources>
@@ -105,303 +109,308 @@
                       AllowCollapse="True"
                       ShowTooltips="True">
             <shiny:Ribbon.QuickAccessItems>
-                <shiny:RibbonButton Text="Settings" Size="Small" Command="{Binding SettingsCommand}" Tooltip="Settings">
+                <shiny:RibbonButton Text="{l:Tr Cmd_Settings}" Size="Small" Command="{Binding SettingsCommand}" Tooltip="{l:Tr Cmd_Settings}">
                     <shiny:RibbonButton.IconTemplate><DataTemplate><shiny:MotionIconView Icon="settings" Trigger="Appear" WidthRequest="16" HeightRequest="16" /></DataTemplate></shiny:RibbonButton.IconTemplate>
                 </shiny:RibbonButton>
-                <shiny:RibbonButton Text="Help" Size="Small" Command="{Binding HelpCommand}" Tooltip="Keyboard reference (F1)">
+                <shiny:RibbonButton Text="{l:Tr Ribbon_Help}" Size="Small" Command="{Binding HelpCommand}" Tooltip="{l:Tr Cmd_Help, Suffix=' (F1)'}">
                     <shiny:RibbonButton.IconTemplate><DataTemplate><shiny:MotionIconView Icon="help" Trigger="Appear" WidthRequest="16" HeightRequest="16" /></DataTemplate></shiny:RibbonButton.IconTemplate>
                 </shiny:RibbonButton>
             </shiny:Ribbon.QuickAccessItems>
-            <shiny:RibbonTab Title="Files" Key="files">
-                <shiny:RibbonGroup Title="Transfer">
-                    <shiny:RibbonButton Text="Copy" Size="Large" Command="{Binding CopyCommand}" Shortcut="F5" Tooltip="Copy (F5)">
+            <shiny:RibbonTab Title="{l:Tr Ribbon_Tab_files}" Key="files">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Transfer}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Copy}" Size="Large" Command="{Binding CopyCommand}" Shortcut="F5" Tooltip="{l:Tr Cmd_Copy, Suffix=' (F5)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="copy" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Move" Size="Large" Command="{Binding MoveCommand}" Shortcut="F6" Tooltip="Move (F6)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Move}" Size="Large" Command="{Binding MoveCommand}" Shortcut="F6" Tooltip="{l:Tr Cmd_Move, Suffix=' (F6)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="arrow-right" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Delete" Size="Large" Command="{Binding DeleteCommand}" Shortcut="F8" Tooltip="Delete (F8)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Delete}" Size="Large" Command="{Binding DeleteCommand}" Shortcut="F8" Tooltip="{l:Tr Cmd_Delete, Suffix=' (F8)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="trash" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="{l:Tr Cmd_ToggleJobs}" Size="Small" Command="{Binding ToggleJobsCommand}" Shortcut="Primary+J" Tooltip="{l:Tr Cmd_ToggleJobs, Suffix=' (Primary+J)'}">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="hourglass" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="Create">
-                    <shiny:RibbonButton Text="New Folder" Size="Small" Command="{Binding MakeDirectoryCommand}" Shortcut="F7" Tooltip="New Folder (F7)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Create}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_MakeDirectory}" Size="Small" Command="{Binding MakeDirectoryCommand}" Shortcut="F7" Tooltip="{l:Tr Cmd_MakeDirectory, Suffix=' (F7)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="folder" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="New File" Size="Small" Command="{Binding NewFileCommand}" Shortcut="Shift+F4" Tooltip="New File (Shift+F4)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_NewFile}" Size="Small" Command="{Binding NewFileCommand}" Shortcut="Shift+F4" Tooltip="{l:Tr Cmd_NewFile, Suffix=' (Shift+F4)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="file" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Rename" Size="Small" Command="{Binding RenameCommand}" Shortcut="F2" Tooltip="Rename (F2)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Rename}" Size="Small" Command="{Binding RenameCommand}" Shortcut="F2" Tooltip="{l:Tr Cmd_Rename, Suffix=' (F2)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="edit" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="Open">
-                    <shiny:RibbonButton Text="View" Size="Large" Command="{Binding ViewCommand}" Shortcut="F3" Tooltip="View (F3)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Open}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_View}" Size="Large" Command="{Binding ViewCommand}" Shortcut="F3" Tooltip="{l:Tr Cmd_View, Suffix=' (F3)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="eye" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Edit" Size="Small" Command="{Binding EditCommand}" Shortcut="F4" Tooltip="Edit (F4)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Edit}" Size="Small" Command="{Binding EditCommand}" Shortcut="F4" Tooltip="{l:Tr Cmd_Edit, Suffix=' (F4)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="file-text" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Terminal" Size="Small" Command="{Binding OpenTerminalCommand}" Shortcut="Primary+O" Tooltip="Terminal (Primary+O)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_OpenTerminal}" Size="Small" Command="{Binding OpenTerminalCommand}" Shortcut="Primary+O" Tooltip="{l:Tr Cmd_OpenTerminal, Suffix=' (Primary+O)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="external-link" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Reveal" Size="Small" Command="{Binding RevealInFileManagerCommand}" Shortcut="Primary+E" Tooltip="Reveal (Primary+E)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_RevealInFileManager}" Size="Small" Command="{Binding RevealInFileManagerCommand}" Shortcut="Primary+E" Tooltip="{l:Tr Cmd_RevealInFileManager, Suffix=' (Primary+E)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="search" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="Archive">
-                    <shiny:RibbonButton Text="Pack" Size="Small" Command="{Binding PackCommand}" Shortcut="Alt+F5" Tooltip="Pack (Alt+F5)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Archive}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Pack}" Size="Small" Command="{Binding PackCommand}" Shortcut="Alt+F5" Tooltip="{l:Tr Cmd_Pack, Suffix=' (Alt+F5)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="download" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Unpack" Size="Small" Command="{Binding UnpackCommand}" Shortcut="Alt+F9" Tooltip="Unpack (Alt+F9)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Unpack}" Size="Small" Command="{Binding UnpackCommand}" Shortcut="Alt+F9" Tooltip="{l:Tr Cmd_Unpack, Suffix=' (Alt+F9)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="upload" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="Clipboard">
-                    <shiny:RibbonButton Text="Copy Paths" Size="Small" Command="{Binding CopyPathsToClipboardCommand}" Shortcut="Primary+Shift+C" Tooltip="Copy Paths (Primary+Shift+C)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Clipboard}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_CopyPathsToClipboard}" Size="Small" Command="{Binding CopyPathsToClipboardCommand}" Shortcut="Primary+Shift+C" Tooltip="{l:Tr Cmd_CopyPathsToClipboard, Suffix=' (Primary+Shift+C)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="clipboard" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Name to Cmd" Size="Small" Command="{Binding CopyNameToCommandLineCommand}" Shortcut="Primary+Enter" Tooltip="Name to Cmd (Primary+Enter)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_CopyNameToCommandLine}" Size="Small" Command="{Binding CopyNameToCommandLineCommand}" Shortcut="Primary+Enter" Tooltip="{l:Tr Cmd_CopyNameToCommandLine, Suffix=' (Primary+Enter)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="arrow-down" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
             </shiny:RibbonTab>
-            <shiny:RibbonTab Title="Selection" Key="select">
-                <shiny:RibbonGroup Title="Mark">
-                    <shiny:RibbonButton Text="Select All" Size="Large" Command="{Binding SelectAllCommand}" Shortcut="Primary+A" Tooltip="Select All (Primary+A)">
+            <shiny:RibbonTab Title="{l:Tr Ribbon_Tab_select}" Key="select">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Mark}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_SelectAll}" Size="Large" Command="{Binding SelectAllCommand}" Shortcut="Primary+A" Tooltip="{l:Tr Cmd_SelectAll, Suffix=' (Primary+A)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="check-circle" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Unselect All" Size="Small" Command="{Binding DeselectAllCommand}" Shortcut="Primary+Shift+A" Tooltip="Unselect All (Primary+Shift+A)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_DeselectAll}" Size="Small" Command="{Binding DeselectAllCommand}" Shortcut="Primary+Shift+A" Tooltip="{l:Tr Cmd_DeselectAll, Suffix=' (Primary+Shift+A)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="x-circle" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Invert" Size="Small" Command="{Binding InvertSelectionCommand}" Shortcut="Primary+I" Tooltip="Invert (Primary+I)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_InvertSelection}" Size="Small" Command="{Binding InvertSelectionCommand}" Shortcut="Primary+I" Tooltip="{l:Tr Cmd_InvertSelection, Suffix=' (Primary+I)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="shuffle" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="By pattern">
-                    <shiny:RibbonButton Text="Select Group…" Size="Small" Command="{Binding SelectGroupCommand}" Shortcut="Primary+G" Tooltip="Select Group… (Primary+G)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_ByPattern}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_SelectGroup}" Size="Small" Command="{Binding SelectGroupCommand}" Shortcut="Primary+G" Tooltip="{l:Tr Cmd_SelectGroup, Suffix=' (Primary+G)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="filter" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Unselect Group…" Size="Small" Command="{Binding DeselectGroupCommand}" Shortcut="Primary+Shift+G" Tooltip="Unselect Group… (Primary+Shift+G)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_DeselectGroup}" Size="Small" Command="{Binding DeselectGroupCommand}" Shortcut="Primary+Shift+G" Tooltip="{l:Tr Cmd_DeselectGroup, Suffix=' (Primary+Shift+G)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="close" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Same Extension" Size="Small" Command="{Binding SelectSameExtensionCommand}" Shortcut="Alt+Shift+E" Tooltip="Same Extension (Alt+Shift+E)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_SelectSameExtension}" Size="Small" Command="{Binding SelectSameExtensionCommand}" Shortcut="Alt+Shift+E" Tooltip="{l:Tr Cmd_SelectSameExtension, Suffix=' (Alt+Shift+E)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="tag" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
             </shiny:RibbonTab>
-            <shiny:RibbonTab Title="View" Key="view">
-                <shiny:RibbonGroup Title="Panel">
-                    <shiny:RibbonButton Text="Reread" Size="Large" Command="{Binding RefreshCommand}" Shortcut="Primary+R" Tooltip="Reread (Primary+R)">
+            <shiny:RibbonTab Title="{l:Tr Ribbon_Tab_view}" Key="view">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Panel}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Refresh}" Size="Large" Command="{Binding RefreshCommand}" Shortcut="Primary+R" Tooltip="{l:Tr Cmd_Refresh, Suffix=' (Primary+R)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="refresh" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Hidden Files" Size="Small" Command="{Binding ToggleHiddenCommand}" Shortcut="Primary+H" Tooltip="Hidden Files (Primary+H)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_ToggleHidden}" Size="Small" Command="{Binding ToggleHiddenCommand}" Shortcut="Primary+H" Tooltip="{l:Tr Cmd_ToggleHidden, Suffix=' (Primary+H)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="eye" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Branch View" Size="Small" Command="{Binding BranchViewCommand}" Shortcut="Primary+B" Tooltip="Branch View (Primary+B)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_BranchView}" Size="Small" Command="{Binding BranchViewCommand}" Shortcut="Primary+B" Tooltip="{l:Tr Cmd_BranchView, Suffix=' (Primary+B)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="expand" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Quick Filter" Size="Small" Command="{Binding QuickFilterCommand}" Shortcut="Primary+F" Tooltip="Quick Filter (Primary+F)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_QuickFilter}" Size="Small" Command="{Binding QuickFilterCommand}" Shortcut="Primary+F" Tooltip="{l:Tr Cmd_QuickFilter, Suffix=' (Primary+F)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="filter" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="Show">
-                    <shiny:RibbonButton Text="Thumbnails" Size="Large" Command="{Binding ThumbnailViewCommand}" Shortcut="Primary+Shift+F1" Tooltip="Thumbnails (Primary+Shift+F1)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Show}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_ThumbnailView}" Size="Large" Command="{Binding ThumbnailViewCommand}" Shortcut="Primary+Shift+F1" Tooltip="{l:Tr Cmd_ThumbnailView, Suffix=' (Primary+Shift+F1)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="image" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Details" Size="Small" Command="{Binding DetailsViewCommand}" Shortcut="Primary+F2" Tooltip="Details (Primary+F2)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_DetailsView}" Size="Small" Command="{Binding DetailsViewCommand}" Shortcut="Primary+F2" Tooltip="{l:Tr Cmd_DetailsView, Suffix=' (Primary+F2)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="menu" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Columns…" Size="Small" Command="{Binding ChooseColumnsCommand}" Shortcut="Primary+Shift+K" Tooltip="Columns… (Primary+Shift+K)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_ChooseColumns}" Size="Small" Command="{Binding ChooseColumnsCommand}" Shortcut="Primary+Shift+K" Tooltip="{l:Tr Cmd_ChooseColumns, Suffix=' (Primary+Shift+K)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="sort" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Folder Tree" Size="Small" Command="{Binding ToggleTreeCommand}" Shortcut="Primary+F8" Tooltip="Folder Tree (Primary+F8)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_ToggleTree}" Size="Small" Command="{Binding ToggleTreeCommand}" Shortcut="Primary+F8" Tooltip="{l:Tr Cmd_ToggleTree, Suffix=' (Primary+F8)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="folder-open" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="Layout">
-                    <shiny:RibbonButton Text="Quick View" Size="Large" Command="{Binding QuickViewCommand}" Shortcut="Ctrl+Q" Tooltip="Quick View (Ctrl+Q)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Layout}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_QuickView}" Size="Large" Command="{Binding QuickViewCommand}" Shortcut="Ctrl+Q" Tooltip="{l:Tr Cmd_QuickView, Suffix=' (Ctrl+Q)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="zoom-in" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Stack Panels" Size="Small" Command="{Binding TogglePanelLayoutCommand}" Shortcut="Primary+Shift+L" Tooltip="Stack Panels (Primary+Shift+L)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_TogglePanelLayout}" Size="Small" Command="{Binding TogglePanelLayoutCommand}" Shortcut="Primary+Shift+L" Tooltip="{l:Tr Cmd_TogglePanelLayout, Suffix=' (Primary+Shift+L)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="collapse" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Swap" Size="Small" Command="{Binding SwapPanelsCommand}" Shortcut="Primary+U" Tooltip="Swap (Primary+U)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_SwapPanels}" Size="Small" Command="{Binding SwapPanelsCommand}" Shortcut="Primary+U" Tooltip="{l:Tr Cmd_SwapPanels, Suffix=' (Primary+U)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="repeat" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Target = Source" Size="Small" Command="{Binding TargetEqualsSourceCommand}" Shortcut="Primary+." Tooltip="Target = Source (Primary+.)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_TargetEqualsSource}" Size="Small" Command="{Binding TargetEqualsSourceCommand}" Shortcut="Primary+." Tooltip="{l:Tr Cmd_TargetEqualsSource, Suffix=' (Primary+.)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="link" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="Tabs">
-                    <shiny:RibbonButton Text="New Tab" Size="Small" Command="{Binding NewTabCommand}" Shortcut="Primary+T" Tooltip="New Tab (Primary+T)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Tabs}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_NewTab}" Size="Small" Command="{Binding NewTabCommand}" Shortcut="Primary+T" Tooltip="{l:Tr Cmd_NewTab, Suffix=' (Primary+T)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="plus" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Close Tab" Size="Small" Command="{Binding CloseTabCommand}" Shortcut="Primary+W" Tooltip="Close Tab (Primary+W)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_CloseTab}" Size="Small" Command="{Binding CloseTabCommand}" Shortcut="Primary+W" Tooltip="{l:Tr Cmd_CloseTab, Suffix=' (Primary+W)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="close" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Next Tab" Size="Small" Command="{Binding NextTabCommand}" Shortcut="Ctrl+Tab" Tooltip="Next Tab (Ctrl+Tab)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_NextTab}" Size="Small" Command="{Binding NextTabCommand}" Shortcut="Ctrl+Tab" Tooltip="{l:Tr Cmd_NextTab, Suffix=' (Ctrl+Tab)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="chevron-right" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
             </shiny:RibbonTab>
-            <shiny:RibbonTab Title="Go" Key="go">
-                <shiny:RibbonGroup Title="History">
-                    <shiny:RibbonButton Text="Back" Size="Large" Command="{Binding GoBackCommand}" Shortcut="Alt+Left" Tooltip="Back (Alt+Left)">
+            <shiny:RibbonTab Title="{l:Tr Ribbon_Tab_go}" Key="go">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_History}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_GoBack}" Size="Large" Command="{Binding GoBackCommand}" Shortcut="Alt+Left" Tooltip="{l:Tr Cmd_GoBack, Suffix=' (Alt+Left)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="arrow-left" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Forward" Size="Small" Command="{Binding GoForwardCommand}" Shortcut="Alt+Right" Tooltip="Forward (Alt+Right)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_GoForward}" Size="Small" Command="{Binding GoForwardCommand}" Shortcut="Alt+Right" Tooltip="{l:Tr Cmd_GoForward, Suffix=' (Alt+Right)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="arrow-right" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Parent" Size="Small" Command="{Binding GoParentCommand}" Shortcut="Backspace" Tooltip="Parent (Backspace)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_GoParent}" Size="Small" Command="{Binding GoParentCommand}" Shortcut="Backspace" Tooltip="{l:Tr Cmd_GoParent, Suffix=' (Backspace)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="arrow-up" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="Places">
-                    <shiny:RibbonButton Text="Home" Size="Large" Command="{Binding GoHomeCommand}" Shortcut="Primary+Shift+H" Tooltip="Home (Primary+Shift+H)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Places}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_GoHome}" Size="Large" Command="{Binding GoHomeCommand}" Shortcut="Primary+Shift+H" Tooltip="{l:Tr Cmd_GoHome, Suffix=' (Primary+Shift+H)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="home" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Root" Size="Small" Command="{Binding GoRootCommand}" Shortcut="Primary+\" Tooltip="Root (Primary+\)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_GoRoot}" Size="Small" Command="{Binding GoRootCommand}" Shortcut="Primary+\" Tooltip="{l:Tr Cmd_GoRoot, Suffix=' (Primary+\\)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="database" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Hotlist" Size="Small" Command="{Binding HotlistCommand}" Shortcut="Primary+D" Tooltip="Hotlist (Primary+D)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Hotlist}" Size="Small" Command="{Binding HotlistCommand}" Shortcut="Primary+D" Tooltip="{l:Tr Cmd_Hotlist, Suffix=' (Primary+D)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="star" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="Drives">
-                    <shiny:RibbonButton Text="Left Drive…" Size="Small" Command="{Binding DriveMenuLeftCommand}" Shortcut="Alt+F1" Tooltip="Left Drive… (Alt+F1)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Drives}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_DriveMenuLeft}" Size="Small" Command="{Binding DriveMenuLeftCommand}" Shortcut="Alt+F1" Tooltip="{l:Tr Cmd_DriveMenuLeft, Suffix=' (Alt+F1)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="compass" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Right Drive…" Size="Small" Command="{Binding DriveMenuRightCommand}" Shortcut="Alt+F2" Tooltip="Right Drive… (Alt+F2)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_DriveMenuRight}" Size="Small" Command="{Binding DriveMenuRightCommand}" Shortcut="Alt+F2" Tooltip="{l:Tr Cmd_DriveMenuRight, Suffix=' (Alt+F2)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="compass" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Other Panel" Size="Small" Command="{Binding OpenInOtherPanelCommand}" Shortcut="Primary+Right" Tooltip="Other Panel (Primary+Right)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_OpenInOtherPanel}" Size="Small" Command="{Binding OpenInOtherPanelCommand}" Shortcut="Primary+Right" Tooltip="{l:Tr Cmd_OpenInOtherPanel, Suffix=' (Primary+Right)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="chevron-right" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
             </shiny:RibbonTab>
-            <shiny:RibbonTab Title="Tools" Key="tools">
-                <shiny:RibbonGroup Title="Find">
-                    <shiny:RibbonButton Text="Find Files" Size="Large" Command="{Binding FindCommand}" Shortcut="Alt+F7" Tooltip="Find Files (Alt+F7)">
+            <shiny:RibbonTab Title="{l:Tr Ribbon_Tab_tools}" Key="tools">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Find}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Find}" Size="Large" Command="{Binding FindCommand}" Shortcut="Alt+F7" Tooltip="{l:Tr Cmd_Find, Suffix=' (Alt+F7)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="search" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="Batch">
-                    <shiny:RibbonButton Text="Multi-Rename" Size="Large" Command="{Binding MultiRenameCommand}" Shortcut="Primary+M" Tooltip="Multi-Rename (Primary+M)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Batch}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_MultiRename}" Size="Large" Command="{Binding MultiRenameCommand}" Shortcut="Primary+M" Tooltip="{l:Tr Cmd_MultiRename, Suffix=' (Primary+M)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="edit" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="Compare">
-                    <shiny:RibbonButton Text="Sync Dirs" Size="Large" Command="{Binding SynchronizeCommand}" Shortcut="Primary+Shift+S" Tooltip="Sync Dirs (Primary+Shift+S)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Compare}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Synchronize}" Size="Large" Command="{Binding SynchronizeCommand}" Shortcut="Primary+Shift+S" Tooltip="{l:Tr Cmd_Synchronize, Suffix=' (Primary+Shift+S)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="refresh" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Compare Files" Size="Small" Command="{Binding CompareFilesCommand}" Shortcut="Primary+Shift+F2" Tooltip="Compare Files (Primary+Shift+F2)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_CompareFiles}" Size="Small" Command="{Binding CompareFilesCommand}" Shortcut="Primary+Shift+F2" Tooltip="{l:Tr Cmd_CompareFiles, Suffix=' (Primary+Shift+F2)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="activity" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
-                <shiny:RibbonGroup Title="App">
-                    <shiny:RibbonButton Text="Settings" Size="Small" Command="{Binding SettingsCommand}" Shortcut="Primary+," Tooltip="Settings (Primary+,)">
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_App}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Settings}" Size="Small" Command="{Binding SettingsCommand}" Shortcut="Primary+," Tooltip="{l:Tr Cmd_Settings, Suffix=' (Primary+,)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="settings" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="Keyboard Help" Size="Small" Command="{Binding HelpCommand}" Shortcut="F1" Tooltip="Keyboard Help (F1)">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Help}" Size="Small" Command="{Binding HelpCommand}" Shortcut="F1" Tooltip="{l:Tr Cmd_Help, Suffix=' (F1)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="help" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
@@ -419,23 +428,23 @@
                 <HorizontalStackLayout Grid.Column="1" Spacing="2">
                     <Border Style="{StaticResource RibbonTabHeader}" AutomationId="ribbon-tab-files" BackgroundColor="{Binding RibbonTab, Converter={StaticResource RibbonTabBackground}, ConverterParameter=files}">
                         <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectRibbonTabCommand}" CommandParameter="files" /></Border.GestureRecognizers>
-                        <Label Text="Files" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=files}" />
+                        <Label Text="{l:Tr Ribbon_Tab_files}" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=files}" />
                     </Border>
                     <Border Style="{StaticResource RibbonTabHeader}" AutomationId="ribbon-tab-select" BackgroundColor="{Binding RibbonTab, Converter={StaticResource RibbonTabBackground}, ConverterParameter=select}">
                         <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectRibbonTabCommand}" CommandParameter="select" /></Border.GestureRecognizers>
-                        <Label Text="Selection" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=select}" />
+                        <Label Text="{l:Tr Ribbon_Tab_select}" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=select}" />
                     </Border>
                     <Border Style="{StaticResource RibbonTabHeader}" AutomationId="ribbon-tab-view" BackgroundColor="{Binding RibbonTab, Converter={StaticResource RibbonTabBackground}, ConverterParameter=view}">
                         <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectRibbonTabCommand}" CommandParameter="view" /></Border.GestureRecognizers>
-                        <Label Text="View" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=view}" />
+                        <Label Text="{l:Tr Ribbon_Tab_view}" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=view}" />
                     </Border>
                     <Border Style="{StaticResource RibbonTabHeader}" AutomationId="ribbon-tab-go" BackgroundColor="{Binding RibbonTab, Converter={StaticResource RibbonTabBackground}, ConverterParameter=go}">
                         <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectRibbonTabCommand}" CommandParameter="go" /></Border.GestureRecognizers>
-                        <Label Text="Go" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=go}" />
+                        <Label Text="{l:Tr Ribbon_Tab_go}" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=go}" />
                     </Border>
                     <Border Style="{StaticResource RibbonTabHeader}" AutomationId="ribbon-tab-tools" BackgroundColor="{Binding RibbonTab, Converter={StaticResource RibbonTabBackground}, ConverterParameter=tools}">
                         <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectRibbonTabCommand}" CommandParameter="tools" /></Border.GestureRecognizers>
-                        <Label Text="Tools" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=tools}" />
+                        <Label Text="{l:Tr Ribbon_Tab_tools}" FontSize="13" VerticalTextAlignment="Center" TextColor="{Binding RibbonTab, Converter={StaticResource RibbonTabText}, ConverterParameter=tools}" />
                     </Border>
                 </HorizontalStackLayout>
                 <HorizontalStackLayout Grid.Column="2" Spacing="4">
@@ -448,494 +457,503 @@
                     <HorizontalStackLayout Spacing="0" IsVisible="{Binding RibbonTab, Converter={StaticResource RibbonTabVisible}, ConverterParameter=files}">
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Copy" ToolTipProperties.Text="Copy (F5)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Copy" ToolTipProperties.Text="{l:Tr Cmd_Copy, Suffix=' (F5)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding CopyCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="copy" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="Copy" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_Copy}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Move" ToolTipProperties.Text="Move (F6)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Move" ToolTipProperties.Text="{l:Tr Cmd_Move, Suffix=' (F6)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding MoveCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="arrow-right" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="Move" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_Move}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Delete" ToolTipProperties.Text="Delete (F8)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Delete" ToolTipProperties.Text="{l:Tr Cmd_Delete, Suffix=' (F8)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DeleteCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="trash" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="Delete" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_Delete}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-ToggleJobs" ToolTipProperties.Text="{l:Tr Cmd_ToggleJobs, Suffix=' (Primary+J)'}">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleJobsCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="hourglass" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="{l:Tr Cmd_ToggleJobs}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Transfer" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Transfer}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-MakeDirectory" ToolTipProperties.Text="New Folder (F7)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-MakeDirectory" ToolTipProperties.Text="{l:Tr Cmd_MakeDirectory, Suffix=' (F7)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding MakeDirectoryCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="folder" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="New Folder" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_MakeDirectory}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-NewFile" ToolTipProperties.Text="New File (Shift+F4)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-NewFile" ToolTipProperties.Text="{l:Tr Cmd_NewFile, Suffix=' (Shift+F4)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding NewFileCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="file" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="New File" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_NewFile}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Rename" ToolTipProperties.Text="Rename (F2)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Rename" ToolTipProperties.Text="{l:Tr Cmd_Rename, Suffix=' (F2)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding RenameCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="edit" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Rename" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_Rename}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Create" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Create}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-View" ToolTipProperties.Text="View (F3)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-View" ToolTipProperties.Text="{l:Tr Cmd_View, Suffix=' (F3)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ViewCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="eye" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="View" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_View}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Edit" ToolTipProperties.Text="Edit (F4)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Edit" ToolTipProperties.Text="{l:Tr Cmd_Edit, Suffix=' (F4)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding EditCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="file-text" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Edit" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_Edit}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-OpenTerminal" ToolTipProperties.Text="Terminal (Primary+O)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-OpenTerminal" ToolTipProperties.Text="{l:Tr Cmd_OpenTerminal, Suffix=' (Primary+O)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding OpenTerminalCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="external-link" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Terminal" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_OpenTerminal}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-RevealInFileManager" ToolTipProperties.Text="Reveal (Primary+E)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-RevealInFileManager" ToolTipProperties.Text="{l:Tr Cmd_RevealInFileManager, Suffix=' (Primary+E)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding RevealInFileManagerCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="search" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Reveal" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_RevealInFileManager}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Open" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Open}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Pack" ToolTipProperties.Text="Pack (Alt+F5)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Pack" ToolTipProperties.Text="{l:Tr Cmd_Pack, Suffix=' (Alt+F5)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding PackCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="download" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Pack" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_Pack}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Unpack" ToolTipProperties.Text="Unpack (Alt+F9)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Unpack" ToolTipProperties.Text="{l:Tr Cmd_Unpack, Suffix=' (Alt+F9)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding UnpackCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="upload" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Unpack" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_Unpack}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Archive" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Archive}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-CopyPathsToClipboard" ToolTipProperties.Text="Copy Paths (Primary+Shift+C)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-CopyPathsToClipboard" ToolTipProperties.Text="{l:Tr Cmd_CopyPathsToClipboard, Suffix=' (Primary+Shift+C)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding CopyPathsToClipboardCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="clipboard" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Copy Paths" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_CopyPathsToClipboard}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-CopyNameToCommandLine" ToolTipProperties.Text="Name to Cmd (Primary+Enter)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-CopyNameToCommandLine" ToolTipProperties.Text="{l:Tr Cmd_CopyNameToCommandLine, Suffix=' (Primary+Enter)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding CopyNameToCommandLineCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="arrow-down" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Name to Cmd" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_CopyNameToCommandLine}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Clipboard" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Clipboard}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="0" IsVisible="{Binding RibbonTab, Converter={StaticResource RibbonTabVisible}, ConverterParameter=select}">
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-SelectAll" ToolTipProperties.Text="Select All (Primary+A)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-SelectAll" ToolTipProperties.Text="{l:Tr Cmd_SelectAll, Suffix=' (Primary+A)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectAllCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="check-circle" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="Select All" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_SelectAll}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-DeselectAll" ToolTipProperties.Text="Unselect All (Primary+Shift+A)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-DeselectAll" ToolTipProperties.Text="{l:Tr Cmd_DeselectAll, Suffix=' (Primary+Shift+A)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DeselectAllCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="x-circle" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Unselect All" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_DeselectAll}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-InvertSelection" ToolTipProperties.Text="Invert (Primary+I)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-InvertSelection" ToolTipProperties.Text="{l:Tr Cmd_InvertSelection, Suffix=' (Primary+I)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding InvertSelectionCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="shuffle" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Invert" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_InvertSelection}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Mark" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Mark}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-SelectGroup" ToolTipProperties.Text="Select Group… (Primary+G)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-SelectGroup" ToolTipProperties.Text="{l:Tr Cmd_SelectGroup, Suffix=' (Primary+G)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectGroupCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="filter" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Select Group…" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_SelectGroup}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-DeselectGroup" ToolTipProperties.Text="Unselect Group… (Primary+Shift+G)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-DeselectGroup" ToolTipProperties.Text="{l:Tr Cmd_DeselectGroup, Suffix=' (Primary+Shift+G)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DeselectGroupCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="close" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Unselect Group…" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_DeselectGroup}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-SelectSameExtension" ToolTipProperties.Text="Same Extension (Alt+Shift+E)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-SelectSameExtension" ToolTipProperties.Text="{l:Tr Cmd_SelectSameExtension, Suffix=' (Alt+Shift+E)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SelectSameExtensionCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="tag" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Same Extension" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_SelectSameExtension}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="By pattern" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_ByPattern}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="0" IsVisible="{Binding RibbonTab, Converter={StaticResource RibbonTabVisible}, ConverterParameter=view}">
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Refresh" ToolTipProperties.Text="Reread (Primary+R)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Refresh" ToolTipProperties.Text="{l:Tr Cmd_Refresh, Suffix=' (Primary+R)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding RefreshCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="refresh" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="Reread" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_Refresh}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-ToggleHidden" ToolTipProperties.Text="Hidden Files (Primary+H)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-ToggleHidden" ToolTipProperties.Text="{l:Tr Cmd_ToggleHidden, Suffix=' (Primary+H)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleHiddenCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="eye" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Hidden Files" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_ToggleHidden}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-BranchView" ToolTipProperties.Text="Branch View (Primary+B)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-BranchView" ToolTipProperties.Text="{l:Tr Cmd_BranchView, Suffix=' (Primary+B)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding BranchViewCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="expand" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Branch View" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_BranchView}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-QuickFilter" ToolTipProperties.Text="Quick Filter (Primary+F)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-QuickFilter" ToolTipProperties.Text="{l:Tr Cmd_QuickFilter, Suffix=' (Primary+F)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding QuickFilterCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="filter" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Quick Filter" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_QuickFilter}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Panel" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Panel}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-ThumbnailView" ToolTipProperties.Text="Thumbnails (Primary+Shift+F1)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-ThumbnailView" ToolTipProperties.Text="{l:Tr Cmd_ThumbnailView, Suffix=' (Primary+Shift+F1)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ThumbnailViewCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="image" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="Thumbnails" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_ThumbnailView}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-DetailsView" ToolTipProperties.Text="Details (Primary+F2)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-DetailsView" ToolTipProperties.Text="{l:Tr Cmd_DetailsView, Suffix=' (Primary+F2)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DetailsViewCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="menu" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Details" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_DetailsView}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-ChooseColumns" ToolTipProperties.Text="Columns… (Primary+Shift+K)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-ChooseColumns" ToolTipProperties.Text="{l:Tr Cmd_ChooseColumns, Suffix=' (Primary+Shift+K)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ChooseColumnsCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="sort" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Columns…" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_ChooseColumns}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-ToggleTree" ToolTipProperties.Text="Folder Tree (Primary+F8)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-ToggleTree" ToolTipProperties.Text="{l:Tr Cmd_ToggleTree, Suffix=' (Primary+F8)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleTreeCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="folder-open" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Folder Tree" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_ToggleTree}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Show" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Show}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-QuickView" ToolTipProperties.Text="Quick View (Ctrl+Q)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-QuickView" ToolTipProperties.Text="{l:Tr Cmd_QuickView, Suffix=' (Ctrl+Q)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding QuickViewCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="zoom-in" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="Quick View" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_QuickView}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-TogglePanelLayout" ToolTipProperties.Text="Stack Panels (Primary+Shift+L)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-TogglePanelLayout" ToolTipProperties.Text="{l:Tr Cmd_TogglePanelLayout, Suffix=' (Primary+Shift+L)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding TogglePanelLayoutCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="collapse" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Stack Panels" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_TogglePanelLayout}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-SwapPanels" ToolTipProperties.Text="Swap (Primary+U)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-SwapPanels" ToolTipProperties.Text="{l:Tr Cmd_SwapPanels, Suffix=' (Primary+U)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SwapPanelsCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="repeat" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Swap" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_SwapPanels}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-TargetEqualsSource" ToolTipProperties.Text="Target = Source (Primary+.)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-TargetEqualsSource" ToolTipProperties.Text="{l:Tr Cmd_TargetEqualsSource, Suffix=' (Primary+.)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding TargetEqualsSourceCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="link" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Target = Source" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_TargetEqualsSource}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Layout" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Layout}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-NewTab" ToolTipProperties.Text="New Tab (Primary+T)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-NewTab" ToolTipProperties.Text="{l:Tr Cmd_NewTab, Suffix=' (Primary+T)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding NewTabCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="plus" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="New Tab" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_NewTab}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-CloseTab" ToolTipProperties.Text="Close Tab (Primary+W)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-CloseTab" ToolTipProperties.Text="{l:Tr Cmd_CloseTab, Suffix=' (Primary+W)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding CloseTabCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="close" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Close Tab" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_CloseTab}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-NextTab" ToolTipProperties.Text="Next Tab (Ctrl+Tab)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-NextTab" ToolTipProperties.Text="{l:Tr Cmd_NextTab, Suffix=' (Ctrl+Tab)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding NextTabCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="chevron-right" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Next Tab" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_NextTab}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Tabs" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Tabs}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="0" IsVisible="{Binding RibbonTab, Converter={StaticResource RibbonTabVisible}, ConverterParameter=go}">
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-GoBack" ToolTipProperties.Text="Back (Alt+Left)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-GoBack" ToolTipProperties.Text="{l:Tr Cmd_GoBack, Suffix=' (Alt+Left)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoBackCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="arrow-left" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="Back" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_GoBack}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-GoForward" ToolTipProperties.Text="Forward (Alt+Right)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-GoForward" ToolTipProperties.Text="{l:Tr Cmd_GoForward, Suffix=' (Alt+Right)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoForwardCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="arrow-right" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Forward" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_GoForward}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-GoParent" ToolTipProperties.Text="Parent (Backspace)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-GoParent" ToolTipProperties.Text="{l:Tr Cmd_GoParent, Suffix=' (Backspace)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoParentCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="arrow-up" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Parent" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_GoParent}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="History" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_History}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-GoHome" ToolTipProperties.Text="Home (Primary+Shift+H)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-GoHome" ToolTipProperties.Text="{l:Tr Cmd_GoHome, Suffix=' (Primary+Shift+H)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoHomeCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="home" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="Home" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_GoHome}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-GoRoot" ToolTipProperties.Text="Root (Primary+\)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-GoRoot" ToolTipProperties.Text="{l:Tr Cmd_GoRoot, Suffix=' (Primary+\\)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoRootCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="database" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Root" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_GoRoot}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Hotlist" ToolTipProperties.Text="Hotlist (Primary+D)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Hotlist" ToolTipProperties.Text="{l:Tr Cmd_Hotlist, Suffix=' (Primary+D)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding HotlistCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="star" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Hotlist" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_Hotlist}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Places" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Places}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-DriveMenuLeft" ToolTipProperties.Text="Left Drive… (Alt+F1)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-DriveMenuLeft" ToolTipProperties.Text="{l:Tr Cmd_DriveMenuLeft, Suffix=' (Alt+F1)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DriveMenuLeftCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="compass" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Left Drive…" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_DriveMenuLeft}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-DriveMenuRight" ToolTipProperties.Text="Right Drive… (Alt+F2)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-DriveMenuRight" ToolTipProperties.Text="{l:Tr Cmd_DriveMenuRight, Suffix=' (Alt+F2)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DriveMenuRightCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="compass" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Right Drive…" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_DriveMenuRight}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-OpenInOtherPanel" ToolTipProperties.Text="Other Panel (Primary+Right)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-OpenInOtherPanel" ToolTipProperties.Text="{l:Tr Cmd_OpenInOtherPanel, Suffix=' (Primary+Right)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding OpenInOtherPanelCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="chevron-right" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Other Panel" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_OpenInOtherPanel}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Drives" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Drives}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="0" IsVisible="{Binding RibbonTab, Converter={StaticResource RibbonTabVisible}, ConverterParameter=tools}">
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Find" ToolTipProperties.Text="Find Files (Alt+F7)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Find" ToolTipProperties.Text="{l:Tr Cmd_Find, Suffix=' (Alt+F7)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding FindCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="search" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="Find Files" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_Find}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Find" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Find}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-MultiRename" ToolTipProperties.Text="Multi-Rename (Primary+M)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-MultiRename" ToolTipProperties.Text="{l:Tr Cmd_MultiRename, Suffix=' (Primary+M)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding MultiRenameCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="edit" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="Multi-Rename" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_MultiRename}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Batch" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Batch}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
-                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Synchronize" ToolTipProperties.Text="Sync Dirs (Primary+Shift+S)">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Synchronize" ToolTipProperties.Text="{l:Tr Cmd_Synchronize, Suffix=' (Primary+Shift+S)'}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SynchronizeCommand}" /></Border.GestureRecognizers>
                                 <VerticalStackLayout Spacing="3">
                                     <shiny:MotionIconView Icon="refresh" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="Sync Dirs" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{l:Tr Cmd_Synchronize}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-CompareFiles" ToolTipProperties.Text="Compare Files (Primary+Shift+F2)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-CompareFiles" ToolTipProperties.Text="{l:Tr Cmd_CompareFiles, Suffix=' (Primary+Shift+F2)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding CompareFilesCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="activity" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Compare Files" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_CompareFiles}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="Compare" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Compare}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
                             <HorizontalStackLayout Spacing="2">
                                 <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Settings" ToolTipProperties.Text="Settings (Primary+,)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Settings" ToolTipProperties.Text="{l:Tr Cmd_Settings, Suffix=' (Primary+,)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SettingsCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="settings" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Settings" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_Settings}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Help" ToolTipProperties.Text="Keyboard Help (F1)">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-Help" ToolTipProperties.Text="{l:Tr Cmd_Help, Suffix=' (F1)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding HelpCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">
                                         <shiny:MotionIconView Icon="help" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="Keyboard Help" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        <Label Text="{l:Tr Cmd_Help}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
-                            <Label Grid.Row="1" Text="App" Style="{StaticResource RibbonGroupTitle}" />
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_App}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                     </HorizontalStackLayout>
                 </Grid>
@@ -955,10 +973,10 @@
                 <Grid ColumnDefinitions="*,Auto,Auto" Padding="8,2" Style="{StaticResource Toolbar}">
                     <HorizontalStackLayout Spacing="6">
                         <shiny:MotionIconView Icon="activity" Color="{StaticResource Accent}" IsPlaying="{Binding IsCommandRunning}" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                        <Label Text="Console" Style="{StaticResource SectionTitle}" VerticalOptions="Center" />
+                        <Label Text="{l:Tr Main_Console}" Style="{StaticResource SectionTitle}" VerticalOptions="Center" />
                         <ActivityIndicator IsRunning="{Binding IsCommandRunning}" IsVisible="{Binding IsCommandRunning}" HeightRequest="14" WidthRequest="14" Color="{StaticResource Accent}" />
                     </HorizontalStackLayout>
-                    <shiny:ShinyButton Grid.Column="1" Text="Stop" Command="{Binding CancelCommandCommand}" IsVisible="{Binding IsCommandRunning}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                    <shiny:ShinyButton Grid.Column="1" Text="{l:Tr Common_Stop}" Command="{Binding CancelCommandCommand}" IsVisible="{Binding IsCommandRunning}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
                     <shiny:ShinyButton Grid.Column="2" Text="✕" Command="{Binding CloseOutputCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
                 </Grid>
                 <ScrollView x:Name="OutputScroll" Grid.Row="1" Padding="8,4">
@@ -967,26 +985,64 @@
             </Grid>
         </Border>
 
-        <!-- copy / move / delete progress (Esc cancels) -->
-        <Border Grid.Row="3" IsVisible="{Binding IsOperationRunning}" Style="{StaticResource Card}" Margin="6,0,6,4" Padding="10,6">
-            <Grid ColumnDefinitions="Auto,*,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="12" RowSpacing="3">
-                <shiny:MotionIconView Grid.RowSpan="3" Icon="hourglass" Color="{StaticResource Accent}" IsPlaying="{Binding IsOperationRunning}" WidthRequest="28" HeightRequest="28" VerticalOptions="Center" />
-                <Label Grid.Column="1" Text="{Binding OperationTitle}" FontAttributes="Bold" />
-                <shiny:ProgressBar Grid.Column="1" Grid.Row="1" Value="{Binding OperationProgress}" Maximum="1" TrackHeight="8" UseGradient="True" PulseEnabled="True" />
-                <Label Grid.Column="1" Grid.Row="2" Text="{Binding OperationDetail}" Style="{StaticResource Subtle}" LineBreakMode="MiddleTruncation" />
-                <shiny:ShinyButton Grid.Column="2" Grid.RowSpan="3" Text="Cancel" Command="{Binding CancelOperationCommand}" Appearance="Tonal" VerticalOptions="Center" />
+        <!-- background jobs: copy / move / delete / pack / unpack (Primary+J) -->
+        <Border Grid.Row="3" IsVisible="{Binding ShowJobs}" Style="{StaticResource Card}" Margin="6,0,6,4" Padding="0" AutomationId="JobsPane">
+            <Grid RowDefinitions="Auto,Auto">
+                <Grid ColumnDefinitions="*,Auto,Auto" Padding="8,2" Style="{StaticResource Toolbar}">
+                    <HorizontalStackLayout Spacing="6">
+                        <shiny:MotionIconView Icon="hourglass" Color="{StaticResource Accent}" IsPlaying="{Binding Jobs.IsBusy}" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                        <Label Text="{l:Tr Jobs_Title}" Style="{StaticResource SectionTitle}" VerticalOptions="Center" />
+                        <Label Text="{Binding Jobs.Summary}" Style="{StaticResource Subtle}" VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                    <shiny:ShinyButton Grid.Column="1" Text="{l:Tr Jobs_ClearCompleted}" AutomationId="ClearCompletedJobs" Command="{Binding ClearCompletedJobsCommand}" IsVisible="{Binding Jobs.HasFinished}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                    <shiny:ShinyButton Grid.Column="2" Text="✕" Command="{Binding ToggleJobsCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" ToolTipProperties.Text="{l:Tr Jobs_Hide, Suffix=' (Esc)'}" />
+                </Grid>
+                <Label Grid.Row="1" Text="{l:Tr Jobs_Empty}" Style="{StaticResource Subtle}" Padding="10,8" IsVisible="{Binding Jobs.IsEmpty}" />
+                <ScrollView Grid.Row="1" MaximumHeightRequest="200" IsVisible="{Binding Jobs.HasJobs}">
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Jobs.Jobs}" Padding="8,4" Spacing="2">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:JobViewModel">
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="2" Padding="2,4">
+                                    <shiny:MotionIconView Grid.RowSpan="3" Icon="{Binding Icon}" IsPlaying="{Binding IsRunning}" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" />
+                                    <Label Grid.Column="1" Text="{Binding Title}" FontAttributes="Bold" LineBreakMode="MiddleTruncation" />
+                                    <shiny:ProgressBar Grid.Column="1" Grid.Row="1" Value="{Binding Progress}" Maximum="1" TrackHeight="6" UseGradient="True" PulseEnabled="True" IsVisible="{Binding IsRunning}" />
+                                    <Label Grid.Column="1" Grid.Row="2" Text="{Binding Subtitle}" Style="{StaticResource Subtle}" LineBreakMode="MiddleTruncation" />
+                                    <shiny:PillView Grid.Column="2" Grid.RowSpan="3" Text="{Binding StateLabel}" Type="{Binding StatePill}" FontSize="10" VerticalOptions="Center" />
+                                    <HorizontalStackLayout Grid.Column="3" Grid.RowSpan="3" Spacing="2" VerticalOptions="Center">
+                                        <shiny:ShinyButton Text="{l:Tr Common_Stop}" IsVisible="{Binding IsRunning}" Appearance="Tonal" FontSize="12" ContentPadding="8,2"
+                                                           Command="{Binding StopJobCommand, Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, x:DataType=vm:MainViewModel}" CommandParameter="{Binding .}" />
+                                        <shiny:ShinyButton Text="{l:Tr Jobs_GoTo}" IsVisible="{Binding CanGoTo}" Appearance="Tonal" FontSize="12" ContentPadding="8,2"
+                                                           Command="{Binding GoToJobCommand, Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, x:DataType=vm:MainViewModel}" CommandParameter="{Binding .}" />
+                                        <shiny:ShinyButton Text="{l:Tr Jobs_Errors}" IsVisible="{Binding IsProblem}" Appearance="Text" FontSize="12" ContentPadding="6,2"
+                                                           Command="{Binding ShowJobErrorsCommand, Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, x:DataType=vm:MainViewModel}" CommandParameter="{Binding .}" />
+                                        <shiny:ShinyButton Text="✕" IsVisible="{Binding IsFinished}" Appearance="Text" FontSize="12" ContentPadding="6,2" ToolTipProperties.Text="{l:Tr Jobs_Remove}"
+                                                           Command="{Binding DismissJobCommand, Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, x:DataType=vm:MainViewModel}" CommandParameter="{Binding .}" />
+                                    </HorizontalStackLayout>
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </ScrollView>
             </Grid>
         </Border>
 
         <!-- command line -->
-        <Grid Grid.Row="4" ColumnDefinitions="Auto,*" Padding="10,2,10,2" ColumnSpacing="6">
+        <Grid Grid.Row="4" ColumnDefinitions="Auto,*,Auto" Padding="10,2,10,2" ColumnSpacing="6">
             <Label Text="{Binding CommandPrompt}" FontFamily="{DynamicResource MonoFont}" FontSize="12" VerticalOptions="Center" LineBreakMode="HeadTruncation" MaximumWidthRequest="520" Style="{StaticResource Subtle}" />
             <Entry x:Name="CommandEntry" AutomationId="CommandLine"
                    Grid.Column="1"
                    Text="{Binding CommandText}"
                    FontFamily="{DynamicResource MonoFont}"
                    FontSize="12"
-                   Placeholder="type a command, or use the keys below…" />
+                   Placeholder="{l:Tr Main_CommandPlaceholder}" />
+            <!-- jobs at a glance - opens the jobs pane -->
+            <Border Grid.Column="2" Style="{StaticResource Chip}" IsVisible="{Binding Jobs.HasJobs}" AutomationId="JobsChip" ToolTipProperties.Text="{l:Tr Jobs_Chip, Suffix=' (Primary+J)'}" VerticalOptions="Center">
+                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleJobsCommand}" /></Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="5">
+                    <ActivityIndicator IsRunning="{Binding Jobs.IsBusy}" IsVisible="{Binding Jobs.IsBusy}" HeightRequest="12" WidthRequest="12" Color="{StaticResource Accent}" VerticalOptions="Center" />
+                    <Label Text="{Binding Jobs.Summary}" FontSize="12" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </Border>
         </Grid>
 
         <!-- function key bar -->
@@ -996,7 +1052,7 @@
                 <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
                     <Border Style="{StaticResource KeyCapKey}"><Label Text="F2" Style="{StaticResource KeyCapKeyText}" /></Border>
                     <shiny:MotionIconView Icon="edit" Trigger="Hover,Press" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
-                    <Label Text="Rename" FontSize="12" VerticalOptions="Center" />
+                    <Label Text="{l:Tr Cmd_Rename}" FontSize="12" VerticalOptions="Center" />
                 </HorizontalStackLayout>
             </Border>
             <Border Grid.Column="1" Style="{StaticResource KeyCap}">
@@ -1004,7 +1060,7 @@
                 <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
                     <Border Style="{StaticResource KeyCapKey}"><Label Text="F3" Style="{StaticResource KeyCapKeyText}" /></Border>
                     <shiny:MotionIconView Icon="eye" Trigger="Hover,Press" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
-                    <Label Text="View" FontSize="12" VerticalOptions="Center" />
+                    <Label Text="{l:Tr Cmd_View}" FontSize="12" VerticalOptions="Center" />
                 </HorizontalStackLayout>
             </Border>
             <Border Grid.Column="2" Style="{StaticResource KeyCap}">
@@ -1012,7 +1068,7 @@
                 <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
                     <Border Style="{StaticResource KeyCapKey}"><Label Text="F4" Style="{StaticResource KeyCapKeyText}" /></Border>
                     <shiny:MotionIconView Icon="file-text" Trigger="Hover,Press" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
-                    <Label Text="Edit" FontSize="12" VerticalOptions="Center" />
+                    <Label Text="{l:Tr Cmd_Edit}" FontSize="12" VerticalOptions="Center" />
                 </HorizontalStackLayout>
             </Border>
             <Border Grid.Column="3" Style="{StaticResource KeyCap}">
@@ -1020,7 +1076,7 @@
                 <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
                     <Border Style="{StaticResource KeyCapKey}"><Label Text="F5" Style="{StaticResource KeyCapKeyText}" /></Border>
                     <shiny:MotionIconView Icon="copy" Trigger="Hover,Press" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
-                    <Label Text="Copy" FontSize="12" VerticalOptions="Center" />
+                    <Label Text="{l:Tr Cmd_Copy}" FontSize="12" VerticalOptions="Center" />
                 </HorizontalStackLayout>
             </Border>
             <Border Grid.Column="4" Style="{StaticResource KeyCap}">
@@ -1028,7 +1084,7 @@
                 <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
                     <Border Style="{StaticResource KeyCapKey}"><Label Text="F6" Style="{StaticResource KeyCapKeyText}" /></Border>
                     <shiny:MotionIconView Icon="arrow-right" Trigger="Hover,Press" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
-                    <Label Text="Move" FontSize="12" VerticalOptions="Center" />
+                    <Label Text="{l:Tr Cmd_Move}" FontSize="12" VerticalOptions="Center" />
                 </HorizontalStackLayout>
             </Border>
             <Border Grid.Column="5" Style="{StaticResource KeyCap}">
@@ -1036,7 +1092,7 @@
                 <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
                     <Border Style="{StaticResource KeyCapKey}"><Label Text="F7" Style="{StaticResource KeyCapKeyText}" /></Border>
                     <shiny:MotionIconView Icon="folder" Trigger="Hover,Press" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
-                    <Label Text="New Folder" FontSize="12" VerticalOptions="Center" />
+                    <Label Text="{l:Tr FKey_NewFolder}" FontSize="12" VerticalOptions="Center" />
                 </HorizontalStackLayout>
             </Border>
             <Border Grid.Column="6" Style="{StaticResource KeyCap}">
@@ -1044,7 +1100,7 @@
                 <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
                     <Border Style="{StaticResource KeyCapKey}"><Label Text="F8" Style="{StaticResource KeyCapKeyText}" /></Border>
                     <shiny:MotionIconView Icon="trash" Trigger="Hover,Press" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
-                    <Label Text="Delete" FontSize="12" VerticalOptions="Center" />
+                    <Label Text="{l:Tr Cmd_Delete}" FontSize="12" VerticalOptions="Center" />
                 </HorizontalStackLayout>
             </Border>
             <Border Grid.Column="7" Style="{StaticResource KeyCap}">
@@ -1052,7 +1108,7 @@
                 <HorizontalStackLayout Spacing="7" HorizontalOptions="Center">
                     <Border Style="{StaticResource KeyCapKey}"><Label Text="Alt+F7" Style="{StaticResource KeyCapKeyText}" /></Border>
                     <shiny:MotionIconView Icon="search" Trigger="Hover,Press" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="15" HeightRequest="15" VerticalOptions="Center" />
-                    <Label Text="Find" FontSize="12" VerticalOptions="Center" />
+                    <Label Text="{l:Tr FKey_Find}" FontSize="12" VerticalOptions="Center" />
                 </HorizontalStackLayout>
             </Border>
         </Grid>

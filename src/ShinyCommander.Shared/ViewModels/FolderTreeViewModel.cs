@@ -52,7 +52,7 @@ public partial class FolderTreeViewModel(AppSettings settings) : ObservableObjec
     {
         if (this.Rows.Count > 0)
             return;
-        this.Rows = new(DriveService.GetDrives().Select(d => new FolderRow(d.Kind == DriveKind.Home ? "Home" : d.Name, d.RootPath, 0, DriveIconConverter.For(d))));
+        this.Rows = new(DriveService.GetDrives().Select(d => new FolderRow(d.Kind == DriveKind.Home ? L.Tree_Home : d.Name, d.RootPath, 0, DriveIconConverter.For(d))));
     }
 
     Task<List<string>> LoadChildren(string path) => Task.Run(() =>

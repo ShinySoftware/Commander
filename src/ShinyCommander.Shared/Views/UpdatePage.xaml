@@ -3,15 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:shiny="http://shiny.net/maui/controls"
              xmlns:md="http://shiny.net/maui/markdown"
+             xmlns:l="clr-namespace:ShinyCommander"
              x:Class="ShinyCommander.Views.UpdatePage"
-             Title="ShinyCommander Update"
+             Title="{l:Tr Update_WindowTitle}"
              BackgroundColor="{AppThemeBinding Light={StaticResource PanelLight}, Dark={StaticResource PanelDark}}">
 
     <!-- the progress and the error line are on the page from the start and only shown when needed:
          the AppKit head never realises views added to a page that is already on screen -->
     <Grid Padding="24,20" RowSpacing="14" RowDefinitions="Auto,*,Auto,Auto,Auto,Auto">
         <VerticalStackLayout Spacing="4">
-            <Label Text="A new version of ShinyCommander is available" FontSize="20" FontAttributes="Bold" />
+            <Label Text="{l:Tr Update_Heading}" FontSize="20" FontAttributes="Bold" />
             <Label x:Name="VersionLabel" Style="{StaticResource Subtle}" FontSize="13" />
             <Label x:Name="ReleasedLabel" Style="{StaticResource Subtle}" />
         </VerticalStackLayout>
@@ -20,7 +21,7 @@
             <md:MarkdownView x:Name="Notes" Theme="{AppThemeBinding Light={StaticResource MarkdownLight}, Dark={StaticResource MarkdownDark}}" Padding="14,10" />
         </Border>
 
-        <Label Grid.Row="2" Text="View on GitHub" TextColor="{StaticResource Accent}" FontSize="12">
+        <Label Grid.Row="2" Text="{l:Tr Update_ViewOnGitHub}" TextColor="{StaticResource Accent}" FontSize="12">
             <Label.GestureRecognizers>
                 <TapGestureRecognizer Tapped="OnGitHubTapped" />
             </Label.GestureRecognizers>
@@ -31,13 +32,13 @@
 
         <Grid Grid.Row="5" ColumnDefinitions="Auto,Auto,*,Auto,Auto" ColumnSpacing="8">
             <CheckBox x:Name="DontShow" VerticalOptions="Center" />
-            <Label Grid.Column="1" Text="Don't show again" VerticalOptions="Center">
+            <Label Grid.Column="1" Text="{l:Tr Update_DontShowAgain}" VerticalOptions="Center">
                 <Label.GestureRecognizers>
                     <TapGestureRecognizer Tapped="OnDontShowTapped" />
                 </Label.GestureRecognizers>
             </Label>
-            <shiny:ShinyButton x:Name="LaterButton" Grid.Column="3" Text="Later" Appearance="Tonal" Clicked="OnLaterClicked" />
-            <shiny:ShinyButton x:Name="InstallButton" Grid.Column="4" Text="Install and Restart" Appearance="Filled" Clicked="OnInstallClicked" />
+            <shiny:ShinyButton x:Name="LaterButton" Grid.Column="3" Text="{l:Tr Update_Later}" Appearance="Tonal" Clicked="OnLaterClicked" />
+            <shiny:ShinyButton x:Name="InstallButton" Grid.Column="4" Text="{l:Tr Update_InstallAndRestart}" Appearance="Filled" Clicked="OnInstallClicked" />
         </Grid>
     </Grid>
 </ContentPage>

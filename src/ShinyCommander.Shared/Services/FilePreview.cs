@@ -87,7 +87,7 @@ public static class FilePreview
             sb.AppendLine();
         }
         if (data.Length > max)
-            sb.AppendLine($"… {SizeFormatter.Exact(data.Length - max)} more bytes not shown");
+            sb.AppendLine(L.Preview_MoreBytesFormat(SizeFormatter.Exact(data.Length - max)));
         return sb.ToString();
     }
 }

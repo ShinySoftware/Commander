@@ -8,6 +8,14 @@ public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThre
 {
     public event EventHandler? DialogClosed;
 
+    /// <summary>IAppDialogs' defaults are the English "OK" / "Cancel" literals - show them in the UI language.</summary>
+    static string Tr(string text) => text switch
+    {
+        "OK" => L.Common_OK,
+        "Cancel" => L.Common_Cancel,
+        _ => text
+    };
+
     async Task<T> Run<T>(Func<Task<T>> show)
     {
         try
@@ -23,17 +31,17 @@ public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThre
     public Task Alert(string title, string message)
         => this.Run(async () =>
         {
-            await dialogs.Alert(title, message, "OK");
+            await dialogs.Alert(title, message, L.Common_OK);
             return true;
         });
 
     public Task<bool> Confirm(string title, string message, string okText = "OK", string cancelText = "Cancel")
-        => this.Run(() => dialogs.Confirm(title, message, okText, cancelText));
+        => this.Run(() => dialogs.Confirm(title, message, Tr(okText), Tr(cancelText)));
 
     public Task<string?> Prompt(string title, string message, string? initialValue = null, string okText = "OK", string? placeholder = null)
         => this.Run(async () =>
         {
-            var task = dialogs.Prompt(title, message, placeholder, okText, "Cancel", initialValue, configure: c => c.MaxWidth = 620);
+            var task = dialogs.Prompt(title, message, placeholder, Tr(okText), L.Common_Cancel, initialValue, configure: c => c.MaxWidth = 620);
             this.FocusDialogEntry();
             var result = await task;
             return result.Ok ? result.Value : null;
@@ -98,7 +106,7 @@ public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThre
     public Task<string?> Choose(string title, IReadOnlyList<string> options, string? cancelText = "Cancel", string? destructive = null)
         => this.Run(() =>
         {
-            var task = dialogs.ActionSheet(title, options, cancelText, destructive);
+            var task = dialogs.ActionSheet(title, options, cancelText == null ? null : Tr(cancelText), destructive);
             this.SizeActionSheetOptions();
             return task;
         });

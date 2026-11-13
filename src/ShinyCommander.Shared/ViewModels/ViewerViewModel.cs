@@ -78,7 +78,9 @@ public partial class ViewerViewModel(VirtualFileSystem vfs, AppSettings settings
             this.truncated = content.Truncated;
             var length = content.Length;
 
-            this.Info = $"{SizeFormatter.Exact(length)} bytes" + (this.truncated ? $"  •  showing first {SizeFormatter.Friendly(this.bytes.Length)}" : String.Empty);
+            this.Info = this.truncated
+                ? L.Viewer_InfoTruncatedFormat(SizeFormatter.Exact(length), SizeFormatter.Friendly(this.bytes.Length))
+                : L.Viewer_InfoFormat(SizeFormatter.Exact(length));
 
             var mode = content.Kind switch
             {

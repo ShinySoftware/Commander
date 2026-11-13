@@ -4,13 +4,19 @@ public partial class App : Application
 {
     readonly AppSettings settings;
     readonly UpdateService updates;
+    readonly QuitGuard quitGuard;
     Window? updateWindow;
     bool started;
 
-    public App(AppSettings settings, UpdateService updates)
+    public App(AppSettings settings, UpdateService updates, QuitGuard quitGuard, StringsLocalized strings)
     {
+        // before anything reads a string - the pages take their text as they are built
+        Strings.ApplyLanguage(LanguageFor(settings));
+        Strings.Initialize(strings);
+
         this.settings = settings;
         this.updates = updates;
+        this.quitGuard = quitGuard;
         this.InitializeComponent();
         this.Resources["MonoFont"] = OperatingSystem.IsWindows() ? "Consolas" : OperatingSystem.IsMacOS() ? "Menlo" : "Monospace";
         settings.EnsureDefaults();
@@ -18,6 +24,17 @@ public partial class App : Application
 
         this.updates.Found += (_, release) => this.ShowUpdate(release);
         this.updates.ShowRelease = this.ShowUpdate;
+    }
+
+    static string? LanguageFor(AppSettings settings)
+    {
+#if DEBUG
+        // the UI tests assert on English text whatever the machine's language - SHINYCOMMANDER_LANG overrides it
+        // (e.g. screenshots in French)
+        if (Testing.UiTestMode.IsEnabled)
+            return Environment.GetEnvironmentVariable("SHINYCOMMANDER_LANG") is { Length: > 0 } lang ? lang : "en";
+#endif
+        return settings.Language;
     }
 
     protected override Window CreateWindow(IActivationState? activationState)
@@ -38,6 +55,8 @@ public partial class App : Application
         Microsoft.Maui.Platforms.MacOS.Platform.MacOSWindow.SetTitleVisibility(window, Microsoft.Maui.Platforms.MacOS.Platform.MacOSTitleVisibility.Visible);
         Microsoft.Maui.Platforms.MacOS.Platform.MacOSWindow.SetTitlebarSeparatorStyle(window, Microsoft.Maui.Platforms.MacOS.Platform.MacOSTitlebarSeparatorStyle.Line);
 #endif
+        // closing while copies/moves are still running asks first
+        this.quitGuard.Attach(window);
         window.Created += (_, _) =>
         {
             if (this.started)
@@ -64,7 +83,7 @@ public partial class App : Application
 
         var window = new Window(new UpdatePage(this.updates, release))
         {
-            Title = "ShinyCommander Update",
+            Title = L.Update_WindowTitle,
             Width = 560,
             Height = 620
         };

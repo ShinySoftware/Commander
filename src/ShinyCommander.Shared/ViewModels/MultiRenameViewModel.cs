@@ -9,7 +9,7 @@ public sealed class RenamePreviewRow(RenamePreview preview)
     public RenamePreview Preview { get; } = preview;
     public string OldName => this.Preview.Source.Name;
     public string NewName => this.Preview.NewName;
-    public string Status => this.Preview.Error ?? (this.Preview.Changed ? "✓" : "unchanged");
+    public string Status => this.Preview.Error ?? (this.Preview.Changed ? "✓" : L.Rename_Unchanged);
 }
 
 /// <summary>Ctrl+M multi-rename tool with TC's placeholder syntax and live preview.</summary>
@@ -34,7 +34,7 @@ public partial class MultiRenameViewModel(IAppDialogs dialogs, INavigator naviga
     [ObservableProperty] public partial string Status { get; set; } = String.Empty;
     [ObservableProperty] public partial bool CanUndo { get; set; }
 
-    public IReadOnlyList<string> CaseOptions { get; } = ["Unchanged", "lowercase", "UPPERCASE", "First letter upper", "Title Case"];
+    public IReadOnlyList<string> CaseOptions { get; } = [L.Rename_CaseUnchanged, L.Rename_CaseLower, L.Rename_CaseUpper, L.Rename_CaseFirstUpper, L.Rename_CaseTitle];
 
     public void OnAppearing() => this.Refresh();
     public void OnDisappearing() { }
@@ -67,7 +67,10 @@ public partial class MultiRenameViewModel(IAppDialogs dialogs, INavigator naviga
         var preview = MultiRenameEngine.Preview(this.Items, this.Options);
         this.Preview = new ObservableCollection<RenamePreviewRow>(preview.Select(x => new RenamePreviewRow(x)));
         var errors = preview.Count(x => x.Error != null);
-        this.Status = $"{preview.Count(x => x.Changed)} of {preview.Count} will be renamed" + (errors > 0 ? $"  •  {errors} problem(s)" : String.Empty);
+        var changed = preview.Count(x => x.Changed);
+        this.Status = errors > 0
+            ? L.Rename_StatusProblemsFormat(changed, preview.Count, errors)
+            : L.Rename_StatusFormat(changed, preview.Count);
     }
 
     [RelayCommand]
@@ -79,7 +82,7 @@ public partial class MultiRenameViewModel(IAppDialogs dialogs, INavigator naviga
         var preview = MultiRenameEngine.Preview(this.Items, this.Options);
         if (preview.Any(x => x.Error != null))
         {
-            await dialogs.Alert("Multi-rename", "Fix the problems shown in the preview first.");
+            await dialogs.Alert(L.Rename_AlertTitle, L.Rename_FixProblems);
             return;
         }
 
@@ -87,7 +90,7 @@ public partial class MultiRenameViewModel(IAppDialogs dialogs, INavigator naviga
         {
             this.lastUndo = await MultiRenameEngine.ExecuteAsync(preview);
             this.CanUndo = this.lastUndo.Count > 0;
-            await dialogs.Toast($"Renamed {this.lastUndo.Count} item(s)", ToastKind.Success);
+            await dialogs.Toast(L.Rename_DoneFormat(this.lastUndo.Count), ToastKind.Success);
 
             // continue editing against the new names
             var map = this.lastUndo.ToDictionary(x => x.ToPath, x => x.FromPath);
@@ -100,7 +103,7 @@ public partial class MultiRenameViewModel(IAppDialogs dialogs, INavigator naviga
         }
         catch (Exception ex)
         {
-            await dialogs.Alert("Multi-rename", ex.Message);
+            await dialogs.Alert(L.Rename_AlertTitle, ex.Message);
         }
     }
 
