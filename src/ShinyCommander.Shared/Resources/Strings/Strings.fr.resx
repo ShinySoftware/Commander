@@ -870,6 +870,12 @@ Quitter les arrête en cours de route. Ce qui a déjà été copié, déplacé o
   <data name="Settings_FriendlySizesDesc" xml:space="preserve">
     <value>12,3 Mo au lieu de 12 912 640</value>
   </data>
+  <data name="Settings_MotionFileIcons" xml:space="preserve">
+    <value>Icônes animées</value>
+  </data>
+  <data name="Settings_MotionFileIconsDesc" xml:space="preserve">
+    <value>Les icônes animées de Shiny dans les listes au lieu de celles du système</value>
+  </data>
   <data name="Settings_CustomizeToolbar" xml:space="preserve">
     <value>Personnaliser la barre d'outils des panneaux…</value>
   </data>

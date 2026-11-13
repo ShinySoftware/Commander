@@ -13,6 +13,7 @@ public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, 
     public bool ConfirmDelete { get => settings.ConfirmDelete; set { settings.ConfirmDelete = value; this.OnPropertyChanged(); } }
     public bool UseTrash { get => settings.UseTrash; set { settings.UseTrash = value; this.OnPropertyChanged(); } }
     public bool FriendlySizes { get => settings.FriendlySizes; set { settings.FriendlySizes = value; this.OnPropertyChanged(); } }
+    public bool MotionFileIcons { get => settings.MotionFileIcons; set { settings.MotionFileIcons = value; this.OnPropertyChanged(); } }
     public bool ExtractToFolderPerArchive { get => settings.ExtractToFolderPerArchive; set { settings.ExtractToFolderPerArchive = value; this.OnPropertyChanged(); } }
     public string ExternalEditor { get => settings.ExternalEditor ?? String.Empty; set { settings.ExternalEditor = value; this.OnPropertyChanged(); } }
 

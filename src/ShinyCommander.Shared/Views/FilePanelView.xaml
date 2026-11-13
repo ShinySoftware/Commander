@@ -259,9 +259,16 @@
                                             <TapGestureRecognizer Tapped="OnRowRightTapped" Buttons="Secondary" />
                                         </Grid.GestureRecognizers>
 
+                                        <Image Source="{Binding SystemIcon}"
+                                               IsVisible="{Binding HasSystemIcon}"
+                                               WidthRequest="16"
+                                               HeightRequest="16"
+                                               HorizontalOptions="Start"
+                                               VerticalOptions="Center" />
                                         <shiny:MotionIconView Icon="{Binding MotionIcon}"
                                                               Color="{Binding IconColor}"
-                                                              IsPlaying="{Binding IsActiveCursor}"
+                                                              IsVisible="{Binding ShowMotionIcon}"
+                                                              IsPlaying="{Binding IsMotionPlaying}"
                                                               Interval="0:0:2.5"
                                                               StrokeWidth="2"
                                                               WidthRequest="16"
@@ -276,7 +283,7 @@
                         </CollectionView>
                     </Grid>
 
-                    <!-- thumbnails (Primary+Shift+F1): pictures for local images, big motion icons for the rest -->
+                    <!-- thumbnails (Primary+Shift+F1): pictures for local images, big system (or motion) icons for the rest -->
                     <CollectionView x:Name="ThumbList"
                                     IsVisible="{Binding ShowThumbnailList}"
                                     SelectionMode="None"
@@ -297,9 +304,10 @@
                                     </Border.GestureRecognizers>
                                     <Grid RowDefinitions="90,30" RowSpacing="4">
                                         <Image Source="{Binding Thumbnail}" IsVisible="{Binding HasThumbnail}" Aspect="AspectFit" HeightRequest="90" />
+                                        <Image Source="{Binding SystemTile}" IsVisible="{Binding HasSystemTile}" Aspect="AspectFit" WidthRequest="54" HeightRequest="54" HorizontalOptions="Center" VerticalOptions="Center" />
                                         <shiny:MotionIconView Icon="{Binding MotionIcon}"
                                                               Color="{Binding IconColor}"
-                                                              IsPlaying="{Binding IsActiveCursor}"
+                                                              IsPlaying="{Binding IsTilePlaying}"
                                                               IsVisible="{Binding ShowIconTile}"
                                                               Interval="0:0:2.5"
                                                               StrokeWidth="1.5"

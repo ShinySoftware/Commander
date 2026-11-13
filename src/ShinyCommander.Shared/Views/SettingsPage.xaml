@@ -38,6 +38,7 @@
                     <shiny:TableSection Title="{l:Tr Settings_Panels}">
                         <shiny:SwitchCell Title="{l:Tr Settings_ShowHidden}" Description="{l:Tr Settings_ShowHiddenDesc}" On="{Binding ShowHidden, Mode=TwoWay}" />
                         <shiny:SwitchCell Title="{l:Tr Settings_FriendlySizes}" Description="{l:Tr Settings_FriendlySizesDesc}" On="{Binding FriendlySizes, Mode=TwoWay}" />
+                        <shiny:SwitchCell Title="{l:Tr Settings_MotionFileIcons}" Description="{l:Tr Settings_MotionFileIconsDesc}" On="{Binding MotionFileIcons, Mode=TwoWay}" />
                         <shiny:ButtonCell Title="{l:Tr Settings_CustomizeToolbar}" ButtonTextColor="{StaticResource Accent}" Command="{Binding CustomizeToolbarCommand}" />
                     </shiny:TableSection>
 

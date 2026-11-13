@@ -17,6 +17,28 @@ public partial class FileItemViewModel(FileEntry entry, bool friendlySizes) : Ob
 
     /// <summary>The icon under the active cursor gently animates.</summary>
     public bool IsActiveCursor => this.Cursor == CursorState.Active;
+
+    ImageSource? systemIcon;
+    bool systemIconLoaded;
+
+    /// <summary>The system's icon for the row (SystemIcons) - null shows the motion icon instead.</summary>
+    public ImageSource? SystemIcon
+    {
+        get
+        {
+            if (!this.systemIconLoaded)
+            {
+                this.systemIcon = SystemIcons.Get(this.Entry, 16);
+                this.systemIconLoaded = true;
+            }
+            return this.systemIcon;
+        }
+    }
+    public bool HasSystemIcon => this.SystemIcon != null;
+    public bool ShowMotionIcon => !this.HasSystemIcon;
+
+    /// <summary>A hidden motion icon doesn't animate.</summary>
+    public bool IsMotionPlaying => this.IsActiveCursor && this.ShowMotionIcon;
     public string Name => this.Entry.IsDirectory || this.Entry.IsParentLink ? this.Entry.Name : this.Entry.NameWithoutExtension;
     public string Extension => this.Entry.Extension;
     public string DateText => this.Entry.IsParentLink || this.Entry.Modified == DateTime.MinValue ? String.Empty : this.Entry.Modified.ToString("yyyy-MM-dd HH:mm");
@@ -29,12 +51,29 @@ public partial class FileItemViewModel(FileEntry entry, bool friendlySizes) : Ob
     public string FullName => this.Entry.Name;
 
     public bool HasThumbnail => !this.Entry.IsDirectory && !this.Entry.IsInArchive && FileIcons.IsImage(this.Entry.Extension);
-    public bool ShowIconTile => !this.HasThumbnail;
 
     ImageSource? thumbnail;
+    ImageSource? systemTile;
+    bool systemTileLoaded;
 
-    /// <summary>Thumbnail view: local images load lazily as the cell binds; everything else shows its motion icon.</summary>
+    /// <summary>Thumbnail view: local images load lazily as the cell binds; everything else shows its system or motion icon.</summary>
     public ImageSource? Thumbnail => this.HasThumbnail ? this.thumbnail ??= ImageSource.FromFile(this.Entry.FullPath) : null;
+
+    public ImageSource? SystemTile
+    {
+        get
+        {
+            if (!this.systemTileLoaded)
+            {
+                this.systemTile = this.HasThumbnail ? null : SystemIcons.Get(this.Entry, 54);
+                this.systemTileLoaded = true;
+            }
+            return this.systemTile;
+        }
+    }
+    public bool HasSystemTile => this.SystemTile != null;
+    public bool ShowIconTile => !this.HasThumbnail && !this.HasSystemTile;
+    public bool IsTilePlaying => this.IsActiveCursor && this.ShowIconTile;
     public string AttributeText => this.Entry.AttributeText;
     public bool IsDirectory => this.Entry.IsDirectory;
     public bool IsHidden => this.Entry.IsHidden;
@@ -51,7 +90,7 @@ public partial class FileItemViewModel(FileEntry entry, bool friendlySizes) : Ob
     public partial bool IsMarked { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(RowState), nameof(IsActiveCursor), nameof(IconColor))]
+    [NotifyPropertyChangedFor(nameof(RowState), nameof(IsActiveCursor), nameof(IsMotionPlaying), nameof(IsTilePlaying), nameof(IconColor))]
     public partial CursorState Cursor { get; set; }
 
     /// <summary>One mutually exclusive value for the row's DataTriggers (cursor x marked).</summary>

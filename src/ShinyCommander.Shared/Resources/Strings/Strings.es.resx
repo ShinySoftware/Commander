@@ -870,6 +870,12 @@ Salir las detiene a medias. Lo que ya se copió, movió o eliminó se queda así
   <data name="Settings_FriendlySizesDesc" xml:space="preserve">
     <value>12,3 MB en lugar de 12.912.640</value>
   </data>
+  <data name="Settings_MotionFileIcons" xml:space="preserve">
+    <value>Iconos animados</value>
+  </data>
+  <data name="Settings_MotionFileIconsDesc" xml:space="preserve">
+    <value>Los iconos animados de Shiny en las listas en lugar de los del sistema</value>
+  </data>
   <data name="Settings_CustomizeToolbar" xml:space="preserve">
     <value>Personalizar la barra de herramientas del panel…</value>
   </data>

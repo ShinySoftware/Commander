@@ -874,6 +874,12 @@ Quitting stops them part-way. What's already been copied, moved or deleted stays
     <value>12.3 MB instead of 12,912,640</value>
     <comment>Example of the size format, use local number formatting</comment>
   </data>
+  <data name="Settings_MotionFileIcons" xml:space="preserve">
+    <value>Animated icons</value>
+  </data>
+  <data name="Settings_MotionFileIconsDesc" xml:space="preserve">
+    <value>Shiny's motion icons in the file lists instead of the system's</value>
+  </data>
   <data name="Settings_CustomizeToolbar" xml:space="preserve">
     <value>Customize pane toolbar…</value>
   </data>

@@ -62,7 +62,10 @@
                 <shiny:DataGridTemplateColumn Title="" Width="34" Sortable="False">
                     <shiny:DataGridTemplateColumn.CellTemplate>
                         <DataTemplate x:DataType="vm:SearchResultItem">
-                            <shiny:MotionIconView Icon="{Binding MotionIcon}" Color="{Binding IconColor}" Trigger="Hover" StrokeWidth="2" WidthRequest="16" HeightRequest="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                            <Grid>
+                                <Image Source="{Binding SystemIcon}" IsVisible="{Binding HasSystemIcon}" WidthRequest="16" HeightRequest="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                                <shiny:MotionIconView Icon="{Binding MotionIcon}" Color="{Binding IconColor}" IsVisible="{Binding ShowMotionIcon}" Trigger="Hover" StrokeWidth="2" WidthRequest="16" HeightRequest="16" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Grid>
                         </DataTemplate>
                     </shiny:DataGridTemplateColumn.CellTemplate>
                 </shiny:DataGridTemplateColumn>

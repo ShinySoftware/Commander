@@ -167,7 +167,7 @@ public partial class MainViewModel : ObservableObject,
             // coming back from viewer/editor/search etc. Folders on disk are kept current by their watchers (and by
             // FileSystemChangedEvent from our own operations), so only archive listings - which nothing watches - are
             // reread. Rereading everything rebuilt both lists on every return and made "back" take seconds.
-            var listingChanged = this.listingSettings != (this.settings.ShowHidden, this.settings.FriendlySizes);
+            var listingChanged = this.listingSettings != (this.settings.ShowHidden, this.settings.FriendlySizes, this.settings.MotionFileIcons);
             foreach (var tab in new[] { this.Left.ActiveTab, this.Right.ActiveTab })
             {
                 if (listingChanged || tab is { IsArchive: true } || tab?.IsBranchView == true)
@@ -186,9 +186,9 @@ public partial class MainViewModel : ObservableObject,
     }
 
     // settings that change what a listing shows (Settings page) - compared when coming back
-    (bool, bool) listingSettings;
+    (bool, bool, bool) listingSettings;
 
-    public void OnDisappearing() => this.listingSettings = (this.settings.ShowHidden, this.settings.FriendlySizes);
+    public void OnDisappearing() => this.listingSettings = (this.settings.ShowHidden, this.settings.FriendlySizes, this.settings.MotionFileIcons);
 
     static string DefaultRightPath(string home)
     {
