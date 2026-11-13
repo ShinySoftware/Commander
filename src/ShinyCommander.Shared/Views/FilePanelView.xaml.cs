@@ -76,6 +76,9 @@ public partial class FilePanelView : ContentView
             SetId(this.PathEntry, side + "Path");
             SetId(this.PathLabel, side + "PathLabel");
             SetId(this.FilterEntry, side + "Filter");
+            SetId(this.BackButton, side + "Back");
+            SetId(this.ForwardButton, side + "Forward");
+            SetId(this.UpButton, side + "Up");
 
             this.panel.ScrollRequested += this.OnScrollRequested;
             this.panel.PropertyChanged += this.OnPanelPropertyChanged;

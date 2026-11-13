@@ -31,6 +31,44 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
     }
 
     [Fact]
+    public async Task The_path_row_arrows_go_up_back_and_forward()
+    {
+        await this.Start(l => l.Dir("inside").File("inside/deep.txt"));
+        await this.App.Navigate(this.LeftTree["inside"], "left");
+
+        await this.Ui.Tap("LeftUp");
+        await this.App.WaitFor(x => x.Left.Path == this.LeftTree.Path, "up");
+
+        await this.Ui.Tap("LeftBack");
+        await this.App.WaitFor(x => x.Left.Path == this.LeftTree["inside"], "back");
+
+        await this.Ui.Tap("LeftForward");
+        await this.App.WaitFor(x => x.Left.Path == this.LeftTree.Path, "forward");
+    }
+
+    // real clicks: a DevFlow tap skips AppKit's hit-testing, and a tap recognizer on the path row once took every click in it
+    [Fact]
+    public async Task A_mouse_click_on_the_up_arrow_goes_up()
+    {
+        await this.Start(l => l.Dir("inside").File("inside/deep.txt"));
+        await this.App.Navigate(this.LeftTree["inside"], "left");
+
+        var (x, y) = await this.Ui.Center(await this.Ui.ById("LeftUp"));
+        await this.App.ClickAt(x, y);
+        await this.App.WaitFor(s => s.Left.Path == this.LeftTree.Path, $"the click on up (hit: {this.App.LastResult.GetProperty("element").GetString()})", TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
+    public async Task A_mouse_click_on_a_pane_toolbar_button_runs_it()
+    {
+        await this.Start(l => l.File("a.txt"));
+
+        var (x, y) = await this.Ui.Center(await this.Ui.ById("LeftViewMode"));
+        await this.App.ClickAt(x, y);
+        await this.App.WaitFor(s => s.Left.ViewMode == "Thumbnails", $"the click on the view mode button (hit: {this.App.LastResult.GetProperty("element").GetString()})", TimeSpan.FromSeconds(5));
+    }
+
+    [Fact]
     public async Task The_function_key_bar_runs_its_command()
     {
         await this.Start(l => l.File("a.txt", "A"));

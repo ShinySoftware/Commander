@@ -117,8 +117,9 @@ public sealed class Ui(AgentClient client)
     {
         var all = await this.All();
         var byId = all.GroupBy(x => x.Id).ToDictionary(g => g.Key, g => g.First());
-        double x = 0, y = 0;
-        for (var e = element; e != null; e = e.ParentId != null && byId.TryGetValue(e.ParentId, out var p) ? p : null)
+        // the element's own offset always counts - a button taller than its row sits at a negative y
+        double x = element.Bounds!.X, y = element.Bounds.Y;
+        for (var e = element.ParentId != null ? byId.GetValueOrDefault(element.ParentId) : null; e != null; e = e.ParentId != null && byId.TryGetValue(e.ParentId, out var p) ? p : null)
         {
             if (e.Bounds is { X: >= 0, Y: >= 0 } b)
             {

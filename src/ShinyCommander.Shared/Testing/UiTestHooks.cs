@@ -50,7 +50,7 @@ public static class UiTestHooks
             Service<AppSettings>().UseTrash = !(a.TryGetProperty("on", out var on) && on.ValueKind == JsonValueKind.False);
             return Task.FromResult<object>(true);
         });
-        Map(ext, "click_at", "A real mouse click (macOS): mouse down/up NSEvents through the window at page point { x, y } - AppKit hit-testing and all. Returns the native view under it", ClickAt);
+        Map(ext, "click_at", "A real mouse click (macOS): mouse down/up NSEvents through the window at page point { x, y } - AppKit hit-testing and all. Returns the native view under it (hit) and the MAUI elements behind it (element)", ClickAt);
         Map(ext, "real_dialogs", "Show the real dialogs instead of answering from the queue: { on = true }", RealDialogs);
         ext.MapTool("state_now", "The state without waiting for the app to settle (while a real dialog is open)", "POST", "state_now",
             async _ => HttpResponse.Json(await MainThread.InvokeOnMainThreadAsync(() => new { result = (object)true, state = Snapshot(MainViewModel.Current!) })));
@@ -292,13 +292,15 @@ public static class UiTestHooks
             chain.Add(v.GetType().Name);
 
         // a button's mouseDown tracks the mouse in a loop until mouse-up arrives from the event queue - so queue the up
-        // first, then deliver the down
-        var up = AppKit.NSEvent.MouseEvent(AppKit.NSEventType.LeftMouseUp, point, 0, NSProcessInfoUptime(), ns.WindowNumber, null, 0, 1, 0f);
-        var down = AppKit.NSEvent.MouseEvent(AppKit.NSEventType.LeftMouseDown, point, 0, NSProcessInfoUptime(), ns.WindowNumber, null, 0, 1, 1f);
+        // first, then deliver the down. The up is stamped after the down: a click gesture recognizer (what a MAUI tap is on
+        // AppKit) ignores an up that predates its down
+        var now = NSProcessInfoUptime();
+        var down = AppKit.NSEvent.MouseEvent(AppKit.NSEventType.LeftMouseDown, point, 0, now, ns.WindowNumber, null, 0, 1, 1f);
+        var up = AppKit.NSEvent.MouseEvent(AppKit.NSEventType.LeftMouseUp, point, 0, now + 0.05, ns.WindowNumber, null, 0, 1, 0f);
         AppKit.NSApplication.SharedApplication.PostEvent(up, false);
         ns.SendEvent(down);
         await Task.Delay(500); // a dialog animates out
-        return new { hit = String.Join(" < ", chain) };
+        return new { hit = String.Join(" < ", chain), element = HitElement(hit) };
 #else
         await Task.CompletedTask;
         throw new NotSupportedException("click_at is macOS only");
@@ -306,6 +308,18 @@ public static class UiTestHooks
     }
 
 #if MACOS_APPKIT
+    // the MAUI elements behind the native view chain, innermost first - "Type#AutomationId"
+    static string HitElement(AppKit.NSView? hit)
+    {
+        var all = Application.Current?.Windows.FirstOrDefault()?.Page is IVisualTreeElement root
+            ? root.GetVisualTreeDescendants().OfType<VisualElement>().Where(x => x.Handler?.PlatformView is AppKit.NSView).ToList()
+            : [];
+        var chain = new List<string>();
+        for (var v = hit; v != null && chain.Count < 8; v = v.Superview)
+            chain.AddRange(all.Where(x => ReferenceEquals(x.Handler!.PlatformView, v)).Select(x => x.GetType().Name + "#" + x.AutomationId));
+        return String.Join(" < ", chain);
+    }
+
     static double NSProcessInfoUptime() => Foundation.NSProcessInfo.ProcessInfo.SystemUptime;
 #endif
 

@@ -99,12 +99,16 @@
 
             <!-- path / back / forward / up -->
             <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto" Padding="6,2,6,6" ColumnSpacing="2" HeightRequest="36">
-                <Grid.GestureRecognizers>
-                    <TapGestureRecognizer Tapped="OnToolbarRightTapped" Buttons="Secondary" />
-                </Grid.GestureRecognizers>
-                <shiny:ShinyButton Command="{Binding GoBackCommand}" LeftMotionIcon="arrow-left" Appearance="Text" ContentPadding="6,0" IconSize="14" />
-                <shiny:ShinyButton Grid.Column="1" Command="{Binding GoForwardCommand}" LeftMotionIcon="arrow-right" Appearance="Text" ContentPadding="6,0" IconSize="14" />
-                <shiny:ShinyButton Grid.Column="2" Command="{Binding GoUpCommand}" LeftMotionIcon="arrow-up" Appearance="Text" ContentPadding="6,0" IconSize="14" />
+                <!-- right-click anywhere on the row to customize it. Behind the buttons, not on the Grid: a tap recognizer on a
+                     layout makes AppKit hand it every click inside it - left ones too - so the buttons would never get theirs -->
+                <BoxView Grid.ColumnSpan="7" Color="Transparent">
+                    <BoxView.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnToolbarRightTapped" Buttons="Secondary" />
+                    </BoxView.GestureRecognizers>
+                </BoxView>
+                <shiny:ShinyButton x:Name="BackButton" Command="{Binding GoBackCommand}" LeftMotionIcon="arrow-left" Appearance="Text" ContentPadding="6,0" IconSize="14" />
+                <shiny:ShinyButton x:Name="ForwardButton" Grid.Column="1" Command="{Binding GoForwardCommand}" LeftMotionIcon="arrow-right" Appearance="Text" ContentPadding="6,0" IconSize="14" />
+                <shiny:ShinyButton x:Name="UpButton" Grid.Column="2" Command="{Binding GoUpCommand}" LeftMotionIcon="arrow-up" Appearance="Text" ContentPadding="6,0" IconSize="14" />
                 <Entry x:Name="PathEntry"
                        Grid.Column="3"
                        Text="{Binding PathText}"

@@ -92,7 +92,7 @@ public sealed class Commander(AgentClient client)
     /// <summary>Deletes go to the trash (a test folder, <see cref="TestConfig.TrashDir"/>) until the next reset.</summary>
     public Task<AppState> UseTrash(bool on = true) => this.Call("use_trash", new { on });
 
-    /// <summary>A real mouse click at a page point (macOS): mouse down/up go through the window's event routing, unlike a DevFlow tap. <see cref="LastResult"/> has <c>hit</c>, the native view chain under the point.</summary>
+    /// <summary>A real mouse click at a page point (macOS): mouse down/up go through the window's event routing, unlike a DevFlow tap. <see cref="LastResult"/> has <c>hit</c>, the native view chain under the point, and <c>element</c>, the MAUI elements behind it.</summary>
     public Task<AppState> ClickAt(double x, double y) => this.Call("click_at", new { x, y });
 
     public Task<AppState> Reset(string left, string right) => this.Call("reset", new { left, right });
