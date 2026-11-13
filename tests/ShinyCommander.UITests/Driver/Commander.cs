@@ -89,6 +89,12 @@ public sealed class Commander(AgentClient client)
     /// <summary>The UI language from here on ("fr", "es") - dialogs and newly opened pages. Reset goes back to English.</summary>
     public Task<AppState> Culture(string name) => this.Call("culture", new { name });
 
+    /// <summary>Deletes go to the trash (a test folder, <see cref="TestConfig.TrashDir"/>) until the next reset.</summary>
+    public Task<AppState> UseTrash(bool on = true) => this.Call("use_trash", new { on });
+
+    /// <summary>A real mouse click at a page point (macOS): mouse down/up go through the window's event routing, unlike a DevFlow tap. <see cref="LastResult"/> has <c>hit</c>, the native view chain under the point.</summary>
+    public Task<AppState> ClickAt(double x, double y) => this.Call("click_at", new { x, y });
+
     public Task<AppState> Reset(string left, string right) => this.Call("reset", new { left, right });
 
     /// <summary>Real (Shiny) dialogs from here on, for this test - driven with DevFlow taps/fills. Reset turns it off.</summary>

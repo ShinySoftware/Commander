@@ -1,7 +1,7 @@
 <Project>
     <PropertyGroup>
         <MauiVersion>10.0.110</MauiVersion>
-        <MauiLabsVersion>0.1.0-preview.14.26531.2</MauiLabsVersion>
+        <MauiLabsVersion>0.1.0-preview.14.26555.2</MauiLabsVersion>
         <ShinyControlsVersion>2.4.0</ShinyControlsVersion>
     </PropertyGroup>
     <ItemGroup>

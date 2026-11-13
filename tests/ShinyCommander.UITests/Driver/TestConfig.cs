@@ -22,6 +22,9 @@ public static class TestConfig
     /// <summary>Per-test file trees live here (wiped at the start of each run).</summary>
     public static string WorkDir => Path.Combine(ArtifactDir, "work");
 
+    /// <summary>Where the app's test trash puts "trashed" items (the real Trash is never used).</summary>
+    public static string TrashDir => Path.Combine(ArtifactDir, "trash");
+
     /// <summary>Build the app before the run (run.sh does it itself, so it leaves this off).</summary>
     public static bool BuildBeforeRun => Flag("SC_UITEST_BUILD");
 

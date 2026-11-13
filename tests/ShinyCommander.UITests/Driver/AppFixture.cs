@@ -110,6 +110,7 @@ public sealed class AppFixture : IAsyncLifetime
         psi.Environment["SHINYCOMMANDER_UITEST"] = "1";
         psi.Environment["SHINYCOMMANDER_LEFT"] = home;
         psi.Environment["SHINYCOMMANDER_RIGHT"] = home;
+        psi.Environment["SHINYCOMMANDER_TRASH"] = TestConfig.TrashDir;
 
         var p = Process.Start(psi) ?? throw new InvalidOperationException("Could not start " + TestConfig.AppExecutable);
         var log = Path.Combine(TestConfig.ArtifactDir, "app.log");

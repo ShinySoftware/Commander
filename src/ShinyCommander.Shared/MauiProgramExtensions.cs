@@ -29,7 +29,7 @@ public static class MauiProgramExtensions
         builder.Services.AddGeneratedServices();   // [Singleton] AppSettings etc. (Shiny.Extensions.DependencyInjection)
 
         builder.Services.AddSingleton<VirtualFileSystem>();
-        builder.Services.AddSingleton<ITrashService, TrashService>();
+        builder.Services.TryAddSingleton<ITrashService, TrashService>();
         builder.Services.AddSingleton(sp => new FileOperationService(sp.GetRequiredService<VirtualFileSystem>(), sp.GetRequiredService<ITrashService>()));
         builder.Services.TryAddSingleton<IAppDialogs, ShinyAppDialogs>();
         // for UpdateService's hourly check

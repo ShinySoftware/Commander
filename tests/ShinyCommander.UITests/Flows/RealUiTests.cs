@@ -264,6 +264,68 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
     }
 
     [Fact]
+    public async Task A_real_confirm_dialog_moves_to_trash_on_its_button()
+    {
+        await this.Start(l => l.File("doomed.txt").File("keep.txt"));
+        await this.App.UseTrash();
+        await this.App.Cursor("doomed.txt");
+        await this.App.RealDialogs();
+
+        await this.App.Key("F8");
+        await this.Ui.ClickInDialog("Move to Trash");
+        await this.App.WaitFor(_ => !this.LeftTree.Exists("doomed.txt"), "the move to trash");
+        this.LeftTree.Exists("keep.txt").ShouldBeTrue();
+        Directory.EnumerateFiles(TestConfig.TrashDir, "*-doomed.txt").ShouldNotBeEmpty();
+    }
+
+    // DevFlow taps a button directly; these click the way a mouse does - through AppKit's hit-testing - which the
+    // dialog layer once failed (the backend ignored CascadeInputTransparent, so clicks fell through to the panels)
+    [Theory]
+    [InlineData(true, "Move to Trash")]
+    [InlineData(false, "Delete")]
+    public async Task A_mouse_click_on_the_confirm_button_deletes(bool trash, string button)
+    {
+        await this.Start(l => l.File("doomed.txt").File("keep.txt"));
+        await this.App.UseTrash(trash);
+        await this.App.Cursor("doomed.txt");
+        await this.App.RealDialogs();
+        await this.App.Key("F8");
+        var target = await this.Ui.ByText(button, within: "type:DialogView");
+        await Task.Delay(400); // let it animate in
+
+        var (x, y) = await this.Ui.Center(target);
+        await this.App.ClickAt(x, y);
+
+        await this.App.WaitFor(_ => !this.LeftTree.Exists("doomed.txt"), $"the click on {button} to delete", TimeSpan.FromSeconds(5));
+        this.LeftTree.Exists("keep.txt").ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task A_mouse_click_on_cancel_closes_the_dialog_and_the_panels_take_clicks_again()
+    {
+        await this.Start(l => l.File("doomed.txt"));
+        await this.App.Cursor("doomed.txt");
+        await this.App.RealDialogs();
+        await this.App.Key("F8");
+        var cancel = await this.Ui.ByText("Cancel", within: "type:DialogView");
+        await Task.Delay(400);
+
+        var (x, y) = await this.Ui.Center(cancel);
+        await this.App.ClickAt(x, y);
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (DateTime.UtcNow < deadline && await this.Ui.Exists(e => e.Type == "DialogView" && e.IsVisible && e.Bounds is { Width: > 0 }))
+            await Task.Delay(100);
+        (await this.Ui.Exists(e => e.Type == "DialogView" && e.IsVisible && e.Bounds is { Width: > 0 })).ShouldBeFalse("the click on Cancel should close the dialog");
+        this.LeftTree.Exists("doomed.txt").ShouldBeTrue();
+
+        // with the dialog gone the layer is click-through again: a click on a row reaches the panel
+        await Task.Delay(500);
+        var (rx, ry) = await this.Ui.Center(await this.Ui.ByText("doomed", within: "LeftPanel"));
+        await this.App.ClickAt(rx, ry);
+        this.App.LastResult.GetProperty("hit").GetString()!.ShouldNotContain("DialogLayer");
+    }
+
+    [Fact]
     public async Task A_real_conflict_choice_skips()
     {
         await this.Start(l => l.File("a.txt", "new"), r => r.File("a.txt", "old"));

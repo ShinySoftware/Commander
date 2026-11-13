@@ -45,6 +45,12 @@ public static class UiTestHooks
         Map(ext, "job", "Act on a job in the jobs pane, newest first: { index = 0, action = stop|goto|dismiss|errors|clear }", JobAction);
         Map(ext, "close_window", "Press the main window's close button (macOS) - the quit guard may stop it", CloseWindow);
         Map(ext, "culture", "Switch the UI language live: { name = \"fr\" } - text already on screen stays; new pages and dialogs use it. Reset goes back to en", SetCulture);
+        Map(ext, "use_trash", "Deletes go to the (test) trash until reset: { on = true }", (_, a) =>
+        {
+            Service<AppSettings>().UseTrash = !(a.TryGetProperty("on", out var on) && on.ValueKind == JsonValueKind.False);
+            return Task.FromResult<object>(true);
+        });
+        Map(ext, "click_at", "A real mouse click (macOS): mouse down/up NSEvents through the window at page point { x, y } - AppKit hit-testing and all. Returns the native view under it", ClickAt);
         Map(ext, "real_dialogs", "Show the real dialogs instead of answering from the queue: { on = true }", RealDialogs);
         ext.MapTool("state_now", "The state without waiting for the app to settle (while a real dialog is open)", "POST", "state_now",
             async _ => HttpResponse.Json(await MainThread.InvokeOnMainThreadAsync(() => new { result = (object)true, state = Snapshot(MainViewModel.Current!) })));
@@ -270,6 +276,39 @@ public static class UiTestHooks
         return Task.FromResult<object>(System.Globalization.CultureInfo.CurrentUICulture.Name);
     }
 
+    static async Task<object> ClickAt(MainViewModel main, JsonElement args)
+    {
+#if MACOS_APPKIT
+        var x = args.GetProperty("x").GetDouble();
+        var y = args.GetProperty("y").GetDouble();
+        if (Application.Current?.Windows.FirstOrDefault()?.Handler?.PlatformView is not AppKit.NSWindow ns || ns.ContentView is not { } content)
+            throw new InvalidOperationException("no window");
+
+        // page points are top-down from the content view; window coordinates are bottom-up
+        var point = new CoreGraphics.CGPoint(x, content.Frame.Height - y);
+        var hit = content.Superview?.HitTest(point);
+        var chain = new List<string>();
+        for (var v = hit; v != null && chain.Count < 12; v = v.Superview)
+            chain.Add(v.GetType().Name);
+
+        // a button's mouseDown tracks the mouse in a loop until mouse-up arrives from the event queue - so queue the up
+        // first, then deliver the down
+        var up = AppKit.NSEvent.MouseEvent(AppKit.NSEventType.LeftMouseUp, point, 0, NSProcessInfoUptime(), ns.WindowNumber, null, 0, 1, 0f);
+        var down = AppKit.NSEvent.MouseEvent(AppKit.NSEventType.LeftMouseDown, point, 0, NSProcessInfoUptime(), ns.WindowNumber, null, 0, 1, 1f);
+        AppKit.NSApplication.SharedApplication.PostEvent(up, false);
+        ns.SendEvent(down);
+        await Task.Delay(500); // a dialog animates out
+        return new { hit = String.Join(" < ", chain) };
+#else
+        await Task.CompletedTask;
+        throw new NotSupportedException("click_at is macOS only");
+#endif
+    }
+
+#if MACOS_APPKIT
+    static double NSProcessInfoUptime() => Foundation.NSProcessInfo.ProcessInfo.SystemUptime;
+#endif
+
     static Task<object> Answer(MainViewModel main, JsonElement args)
     {
         Service<UiTestDialogs>().Enqueue(args.GetProperty("answers").EnumerateArray().Select(x => x.GetString() ?? String.Empty));
@@ -329,7 +368,7 @@ public static class UiTestHooks
         var settings = Service<AppSettings>();
         settings.ShowHidden = false;
         settings.ConfirmDelete = true;
-        settings.UseTrash = false; // never fill the developer's real Trash
+        settings.UseTrash = false; // the use_trash tool turns it on - into a test folder, never the real Trash
         settings.ExtractToFolderPerArchive = true;
         settings.FriendlySizes = false;
 

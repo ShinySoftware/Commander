@@ -16,16 +16,72 @@ public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThre
         _ => text
     };
 
+    // dialog layers made hit-testable while a dialog is up (AcceptClicks)
+    readonly List<VisualElement> clickableLayers = [];
+    int openDialogs;
+
     async Task<T> Run<T>(Func<Task<T>> show)
     {
         try
         {
-            return await mainThread.InvokeOnMainThreadAsync(show);
+            return await mainThread.InvokeOnMainThreadAsync(() =>
+            {
+                this.openDialogs++;
+                this.AcceptClicks(0);
+                return show();
+            });
         }
         finally
         {
-            mainThread.BeginInvokeOnMainThread(() => this.DialogClosed?.Invoke(this, EventArgs.Empty));
+            mainThread.BeginInvokeOnMainThread(() =>
+            {
+                this.openDialogs--;
+                if (this.openDialogs == 0)
+                    this.RestoreLayers();
+                this.DialogClosed?.Invoke(this, EventArgs.Empty);
+            });
         }
+    }
+
+    /// <summary>
+    /// Shiny's DialogLayer covers the page with InputTransparent = true and CascadeInputTransparent = false, so clicks
+    /// pass through the empty layer but reach the dialog. The AppKit backend ignores CascadeInputTransparent and drops
+    /// the whole layer from hit-testing (MacOSContainerView.HitTest), so a real mouse click on a dialog button lands on
+    /// the panel underneath - only the keyboard worked. While a dialog is up the layer takes clicks itself (it's modal
+    /// anyway); RestoreLayers puts it back once the last dialog closes.
+    /// </summary>
+    void AcceptClicks(int attempt)
+    {
+        var dispatcher = Application.Current?.Dispatcher;
+        if (dispatcher == null || attempt > 15)
+            return;
+
+        // the layer is built along with the first dialog - keep looking for up to ~1.5s
+        dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(attempt == 0 ? 0 : 100), () =>
+        {
+            if (this.openDialogs == 0)
+                return;
+
+            var root = Application.Current?.Windows.FirstOrDefault()?.Page;
+            var layers = root == null
+                ? []
+                : Descendants(root).OfType<VisualElement>().Where(x => x.GetType().Name == "DialogLayer" && x.InputTransparent).ToList();
+
+            foreach (var layer in layers)
+            {
+                layer.InputTransparent = false;
+                this.clickableLayers.Add(layer);
+            }
+            if (this.clickableLayers.Count == 0)
+                this.AcceptClicks(attempt + 1);
+        });
+    }
+
+    void RestoreLayers()
+    {
+        foreach (var layer in this.clickableLayers)
+            layer.InputTransparent = true;
+        this.clickableLayers.Clear();
     }
 
     public Task Alert(string title, string message)

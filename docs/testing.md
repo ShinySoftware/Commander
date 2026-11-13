@@ -39,7 +39,11 @@ doesn't fight your own build or the copy of the app you're using.
   `SHINYCOMMANDER_LANG=fr` (with `--fresh`) to run it in another language, e.g. `--screens` to screenshot every screen
   in French. `LocalizationTests` switch languages live through the `culture` tool.
 - **Throwaway folders.** Each test works in its own folder under `tests/ShinyCommander.UITests/artifacts/work`.
-- **No Trash.** Deletes are permanent in test mode, so nothing lands in your Trash.
+- **No Trash.** Deletes are permanent in test mode, so nothing lands in your Trash. A test that wants the trash calls
+  `use_trash`, and "trashed" items move into `artifacts/trash` instead.
+- **Real clicks.** A DevFlow tap fires a control directly, skipping AppKit's hit-testing. `click_at` sends mouse
+  down/up events through the window instead, so a test sees what a real mouse does - that's how the dialog buttons
+  that ignored the mouse were caught.
 
 ### How it works
 
@@ -51,7 +55,8 @@ doesn't fight your own build or the copy of the app you're using.
  Commander ── extension tools org.shiny.commander ───▶  └─ Shared/Testing/UiTestHooks.cs
                                                             state · key · type · navigate · cursor · mark
                                                             command · answer · real_dialogs · reset
-                                                            hold_job · job · close_window
+                                                            hold_job · job · close_window · culture
+                                                            use_trash · click_at
 ```
 
 - **Keys.** DevFlow can tap and fill but can't press keys, and ShinyCommander is a keyboard program. The app's `key`

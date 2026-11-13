@@ -31,6 +31,26 @@ public static class UiTestMode
         builder.Services.AddSingleton<ShinyAppDialogs>();
         builder.Services.AddSingleton<UiTestDialogs>();
         builder.Services.AddSingleton<IAppDialogs>(sp => sp.GetRequiredService<UiTestDialogs>());
+        builder.Services.AddSingleton<ITrashService, UiTestTrash>();
+    }
+
+    /// <summary>A trash that never touches the developer's real one: "trashed" items move into SHINYCOMMANDER_TRASH.</summary>
+    sealed class UiTestTrash : ITrashService
+    {
+        static readonly string Dir = Environment.GetEnvironmentVariable("SHINYCOMMANDER_TRASH") is { Length: > 0 } dir
+            ? dir
+            : Path.Combine(Path.GetTempPath(), "shinycommander-uitest-trash");
+
+        public bool TryMoveToTrash(string path)
+        {
+            var target = Path.Combine(Dir, Guid.NewGuid().ToString("N")[..8] + "-" + Path.GetFileName(path.TrimEnd(Path.DirectorySeparatorChar)));
+            Directory.CreateDirectory(Dir);
+            if (Directory.Exists(path))
+                Directory.Move(path, target);
+            else
+                File.Move(path, target);
+            return true;
+        }
     }
 }
 #endif

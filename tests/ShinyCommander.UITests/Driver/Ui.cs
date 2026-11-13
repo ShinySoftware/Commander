@@ -112,6 +112,23 @@ public sealed class Ui(AgentClient client)
             throw new ShouldAssertException($"Could not press {key} on {element.Type} {element.AutomationId ?? element.Id}");
     }
 
+    /// <summary>An element's centre in page coordinates - the tree's bounds are relative to each parent.</summary>
+    public async Task<(double X, double Y)> Center(ElementInfo element)
+    {
+        var all = await this.All();
+        var byId = all.GroupBy(x => x.Id).ToDictionary(g => g.Key, g => g.First());
+        double x = 0, y = 0;
+        for (var e = element; e != null; e = e.ParentId != null && byId.TryGetValue(e.ParentId, out var p) ? p : null)
+        {
+            if (e.Bounds is { X: >= 0, Y: >= 0 } b)
+            {
+                x += b.X;
+                y += b.Y;
+            }
+        }
+        return (x + element.Bounds!.Width / 2, y + element.Bounds.Height / 2);
+    }
+
     public async Task<bool> Exists(Func<ElementInfo, bool> predicate) => (await this.All()).Any(predicate);
 
     /// <summary>
