@@ -613,11 +613,19 @@
   <data name="Main_ConsoleCancelled" xml:space="preserve">
     <value>[cancelled]</value>
   </data>
+  <data name="Main_ArchiveSavedFormat" xml:space="preserve">
+    <value>{0} saved into {1}</value>
+    <comment>Toast when an edited file is written back into its archive: file name, archive name</comment>
+  </data>
+  <data name="Main_ArchiveSaveFailedFormat" xml:space="preserve">
+    <value>Couldn't save {0} into {1}: {2}</value>
+    <comment>Toast when writing an edited file back into its archive fails: file, archive, error</comment>
+  </data>
   <data name="Main_ReadOnly" xml:space="preserve">
     <value>Read only</value>
   </data>
   <data name="Main_ReadOnlyArchive" xml:space="preserve">
-    <value>Files inside archives can be viewed (F3) but not edited. Copy it out first.</value>
+    <value>Files inside rar and tar.xz archives can be viewed (F3) but not changed. Copy it out first.</value>
   </data>
   <data name="Main_NewFile" xml:space="preserve">
     <value>New file</value>
@@ -785,7 +793,7 @@ Existing: {3} bytes  {4}</value>
     <value>Archives</value>
   </data>
   <data name="Help_ArchivesText" xml:space="preserve">
-    <value>Press `Enter` on a `.zip` (also .jar, .nupkg, .docx, .apk…) to browse it like a folder. Copy (F5) out of it, copy into it, delete or rename inside it.</value>
+    <value>Press `Enter` on an archive to browse it like a folder. zip (also .jar, .nupkg, .docx, .apk…), 7z, tar, tar.gz, tar.bz2 and tar.zst work like folders: copy in and out, move, delete, rename, make folders and files, and edit a file (F4) to save it back into the archive. rar and tar.xz can be browsed and copied out of. `Alt+F5` packs folders - with everything in them - into a new or existing archive.</value>
   </data>
 
   <!-- Jobs & quitting -->
@@ -1527,6 +1535,14 @@ Quitting stops them part-way. What's already been copied, moved or deleted stays
     <value>Filter:</value>
     <comment>Label before the quick filter box</comment>
   </data>
+  <data name="Panel_EditPath" xml:space="preserve">
+    <value>Edit path</value>
+    <comment>Switch the breadcrumbs to a text box for typing a path</comment>
+  </data>
+  <data name="Panel_NoSubfolders" xml:space="preserve">
+    <value>No folders</value>
+    <comment>Shown in a breadcrumb dropdown when the folder has no subfolders</comment>
+  </data>
   <data name="Panel_FilterPlaceholder" xml:space="preserve">
     <value>*.cs;*.md   (Esc closes)</value>
     <comment>Keep the *.cs;*.md patterns</comment>
@@ -1582,6 +1598,87 @@ Quitting stops them part-way. What's already been copied, moved or deleted stays
   <data name="Column_Attributes" xml:space="preserve">
     <value>Attributes</value>
     <comment>Column name in the Columns menu</comment>
+  </data>
+  <data name="Tab_Lock" xml:space="preserve">
+    <value>Lock tab</value>
+    <comment>Tab right-click menu: keep the tab on its folder; it cannot be closed until unlocked</comment>
+  </data>
+  <data name="Tab_Unlock" xml:space="preserve">
+    <value>Unlock tab</value>
+    <comment>Tab right-click menu</comment>
+  </data>
+  <data name="Tab_Close" xml:space="preserve">
+    <value>Close tab</value>
+    <comment>Tab right-click menu</comment>
+  </data>
+  <data name="Tab_UnlockToClose" xml:space="preserve">
+    <value>This tab is locked - unlock it to close it</value>
+    <comment>Toast when closing a locked tab</comment>
+  </data>
+  <data name="Tab_New" xml:space="preserve">
+    <value>New tab</value>
+    <comment>Tooltip for the + button after the tabs</comment>
+  </data>
+  <data name="Tab_LockedTooltip" xml:space="preserve">
+    <value>Locked - click to unlock</value>
+    <comment>Tooltip on a locked tab's lock icon</comment>
+  </data>
+  <data name="Settings_ShowTabs" xml:space="preserve">
+    <value>Show folder tabs</value>
+  </data>
+  <data name="Settings_ShowTabsDesc" xml:space="preserve">
+    <value>Tabs above each panel. Turned off, your tabs are kept for when you turn them back on</value>
+  </data>
+  <data name="Tab_Rename" xml:space="preserve">
+    <value>Rename tab…</value>
+    <comment>Tab right-click menu: give the tab a name of its own</comment>
+  </data>
+  <data name="Tab_RenameMessage" xml:space="preserve">
+    <value>Leave it empty to use the folder's name</value>
+    <comment>Rename tab prompt</comment>
+  </data>
+  <data name="Tab_Color" xml:space="preserve">
+    <value>Colour</value>
+    <comment>Tab menu: heading over the colour swatches</comment>
+  </data>
+  <data name="TabColor_None" xml:space="preserve">
+    <value>None</value>
+    <comment>Tab colour: no colour</comment>
+  </data>
+  <data name="TabColor_Red" xml:space="preserve">
+    <value>Red</value>
+  </data>
+  <data name="TabColor_Orange" xml:space="preserve">
+    <value>Orange</value>
+  </data>
+  <data name="TabColor_Yellow" xml:space="preserve">
+    <value>Yellow</value>
+  </data>
+  <data name="TabColor_Green" xml:space="preserve">
+    <value>Green</value>
+  </data>
+  <data name="TabColor_Teal" xml:space="preserve">
+    <value>Teal</value>
+  </data>
+  <data name="TabColor_Blue" xml:space="preserve">
+    <value>Blue</value>
+  </data>
+  <data name="TabColor_Purple" xml:space="preserve">
+    <value>Purple</value>
+  </data>
+  <data name="TabColor_Pink" xml:space="preserve">
+    <value>Pink</value>
+  </data>
+  <data name="TabColor_Gray" xml:space="preserve">
+    <value>Gray</value>
+  </data>
+  <data name="Tab_Icon" xml:space="preserve">
+    <value>Icon</value>
+    <comment>Tab menu: heading over the icon choices</comment>
+  </data>
+  <data name="Tab_IconAuto" xml:space="preserve">
+    <value>Automatic</value>
+    <comment>Tab menu: the icon that goes with the folder (Home, Documents...)</comment>
   </data>
   <data name="Tree_Home" xml:space="preserve">
     <value>Home</value>

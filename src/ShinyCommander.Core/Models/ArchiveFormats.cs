@@ -17,9 +17,9 @@ public enum ArchiveKind
 }
 
 /// <summary>
-/// Which files the panels can enter like a folder. Zip (and the zip-container family) is read/write through
-/// System.IO.Compression; tar (plain or gz/bz2/xz/zstd compressed), 7z and rar are read-only through
-/// SharpCompress, and a lone .gz/.bz2/.xz shows up as an archive holding the one decompressed file.
+/// Which files the panels can enter like a folder. All are read; zip, 7z and tar (plain or gz/bz2/zstd compressed)
+/// can also be changed (ArchiveWriter). rar, tar.xz, and a lone .gz/.bz2/.xz - shown as an archive holding the one
+/// decompressed file - are read-only.
 /// </summary>
 public static class ArchiveFormats
 {
@@ -50,7 +50,7 @@ public static class ArchiveFormats
     ];
 
     /// <summary>Formats Pack (Alt+F5) can create, as typed in the target name.</summary>
-    public static IReadOnlyList<string> PackExtensions { get; } = [".zip", ".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2"];
+    public static IReadOnlyList<string> PackExtensions { get; } = [".zip", ".7z", ".tar", ".tar.gz", ".tgz", ".tar.bz2", ".tbz2", ".tar.zst"];
 
     public static ArchiveKind GetKind(string fileName)
     {
@@ -67,13 +67,14 @@ public static class ArchiveFormats
 
     public static bool IsSupported(string fileName) => GetKind(fileName) != ArchiveKind.None;
 
-    /// <summary>Only zip archives can be changed in place (copy into, delete, rename, new folder).</summary>
-    public static bool IsWritable(string fileName) => GetKind(fileName) == ArchiveKind.Zip;
+    /// <summary>Archives that can be changed like a folder - copy into, delete, rename, new folder, edit.</summary>
+    public static bool IsWritable(string fileName) => GetKind(fileName) is ArchiveKind.Zip or ArchiveKind.SevenZip
+        or ArchiveKind.Tar or ArchiveKind.TarGz or ArchiveKind.TarBz2 or ArchiveKind.TarZst;
 
     /// <summary>A lone compressed file rather than a container.</summary>
     public static bool IsSingleStream(ArchiveKind kind) => kind is ArchiveKind.GZip or ArchiveKind.BZip2 or ArchiveKind.Xz;
 
-    public static bool CanPack(string fileName) => GetKind(fileName) is ArchiveKind.Zip or ArchiveKind.Tar or ArchiveKind.TarGz or ArchiveKind.TarBz2;
+    public static bool CanPack(string fileName) => IsWritable(fileName);
 
     /// <summary>"site.tar.gz" → "site", "notes.txt.gz" → "notes.txt", "a.zip" → "a".</summary>
     public static string StripExtension(string fileName)

@@ -14,6 +14,9 @@ public class ArchiveFormatTests
     // same files, tar -czf by macOS bsdtar: pax xattr records + "._" AppleDouble companions
     const string MacTarGzBase64 = "H4sIAHU+7moAA+2Y3U7bMBiGXSSE6I7hDMlXYPwbtwccFLSJaiAYIESPKpMapVL/lmZQcSU73x3sona83QFO1KlboJSiOkjkeyTLsRXbnxO9/l6ZtA1JJgnyCaU0kBKntQ5UVjv+1pRyKTBTXAspgkApTJngnCFMvUY15ds4MbELxcTdJIy6dt57d5G1vWfm+X9TePWBemJ9ewOtIXRsQnxyjq/wlLQPbbrCXfnqStr+8bIpGxcXZ9PHdMR3Vz7kXqnM+rfCYZ+Y0ahnySge3tqBGYQWVdYQ+2N+7lR//1rBJoF5nJrJoTUdG+/6OwcW6p/RnP6llhrhiZdocpRc/4LiftLt2z2m66Jer3EliHAnshSspqtK46PmfuPs4LB5+ZFMTJLE5Cm57jW+NBvHN5+icUQ/105aVVnH527QUeu5Qf9ovPrW36Gs+M/+i/VPGcvpn2utIP8XQWR7vSHW9yDAckLanWE49rtGqnullvL/jAWg/0IA/19qZv7f3zmwUP+P/b/zC+D/i2CO/1epZ+Pg/989qep3Pa+xSP9pI+//ldO/8hxXRsn1n/1/0r4m/Y63NV5x/6uFAP9XCOD/Sk2m/5kJ9HIOLH//q2TAwP8VwTz/x2uBVOD/3j2Z/r1m/xfc/1Kdz/+KScj/RTCw48R2QH4AAABl4wE3Lz1rACYAAA==";
 
+    // index.html ("<h1/>"), written by python's tarfile as xz
+    const string SiteTarXzBase64 = "/Td6WFoAAATm1rRGAgAhARYAAAB0L+Wj4Cf/AGldADSbiLBXymXIPZmcoovNvTmnF+OaKURw2zuHsp48HTwz77oR5S24baw4Z6gRlsnnD9QavZ+z3ZtT2+E6dKEje8MfFn2l33gLo81P5xEAJeWrCPFH+LVUsTEwxB+Rfh0xRlluvAPUOmzYAAAAAAATCMssO1bJ5wABhQGAUAAAjeCtMbHEZ/sCAAAAAARZWg==";
+
     readonly VirtualFileSystem vfs = new();
     FileOperationService Ops => new(this.vfs);
 
@@ -123,10 +126,13 @@ public class ArchiveFormatTests
     }
 
     [Theory]
+    [InlineData("out.zip")]
+    [InlineData("out.7z")]
     [InlineData("out.tar")]
     [InlineData("out.tar.gz")]
     [InlineData("out.tar.bz2")]
-    public async Task PacksTarFamilyRoundTrip(string name)
+    [InlineData("out.tar.zst")]
+    public async Task PacksEveryWritableFormatRoundTrip(string name)
     {
         using var tmp = new TempDir();
         tmp.File("src/folder/a.txt", "A");
@@ -150,15 +156,17 @@ public class ArchiveFormatTests
         using var tmp = new TempDir();
         tmp.File("a.txt", "A");
         var a = (await this.vfs.ListAsync(tmp.Path, true)).Single(x => x.Name == "a.txt");
-        await Should.ThrowAsync<NotSupportedException>(() => this.Ops.PackAsync([a], Path.Combine(tmp.Path, "x.7z")));
+        await Should.ThrowAsync<NotSupportedException>(() => this.Ops.PackAsync([a], Path.Combine(tmp.Path, "x.rar")));
+        await Should.ThrowAsync<NotSupportedException>(() => this.Ops.PackAsync([a], Path.Combine(tmp.Path, "x.tar.xz")));
     }
 
     [Fact]
     public async Task ReadOnlyArchivesRefuseChanges()
     {
         using var tmp = new TempDir();
-        var archive = Path.Combine(tmp.Path, "site.tar.gz");
-        WriteTarGz(archive, ("index.html", "<h1/>"));
+        // SharpCompress reads xz but can't write it
+        var archive = Path.Combine(tmp.Path, "site.tar.xz");
+        File.WriteAllBytes(archive, Convert.FromBase64String(SiteTarXzBase64));
         tmp.File("new.txt", "N");
         var inside = (await this.vfs.ListAsync(archive, true)).Single(x => x.Name == "index.html");
         var local = (await this.vfs.ListAsync(tmp.Path, true)).Single(x => x.Name == "new.txt");
@@ -186,5 +194,22 @@ public class ArchiveFormatTests
         var result = await this.Ops.ExtractAsync([new FileEntry { Name = "mac.tar.gz", FullPath = archive }], dest, folderPerArchive: true);
         result.Errors.ShouldBeEmpty();
         File.ReadAllText(Path.Combine(dest, "mac", "docs", "b.md")).ShouldBe("nested\n");
+    }
+
+    // bsdtar's xattr headers make System.Formats.Tar give up - the rewrite goes through SharpCompress instead
+    [Fact]
+    public async Task ChangesAMacBsdTar()
+    {
+        using var tmp = new TempDir();
+        var archive = Path.Combine(tmp.Path, "mac.tar.gz");
+        File.WriteAllBytes(archive, Convert.FromBase64String(MacTarGzBase64));
+
+        var a = (await this.vfs.ListAsync(archive, true)).Single(x => x.Name == "a.txt");
+        await this.Ops.RenameAsync(a, "renamed.txt");
+
+        var root = (await this.vfs.ListAsync(archive, true)).Where(x => !x.IsParentLink).Select(x => x.Name).OrderBy(x => x);
+        root.ShouldBe(["docs", "renamed.txt"]);
+        using var reader = new StreamReader(this.vfs.OpenRead(Path.Combine(archive, "docs", "b.md")));
+        reader.ReadToEnd().ShouldBe("nested\n");
     }
 }

@@ -63,6 +63,29 @@ public class RowFontConverter : IValueConverter
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
 }
 
+public class InvertBoolConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value is not true;
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => value is not true;
+}
+
+public class BoolToDoubleConverter : IValueConverter
+{
+    public double True { get; set; } = 1;
+    public double False { get; set; }
+
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value is true ? this.True : this.False;
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
+}
+
+public class BoolToBoldConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is true ? FontAttributes.Bold : FontAttributes.None;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) => throw new NotSupportedException();
+}
+
 /// <summary>ConverterParameter "TrueKey|FalseKey", e.g. "Accent|Header" or "White|Text".</summary>
 public class BoolToThemeColorConverter : IValueConverter
 {

@@ -22,6 +22,8 @@ public partial class MainViewModel : ObservableObject,
     readonly QuitGuard quitGuard;
     // one conflict question at a time, whichever job asks
     readonly SemaphoreSlim conflictGate = new(1, 1);
+    // files opened out of archives, saved back into them
+    readonly ArchiveWriteBack writeBack = new();
     CancellationTokenSource? commandCts;
     bool initialized;
 
@@ -61,16 +63,30 @@ public partial class MainViewModel : ObservableObject,
         this.navigator = navigator;
         this.mediator = mediator;
         this.mainThread = mainThread;
+        this.writeBack.Saved += (_, e) => this.mainThread.BeginInvokeOnMainThread(async () =>
+        {
+            await this.dialogs.Toast(L.Main_ArchiveSavedFormat(Path.GetFileName(e.Key), Path.GetFileName(e.ArchiveFile)), ToastKind.Success);
+            await this.Changed(Path.GetDirectoryName(e.ArchiveFile));
+        });
+        this.writeBack.Failed += (_, e) => this.mainThread.BeginInvokeOnMainThread(async () =>
+            await this.dialogs.Toast(L.Main_ArchiveSaveFailedFormat(Path.GetFileName(e.Key), Path.GetFileName(e.ArchiveFile), e.Error?.Message ?? String.Empty), ToastKind.Error));
 
         // the ribbon's tab colours come from converters, which only run when RibbonTab changes - a theme switch while
         // running would leave light colours on a dark ribbon
         if (Application.Current is { } app)
-            app.RequestedThemeChanged += (_, _) => this.OnPropertyChanged(nameof(this.RibbonTab));
+            app.RequestedThemeChanged += (_, _) =>
+            {
+                this.OnPropertyChanged(nameof(this.RibbonTab));
+                foreach (var tab in this.Left.Tabs.Concat(this.Right.Tabs))
+                    tab.RefreshTheme();
+            };
 
         this.Left = new PanelViewModel(PanelSide.Left, vfs, settings, columns, toolbar);
         this.Right = new PanelViewModel(PanelSide.Right, vfs, settings, columns, toolbar);
         this.Left.PropertyChanged += this.OnPanelPropertyChanged;
         this.Right.PropertyChanged += this.OnPanelPropertyChanged;
+        this.Left.TabsChanged += (_, _) => this.SaveState();
+        this.Right.TabsChanged += (_, _) => this.SaveState();
         this.Left.ScrollRequested += this.OnPanelCursorMoved;
         this.Right.ScrollRequested += this.OnPanelCursorMoved;
         this.StackPanels = settings.StackPanels;
@@ -173,6 +189,9 @@ public partial class MainViewModel : ObservableObject,
                 if (listingChanged || tab is { IsArchive: true } || tab?.IsBranchView == true)
                     _ = tab?.RefreshAsync();
             }
+            // Settings may have turned tabs on or off
+            await this.Left.RefreshShowTabsAsync();
+            await this.Right.RefreshShowTabsAsync();
             this.FocusCommandLineRequested?.Invoke(this, EventArgs.Empty);
             return;
         }
@@ -182,7 +201,14 @@ public partial class MainViewModel : ObservableObject,
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         await this.RestoreTabs(this.Left, AppSettings.SplitLines(this.settings.LeftTabs), this.settings.LeftActiveTab, home);
         await this.RestoreTabs(this.Right, AppSettings.SplitLines(this.settings.RightTabs), this.settings.RightActiveTab, DefaultRightPath(home));
+        if (!this.settings.PlaceTabsSeeded)
+        {
+            await SeedPlaceTabs(this.Left);
+            await SeedPlaceTabs(this.Right);
+            this.settings.PlaceTabsSeeded = true;
+        }
         this.Activate(this.settings.RightPanelActive ? this.Right : this.Left);
+        this.SaveState();
     }
 
     // settings that change what a listing shows (Settings page) - compared when coming back
@@ -196,16 +222,32 @@ public partial class MainViewModel : ObservableObject,
         return Directory.Exists(docs) && docs != home ? docs : home;
     }
 
-    async Task RestoreTabs(PanelViewModel panel, IReadOnlyList<string> paths, int active, string fallback)
+    async Task RestoreTabs(PanelViewModel panel, IReadOnlyList<string> lines, int active, string fallback)
     {
-        if (paths.Count == 0)
-            paths = [fallback];
+        if (lines.Count == 0)
+            lines = [fallback];
 
-        foreach (var p in paths)
-            await panel.AddTabAsync(p, activate: false);
+        foreach (var state in lines.Select(TabState.Parse))
+        {
+            var tab = await panel.AddTabAsync(state.Path, activate: false, locked: state.Locked);
+            tab.Alias = state.Alias;
+            tab.ColorKey = state.Color;
+            tab.IconKey = state.Icon;
+        }
 
         panel.ActiveTab = panel.Tabs[Math.Clamp(active, 0, panel.Tabs.Count - 1)];
     }
+
+    // the places used to be drive bar buttons: they come back as locked tabs, after whatever was open already
+    static async Task SeedPlaceTabs(PanelViewModel panel)
+    {
+        var open = panel.Tabs.Select(x => x.Path).ToHashSet(StringComparer.Ordinal);
+        foreach (var place in DriveService.GetPlaces().Where(x => !open.Contains(VirtualFileSystem.Normalize(x.RootPath))))
+            await panel.AddTabAsync(place.RootPath, activate: false, locked: true);
+    }
+
+    // a locked tab is saved at its own folder, even if it wandered while tabs were off
+    static string TabLine(PanelTabViewModel tab) => new TabState(tab.LockedPath ?? tab.Path, tab.IsLocked, tab.Alias, tab.ColorKey, tab.IconKey).Format();
 
     void OnPanelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -223,8 +265,8 @@ public partial class MainViewModel : ObservableObject,
         if (!this.initialized || this.ActivePanel == null)
             return;
 
-        this.settings.LeftTabs = AppSettings.JoinLines(this.Left.Tabs.Select(x => x.Path));
-        this.settings.RightTabs = AppSettings.JoinLines(this.Right.Tabs.Select(x => x.Path));
+        this.settings.LeftTabs = AppSettings.JoinLines(this.Left.Tabs.Select(TabLine));
+        this.settings.RightTabs = AppSettings.JoinLines(this.Right.Tabs.Select(TabLine));
         this.settings.LeftActiveTab = this.Left.ActiveTab == null ? 0 : this.Left.Tabs.IndexOf(this.Left.ActiveTab);
         this.settings.RightActiveTab = this.Right.ActiveTab == null ? 0 : this.Right.Tabs.IndexOf(this.Right.ActiveTab);
         this.settings.RightPanelActive = this.ActivePanel == this.Right;
@@ -341,9 +383,11 @@ public partial class MainViewModel : ObservableObject,
             return;
 
         tab.ToggleMark(item);
-        if (item is { IsDirectory: true, IsMarked: true, CalculatedSize: null } && !item.Entry.IsInArchive)
+        if (item is { IsDirectory: true, IsMarked: true, CalculatedSize: null })
         {
-            item.CalculatedSize = await FileOperationService.CalculateSizeAsync(item.Entry.FullPath);
+            item.CalculatedSize = item.Entry.IsInArchive
+                ? await this.vfs.CalculateArchiveFolderSizeAsync(item.Entry.FullPath)
+                : await FileOperationService.CalculateSizeAsync(item.Entry.FullPath);
             tab.UpdateStatus();
         }
     }
@@ -413,8 +457,7 @@ public partial class MainViewModel : ObservableObject,
             }
             else
             {
-                var path = await this.vfs.MaterializeAsync(item.Entry.FullPath);
-                ShellLauncher.OpenWithDefaultApp(path);
+                ShellLauncher.OpenWithDefaultApp(await this.LocalCopy(item.Entry));
             }
         }
         catch (Exception ex)
@@ -451,19 +494,47 @@ public partial class MainViewModel : ObservableObject,
     [RelayCommand]
     async Task NewTab()
     {
+        if (this.settings.HideTabs)
+            return;
+
         var item = this.Tab?.CursorItem;
         var path = item is { IsDirectory: true, Entry.IsParentLink: false } ? item.Entry.FullPath : this.ActivePanel.Path;
         await this.ActivePanel.AddTabAsync(path);
     }
 
     [RelayCommand]
-    void CloseTab() => this.ActivePanel.CloseTab(null);
+    async Task CloseTab()
+    {
+        if (this.settings.HideTabs)
+            return;
+
+        if (this.Tab is { IsLocked: true })
+            await this.dialogs.Toast(L.Tab_UnlockToClose);
+        else
+            this.ActivePanel.CloseTab(null);
+    }
+
+    /// <summary>"Rename tab…" in a tab's menu: empty goes back to the folder's own name, cancel leaves it be.</summary>
+    public async Task RenameTab(PanelViewModel panel, PanelTabViewModel tab)
+    {
+        var alias = await this.dialogs.Prompt(L.Tab_Rename, L.Tab_RenameMessage, tab.Alias, placeholder: tab.Path);
+        if (alias != null)
+            panel.EditTab(tab, x => x.Alias = String.IsNullOrWhiteSpace(alias) ? null : alias.Trim());
+    }
 
     [RelayCommand]
-    void NextTab() => this.ActivePanel.NextTab(1);
+    void NextTab()
+    {
+        if (!this.settings.HideTabs)
+            this.ActivePanel.NextTab(1);
+    }
 
     [RelayCommand]
-    void PreviousTab() => this.ActivePanel.NextTab(-1);
+    void PreviousTab()
+    {
+        if (!this.settings.HideTabs)
+            this.ActivePanel.NextTab(-1);
+    }
 
     [RelayCommand]
     async Task SwapPanels()
@@ -815,8 +886,12 @@ public partial class MainViewModel : ObservableObject,
     [RelayCommand]
     void RevealInFileManager()
     {
-        if (this.Tab?.CursorItem is { Entry.IsInArchive: false, Entry.IsParentLink: false } item)
-            ShellLauncher.RevealInFileManager(item.Entry.FullPath);
+        if (this.Tab?.CursorItem is not { Entry.IsParentLink: false } item)
+            return;
+
+        // inside an archive, the archive itself is what the file manager can show
+        var path = item.Entry.IsInArchive ? this.vfs.Resolve(Path.GetDirectoryName(item.Entry.FullPath)!).ArchiveFile! : item.Entry.FullPath;
+        ShellLauncher.RevealInFileManager(path);
     }
 
     // ===========================================================================================
@@ -832,11 +907,10 @@ public partial class MainViewModel : ObservableObject,
         if (item.IsDirectory)
         {
             // TC: F3 on a folder shows its size
-            if (!item.Entry.IsInArchive)
-            {
-                item.CalculatedSize = await FileOperationService.CalculateSizeAsync(item.Entry.FullPath);
-                this.Tab.UpdateStatus();
-            }
+            item.CalculatedSize = item.Entry.IsInArchive
+                ? await this.vfs.CalculateArchiveFolderSizeAsync(item.Entry.FullPath)
+                : await FileOperationService.CalculateSizeAsync(item.Entry.FullPath);
+            this.Tab.UpdateStatus();
             return;
         }
         await this.navigator.NavigateTo<ViewerViewModel>(vm => vm.FilePath = item.Entry.FullPath);
@@ -855,28 +929,46 @@ public partial class MainViewModel : ObservableObject,
     {
         try
         {
-            if (!String.IsNullOrWhiteSpace(this.settings.ExternalEditor))
-            {
-                var local = await this.vfs.MaterializeAsync(entry.FullPath);
-                ShellLauncher.OpenWith(this.settings.ExternalEditor, local);
-                return;
-            }
-            if (entry.IsInArchive)
+            if (entry.IsInArchive && !ArchiveFormats.IsWritable(this.vfs.Resolve(Path.GetDirectoryName(entry.FullPath)!).ArchiveFile!))
             {
                 await this.dialogs.Alert(L.Main_ReadOnly, L.Main_ReadOnlyArchive);
                 return;
             }
-            if (entry.Size > 20 * 1024 * 1024)
+
+            // inside an archive this edits a copy, and each save goes back in
+            var path = await this.LocalCopy(entry);
+            if (!String.IsNullOrWhiteSpace(this.settings.ExternalEditor))
             {
-                ShellLauncher.OpenWithDefaultApp(entry.FullPath);
+                ShellLauncher.OpenWith(this.settings.ExternalEditor, path);
                 return;
             }
-            await this.navigator.NavigateTo<EditorViewModel>(vm => vm.FilePath = entry.FullPath);
+            if (entry.Size > 20 * 1024 * 1024)
+            {
+                ShellLauncher.OpenWithDefaultApp(path);
+                return;
+            }
+            await this.navigator.NavigateTo<EditorViewModel>(vm => vm.FilePath = path);
         }
         catch (Exception ex)
         {
             await this.dialogs.Alert(L.Cmd_Edit, ex.Message);
         }
+    }
+
+    /// <summary>
+    /// A path another program (or the editor) can open: the file itself on disk; from an archive a temporary copy,
+    /// whose saves are written back into a writable archive.
+    /// </summary>
+    async Task<string> LocalCopy(FileEntry entry)
+    {
+        var path = await this.vfs.MaterializeAsync(entry.FullPath);
+        if (entry.IsInArchive)
+        {
+            var loc = this.vfs.Resolve(Path.GetDirectoryName(entry.FullPath)!);
+            var key = loc.InnerPath.Length == 0 ? entry.Name : loc.InnerPath + "/" + entry.Name;
+            this.writeBack.Watch(path, loc.ArchiveFile!, key, entry.UnixMode);
+        }
+        return path;
     }
 
     [RelayCommand]
@@ -1244,7 +1336,7 @@ public partial class MainViewModel : ObservableObject,
     [RelayCommand]
     async Task MultiRename()
     {
-        var items = this.Tab?.SelectedEntries.Where(x => !x.IsInArchive).ToList() ?? [];
+        var items = this.Tab?.SelectedEntries.ToList() ?? [];
         if (items.Count == 0)
         {
             await this.dialogs.Toast(L.Main_SelectToRename, ToastKind.Warning);

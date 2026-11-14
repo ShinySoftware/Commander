@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
+using ShinyCommander.Core.FileSystem;
 using ShinyCommander.Core.Models;
 
 namespace ShinyCommander.Core.Rename;
@@ -190,6 +191,7 @@ public static partial class MultiRenameEngine
     public static Task<IReadOnlyList<RenameUndoStep>> ExecuteAsync(IReadOnlyList<RenamePreview> previews, CancellationToken ct = default) => Task.Run<IReadOnlyList<RenameUndoStep>>(() =>
     {
         var work = previews.Where(x => x.Changed && !x.Source.IsInArchive && !x.Source.IsParentLink).ToList();
+        var undo = RenameInArchives(previews.Where(x => x.Changed && x.Source.IsInArchive && !x.Source.IsParentLink).ToList(), ct);
         var temps = new List<(string Temp, string Final, string Original)>();
 
         foreach (var item in work)
@@ -201,7 +203,6 @@ public static partial class MultiRenameEngine
             temps.Add((temp, Path.Combine(dir, item.NewName), item.Source.FullPath));
         }
 
-        var undo = new List<RenameUndoStep>();
         foreach (var (temp, final, original) in temps)
         {
             var isDir = Directory.Exists(temp);
@@ -219,12 +220,68 @@ public static partial class MultiRenameEngine
 
     public static Task UndoAsync(IReadOnlyList<RenameUndoStep> steps) => Task.Run(() =>
     {
+        var vfs = new VirtualFileSystem();
+        var inArchives = new List<(string Archive, string From, string To)>();
         foreach (var step in steps)
         {
-            if (Path.Exists(step.FromPath) && !Path.Exists(step.ToPath))
-                Move(step.FromPath, step.ToPath, Directory.Exists(step.FromPath));
+            if (Path.Exists(step.FromPath))
+            {
+                if (!Path.Exists(step.ToPath))
+                    Move(step.FromPath, step.ToPath, Directory.Exists(step.FromPath));
+            }
+            else if (vfs.Resolve(Path.GetDirectoryName(step.FromPath)!) is { IsArchive: true } loc)
+            {
+                inArchives.Add((loc.ArchiveFile!, Key(loc, Path.GetFileName(step.FromPath)), Key(loc, Path.GetFileName(step.ToPath))));
+            }
+        }
+
+        foreach (var archive in inArchives.GroupBy(x => x.Archive))
+        {
+            var changes = new ArchiveChanges();
+            changes.Renames.AddRange(archive.Select(x => (x.From, x.To)));
+            ArchiveWriter.Apply(archive.Key, changes);
         }
     });
+
+    /// <summary>
+    /// Renames inside archives - one rewrite per archive. Every rename is worked out against the archive as it was,
+    /// so swaps (a→b, b→a) need no temporary names; a new name already taken by an entry that isn't moving is left.
+    /// </summary>
+    static List<RenameUndoStep> RenameInArchives(List<RenamePreview> work, CancellationToken ct)
+    {
+        var undo = new List<RenameUndoStep>();
+        var vfs = new VirtualFileSystem();
+        var byArchive = work
+            .Select(x => (Preview: x, Location: vfs.Resolve(Path.GetDirectoryName(x.Source.FullPath)!)))
+            .GroupBy(x => x.Location.ArchiveFile!);
+
+        foreach (var archive in byArchive)
+        {
+            ct.ThrowIfCancellationRequested();
+            if (!ArchiveFormats.IsWritable(archive.Key))
+                throw new NotSupportedException($"'{Path.GetFileName(archive.Key)}' is a read-only archive");
+
+            HashSet<string> keys;
+            using (var reader = ArchiveReader.Open(archive.Key))
+                keys = reader.Items.Select(x => x.Key).ToHashSet(StringComparer.Ordinal);
+
+            var moving = archive.Select(x => Key(x.Location, x.Preview.Source.Name)).ToHashSet(StringComparer.Ordinal);
+            var changes = new ArchiveChanges();
+            foreach (var (preview, location) in archive)
+            {
+                var to = Key(location, preview.NewName);
+                if (keys.Contains(to) && !moving.Contains(to))
+                    continue;
+
+                changes.Renames.Add((Key(location, preview.Source.Name), to));
+                undo.Add(new RenameUndoStep(Path.Combine(Path.GetDirectoryName(preview.Source.FullPath)!, preview.NewName), preview.Source.FullPath));
+            }
+            ArchiveWriter.Apply(archive.Key, changes, ct);
+        }
+        return undo;
+    }
+
+    static string Key(VfsLocation location, string name) => location.InnerPath.Length == 0 ? name : location.InnerPath + "/" + name;
 
     static void Move(string from, string to, bool isDir)
     {

@@ -1,14 +1,12 @@
-using System.Formats.Tar;
-using System.IO.Compression;
-using SharpCompress.Compressors.BZip2;
 using ShinyCommander.Core.FileSystem;
 using ShinyCommander.Core.Models;
 
 namespace ShinyCommander.Core.Operations;
 
 /// <summary>
-/// Copy/move/delete/pack/extract across the local disk and archives with progress, cancellation and
-/// conflict resolution. Zip archives are read/write; tar, 7z, rar and gz/bz2/xz are read-only.
+/// Copy/move/delete/rename/pack/extract across the local disk and archives with progress, cancellation and
+/// conflict resolution. Zip, 7z and tar (plain, gz, bz2, zst) archives can be changed like folders, through
+/// <see cref="ArchiveWriter"/>; rar, tar.xz and lone gz/bz2/xz files are read-only.
 /// </summary>
 public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? trash = null)
 {
@@ -119,6 +117,10 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
 
         var state = new RunState(move ? FileOperationKind.Move : FileOperationKind.Copy, progress, onConflict);
 
+        // a move within one archive is a rename there - nothing needs unpacking
+        if (move && dest.IsArchive && items.All(x => x.IsInArchive && this.ArchiveOf(x).File == dest.ArchiveFile))
+            return this.MoveWithinArchive(items, dest, renameTo, state, ct);
+
         foreach (var item in items)
         {
             var name = renameTo ?? item.Name;
@@ -155,9 +157,6 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
         state.ItemsTotal = plan.Count + state.ItemsDone;
         state.BytesTotal = plan.Sum(x => x.Size);
         state.Report(String.Empty);
-
-        if (plan.Any(x => x.FromArchive) && dest.IsArchive)
-            throw new NotSupportedException("Copying directly between archives is not supported - extract first");
 
         if (dest.IsArchive)
             this.WriteIntoArchive(plan, dest, state, ct);
@@ -441,83 +440,163 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
 
     void WriteIntoArchive(List<PlanItem> plan, VfsLocation dest, RunState state, CancellationToken ct)
     {
-        var buffer = new byte[BufferSize];
         var prefix = dest.InnerPath.Length == 0 ? String.Empty : dest.InnerPath + "/";
 
-        using var fs = new FileStream(dest.ArchiveFile!, FileMode.Open, FileAccess.ReadWrite);
-        using var zip = new ZipArchive(fs, ZipArchiveMode.Update);
+        // what's there already - for the overwrite questions, and for "keep both" names
+        Dictionary<string, ArchiveItem> existing;
+        using (var reader = ArchiveReader.Open(dest.ArchiveFile!))
+            existing = reader.Items.GroupBy(x => x.Key).ToDictionary(g => g.Key, g => g.First(), StringComparer.Ordinal);
+        var taken = existing.Keys.ToHashSet(StringComparer.Ordinal);
 
-        foreach (var item in plan)
+        // files from inside another archive (or this one) are unpacked first, one pass per archive
+        var fromArchives = plan.Where(x => x.FromArchive && !x.IsDirectory).ToList();
+        var staging = fromArchives.Count > 0 ? Path.Combine(Path.GetTempPath(), "shinycommander-" + Guid.NewGuid().ToString("N")[..8]) : null;
+        try
         {
-            ct.ThrowIfCancellationRequested();
-            var entryName = prefix + item.RelativePath + (item.IsDirectory ? "/" : String.Empty);
-            var existing = zip.GetEntry(entryName);
+            var staged = staging == null ? [] : this.Stage(fromArchives, staging, state, ct);
+            var changes = new ArchiveChanges();
+            var written = 0;
 
-            if (item.IsDirectory)
+            foreach (var item in plan)
             {
-                if (existing == null)
-                    zip.CreateEntry(entryName);
-                state.ItemsDone++;
-                state.Report(item.RelativePath);
-                continue;
+                ct.ThrowIfCancellationRequested();
+                var key = prefix + item.RelativePath;
+                if (item.IsDirectory)
+                {
+                    if (!existing.ContainsKey(key))
+                        changes.Adds.Add(ArchiveAdd.Folder(key, item.Modified));
+                    state.ItemsDone++;
+                    state.Report(item.RelativePath);
+                    continue;
+                }
+
+                var source = item.FromArchive ? staged.GetValueOrDefault(item) : item.SourcePath;
+                if (source == null)
+                    continue; // couldn't be unpacked - already counted as an error
+
+                if (existing.TryGetValue(key, out var there) && !there.IsDirectory)
+                {
+                    var action = this.Resolve(state, new FileConflict(item.SourcePath, item.Size, item.Modified, Path.Combine(dest.Path, item.RelativePath), there.Size, there.Modified), ct).GetAwaiter().GetResult();
+                    if (action == ConflictAction.Skip)
+                    {
+                        state.Skipped++;
+                        state.SkippedSources.Add(item.SourcePath);
+                        state.BytesDone += item.Size;
+                        state.ItemsDone++;
+                        continue;
+                    }
+                    if (action == ConflictAction.KeepBoth)
+                        key = UniqueKey(taken, key);
+                }
+                taken.Add(key);
+
+                var progressItem = item;
+                changes.Adds.Add(new ArchiveAdd(key, false, () => new ProgressStream(File.OpenRead(source), n =>
+                {
+                    ct.ThrowIfCancellationRequested();
+                    state.BytesDone += n;
+                    state.Report(progressItem.RelativePath);
+                }), item.Modified, item.Mode));
+                written++;
             }
 
-            if (existing != null)
+            ArchiveWriter.Apply(dest.ArchiveFile!, changes, ct);
+            state.ItemsDone += written;
+            state.Report(String.Empty);
+        }
+        finally
+        {
+            if (staging != null)
             {
-                var action = this.Resolve(state, new FileConflict(item.SourcePath, item.Size, item.Modified, Path.Combine(dest.Path, item.RelativePath), existing.Length, existing.LastWriteTime.LocalDateTime), ct).GetAwaiter().GetResult();
+                try { Directory.Delete(staging, true); } catch { }
+            }
+        }
+    }
+
+    // unpacks archive files to a temporary folder - a pass of their own, so they don't count as copied yet
+    Dictionary<PlanItem, string> Stage(List<PlanItem> items, string folder, RunState state, CancellationToken ct)
+    {
+        var quiet = new RunState(FileOperationKind.Copy, null, null);
+        this.WriteToDisk(items, folder, quiet, ct);
+        state.Errors.AddRange(quiet.Errors);
+        return items
+            .Where(x => !quiet.SkippedSources.Contains(x.SourcePath) && File.Exists(TargetPath(folder, x)))
+            .ToDictionary(x => x, x => TargetPath(folder, x));
+    }
+
+    OperationResult MoveWithinArchive(List<FileEntry> items, VfsLocation dest, string? renameTo, RunState state, CancellationToken ct)
+    {
+        var prefix = dest.InnerPath.Length == 0 ? String.Empty : dest.InnerPath + "/";
+        HashSet<string> keys;
+        using (var reader = ArchiveReader.Open(dest.ArchiveFile!))
+            keys = reader.Items.Select(x => x.Key).ToHashSet(StringComparer.Ordinal);
+
+        state.ItemsTotal = items.Count;
+        var changes = new ArchiveChanges();
+        foreach (var item in items)
+        {
+            ct.ThrowIfCancellationRequested();
+            var from = this.ArchiveOf(item).Key;
+            var to = prefix + (renameTo ?? item.Name);
+            if (to.StartsWith(from + "/", StringComparison.Ordinal))
+                throw new IOException($"Cannot move '{item.Name}' into its own subfolder");
+
+            if (from != to && (keys.Contains(to) || keys.Any(k => k.StartsWith(to + "/", StringComparison.Ordinal))))
+            {
+                var action = this.Resolve(state, new FileConflict(item.FullPath, item.Size, item.Modified, Path.Combine(dest.Path, renameTo ?? item.Name), 0, DateTime.MinValue), ct).GetAwaiter().GetResult();
                 if (action == ConflictAction.Skip)
                 {
                     state.Skipped++;
-                    state.SkippedSources.Add(item.SourcePath);
-                    state.BytesDone += item.Size;
                     state.ItemsDone++;
                     continue;
                 }
                 if (action == ConflictAction.KeepBoth)
-                    entryName = UniqueEntryName(zip, entryName);
+                    to = UniqueKey(keys, to);
                 else
-                    existing.Delete();
+                    changes.Deletes.Add(to);
             }
-
-            var entry = zip.CreateEntry(entryName, CompressionLevel.Optimal);
-            entry.LastWriteTime = item.Modified;
-            if (item.Mode is { } mode)
-                entry.ExternalAttributes = ((int)mode | 0x8000) << 16; // regular file + permissions
-
-            using (var input = File.OpenRead(item.SourcePath))
-            using (var output = entry.Open())
+            if (from != to)
             {
-                int read;
-                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    ct.ThrowIfCancellationRequested();
-                    output.Write(buffer, 0, read);
-                    state.BytesDone += read;
-                    state.Report(item.RelativePath);
-                }
+                keys.Add(to);
+                changes.Renames.Add((from, to));
             }
             state.ItemsDone++;
-            state.Report(item.RelativePath);
+            state.Report(item.Name);
         }
+
+        ArchiveWriter.Apply(dest.ArchiveFile!, changes, ct);
+        return new OperationResult(state.ItemsDone, state.Skipped, state.Errors);
+    }
+
+    /// <summary>The archive an entry inside one lives in, and its key there.</summary>
+    (string File, string Key) ArchiveOf(FileEntry entry)
+    {
+        var loc = vfs.Resolve(Path.GetDirectoryName(entry.FullPath)!);
+        return (loc.ArchiveFile!, loc.InnerPath.Length == 0 ? entry.Name : loc.InnerPath + "/" + entry.Name);
     }
 
     void DeleteMovedSources(List<PlanItem> plan, RunState state, CancellationToken ct)
     {
         // files first, then folders deepest-first (only if empty - skipped files keep their folders alive)
-        var byArchive = plan.Where(x => x.FromArchive).GroupBy(x => x.ArchiveFile!);
-        foreach (var group in byArchive)
+        foreach (var group in plan.Where(x => x.FromArchive).GroupBy(x => x.ArchiveFile!))
         {
-            using var fs = new FileStream(group.Key, FileMode.Open, FileAccess.ReadWrite);
-            using var zip = new ZipArchive(fs, ZipArchiveMode.Update);
-            foreach (var item in group.Where(x => !x.IsDirectory && !state.SkippedSources.Contains(x.SourcePath)))
-                zip.GetEntry(item.EntryName!)?.Delete();
+            var changes = new ArchiveChanges();
+            var gone = group
+                .Where(x => !x.IsDirectory && !state.SkippedSources.Contains(x.SourcePath))
+                .Select(x => ArchiveReader.NormalizeKey(x.EntryName!))
+                .ToHashSet(StringComparer.Ordinal);
+            changes.Deletes.AddRange(gone);
 
-            foreach (var item in group.Where(x => x.IsDirectory))
+            List<ArchiveItem> items;
+            using (var reader = ArchiveReader.Open(group.Key))
+                items = reader.Items.ToList();
+            foreach (var dir in group.Where(x => x.IsDirectory))
             {
-                var prefix = item.EntryName!;
-                if (!zip.Entries.Any(e => e.FullName.StartsWith(prefix, StringComparison.Ordinal) && e.FullName != prefix))
-                    zip.GetEntry(prefix)?.Delete();
+                var key = ArchiveReader.NormalizeKey(dir.EntryName!);
+                if (!items.Any(e => !e.IsDirectory && !gone.Contains(e.Key) && e.Key.StartsWith(key + "/", StringComparison.Ordinal)))
+                    changes.Deletes.Add(key);
             }
+            ArchiveWriter.Apply(group.Key, changes, ct);
         }
 
         var local = plan.Where(x => !x.FromArchive).ToList();
@@ -558,22 +637,16 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
         var list = items.Where(x => !x.IsParentLink).ToList();
         var state = new RunState(FileOperationKind.Delete, progress, null) { ItemsTotal = list.Count };
 
-        foreach (var archiveGroup in list.Where(x => x.IsInArchive).GroupBy(x => vfs.Resolve(Path.GetDirectoryName(x.FullPath)!)))
+        foreach (var archiveGroup in list.Where(x => x.IsInArchive).GroupBy(x => this.ArchiveOf(x).File))
         {
-            var loc = archiveGroup.Key;
-            if (loc.IsReadOnlyArchive)
-                throw ReadOnly(loc.ArchiveFile!);
-            using var fs = new FileStream(loc.ArchiveFile!, FileMode.Open, FileAccess.ReadWrite);
-            using var zip = new ZipArchive(fs, ZipArchiveMode.Update);
+            if (!ArchiveFormats.IsWritable(archiveGroup.Key))
+                throw ReadOnly(archiveGroup.Key);
+
+            var changes = new ArchiveChanges();
+            changes.Deletes.AddRange(archiveGroup.Select(x => this.ArchiveOf(x).Key));
+            ArchiveWriter.Apply(archiveGroup.Key, changes, ct);
             foreach (var item in archiveGroup)
             {
-                ct.ThrowIfCancellationRequested();
-                var inner = loc.InnerPath.Length == 0 ? item.Name : loc.InnerPath + "/" + item.Name;
-                var doomed = item.IsDirectory
-                    ? zip.Entries.Where(e => e.FullName.Replace('\\', '/').StartsWith(inner + "/", StringComparison.Ordinal)).ToList()
-                    : zip.Entries.Where(e => e.FullName.Replace('\\', '/') == inner).ToList();
-                foreach (var e in doomed)
-                    e.Delete();
                 state.ItemsDone++;
                 state.Report(item.Name);
             }
@@ -653,10 +726,10 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
         }
         if (loc.IsReadOnlyArchive)
             throw ReadOnly(loc.ArchiveFile!);
-        using var fs = new FileStream(loc.ArchiveFile!, FileMode.Open, FileAccess.ReadWrite);
-        using var zip = new ZipArchive(fs, ZipArchiveMode.Update);
         var prefix = loc.InnerPath.Length == 0 ? String.Empty : loc.InnerPath + "/";
-        zip.CreateEntry(prefix + name.Replace('\\', '/').Trim('/') + "/");
+        var changes = new ArchiveChanges();
+        changes.Adds.Add(ArchiveAdd.Folder(prefix + name.Replace('\\', '/').Trim('/')));
+        ArchiveWriter.Apply(loc.ArchiveFile!, changes);
     });
 
     public Task CreateFileAsync(string parentPath, string name) => Task.Run(() =>
@@ -664,7 +737,20 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
         ValidateName(name, allowSubPaths: false);
         var loc = vfs.Resolve(parentPath);
         if (loc.IsArchive)
-            throw new NotSupportedException("Create the file on disk and copy it into the archive");
+        {
+            if (loc.IsReadOnlyArchive)
+                throw ReadOnly(loc.ArchiveFile!);
+            var key = (loc.InnerPath.Length == 0 ? String.Empty : loc.InnerPath + "/") + name;
+            using (var reader = ArchiveReader.Open(loc.ArchiveFile!))
+            {
+                if (reader.Items.Any(x => x.Key == key))
+                    return;
+            }
+            var changes = new ArchiveChanges();
+            changes.Adds.Add(new ArchiveAdd(key, false, () => new MemoryStream(), DateTime.Now, null));
+            ArchiveWriter.Apply(loc.ArchiveFile!, changes);
+            return;
+        }
 
         var path = Path.Combine(loc.Path, name);
         if (!File.Exists(path))
@@ -679,31 +765,20 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
 
         if (entry.IsInArchive)
         {
-            var loc = vfs.Resolve(Path.GetDirectoryName(entry.FullPath)!);
-            if (loc.IsReadOnlyArchive)
-                throw ReadOnly(loc.ArchiveFile!);
-            var prefix = loc.InnerPath.Length == 0 ? String.Empty : loc.InnerPath + "/";
-            using var fs = new FileStream(loc.ArchiveFile!, FileMode.Open, FileAccess.ReadWrite);
-            using var zip = new ZipArchive(fs, ZipArchiveMode.Update);
-            var oldName = prefix + entry.Name;
-            var entries = entry.IsDirectory
-                ? zip.Entries.Where(e => e.FullName.StartsWith(oldName + "/", StringComparison.Ordinal)).ToList()
-                : zip.Entries.Where(e => e.FullName == oldName).ToList();
+            var (archive, oldKey) = this.ArchiveOf(entry);
+            if (!ArchiveFormats.IsWritable(archive))
+                throw ReadOnly(archive);
 
-            foreach (var e in entries)
+            var newKey = oldKey[..(oldKey.Length - entry.Name.Length)] + newName;
+            using (var reader = ArchiveReader.Open(archive))
             {
-                var renamed = prefix + newName + e.FullName[oldName.Length..];
-                var copy = zip.CreateEntry(renamed);
-                copy.LastWriteTime = e.LastWriteTime;
-                copy.ExternalAttributes = e.ExternalAttributes;
-                if (!renamed.EndsWith('/'))
-                {
-                    using var src = e.Open();
-                    using var dst = copy.Open();
-                    src.CopyTo(dst);
-                }
-                e.Delete();
+                // archives are case sensitive - a case-only rename is a rename like any other
+                if (reader.Items.Any(x => x.Key == newKey || x.Key.StartsWith(newKey + "/", StringComparison.Ordinal)))
+                    throw new IOException($"'{newName}' already exists");
             }
+            var changes = new ArchiveChanges();
+            changes.Renames.Add((oldKey, newKey));
+            ArchiveWriter.Apply(archive, changes);
             return;
         }
 
@@ -733,8 +808,9 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
     });
 
     /// <summary>
-    /// Alt+F5 - pack the sources into an archive. Zip can be new or existing (files are added); tar, tar.gz and
-    /// tar.bz2 are always written fresh. A name without a known archive extension gets ".zip".
+    /// Alt+F5 - pack the sources (folders with everything under them) into an archive: zip, 7z, tar, tar.gz,
+    /// tar.bz2 or tar.zst. A new archive is created; an existing one has the sources added, like a copy into it.
+    /// A name without a known archive extension gets ".zip".
     /// </summary>
     public async Task<OperationResult> PackAsync(
         IReadOnlyList<FileEntry> sources,
@@ -744,9 +820,6 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
         CancellationToken ct = default
     )
     {
-        if (sources.Any(x => x.IsInArchive))
-            throw new NotSupportedException("Packing files that are already inside an archive is not supported");
-
         archivePath = VirtualFileSystem.Normalize(archivePath);
         if (!ArchiveFormats.CanPack(archivePath))
         {
@@ -755,99 +828,19 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
             archivePath += ".zip";
         }
 
-        var kind = ArchiveFormats.GetKind(archivePath);
-        if (kind != ArchiveKind.Zip)
-            return await Task.Run(() => this.PackTar(sources, archivePath, kind, onConflict, progress, ct), ct).ConfigureAwait(false);
-
-        if (!File.Exists(archivePath))
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(archivePath)!);
-            await using var fs = File.Create(archivePath);
-            using var _ = new ZipArchive(fs, ZipArchiveMode.Create);
-        }
-
-        return await this.CopyAsync(sources, new OperationTarget(archivePath), onConflict, progress, ct).ConfigureAwait(false);
-    }
-
-    OperationResult PackTar(IReadOnlyList<FileEntry> sources, string archivePath, ArchiveKind kind, ConflictResolver? onConflict, IProgress<OperationProgress>? progress, CancellationToken ct)
-    {
-        var items = sources.Where(x => !x.IsParentLink).ToList();
-        var state = new RunState(FileOperationKind.Copy, progress, onConflict);
-
-        if (File.Exists(archivePath))
-        {
-            // tar streams can't be appended to once compressed - the only choice is replace or stop
-            var fi = new FileInfo(archivePath);
-            var action = this.Resolve(state, new FileConflict(items.FirstOrDefault()?.FullPath ?? archivePath, 0, DateTime.Now, archivePath, fi.Length, fi.LastWriteTime), ct).GetAwaiter().GetResult();
-            if (action is ConflictAction.Skip or ConflictAction.KeepBoth)
-            {
-                if (action == ConflictAction.Skip)
-                    return new OperationResult(0, items.Count, []);
-                archivePath = UniqueName(archivePath);
-            }
-        }
-
-        var plan = this.BuildPlan(items, null, ct);
-        state.ItemsTotal = plan.Count;
-        state.BytesTotal = plan.Sum(x => x.Size);
-        state.Report(String.Empty);
-
-        Directory.CreateDirectory(Path.GetDirectoryName(archivePath)!);
-        var temp = archivePath + ".~" + Guid.NewGuid().ToString("N")[..6];
+        var created = !File.Exists(archivePath);
+        if (created)
+            ArchiveWriter.CreateEmpty(archivePath);
         try
         {
-            using (var fs = new FileStream(temp, FileMode.CreateNew, FileAccess.Write, FileShare.None, BufferSize))
-            using (var compressed = kind switch
-            {
-                ArchiveKind.TarGz => new GZipStream(fs, CompressionLevel.Optimal, true),
-                ArchiveKind.TarBz2 => new BZip2Stream(fs, SharpCompress.Compressors.CompressionMode.Compress, false),
-                _ => (Stream)new NonClosingStream(fs)
-            })
-            using (var tar = new TarWriter(compressed, TarEntryFormat.Gnu, leaveOpen: true))
-            {
-                foreach (var item in plan)
-                {
-                    ct.ThrowIfCancellationRequested();
-                    var mode = item.Mode ?? (item.IsDirectory ? (UnixFileMode)0b111_101_101 : (UnixFileMode)0b110_100_100);
-                    var entry = new GnuTarEntry(item.IsDirectory ? TarEntryType.Directory : TarEntryType.RegularFile, item.RelativePath + (item.IsDirectory ? "/" : String.Empty))
-                    {
-                        Mode = mode,
-                        ModificationTime = item.Modified > DateTime.MinValue ? new DateTimeOffset(item.Modified) : DateTimeOffset.Now
-                    };
-
-                    if (item.IsDirectory)
-                    {
-                        tar.WriteEntry(entry);
-                    }
-                    else
-                    {
-                        try
-                        {
-                            using var input = new ProgressStream(File.OpenRead(item.SourcePath), n =>
-                            {
-                                ct.ThrowIfCancellationRequested();
-                                state.BytesDone += n;
-                                state.Report(item.RelativePath);
-                            });
-                            entry.DataStream = input;
-                            tar.WriteEntry(entry);
-                        }
-                        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-                        {
-                            state.Errors.Add($"{item.RelativePath}: {ex.Message}");
-                        }
-                    }
-                    state.ItemsDone++;
-                    state.Report(item.RelativePath);
-                }
-            }
-            File.Move(temp, archivePath, true);
+            return await this.CopyAsync(sources, new OperationTarget(archivePath), onConflict, progress, ct).ConfigureAwait(false);
         }
-        finally
+        catch
         {
-            TryDelete(temp);
+            if (created)
+                TryDelete(archivePath); // no half made archive left behind
+            throw;
         }
-        return new OperationResult(state.ItemsDone, state.Skipped, state.Errors);
     }
 
     /// <summary>Alt+F9 - unpack whole archives into the destination (optionally one folder per archive).</summary>
@@ -912,16 +905,16 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
         }
     }
 
-    static string UniqueEntryName(ZipArchive zip, string entryName)
+    static string UniqueKey(ISet<string> taken, string key)
     {
-        var dir = entryName.Contains('/') ? entryName[..(entryName.LastIndexOf('/') + 1)] : String.Empty;
-        var file = entryName[dir.Length..];
+        var dir = key.Contains('/') ? key[..(key.LastIndexOf('/') + 1)] : String.Empty;
+        var file = key[dir.Length..];
         var name = Path.GetFileNameWithoutExtension(file);
         var ext = Path.GetExtension(file);
         for (var i = 2; ; i++)
         {
             var candidate = $"{dir}{name} ({i}){ext}";
-            if (zip.GetEntry(candidate) == null)
+            if (!taken.Contains(candidate))
                 return candidate;
         }
     }
@@ -932,7 +925,7 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
     }
 
     static NotSupportedException ReadOnly(string archiveFile)
-        => new($"{ArchiveFormats.Describe(ArchiveFormats.GetKind(archiveFile))} archives are read-only - extract, change, then pack again");
+        => new($"{ArchiveFormats.Describe(ArchiveFormats.GetKind(archiveFile))} archives are read-only - extract, change, then pack again as zip, 7z or tar");
 
     /// <summary>Lets a reader hand out an entry stream without the consumer closing the archive under it.</summary>
     sealed class NonClosingStream(Stream inner) : Stream
@@ -951,7 +944,7 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
         public override void SetLength(long value) => throw new NotSupportedException();
     }
 
-    /// <summary>Reports bytes as TarWriter pulls a file through it.</summary>
+    /// <summary>Reports bytes as an archive writer pulls a file through it.</summary>
     sealed class ProgressStream(Stream inner, Action<int> onRead) : Stream
     {
         public override bool CanRead => true;

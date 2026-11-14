@@ -613,11 +613,17 @@
   <data name="Main_ConsoleCancelled" xml:space="preserve">
     <value>[annulé]</value>
   </data>
+  <data name="Main_ArchiveSavedFormat" xml:space="preserve">
+    <value>{0} enregistré dans {1}</value>
+  </data>
+  <data name="Main_ArchiveSaveFailedFormat" xml:space="preserve">
+    <value>Impossible d'enregistrer {0} dans {1} : {2}</value>
+  </data>
   <data name="Main_ReadOnly" xml:space="preserve">
     <value>Lecture seule</value>
   </data>
   <data name="Main_ReadOnlyArchive" xml:space="preserve">
-    <value>Les fichiers d'une archive peuvent être affichés (F3) mais pas modifiés. Copiez-le d'abord hors de l'archive.</value>
+    <value>Les fichiers des archives rar et tar.xz peuvent être affichés (F3) mais pas modifiés. Copiez-le d'abord hors de l'archive.</value>
   </data>
   <data name="Main_NewFile" xml:space="preserve">
     <value>Nouveau fichier</value>
@@ -785,7 +791,7 @@ Existant : {3} octets  {4}</value>
     <value>Archives</value>
   </data>
   <data name="Help_ArchivesText" xml:space="preserve">
-    <value>Appuyez sur `Enter` sur un `.zip` (ou .jar, .nupkg, .docx, .apk…) pour le parcourir comme un dossier. Copiez (F5) depuis ou vers l'archive, supprimez ou renommez à l'intérieur.</value>
+    <value>Appuyez sur `Enter` sur une archive pour la parcourir comme un dossier. zip (ou .jar, .nupkg, .docx, .apk…), 7z, tar, tar.gz, tar.bz2 et tar.zst fonctionnent comme des dossiers : copiez depuis et vers l'archive, déplacez, supprimez, renommez, créez dossiers et fichiers, et modifiez un fichier (F4) pour l'enregistrer dans l'archive. rar et tar.xz se parcourent et se copient vers l'extérieur. `Alt+F5` compresse des dossiers - avec tout leur contenu - dans une archive nouvelle ou existante.</value>
   </data>
 
   <!-- Jobs & quitting -->
@@ -1394,6 +1400,12 @@ Quitter les arrête en cours de route. Ce qui a déjà été copié, déplacé o
   <data name="Panel_Filter" xml:space="preserve">
     <value>Filtre :</value>
   </data>
+  <data name="Panel_EditPath" xml:space="preserve">
+    <value>Modifier le chemin</value>
+  </data>
+  <data name="Panel_NoSubfolders" xml:space="preserve">
+    <value>Aucun dossier</value>
+  </data>
   <data name="Panel_FilterPlaceholder" xml:space="preserve">
     <value>*.cs;*.md   (Échap pour fermer)</value>
   </data>
@@ -1435,6 +1447,75 @@ Quitter les arrête en cours de route. Ce qui a déjà été copié, déplacé o
   </data>
   <data name="Column_Attributes" xml:space="preserve">
     <value>Attributs</value>
+  </data>
+  <data name="Tab_Lock" xml:space="preserve">
+    <value>Verrouiller l'onglet</value>
+  </data>
+  <data name="Tab_Unlock" xml:space="preserve">
+    <value>Déverrouiller l'onglet</value>
+  </data>
+  <data name="Tab_Close" xml:space="preserve">
+    <value>Fermer l'onglet</value>
+  </data>
+  <data name="Tab_UnlockToClose" xml:space="preserve">
+    <value>Cet onglet est verrouillé - déverrouillez-le pour le fermer</value>
+  </data>
+  <data name="Tab_New" xml:space="preserve">
+    <value>Nouvel onglet</value>
+  </data>
+  <data name="Tab_LockedTooltip" xml:space="preserve">
+    <value>Verrouillé - cliquez pour déverrouiller</value>
+  </data>
+  <data name="Settings_ShowTabs" xml:space="preserve">
+    <value>Afficher les onglets de dossiers</value>
+  </data>
+  <data name="Settings_ShowTabsDesc" xml:space="preserve">
+    <value>Des onglets au-dessus de chaque panneau. Désactivés, vos onglets sont conservés pour leur retour</value>
+  </data>
+  <data name="Tab_Rename" xml:space="preserve">
+    <value>Renommer l'onglet…</value>
+  </data>
+  <data name="Tab_RenameMessage" xml:space="preserve">
+    <value>Laissez vide pour utiliser le nom du dossier</value>
+  </data>
+  <data name="Tab_Color" xml:space="preserve">
+    <value>Couleur</value>
+  </data>
+  <data name="TabColor_None" xml:space="preserve">
+    <value>Aucune</value>
+  </data>
+  <data name="TabColor_Red" xml:space="preserve">
+    <value>Rouge</value>
+  </data>
+  <data name="TabColor_Orange" xml:space="preserve">
+    <value>Orange</value>
+  </data>
+  <data name="TabColor_Yellow" xml:space="preserve">
+    <value>Jaune</value>
+  </data>
+  <data name="TabColor_Green" xml:space="preserve">
+    <value>Vert</value>
+  </data>
+  <data name="TabColor_Teal" xml:space="preserve">
+    <value>Sarcelle</value>
+  </data>
+  <data name="TabColor_Blue" xml:space="preserve">
+    <value>Bleu</value>
+  </data>
+  <data name="TabColor_Purple" xml:space="preserve">
+    <value>Violet</value>
+  </data>
+  <data name="TabColor_Pink" xml:space="preserve">
+    <value>Rose</value>
+  </data>
+  <data name="TabColor_Gray" xml:space="preserve">
+    <value>Gris</value>
+  </data>
+  <data name="Tab_Icon" xml:space="preserve">
+    <value>Icône</value>
+  </data>
+  <data name="Tab_IconAuto" xml:space="preserve">
+    <value>Automatique</value>
   </data>
   <data name="Tree_Home" xml:space="preserve">
     <value>Départ</value>

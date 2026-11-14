@@ -94,9 +94,7 @@ public partial class MultiRenameViewModel(IAppDialogs dialogs, INavigator naviga
 
             // continue editing against the new names
             var map = this.lastUndo.ToDictionary(x => x.ToPath, x => x.FromPath);
-            this.Items = this.Items.Select(e => map.FirstOrDefault(kv => kv.Value == e.FullPath).Key is { } newPath
-                ? FileEntry.FromInfo(e.IsDirectory ? new DirectoryInfo(newPath) : new FileInfo(newPath))
-                : e).ToList();
+            this.Items = this.Items.Select(e => map.FirstOrDefault(kv => kv.Value == e.FullPath).Key is { } newPath ? Moved(e, newPath) : e).ToList();
             this.NameMask = "[N]";
             this.Search = String.Empty;
             await this.Publish();
@@ -112,14 +110,17 @@ public partial class MultiRenameViewModel(IAppDialogs dialogs, INavigator naviga
     {
         await MultiRenameEngine.UndoAsync(this.lastUndo);
         var map = this.lastUndo.ToDictionary(x => x.FromPath, x => x.ToPath);
-        this.Items = this.Items.Select(e => map.TryGetValue(e.FullPath, out var original)
-            ? FileEntry.FromInfo(e.IsDirectory ? new DirectoryInfo(original) : new FileInfo(original))
-            : e).ToList();
+        this.Items = this.Items.Select(e => map.TryGetValue(e.FullPath, out var original) ? Moved(e, original) : e).ToList();
         this.lastUndo = [];
         this.CanUndo = false;
         this.Refresh();
         await this.Publish();
     }
+
+    // the entry under its new name - read from disk, or (inside an archive) the same entry renamed
+    static FileEntry Moved(FileEntry entry, string path) => entry.IsInArchive
+        ? entry with { FullPath = path, Name = Path.GetFileName(path) }
+        : FileEntry.FromInfo(entry.IsDirectory ? new DirectoryInfo(path) : new FileInfo(path));
 
     Task Publish() => mediator.Publish(new FileSystemChangedEvent(this.Items.Select(x => Path.GetDirectoryName(x.FullPath)!).Distinct().ToList()));
 

@@ -25,12 +25,18 @@ public partial class AppSettings
     [Bind] public partial int ViewerFontSize { get; set; }
     [Bind] public partial int PanelFontSize { get; set; }
 
-    /// <summary>Tab paths per side separated by newlines - restored on startup.</summary>
+    /// <summary>Tab paths per side separated by newlines - restored on startup. One <see cref="TabState"/> line per tab.</summary>
     [Bind] public partial string? LeftTabs { get; set; }
     [Bind] public partial string? RightTabs { get; set; }
     [Bind] public partial int LeftActiveTab { get; set; }
     [Bind] public partial int RightActiveTab { get; set; }
     [Bind] public partial bool RightPanelActive { get; set; }
+
+    /// <summary>Folder tabs turned off in Settings - "Hide" so they're on for existing installs too.</summary>
+    [Bind] public partial bool HideTabs { get; set; }
+
+    /// <summary>The places (Home, Desktop...) have been added as locked tabs - once, when they left the drive bar.</summary>
+    [Bind] public partial bool PlaceTabsSeeded { get; set; }
 
     /// <summary>Panels stacked top/bottom instead of side by side.</summary>
     [Bind] public partial bool StackPanels { get; set; }

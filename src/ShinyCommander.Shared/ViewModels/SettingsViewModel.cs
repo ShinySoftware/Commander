@@ -10,6 +10,7 @@ public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, 
     public bool ShowAttrColumn { get => columns.ShowAttributes; set { columns.Set(PanelColumn.Attributes, value); this.OnPropertyChanged(); } }
 
     public bool ShowHidden { get => settings.ShowHidden; set { settings.ShowHidden = value; this.OnPropertyChanged(); } }
+    public bool ShowTabs { get => !settings.HideTabs; set { settings.HideTabs = !value; this.OnPropertyChanged(); } }
     public bool ConfirmDelete { get => settings.ConfirmDelete; set { settings.ConfirmDelete = value; this.OnPropertyChanged(); } }
     public bool UseTrash { get => settings.UseTrash; set { settings.UseTrash = value; this.OnPropertyChanged(); } }
     public bool FriendlySizes { get => settings.FriendlySizes; set { settings.FriendlySizes = value; this.OnPropertyChanged(); } }

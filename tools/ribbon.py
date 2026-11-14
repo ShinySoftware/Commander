@@ -17,7 +17,7 @@ ICON = "{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResourc
 
 RIBBON = [
  ("Files","files",ICON,[
-   ("Transfer",[("Copy","copy","CopyCommand","L","F5"),("Move","arrow-right","MoveCommand","L","F6"),("Delete","trash","DeleteCommand","L","F8"),("Jobs","hourglass","ToggleJobsCommand","S","Primary+J")]),
+   ("Transfer",[("Copy","copy","CopyCommand","L","F5"),("Move","arrow-right","MoveCommand","L","F6"),("Delete","trash","DeleteCommand","L","F8"),("Jobs","hourglass","ToggleJobsCommand","L","Primary+J")]),
    ("Create",[("New Folder","folder","MakeDirectoryCommand","S","F7"),("New File","file","NewFileCommand","S","Shift+F4"),("Rename","edit","RenameCommand","S","F2")]),
    ("Open",[("View","eye","ViewCommand","L","F3"),("Edit","file-text","EditCommand","S","F4"),("Terminal","external-link","OpenTerminalCommand","S","Primary+O"),("Reveal","search","RevealInFileManagerCommand","S","Primary+E")]),
    ("Archive",[("Pack","download","PackCommand","S","Alt+F5"),("Unpack","upload","UnpackCommand","S","Alt+F9")]),

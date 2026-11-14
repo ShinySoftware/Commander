@@ -5,7 +5,7 @@ using ShinyCommander.Core.Models;
 namespace ShinyCommander.Core.Platform;
 
 /// <summary>
-/// The drive button bar. Places come first - Home (unix only, since there are no letters), the special folders
+/// Drives and places. Places come first - Home (unix only, since there are no letters), the special folders
 /// (Desktop, Documents, Downloads) and any cloud sync folders (iCloud, OneDrive, Dropbox, Google Drive...) - then the
 /// volumes: drive letters on Windows, "/" + /Volumes on macOS, "/" + the usual mount points on Linux, and network
 /// shares last.
@@ -14,7 +14,10 @@ public static class DriveService
 {
     static readonly StringComparison PathComparison = OperatingSystem.IsLinux() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
-    public static IReadOnlyList<DriveEntry> GetDrives()
+    public static IReadOnlyList<DriveEntry> GetDrives() => [.. GetPlaces(), .. GetVolumes()];
+
+    /// <summary>Home (unix only), the special folders and any cloud sync folders - the folders that open as tabs.</summary>
+    public static IReadOnlyList<DriveEntry> GetPlaces()
     {
         var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         var places = new List<DriveEntry>();
@@ -28,6 +31,12 @@ public static class DriveService
         foreach (var (name, path, label) in CloudFolders(home))
             AddPlace(places, name, path, label, DriveKind.Cloud);
 
+        return places;
+    }
+
+    /// <summary>The volumes, network shares last - what the drive bar shows.</summary>
+    public static IReadOnlyList<DriveEntry> GetVolumes()
+    {
         var volumes = new List<DriveEntry>();
         foreach (var d in SafeDrives())
         {
@@ -46,7 +55,7 @@ public static class DriveService
             volumes.AddRange(GvfsMounts());
 
         // network shares go to the end of the bar
-        return [.. places, .. volumes.Where(x => x.Kind != DriveKind.Network), .. volumes.Where(x => x.Kind == DriveKind.Network)];
+        return [.. volumes.Where(x => x.Kind != DriveKind.Network), .. volumes.Where(x => x.Kind == DriveKind.Network)];
     }
 
     static void AddPlace(List<DriveEntry> list, string name, string path, string label, DriveKind kind)

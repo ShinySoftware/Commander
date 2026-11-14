@@ -192,6 +192,18 @@ public sealed class VirtualFileSystem
     internal static ArchiveItem? FindItem(IArchiveReader reader, string innerPath)
         => reader.Items.FirstOrDefault(e => !e.IsDirectory && e.Key.Equals(innerPath, StringComparison.Ordinal));
 
+    /// <summary>A folder inside an archive: the total size of the files under it, from the archive's listing.</summary>
+    public Task<long> CalculateArchiveFolderSizeAsync(string path) => Task.Run(() =>
+    {
+        var location = this.Resolve(path);
+        if (!location.IsArchive)
+            throw new ArgumentException($"'{path}' is not inside an archive", nameof(path));
+
+        using var reader = ArchiveReader.Open(location.ArchiveFile!);
+        var prefix = location.InnerPath + "/";
+        return reader.Items.Where(x => !x.IsDirectory && x.Key.StartsWith(prefix, StringComparison.Ordinal)).Sum(x => x.Size);
+    });
+
     /// <summary>
     /// Archive files can't be handed to other processes, so extract to a temp folder (for "open with", the
     /// viewer, the editor). Local paths come back untouched.

@@ -54,6 +54,11 @@ public sealed record PanelState
     public bool IsQuickView { get; init; }
     public int ThumbnailSpan { get; init; }
     public List<string> Tabs { get; init; } = [];
+    public List<bool> LockedTabs { get; init; } = [];
+    public List<string> TabTitles { get; init; } = [];
+    public List<string?> TabColors { get; init; } = [];
+    public List<string?> TabIcons { get; init; } = [];
+    public bool ShowTabs { get; init; }
     public int ActiveTab { get; init; }
     public QuickViewState QuickView { get; init; } = new();
     public int Cursor { get; init; }

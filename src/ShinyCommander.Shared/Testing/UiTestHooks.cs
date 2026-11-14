@@ -50,7 +50,14 @@ public static class UiTestHooks
             Service<AppSettings>().UseTrash = !(a.TryGetProperty("on", out var on) && on.ValueKind == JsonValueKind.False);
             return Task.FromResult<object>(true);
         });
-        Map(ext, "click_at", "A real mouse click (macOS): mouse down/up NSEvents through the window at page point { x, y } - AppKit hit-testing and all. Returns the native view under it (hit) and the MAUI elements behind it (element)", ClickAt);
+        Map(ext, "show_tabs", "Folder tabs on or off, as the Settings switch does it, until reset: { on = true }", async (main, a) =>
+        {
+            Service<AppSettings>().HideTabs = a.TryGetProperty("on", out var on) && on.ValueKind == JsonValueKind.False;
+            await main.Left.RefreshShowTabsAsync();
+            await main.Right.RefreshShowTabsAsync();
+            return (object)true;
+        });
+        Map(ext, "click_at", "A real mouse click (macOS): mouse down/up NSEvents through the window at page point { x, y, secondary = false } - AppKit hit-testing and all. Returns the native view under it (hit) and the MAUI elements behind it (element)", ClickAt);
         Map(ext, "real_dialogs", "Show the real dialogs instead of answering from the queue: { on = true }", RealDialogs);
         ext.MapTool("state_now", "The state without waiting for the app to settle (while a real dialog is open)", "POST", "state_now",
             async _ => HttpResponse.Json(await MainThread.InvokeOnMainThreadAsync(() => new { result = (object)true, state = Snapshot(MainViewModel.Current!) })));
@@ -294,9 +301,10 @@ public static class UiTestHooks
         // a button's mouseDown tracks the mouse in a loop until mouse-up arrives from the event queue - so queue the up
         // first, then deliver the down. The up is stamped after the down: a click gesture recognizer (what a MAUI tap is on
         // AppKit) ignores an up that predates its down
+        var secondary = args.TryGetProperty("secondary", out var sec) && sec.GetBoolean();
         var now = NSProcessInfoUptime();
-        var down = AppKit.NSEvent.MouseEvent(AppKit.NSEventType.LeftMouseDown, point, 0, now, ns.WindowNumber, null, 0, 1, 1f);
-        var up = AppKit.NSEvent.MouseEvent(AppKit.NSEventType.LeftMouseUp, point, 0, now + 0.05, ns.WindowNumber, null, 0, 1, 0f);
+        var down = AppKit.NSEvent.MouseEvent(secondary ? AppKit.NSEventType.RightMouseDown : AppKit.NSEventType.LeftMouseDown, point, 0, now, ns.WindowNumber, null, 0, 1, 1f);
+        var up = AppKit.NSEvent.MouseEvent(secondary ? AppKit.NSEventType.RightMouseUp : AppKit.NSEventType.LeftMouseUp, point, 0, now + 0.05, ns.WindowNumber, null, 0, 1, 0f);
         AppKit.NSApplication.SharedApplication.PostEvent(up, false);
         ns.SendEvent(down);
         await Task.Delay(500); // a dialog animates out
@@ -385,6 +393,7 @@ public static class UiTestHooks
         settings.UseTrash = false; // the use_trash tool turns it on - into a test folder, never the real Trash
         settings.ExtractToFolderPerArchive = true;
         settings.FriendlySizes = false;
+        settings.HideTabs = false;
 
         var columns = Service<ColumnSet>();
         foreach (var c in Enum.GetValues<PanelColumn>())
@@ -407,6 +416,14 @@ public static class UiTestHooks
             panel.TreeWidth = 240;
             panel.ShowQuickFilter = false;
             panel.ViewMode = PanelViewMode.Details;
+            foreach (var t in panel.Tabs)
+            {
+                t.IsLocked = false;
+                t.Alias = null;
+                t.ColorKey = null;
+                t.IconKey = null;
+            }
+            await panel.RefreshShowTabsAsync();
             while (panel.Tabs.Count > 1)
                 panel.CloseTab(panel.Tabs[^1]);
 
@@ -577,6 +594,11 @@ public static class UiTestHooks
             isQuickView = p.IsQuickView,
             thumbnailSpan = p.ThumbnailSpan,
             tabs = p.Tabs.Select(t => t.Path).ToList(),
+            lockedTabs = p.Tabs.Select(t => t.IsLocked).ToList(),
+            tabTitles = p.Tabs.Select(t => t.Title).ToList(),
+            tabColors = p.Tabs.Select(t => t.ColorKey).ToList(),
+            tabIcons = p.Tabs.Select(t => t.IconKey).ToList(),
+            showTabs = p.ShowTabs,
             activeTab = tab == null ? -1 : p.Tabs.IndexOf(tab),
             quickView = new
             {

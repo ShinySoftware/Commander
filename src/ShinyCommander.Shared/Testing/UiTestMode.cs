@@ -26,6 +26,8 @@ public static class UiTestMode
             store.Set("LeftTabs", left);
         if (Environment.GetEnvironmentVariable("SHINYCOMMANDER_RIGHT") is { Length: > 0 } right)
             store.Set("RightTabs", right);
+        // tests start from the tabs they ask for - not with Home, Desktop... added as locked tabs
+        store.Set("PlaceTabsSeeded", true);
         Shiny.Stores.Register(StoreKeys.Default, store);
 
         builder.Services.AddSingleton<ShinyAppDialogs>();

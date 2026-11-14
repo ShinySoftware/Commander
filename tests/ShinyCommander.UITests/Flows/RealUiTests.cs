@@ -121,14 +121,40 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
     {
         await this.Start(l => l.Dir("dest").File("dest/here.txt"));
 
-        await this.Ui.Tap(await this.Ui.Tappable(await this.Ui.ById("LeftPathLabel"))); // click the path to edit it
+        await this.Ui.Tap("LeftPathEdit"); // click past the breadcrumbs to edit the path
         var path = await this.Ui.ById("LeftPath");
         await this.Ui.Fill(path, this.LeftTree["dest"]);
         await this.Ui.Press(path, "Enter");
 
         var s = await this.App.WaitFor(x => x.Left.Path == this.LeftTree["dest"], "the path box to navigate");
         s.Left.Names.ShouldBe(["here.txt"]);
-        (await this.Ui.ById("LeftPathLabel")).Text.ShouldBe(this.LeftTree["dest"]); // back to the label, showing the new path
+        await this.Ui.ByText("dest", within: "LeftPathCrumbs"); // back to the breadcrumbs, ending in the new folder
+    }
+
+    [Fact]
+    public async Task Clicking_a_breadcrumb_goes_to_that_folder()
+    {
+        await this.Start(l => l.Dir("outer/inner").File("outer/there.txt"));
+        await this.App.Navigate(this.LeftTree["outer/inner"]);
+
+        await this.Ui.Click("outer", within: "LeftPathCrumbs");
+        var s = await this.App.WaitFor(x => x.Left.Path == this.LeftTree["outer"], "the crumb to navigate");
+        s.Left.Names.ShouldContain("there.txt");
+    }
+
+    [Fact]
+    public async Task A_breadcrumb_drops_down_its_folders()
+    {
+        await this.Start(l => l.Dir("outer/inner").Dir("outer/sibling").File("outer/sibling/here.txt").File("outer/not-a-folder.txt"));
+        await this.App.Navigate(this.LeftTree["outer/inner"]);
+
+        await this.Ui.Tap(await this.Ui.Tappable(await this.Ui.ById("CrumbMenu:" + this.LeftTree["outer"])));
+        await this.Ui.ByText("inner", within: "LeftCrumbMenu"); // the way to here is listed too
+        (await this.Ui.Exists(x => x.Text == "not-a-folder.txt" && x.IsVisible)).ShouldBeFalse(); // folders only
+
+        await this.Ui.Click("sibling", within: "LeftCrumbMenu");
+        var s = await this.App.WaitFor(x => x.Left.Path == this.LeftTree["outer/sibling"], "the dropdown to navigate");
+        s.Left.Names.ShouldBe(["here.txt"]);
     }
 
     [Fact]

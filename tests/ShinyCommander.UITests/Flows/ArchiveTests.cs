@@ -2,9 +2,12 @@ using ShinyCommander.UITests.Driver;
 
 namespace ShinyCommander.UITests.Flows;
 
-/// <summary>Browsing archives like folders, copying in and out, Pack (Alt+F5) and Unpack (Alt+F9), and read-only formats.</summary>
+/// <summary>Archives as folders - browsing, copying in and out, deleting, Pack (Alt+F5), Unpack (Alt+F9) - and the formats that stay read-only.</summary>
 public class ArchiveTests(AppFixture fixture) : UiTest(fixture)
 {
+    // index.html ("<h1/>") as tar.xz - a format that stays read-only (SharpCompress can't write xz)
+    const string SiteTarXz = "/Td6WFoAAATm1rRGAgAhARYAAAB0L+Wj4Cf/AGldADSbiLBXymXIPZmcoovNvTmnF+OaKURw2zuHsp48HTwz77oR5S24baw4Z6gRlsnnD9QavZ+z3ZtT2+E6dKEje8MfFn2l33gLo81P5xEAJeWrCPFH+LVUsTEwxB+Rfh0xRlluvAPUOmzYAAAAAAATCMssO1bJ5wABhQGAUAAAjeCtMbHEZ/sCAAAAAARZWg==";
+
     [Fact]
     public async Task Enter_browses_a_zip_like_a_folder()
     {
@@ -26,15 +29,27 @@ public class ArchiveTests(AppFixture fixture) : UiTest(fixture)
     }
 
     [Fact]
-    public async Task A_tar_gz_opens_read_only()
+    public async Task A_tar_gz_opens_like_a_folder_that_can_be_changed()
     {
         await this.Start(l => l.TarGz("site.tar.gz", ("index.html", "<h1/>"), ("css/site.css", "body{}")));
         await this.App.Cursor("site.tar.gz");
 
         var s = await this.App.Key("Enter");
-        s.Left.IsReadOnlyArchive.ShouldBeTrue();
-        s.Left.ArchiveBadge.ShouldBe("tar.gz • read-only");
+        s.Left.IsReadOnlyArchive.ShouldBeFalse();
+        s.Left.ArchiveBadge.ShouldBe("tar.gz");
         s.Left.Names.ShouldBe(["css", "index.html"]);
+    }
+
+    [Fact]
+    public async Task A_tar_xz_opens_read_only()
+    {
+        await this.Start(l => l.Bytes("site.tar.xz", Convert.FromBase64String(SiteTarXz)));
+        await this.App.Cursor("site.tar.xz");
+
+        var s = await this.App.Key("Enter");
+        s.Left.IsReadOnlyArchive.ShouldBeTrue();
+        s.Left.ArchiveBadge.ShouldBe("tar.xz • read-only");
+        s.Left.Names.ShouldBe(["index.html"]);
     }
 
     [Fact]
@@ -53,8 +68,8 @@ public class ArchiveTests(AppFixture fixture) : UiTest(fixture)
     [Fact]
     public async Task F8_inside_a_read_only_archive_explains_instead_of_deleting()
     {
-        await this.Start(l => l.TarGz("site.tar.gz", ("index.html", "<h1/>")));
-        await this.App.Navigate(this.LeftTree["site.tar.gz"]);
+        await this.Start(l => l.Bytes("site.tar.xz", Convert.FromBase64String(SiteTarXz)));
+        await this.App.Navigate(this.LeftTree["site.tar.xz"]);
         await this.App.Cursor("index.html");
         await this.App.Answer("yes");
 
@@ -89,6 +104,39 @@ public class ArchiveTests(AppFixture fixture) : UiTest(fixture)
         await this.App.Navigate(this.RightTree["bundle.tar.gz"], "right");
         var inside = await this.App.State();
         inside.Right.Names.ShouldBe(["d", "a.txt"]);
+    }
+
+    [Fact]
+    public async Task F8_deletes_inside_a_tar_gz()
+    {
+        await this.Start(l => l.TarGz("site.tar.gz", ("index.html", "<h1/>"), ("css/site.css", "body{}")));
+        await this.App.Navigate(this.LeftTree["site.tar.gz"]);
+        await this.App.Cursor("css");
+        await this.App.Answer("yes");
+
+        var s = await this.App.Key("F8");
+        s.Left.Names.ShouldBe(["index.html"]);
+    }
+
+    [Fact]
+    public async Task Alt_F5_packs_a_folder_to_7z_and_files_copy_in_and_out_of_it()
+    {
+        await this.Start(l => l.Dir("project").File("project/readme.md", "R").File("project/src/deep/main.cs", "M").File("extra.txt", "E"));
+        await this.App.Cursor("project");
+        await this.App.Answer(this.RightTree["project.7z"]);
+        await this.App.Key("Alt+F5");
+        this.RightTree.Exists("project.7z").ShouldBeTrue();
+
+        // the folder went in with everything under it
+        await this.App.Navigate(Path.Combine(this.RightTree["project.7z"], "project", "src", "deep"), "right");
+        (await this.App.State()).Right.Names.ShouldBe(["main.cs"]);
+
+        // copy a file in, from the other panel
+        await this.App.Navigate(this.RightTree["project.7z"], "right");
+        await this.App.Cursor("extra.txt", "left");
+        await this.App.Answer("<default>");
+        var s = await this.App.Key("F5");
+        s.Right.Names.ShouldBe(["project", "extra.txt"]);
     }
 
     [Fact]

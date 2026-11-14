@@ -97,9 +97,8 @@ public class LayoutTests(AppFixture fixture) : UiTest(fixture)
         var deep = this.LeftTree["a-rather-long-folder-name/another-long-folder-name/the-folder-you-are-in"];
         await this.App.Navigate(deep);
 
-        // the folder you are in must be what's readable: a head-truncated label while not editing
-        var label = await this.Ui.ById("LeftPathLabel");
-        label.Text.ShouldBe(deep);
-        await this.Ui.ShouldBeVisible(label, "the path label");
+        // the folder you are in must be what's readable: the end of the breadcrumb trail, scrolled into view
+        var crumb = await this.Ui.ByText("the-folder-you-are-in", within: "LeftPathCrumbs");
+        await this.Ui.ShouldBeVisible(crumb, "the current folder's crumb");
     }
 }

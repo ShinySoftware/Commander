@@ -133,9 +133,9 @@
                             <DataTemplate><shiny:MotionIconView Icon="trash" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
-                    <shiny:RibbonButton Text="{l:Tr Cmd_ToggleJobs}" Size="Small" Command="{Binding ToggleJobsCommand}" Shortcut="Primary+J" Tooltip="{l:Tr Cmd_ToggleJobs, Suffix=' (Primary+J)'}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_ToggleJobs}" Size="Large" Command="{Binding ToggleJobsCommand}" Shortcut="Primary+J" Tooltip="{l:Tr Cmd_ToggleJobs, Suffix=' (Primary+J)'}">
                         <shiny:RibbonButton.IconTemplate>
-                            <DataTemplate><shiny:MotionIconView Icon="hourglass" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="hourglass" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
@@ -478,15 +478,13 @@
                                     <Label Text="{l:Tr Cmd_Delete}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
                             </Border>
-                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
-                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-ToggleJobs" ToolTipProperties.Text="{l:Tr Cmd_ToggleJobs, Suffix=' (Primary+J)'}">
-                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleJobsCommand}" /></Border.GestureRecognizers>
-                                    <HorizontalStackLayout Spacing="6">
-                                        <shiny:MotionIconView Icon="hourglass" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="{l:Tr Cmd_ToggleJobs}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
-                                    </HorizontalStackLayout>
-                                </Border>
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-ToggleJobs" ToolTipProperties.Text="{l:Tr Cmd_ToggleJobs, Suffix=' (Primary+J)'}">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleJobsCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="hourglass" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="{l:Tr Cmd_ToggleJobs}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
                                 </VerticalStackLayout>
+                            </Border>
                             </HorizontalStackLayout>
                             <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Transfer}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>

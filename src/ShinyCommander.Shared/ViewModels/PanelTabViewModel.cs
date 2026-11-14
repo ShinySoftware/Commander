@@ -1,4 +1,5 @@
 using Shiny.Mediator;
+using ShinyCommander.Core.Platform;
 
 namespace ShinyCommander.ViewModels;
 
@@ -25,8 +26,78 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
 
     public event EventHandler? CursorMoved;
 
+    /// <summary>A locked tab was asked to go somewhere else - the panel opens that in a new tab instead.</summary>
+    public event EventHandler<(string Path, string? FocusName)>? OpenInNewTabRequested;
+
+    /// <summary>Stays on its folder: going anywhere else opens a new tab, and it can't be closed until unlocked.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowClose))]
+    public partial bool IsLocked { get; set; }
+
+    /// <summary>The folder a locked tab belongs to - it can wander while tabs are turned off, and goes back here.</summary>
+    public string? LockedPath { get; private set; }
+
+    partial void OnIsLockedChanged(bool value) => this.LockedPath = value ? this.Path : null;
+
+    /// <summary>A locked tab that wandered (tabs were off) goes back to its folder. False when it was already there.</summary>
+    public async Task<bool> ReturnToLockedPathAsync()
+    {
+        if (this.LockedPath is not { } home || String.Equals(home, this.Path, StringComparison.Ordinal))
+            return false;
+
+        await this.GoAsync(home, null, addHistory: false);
+        return true;
+    }
+
+    /// <summary>The ✕ - only on the tab you're on, and never on a locked one.</summary>
+    public bool ShowClose => this.IsSelected && !this.IsLocked;
+
+    /// <summary>The name the user gave the tab - shown instead of the folder's when set.</summary>
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Title))]
+    public partial string? Alias { get; set; }
+
+    /// <summary>The tab's colour (a <see cref="TabColors"/> key), or null for none.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TabColor), nameof(HasColor), nameof(TabBackground), nameof(IconColor))]
+    public partial string? ColorKey { get; set; }
+
+    public Color? TabColor => TabColors.Get(this.ColorKey);
+    public bool HasColor => this.TabColor != null;
+
+    /// <summary>The panel's colour on the tab you're on (it opens into the panel), otherwise a tint of the tab's colour.</summary>
+    public Color TabBackground => this.IsSelected
+        ? ThemeColors.Get("Panel")
+        : this.TabColor?.WithAlpha(ThemeColors.IsDark ? 0.3f : 0.2f) ?? ThemeColors.Get("Header");
+
+    /// <summary>The tab's own colour when it has one, otherwise the accent on the tab you're on.</summary>
+    public Color IconColor => this.TabColor ?? ThemeColors.Get(this.IsSelected ? "Accent" : "Subtle");
+
+    /// <summary>The light/dark theme changed - these colours are picked in code, so ask for them again.</summary>
+    public void RefreshTheme()
+    {
+        this.OnPropertyChanged(nameof(this.TabBackground));
+        this.OnPropertyChanged(nameof(this.IconColor));
+    }
+
+    /// <summary>The icon the user picked for the tab, or null for the automatic one.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Icon))]
+    public partial string? IconKey { get; set; }
+
+    /// <summary>The tab's icon: the one picked for it, otherwise <see cref="AutomaticIcon"/>.</summary>
+    public string Icon => this.IconKey ?? this.AutomaticIcon;
+
+    /// <summary>What the place is (home, cloud...), otherwise a folder.</summary>
+    public string AutomaticIcon => this.Place is { } place ? DriveIconConverter.For(place) : "folder";
+
+    DriveEntry? Place => Places.Value.FirstOrDefault(x => String.Equals(x.RootPath, this.Path, StringComparison.Ordinal));
+
+    // Home, Desktop, iCloud Drive... - their tabs are titled by what they are, not the folder name ("com~apple~CloudDocs")
+    static readonly Lazy<IReadOnlyList<DriveEntry>> Places = new(DriveService.GetPlaces);
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(Title), nameof(Icon), nameof(AutomaticIcon))]
     public partial string Path { get; set; }
 
     [ObservableProperty]
@@ -60,6 +131,7 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     public partial int MarkedCount { get; set; }
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ShowClose), nameof(IsActiveTab), nameof(TabBackground), nameof(IconColor))]
     public partial bool IsSelected { get; set; }
 
     public bool IsArchive { get; private set; }
@@ -74,6 +146,12 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     {
         get
         {
+            if (!String.IsNullOrWhiteSpace(this.Alias))
+                return this.Alias;
+
+            if (this.Place is { } place)
+                return place.Kind == DriveKind.Home ? L.Tree_Home : place.Label;
+
             var name = System.IO.Path.GetFileName(this.Path);
             return String.IsNullOrEmpty(name) ? this.Path : name;
         }
@@ -137,7 +215,11 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     {
         this.panelActive = active;
         this.UpdateCursorVisual();
+        this.OnPropertyChanged(nameof(this.IsActiveTab));
     }
+
+    /// <summary>The tab you're on, in the panel that has the focus - outlined in the accent like the panel itself.</summary>
+    public bool IsActiveTab => this.IsSelected && this.panelActive;
 
     void UpdateCursorVisual()
     {
@@ -148,6 +230,17 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     public async Task NavigateAsync(string path, string? focusName = null, bool addHistory = true)
     {
         var normalized = VirtualFileSystem.Normalize(path);
+        // with tabs turned off in Settings there's nowhere to open another one - a lock is kept, but doesn't apply
+        if (this.IsLocked && !this.settings.HideTabs && !String.Equals(normalized, this.Path, StringComparison.Ordinal))
+        {
+            this.OpenInNewTabRequested?.Invoke(this, (normalized, focusName));
+            return;
+        }
+        await this.GoAsync(normalized, focusName, addHistory);
+    }
+
+    async Task GoAsync(string normalized, string? focusName, bool addHistory)
+    {
         if (addHistory && !String.Equals(normalized, this.Path, StringComparison.Ordinal))
         {
             this.back.Push(this.Path);
@@ -174,6 +267,13 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
         if (this.back.Count == 0)
             return;
 
+        // a locked tab keeps its history as it is - the step opens in a new tab
+        if (this.IsLocked && !this.settings.HideTabs)
+        {
+            await this.NavigateAsync(this.back.Peek(), null, false);
+            return;
+        }
+
         this.forward.Push(this.Path);
         var target = this.back.Pop();
         await this.NavigateAsync(target, null, false);
@@ -183,6 +283,13 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     {
         if (this.forward.Count == 0)
             return;
+
+        // a locked tab keeps its history as it is - the step opens in a new tab
+        if (this.IsLocked && !this.settings.HideTabs)
+        {
+            await this.NavigateAsync(this.forward.Peek(), null, false);
+            return;
+        }
 
         this.back.Push(this.Path);
         var target = this.forward.Pop();

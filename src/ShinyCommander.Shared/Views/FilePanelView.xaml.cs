@@ -11,9 +11,22 @@ public partial class FilePanelView : ContentView
     bool toolbarStale;
     Page? hostPage;
 
+    // the panel's root grid - the breadcrumb dropdown's layer joins it only while open
+    readonly Grid crumbMenuHost;
+
+    // the tab whose menu is open
+    PanelTabViewModel? menuTab;
+
     public FilePanelView()
     {
         this.InitializeComponent();
+
+        // even hidden, the layer's tap recognizers take real clicks meant for what's under it on AppKit (the up arrow
+        // stopped working) - so it's only in the tree while the dropdown shows
+        this.crumbMenuHost = (Grid)this.CrumbMenuLayer.Parent;
+        this.crumbMenuHost.Children.Remove(this.CrumbMenuLayer);
+        this.PanelRoot.Children.Remove(this.TabMenuLayer);
+
         this.Loaded += (_, _) =>
         {
             if (this.hostPage != null)
@@ -74,7 +87,13 @@ public partial class FilePanelView : ContentView
             SetId(this.ThumbList, side + "Thumbnails");
             SetId(this.FileList, side + "Files");
             SetId(this.PathEntry, side + "Path");
-            SetId(this.PathLabel, side + "PathLabel");
+            SetId(this.PathEditButton, side + "PathEdit");
+            SetId(this.PathCrumbStrip, side + "PathCrumbs");
+            SetId(this.CrumbMenu, side + "CrumbMenu");
+            SetId(this.TabStrip, side + "Tabs");
+            SetId(this.NewTabButton, side + "NewTab");
+            SetId(this.TabMenu, side + "TabMenu");
+            SetId(this.TabMenuBackdrop, side + "TabMenuBackdrop");
             SetId(this.FilterEntry, side + "Filter");
             SetId(this.BackButton, side + "Back");
             SetId(this.ForwardButton, side + "Forward");
@@ -107,6 +126,15 @@ public partial class FilePanelView : ContentView
                 // re-measure for the new buttons until something asks it to, so ask once the page is back
                 this.toolbarStale = true;
                 this.RemeasureToolbarIfStale();
+                break;
+
+            case nameof(PanelViewModel.IsActive) when this.panel?.IsActive == false:
+                this.CloseCrumbMenu();
+                this.CloseTabMenu();
+                break;
+
+            case nameof(PanelViewModel.PathCrumbs):
+                this.CloseCrumbMenu();
                 break;
 
             case nameof(PanelViewModel.Path):
@@ -309,6 +337,117 @@ public partial class FilePanelView : ContentView
         }
     }
 
+    void OnTabRightTapped(object? sender, TappedEventArgs e)
+    {
+        if (this.Panel is not { } p || sender is not VisualElement part || part.BindingContext is not PanelTabViewModel tab)
+            return;
+
+        this.Main?.Activate(p);
+        this.menuTab = tab;
+        this.TabMenu.BindingContext = tab;
+        this.RefreshTabMenu();
+
+        // under the tab that was right-clicked (the first Border up from its icon or name), kept inside the panel
+        var anchor = part;
+        for (var parent = part.Parent; parent != null; parent = parent.Parent)
+        {
+            if (parent is Border border)
+            {
+                anchor = border;
+                break;
+            }
+        }
+        var at = PositionIn(anchor, this.PanelRoot);
+        var left = Math.Max(4, Math.Min(at.X, this.PanelRoot.Width - this.TabMenu.WidthRequest - 4));
+        this.TabMenu.Margin = new Thickness(left, at.Y + anchor.Height + 2, 0, 0);
+        if (!this.PanelRoot.Children.Contains(this.TabMenuLayer))
+            this.PanelRoot.Children.Add(this.TabMenuLayer);
+    }
+
+    // the parts of the menu that depend on the tab's state - rebuilt as colours and icons are picked
+    void RefreshTabMenu()
+    {
+        if (this.menuTab is not { } tab || this.Panel is not { } p)
+            return;
+
+        this.TabMenuLock.Text = tab.IsLocked ? L.Tab_Unlock : L.Tab_Lock;
+        var closable = !tab.IsLocked && p.Tabs.Count > 1;
+        this.TabMenuClose.IsVisible = closable;
+        this.TabMenuCloseLine.IsVisible = closable;
+        BindableLayout.SetItemsSource(this.TabColorSwatches, TabColors.Choices(tab.ColorKey));
+        BindableLayout.SetItemsSource(this.TabIconChoices, TabIcons.Choices(tab.IconKey, tab.AutomaticIcon));
+    }
+
+    void CloseTabMenu()
+    {
+        this.PanelRoot.Children.Remove(this.TabMenuLayer);
+        this.menuTab = null;
+    }
+
+    void OnTabMenuDismiss(object? sender, TappedEventArgs e) => this.CloseTabMenu();
+
+    void OnTabMenuLockTapped(object? sender, TappedEventArgs e)
+    {
+        if (this.Panel is { } p && this.menuTab is { } tab)
+            p.SetTabLocked(tab, !tab.IsLocked);
+        this.CloseTabMenu();
+    }
+
+    void OnTabMenuRenameTapped(object? sender, TappedEventArgs e)
+    {
+        var tab = this.menuTab;
+        this.CloseTabMenu();
+        if (this.Panel is { } p && tab != null)
+            _ = this.Main?.RenameTab(p, tab);
+    }
+
+    void OnTabMenuCloseTapped(object? sender, TappedEventArgs e)
+    {
+        var tab = this.menuTab;
+        this.CloseTabMenu();
+        if (this.Panel is { } p && tab != null)
+            p.CloseTab(tab);
+    }
+
+    void OnTabColorTapped(object? sender, TappedEventArgs e)
+    {
+        if (this.Panel is { } p && this.menuTab is { } tab && (sender as BindableObject)?.BindingContext is TabColorChoice choice)
+        {
+            p.EditTab(tab, x => x.ColorKey = choice.Key);
+            this.RefreshTabMenu();
+        }
+    }
+
+    void OnTabIconTapped(object? sender, TappedEventArgs e)
+    {
+        if (this.Panel is { } p && this.menuTab is { } tab && (sender as BindableObject)?.BindingContext is TabIconChoice choice)
+        {
+            p.EditTab(tab, x => x.IconKey = choice.Key);
+            this.RefreshTabMenu();
+        }
+    }
+
+    void OnTabLockTapped(object? sender, TappedEventArgs e)
+    {
+        if (this.Panel is { } p && (sender as BindableObject)?.BindingContext is PanelTabViewModel tab)
+            p.SetTabLocked(tab, false);
+    }
+
+    void OnTabCloseTapped(object? sender, TappedEventArgs e)
+    {
+        if (this.Panel is { } p && (sender as BindableObject)?.BindingContext is PanelTabViewModel tab)
+            p.CloseTab(tab);
+    }
+
+    void OnNewTabClicked(object? sender, EventArgs e)
+    {
+        if (this.Panel is { } p)
+        {
+            this.Main?.Activate(p);
+            _ = p.AddTabAsync(p.Path);
+        }
+    }
+
     void OnToolbarItemClicked(object? sender, EventArgs e)
     {
         if (this.Panel is { } p && (sender as BindableObject)?.BindingContext is PaneToolbarItem item)
@@ -327,12 +466,113 @@ public partial class FilePanelView : ContentView
     }
 
 
-    void OnPathLabelTapped(object? sender, TappedEventArgs e)
+    void OnPathLabelTapped(object? sender, EventArgs e)
     {
         this.PathLabelBox.IsVisible = false;
         this.PathEntry.Opacity = 1;
         this.PathEntry.Focus();
         this.PathEntry.CursorPosition = this.PathEntry.Text?.Length ?? 0;
+    }
+
+    void OnCrumbTapped(object? sender, TappedEventArgs e)
+    {
+        if (this.Panel is not { } p || (sender as BindableObject)?.BindingContext is not PathCrumb crumb)
+            return;
+
+        // the folder you're already in has nowhere to go - edit the path instead
+        if (crumb.IsCurrent)
+        {
+            this.OnPathLabelTapped(sender, e);
+            return;
+        }
+        this.Main?.Activate(p);
+        _ = p.NavigateAsync(crumb.Path);
+    }
+
+    // deep paths overflow: keep the folder you're in, at the end of the trail, in view. On a size change rather than
+    // when the crumbs change - until the new ones are laid out there's nothing new to scroll to
+    void OnCrumbsSizeChanged(object? sender, EventArgs e)
+    {
+#if MACOS_APPKIT
+        // "Never" isn't honoured when we scroll the crumbs ourselves - AppKit shows its scroller over them. Turned off
+        // here, each time, as the handler puts it back when it maps the ScrollView again
+        if (this.PathCrumbScroll.Handler?.PlatformView is AppKit.NSScrollView native)
+            native.HasHorizontalScroller = false;
+#endif
+        _ = this.PathCrumbScroll.ScrollToAsync(Math.Max(0, this.PathCrumbStrip.Width - this.PathCrumbScroll.Width), 0, false);
+    }
+
+    async void OnCrumbChevronTapped(object? sender, TappedEventArgs e)
+    {
+        if (this.Panel is not { } p || sender is not Label chevron || chevron.BindingContext is not PathCrumb crumb)
+            return;
+
+        this.Main?.Activate(p);
+        var folders = await p.ListSubfoldersAsync(crumb.Path);
+        this.CrumbMenuList.ItemsSource = folders;
+        this.CrumbMenuList.IsVisible = folders.Count > 0;
+        this.CrumbMenuEmpty.IsVisible = folders.Count == 0;
+
+        // sized up front: a CollectionView left to measure itself inside a Start-aligned box comes out 0 tall on AppKit
+        const double rowHeight = 24;
+        this.CrumbMenuList.HeightRequest = Math.Min(folders.Count, 14) * rowHeight;
+
+        // measured against the panel, not the layer - out of the tree, the layer has no size yet
+        var host = this.crumbMenuHost;
+        var at = PositionIn(chevron, host);
+        var left = Math.Max(4, Math.Min(at.X, host.Width - this.CrumbMenu.WidthRequest - 4));
+        this.CrumbMenu.Margin = new Thickness(left, at.Y + chevron.Height + 2, 0, 0);
+        if (!host.Children.Contains(this.CrumbMenuLayer))
+            host.Children.Add(this.CrumbMenuLayer);
+    }
+
+    void OnCrumbFolderTapped(object? sender, TappedEventArgs e)
+    {
+        if (this.Panel is not { } p || (sender as BindableObject)?.BindingContext is not PathCrumbFolder folder)
+            return;
+
+        this.CloseCrumbMenu();
+        _ = p.NavigateAsync(folder.Path);
+    }
+
+    void OnCrumbFolderPointerEntered(object? sender, PointerEventArgs e)
+    {
+        if (sender is VisualElement row)
+            row.BackgroundColor = ThemeColors.Get("CursorInactive");
+    }
+
+    void OnCrumbFolderPointerExited(object? sender, PointerEventArgs e)
+    {
+        if (sender is VisualElement row)
+            row.BackgroundColor = Colors.Transparent;
+    }
+
+    void OnCrumbMenuDismiss(object? sender, TappedEventArgs e) => this.CloseCrumbMenu();
+
+    void CloseCrumbMenu()
+    {
+        this.crumbMenuHost.Children.Remove(this.CrumbMenuLayer);
+        this.CrumbMenuList.ItemsSource = null;
+    }
+
+    /// <summary>Where <paramref name="element"/> sits inside <paramref name="ancestor"/>, allowing for scrolled ScrollViews on the way up.</summary>
+    static Point PositionIn(VisualElement element, VisualElement ancestor)
+    {
+        double x = 0, y = 0;
+        for (var e = element as Element; e != null && e != ancestor; e = e.Parent)
+        {
+            if (e is VisualElement v)
+            {
+                x += v.X + v.TranslationX;
+                y += v.Y + v.TranslationY;
+            }
+            if (e is ScrollView scroll)
+            {
+                x -= scroll.ScrollX;
+                y -= scroll.ScrollY;
+            }
+        }
+        return new Point(x, y);
     }
 
     void OnPathFocused(object? sender, FocusEventArgs e)
