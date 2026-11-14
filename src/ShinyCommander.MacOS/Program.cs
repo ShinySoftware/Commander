@@ -26,6 +26,13 @@ public class Program : MacOSMauiApplication
         return NSApplicationTerminateReply.Cancel;
     }
 
+    /// <summary>
+    /// The backend tears the MAUI window down when its close button is clicked and doesn't handle the Dock icon's
+    /// reopen, so the app would sit there with no window and no way back - closing the last window quits instead
+    /// (the close button already asks first while jobs run, see QuitGuard).
+    /// </summary>
+    public override bool ApplicationShouldTerminateAfterLastWindowClosed(NSApplication sender) => true;
+
     public static void Main(string[] args)
     {
         NSApplication.Init();
