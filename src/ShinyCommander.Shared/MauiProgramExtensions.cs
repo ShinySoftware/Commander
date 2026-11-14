@@ -28,7 +28,13 @@ public static class MauiProgramExtensions
         builder.Services.AddStronglyTypedLocalizations();
         builder.Services.AddGeneratedServices();   // [Singleton] AppSettings etc. (Shiny.Extensions.DependencyInjection)
 
-        builder.Services.AddSingleton<VirtualFileSystem>();
+        // servers and storage accounts: the providers, their sessions and the saved connections (secrets in the keychain)
+        builder.Services.TryAddSingleton<ISecretStore, OsSecretStore>();
+        builder.Services.AddSingleton(sp => new RemoteSessions(sp.GetRequiredService<ISecretStore>(), ShinyCommander.Remote.RemoteProviders.All()));
+        builder.Services.AddSingleton<RemoteConnections>();
+        builder.Services.AddSingleton(sp => new VirtualFileSystem(sp.GetRequiredService<RemoteSessions>()));
+        builder.Services.AddMdns();
+        builder.Services.AddSingleton<NetworkBrowser>();
         builder.Services.TryAddSingleton<ITrashService, TrashService>();
         builder.Services.AddSingleton(sp => new FileOperationService(sp.GetRequiredService<VirtualFileSystem>(), sp.GetRequiredService<ITrashService>()));
         builder.Services.TryAddSingleton<IAppDialogs, ShinyAppDialogs>();

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:svc="clr-namespace:ShinyCommander.Services"
+             xmlns:l="clr-namespace:ShinyCommander"
+             x:Class="ShinyCommander.Views.ConnectionsPage"
+             x:DataType="vm:ConnectionsViewModel">
+
+    <shiny:KeyboardShortcuts.Shortcuts>
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
+        <shiny:KeyboardShortcut Gesture="Primary+N" Command="{Binding NewCommand}" Description="{l:Tr Connections_New}" />
+    </shiny:KeyboardShortcuts.Shortcuts>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+        <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+            <shiny:ShinyButton AutomationId="PageBack" Text="{l:Tr Page_Back}" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="{l:Tr Connections_Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
+            <shiny:ShinyButton Grid.Column="2" AutomationId="ConnectShare" Text="{l:Tr Connections_Share}" LeftMotionIcon="link" Command="{Binding ConnectShareCommand}" Appearance="Text" FontSize="12" IconSize="13" ContentPadding="6,2" />
+            <shiny:ShinyButton Grid.Column="3" AutomationId="NewConnection" Text="{l:Tr Connections_New}" LeftMotionIcon="plus" Command="{Binding NewCommand}" Appearance="Text" FontSize="12" IconSize="13" ContentPadding="6,2" />
+        </Grid>
+
+        <Label Grid.Row="1" Style="{StaticResource Subtle}" Padding="16,12,16,4" Text="{l:Tr Connections_Intro}" />
+
+        <Grid Grid.Row="2" ColumnDefinitions="3*,2*" ColumnSpacing="12" Padding="12,8,12,12">
+            <!-- saved servers and storage accounts -->
+            <Border Style="{StaticResource Card}" Padding="0">
+                <Grid RowDefinitions="Auto,*">
+                    <Label Text="{l:Tr Connections_Saved}" Style="{StaticResource SectionTitle}" FontSize="11" Padding="14,10,14,6" />
+                    <CollectionView Grid.Row="1" ItemsSource="{Binding Saved}" SelectionMode="None" AutomationId="SavedConnections">
+                        <CollectionView.EmptyView>
+                            <Label Text="{l:Tr Connections_Empty}" Style="{StaticResource Subtle}" Padding="14,8" />
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ConnectionRow">
+                                <Grid ColumnDefinitions="24,*,Auto,Auto,Auto,Auto" Padding="14,0,8,0" HeightRequest="44" ColumnSpacing="6">
+                                    <shiny:MotionIconView Icon="{Binding Icon}" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Hover" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                                        <Label Text="{Binding Name}" LineBreakMode="TailTruncation">
+                                            <Label.GestureRecognizers>
+                                                <TapGestureRecognizer NumberOfTapsRequired="2" Command="{Binding OpenCommand, Source={RelativeSource AncestorType={x:Type vm:ConnectionsViewModel}}, x:DataType=vm:ConnectionsViewModel}" CommandParameter="{Binding .}" />
+                                            </Label.GestureRecognizers>
+                                        </Label>
+                                        <Label Text="{Binding Address}" Style="{StaticResource Subtle}" FontSize="11" LineBreakMode="MiddleTruncation" />
+                                    </VerticalStackLayout>
+                                    <shiny:PillView Grid.Column="2" Text="{l:Tr Connections_Connected}" IsVisible="{Binding IsConnected}" Type="Success" FontSize="10" VerticalOptions="Center" />
+                                    <shiny:ShinyButton Grid.Column="3" LeftMotionIcon="arrow-right" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="{l:Tr Connections_Open}"
+                                                       Command="{Binding OpenCommand, Source={RelativeSource AncestorType={x:Type vm:ConnectionsViewModel}}, x:DataType=vm:ConnectionsViewModel}" CommandParameter="{Binding .}" />
+                                    <shiny:ShinyButton Grid.Column="4" LeftMotionIcon="edit" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="{l:Tr Connections_Edit}"
+                                                       Command="{Binding EditCommand, Source={RelativeSource AncestorType={x:Type vm:ConnectionsViewModel}}, x:DataType=vm:ConnectionsViewModel}" CommandParameter="{Binding .}" />
+                                    <Grid Grid.Column="5">
+                                        <shiny:ShinyButton LeftMotionIcon="x-circle" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="{l:Tr Connections_Disconnect}" IsVisible="{Binding IsConnected}"
+                                                           Command="{Binding DisconnectCommand, Source={RelativeSource AncestorType={x:Type vm:ConnectionsViewModel}}, x:DataType=vm:ConnectionsViewModel}" CommandParameter="{Binding .}" />
+                                        <shiny:ShinyButton LeftMotionIcon="trash" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="{l:Tr Common_Delete}" IsVisible="{Binding IsDisconnected}"
+                                                           Command="{Binding DeleteCommand, Source={RelativeSource AncestorType={x:Type vm:ConnectionsViewModel}}, x:DataType=vm:ConnectionsViewModel}" CommandParameter="{Binding .}" />
+                                    </Grid>
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Border>
+
+            <!-- found on the local network (Bonjour) -->
+            <Border Grid.Column="1" Style="{StaticResource Card}" Padding="0">
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <Grid ColumnDefinitions="*,Auto" Padding="14,4,8,0">
+                        <Label Text="{l:Tr Connections_Nearby}" Style="{StaticResource SectionTitle}" FontSize="11" VerticalOptions="Center" Padding="0,6,0,2" />
+                        <shiny:ShinyButton Grid.Column="1" LeftMotionIcon="refresh" Appearance="Text" ContentPadding="4,0" IconSize="13" ToolTipProperties.Text="{l:Tr Connections_Rescan}" Command="{Binding ScanCommand}" />
+                    </Grid>
+                    <Label Grid.Row="1" Text="{Binding ScanStatus}" Style="{StaticResource Subtle}" Padding="14,0,14,6" IsVisible="{Binding HasScanStatus}" />
+                    <CollectionView Grid.Row="2" ItemsSource="{Binding Nearby}" SelectionMode="None" AutomationId="NearbyServers">
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate x:DataType="svc:NetworkServer">
+                                <Grid ColumnDefinitions="24,*,Auto" Padding="14,0,8,0" HeightRequest="44" ColumnSpacing="6">
+                                    <shiny:MotionIconView Icon="{Binding Icon}" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Hover" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                    <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="1">
+                                        <Label Text="{Binding Name}" LineBreakMode="TailTruncation" />
+                                        <Label Style="{StaticResource Subtle}" FontSize="11" LineBreakMode="TailTruncation">
+                                            <Label.FormattedText>
+                                                <FormattedString>
+                                                    <Span Text="{Binding KindText}" />
+                                                    <Span Text=" • " />
+                                                    <Span Text="{Binding Host}" />
+                                                </FormattedString>
+                                            </Label.FormattedText>
+                                        </Label>
+                                    </VerticalStackLayout>
+                                    <shiny:ShinyButton Grid.Column="2" Text="{l:Tr Remote_Connect}" Appearance="Text" FontSize="12" ContentPadding="6,0"
+                                                       Command="{Binding ConnectNearbyCommand, Source={RelativeSource AncestorType={x:Type vm:ConnectionsViewModel}}, x:DataType=vm:ConnectionsViewModel}" CommandParameter="{Binding .}" />
+                                </Grid>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <ActivityIndicator Grid.Row="2" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" VerticalOptions="Center" />
+    </Grid>
+</ContentPage>

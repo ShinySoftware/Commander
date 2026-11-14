@@ -1,0 +1,43 @@
+name: Website
+
+# Publishes website/ to GitHub Pages, with the README's screenshots (docs/screenshots) and the app icon copied in -
+# so the pictures live in one place. Runs when the site or the screenshots change, or by hand.
+# Pages is set to deploy from GitHub Actions (Settings → Pages → Source); the site is shinysoftware.github.io/Commander.
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'website/**'
+      - 'docs/screenshots/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Assemble
+        run: website/build.sh _site
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+      - id: deployment
+        uses: actions/deploy-pages@v5

@@ -45,6 +45,29 @@ public static class UiTestHooks
         Map(ext, "job", "Act on a job in the jobs pane, newest first: { index = 0, action = stop|goto|dismiss|errors|clear }", JobAction);
         Map(ext, "close_window", "Press the main window's close button (macOS) - the quit guard may stop it", CloseWindow);
         Map(ext, "culture", "Switch the UI language live: { name = \"fr\" } - text already on screen stays; new pages and dialogs use it. Reset goes back to en", SetCulture);
+        Map(ext, "connection", "Save a remote connection (in-memory settings, memory keychain): { protocol, name, host, port, user, secret, start } - returns its start path; { remove = name } deletes one", (_, a) =>
+        {
+            var connections = Service<RemoteConnections>();
+            if (a.TryGetProperty("remove", out var remove))
+            {
+                foreach (var doomed in connections.All.Where(x => x.Name == remove.GetString()).ToList())
+                    connections.Remove(doomed).GetAwaiter().GetResult();
+                return Task.FromResult<object>(true);
+            }
+
+            string? Text(string name) => a.TryGetProperty(name, out var v) ? v.GetString() : null;
+            var connection = new RemoteConnection
+            {
+                Name = Text("name") ?? "test",
+                Protocol = Enum.Parse<RemoteProtocol>(Text("protocol") ?? "WebDav", true),
+                Host = Text("host") ?? "127.0.0.1",
+                Port = a.TryGetProperty("port", out var port) ? port.GetInt32() : 0,
+                UserName = Text("user") ?? String.Empty,
+                StartPath = Text("start") ?? "/"
+            };
+            connections.Save(connection, Text("secret"));
+            return Task.FromResult<object>(connection.StartUri);
+        });
         Map(ext, "use_trash", "Deletes go to the (test) trash until reset: { on = true }", (_, a) =>
         {
             Service<AppSettings>().UseTrash = !(a.TryGetProperty("on", out var on) && on.ValueKind == JsonValueKind.False);
@@ -81,6 +104,8 @@ public static class UiTestHooks
             }
             catch (Exception ex)
             {
+                // the client only sees "500" - the whole story goes to the app log (artifacts/app.log)
+                Console.Error.WriteLine($"[uitest hook] {name} failed: {ex}");
                 return HttpResponse.Error($"{name}: {ex.GetType().Name}: {ex.Message}", 500, details: ex.ToString());
             }
         });

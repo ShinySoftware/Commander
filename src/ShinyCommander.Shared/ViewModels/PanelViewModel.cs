@@ -225,7 +225,13 @@ public partial class PanelViewModel : ObservableObject
         if (drive != null && !ReferenceEquals(drive, this.CurrentDrive))
             this.CurrentDrive = drive;
 
-        if (drive != null)
+        if (drive is { Kind: DriveKind.Remote })
+        {
+            // servers don't say how full they are
+            this.FreeSpaceText = drive.Label;
+            this.DriveUsage = 0;
+        }
+        else if (drive != null)
         {
             // re-query free space - it changes as we copy
             var fresh = DriveService.FromPath(drive.Name, drive.RootPath, drive.Label);
@@ -236,7 +242,18 @@ public partial class PanelViewModel : ObservableObject
 
     public void RefreshDrives()
     {
-        this.Volumes = DriveService.GetVolumes();
+        // saved servers and storage accounts go after the volumes and network shares
+        var remote = this.vfs.Remote.Connections.Select(x => new DriveEntry(
+            x.Name,
+            x.Root + "/",
+            x.Root,
+            0,
+            0,
+            DriveType.Network,
+            DriveKind.Remote,
+            x.StartUri
+        ));
+        this.Volumes = [.. DriveService.GetVolumes(), .. remote];
         this.Drives = [.. DriveService.GetPlaces(), .. this.Volumes];
         this.UpdateLocation();
     }
@@ -330,7 +347,7 @@ public partial class PanelViewModel : ObservableObject
         => this.ActiveTab?.NavigateAsync(path, focusName) ?? Task.CompletedTask;
 
     [RelayCommand]
-    Task SelectDrive(DriveEntry? drive) => drive == null ? Task.CompletedTask : this.NavigateAsync(drive.RootPath);
+    Task SelectDrive(DriveEntry? drive) => drive == null ? Task.CompletedTask : this.NavigateAsync(drive.Target);
 
     [RelayCommand]
     void SelectTab(PanelTabViewModel tab) => this.ActiveTab = tab;
@@ -379,8 +396,11 @@ public partial class PanelViewModel : ObservableObject
     }
 
     static bool IsOnPath(string current, string folder)
-        => current.Equals(folder, StringComparison.OrdinalIgnoreCase)
-           || current.StartsWith(folder.TrimEnd(VirtualFileSystem.Sep) + VirtualFileSystem.Sep, StringComparison.OrdinalIgnoreCase);
+    {
+        var sep = RemotePath.IsRemote(folder) ? '/' : VirtualFileSystem.Sep;
+        return current.Equals(folder, StringComparison.OrdinalIgnoreCase)
+           || current.StartsWith(folder.TrimEnd(sep) + sep, StringComparison.OrdinalIgnoreCase);
+    }
 
     [RelayCommand]
     Task NavigatePathText() => String.IsNullOrWhiteSpace(this.PathText) ? Task.CompletedTask : this.NavigateAsync(this.PathText);

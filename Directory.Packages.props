@@ -24,6 +24,13 @@
 
         <!-- misc -->
         <PackageVersion Include="SharpCompress" Version="1.0.0" />
+
+        <!-- remote file systems (ShinyCommander.Remote) -->
+        <PackageVersion Include="SSH.NET" Version="2026.0.0" />
+        <PackageVersion Include="FluentFTP" Version="55.1.0" />
+        <PackageVersion Include="AWSSDK.S3" Version="4.1.0" />
+        <PackageVersion Include="Azure.Storage.Blobs" Version="12.30.1" />
+        <PackageVersion Include="Shiny.Net.Discovery" Version="6.5.2" />
         <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
         <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
         <PackageVersion Include="Microsoft.Extensions.Localization" Version="10.0.0" />

@@ -20,6 +20,9 @@ public interface IAppDialogs
     Task Alert(string title, string message);
     Task<bool> Confirm(string title, string message, string okText = "OK", string cancelText = "Cancel");
     Task<string?> Prompt(string title, string message, string? initialValue = null, string okText = "OK", string? placeholder = null);
+    /// <summary>A prompt whose text is masked - passwords. Implementations without a masked field fall back to <see cref="Prompt"/>.</summary>
+    Task<string?> PromptSecret(string title, string message, string okText = "OK") => this.Prompt(title, message, null, okText);
+
     Task<string?> Choose(string title, IReadOnlyList<string> options, string? cancelText = "Cancel", string? destructive = null);
     Task Toast(string message, ToastKind kind = ToastKind.Info);
 }

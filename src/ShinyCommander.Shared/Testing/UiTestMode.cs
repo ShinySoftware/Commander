@@ -34,6 +34,8 @@ public static class UiTestMode
         builder.Services.AddSingleton<UiTestDialogs>();
         builder.Services.AddSingleton<IAppDialogs>(sp => sp.GetRequiredService<UiTestDialogs>());
         builder.Services.AddSingleton<ITrashService, UiTestTrash>();
+        // never the developer's real keychain
+        builder.Services.AddSingleton<ISecretStore, MemorySecretStore>();
     }
 
     /// <summary>A trash that never touches the developer's real one: "trashed" items move into SHINYCOMMANDER_TRASH.</summary>

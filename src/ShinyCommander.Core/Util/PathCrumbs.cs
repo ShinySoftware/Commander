@@ -19,6 +19,9 @@ public static class PathCrumbs
         if (String.IsNullOrEmpty(path))
             return [];
 
+        if (Remote.RemotePath.IsRemote(path))
+            return SplitRemote(path);
+
         var parts = new List<(string Name, string Path)>();
         var root = System.IO.Path.GetPathRoot(path) ?? String.Empty;
         if (root.Length > 0)
@@ -38,6 +41,20 @@ public static class PathCrumbs
             start = end + 1;
         }
 
+        return parts.Select((x, i) => new PathCrumb(x.Name, x.Path, i == parts.Count - 1)).ToList();
+    }
+
+    // "sftp://me@host/var/www" -> "me@host", "var", "www"
+    static IReadOnlyList<PathCrumb> SplitRemote(string path)
+    {
+        var (root, inner) = Remote.RemotePath.Split(path);
+        var parts = new List<(string Name, string Path)> { (Remote.RemotePath.GetName(root), root + "/") };
+        var current = root;
+        foreach (var segment in inner.Split('/', StringSplitOptions.RemoveEmptyEntries))
+        {
+            current += "/" + segment;
+            parts.Add((segment, current));
+        }
         return parts.Select((x, i) => new PathCrumb(x.Name, x.Path, i == parts.Count - 1)).ToList();
     }
 }

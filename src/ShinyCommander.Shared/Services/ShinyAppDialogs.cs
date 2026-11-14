@@ -103,6 +103,19 @@ public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThre
             return result.Ok ? result.Value : null;
         });
 
+    public Task<string?> PromptSecret(string title, string message, string okText = "OK")
+        => this.Run(async () =>
+        {
+            var task = dialogs.Prompt(title, message, null, Tr(okText), L.Common_Cancel, null, configure: c =>
+            {
+                c.MaxWidth = 620;
+                c.IsPassword = true;
+            });
+            this.FocusDialogEntry();
+            var result = await task;
+            return result.Ok ? result.Value : null;
+        });
+
     /// <summary>
     /// The dialog's text field doesn't always take first responder on the desktop backends (the command
     /// line keeps it), which also means Return never reaches it. Find the field and focus it.

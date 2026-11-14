@@ -8,7 +8,9 @@ public enum DriveKind
     Network,
     Home,
     Special,
-    Cloud
+    Cloud,
+    /// <summary>A saved server or storage account (Remote.RemoteConnection) - RootPath is its URI root.</summary>
+    Remote
 }
 
 public sealed record DriveEntry(
@@ -18,9 +20,13 @@ public sealed record DriveEntry(
     long TotalSize,
     long FreeSpace,
     DriveType DriveType,
-    DriveKind Kind = DriveKind.Volume
+    DriveKind Kind = DriveKind.Volume,
+    string? OpenPath = null
 )
 {
+    /// <summary>Where a click goes - a connection's start folder, otherwise the root.</summary>
+    public string Target => this.OpenPath ?? this.RootPath;
+
     /// <summary>A shortcut to a folder on some other drive (Home, Documents...) - never the "current drive".</summary>
     public bool IsPlace => this.Kind is DriveKind.Home or DriveKind.Special;
     public double UsedRatio => this.TotalSize <= 0 ? 0 : 1d - (double)this.FreeSpace / this.TotalSize;

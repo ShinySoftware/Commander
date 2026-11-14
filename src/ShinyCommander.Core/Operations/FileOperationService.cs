@@ -1,12 +1,14 @@
 using ShinyCommander.Core.FileSystem;
 using ShinyCommander.Core.Models;
+using ShinyCommander.Core.Remote;
 
 namespace ShinyCommander.Core.Operations;
 
 /// <summary>
 /// Copy/move/delete/rename/pack/extract across the local disk and archives with progress, cancellation and
 /// conflict resolution. Zip, 7z and tar (plain, gz, bz2, zst) archives can be changed like folders, through
-/// <see cref="ArchiveWriter"/>; rar, tar.xz and lone gz/bz2/xz files are read-only.
+/// <see cref="ArchiveWriter"/>; rar, tar.xz and lone gz/bz2/xz files are read-only. Servers and storage accounts
+/// (<see cref="IRemoteFileSystem"/>) are read from and written to like folders.
 /// </summary>
 public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? trash = null)
 {
@@ -20,7 +22,8 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
         DateTime Modified,
         UnixFileMode? Mode,
         string? ArchiveFile = null,
-        string? EntryName = null
+        string? EntryName = null,
+        bool FromRemote = false
     )
     {
         public bool FromArchive => this.ArchiveFile != null;
@@ -54,22 +57,25 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
 
         var raw = input.Trim();
         var endsWithSep = raw.EndsWith('/') || raw.EndsWith('\\');
-        var full = Path.IsPathRooted(raw) || raw.StartsWith('~')
+        var full = VirtualFileSystem.IsAbsolute(raw)
             ? VirtualFileSystem.Normalize(raw)
-            : VirtualFileSystem.Normalize(Path.Combine(currentDirectory, raw));
+            : VirtualFileSystem.Normalize(VirtualFileSystem.Combine(currentDirectory, raw));
 
         if (endsWithSep || sourceCount > 1 || vfs.Exists(full) && IsContainer(full))
             return new OperationTarget(full);
 
-        var parent = Path.GetDirectoryName(full);
+        var parent = VirtualFileSystem.GetDirectory(full);
         if (parent == null)
             return new OperationTarget(full);
 
-        return new OperationTarget(parent, Path.GetFileName(full));
+        return new OperationTarget(parent, VirtualFileSystem.GetName(full));
     }
 
     bool IsContainer(string path)
     {
+        if (RemotePath.IsRemote(path))
+            return vfs.Exists(path);
+
         if (Directory.Exists(path))
             return true;
 
@@ -121,27 +127,31 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
         if (move && dest.IsArchive && items.All(x => x.IsInArchive && this.ArchiveOf(x).File == dest.ArchiveFile))
             return this.MoveWithinArchive(items, dest, renameTo, state, ct);
 
+        // and a move on one server is a rename there - nothing needs downloading
+        if (move && dest.IsRemote && items.All(x => x.IsRemote && vfs.Remote.Find(x.FullPath)?.Id == dest.Connection!.Id))
+            return this.MoveWithinRemote(items, dest, renameTo, state, ct);
+
         foreach (var item in items)
         {
             var name = renameTo ?? item.Name;
-            var destFull = Path.Combine(dest.Path, name);
+            var destFull = VirtualFileSystem.Combine(dest.Path, name);
             if (String.Equals(VirtualFileSystem.Normalize(item.FullPath), VirtualFileSystem.Normalize(destFull), PathComparison))
                 throw new IOException($"'{item.Name}' cannot be copied onto itself");
 
-            if (item.IsDirectory && !dest.IsArchive && !item.IsInArchive && IsSubPath(item.FullPath, destFull))
+            if (item.IsDirectory && !dest.IsArchive && !item.IsInArchive && item.IsRemote == dest.IsRemote && IsSubPath(item.FullPath, destFull))
                 throw new IOException($"Cannot copy '{item.Name}' into its own subfolder");
         }
 
         // fast path: a plain rename on the same volume
         var remaining = items;
-        if (move && !dest.IsArchive)
+        if (move && !dest.IsArchive && !dest.IsRemote)
         {
             remaining = [];
             foreach (var item in items)
             {
                 ct.ThrowIfCancellationRequested();
                 var destPath = Path.Combine(dest.Path, renameTo ?? item.Name);
-                if (!item.IsInArchive && !Path.Exists(destPath) && TryFastMove(item, destPath))
+                if (!item.IsInArchive && !item.IsRemote && !Path.Exists(destPath) && TryFastMove(item, destPath))
                 {
                     state.ItemsDone++;
                     state.Report(item.Name);
@@ -160,6 +170,8 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
 
         if (dest.IsArchive)
             this.WriteIntoArchive(plan, dest, state, ct);
+        else if (dest.IsRemote)
+            this.WriteToRemote(plan, dest, state, ct);
         else
             this.WriteToDisk(plan, dest.Path, state, ct);
 
@@ -173,6 +185,9 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
 
     static bool IsSubPath(string parent, string child)
     {
+        if (RemotePath.IsRemote(parent) || RemotePath.IsRemote(child))
+            return RemotePath.IsRemote(parent) && RemotePath.IsRemote(child) && RemotePath.IsSameOrBelow(parent, child);
+
         var p = VirtualFileSystem.Normalize(parent) + Path.DirectorySeparatorChar;
         var c = VirtualFileSystem.Normalize(child) + Path.DirectorySeparatorChar;
         return c.StartsWith(p, PathComparison);
@@ -184,7 +199,15 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
             return dir;
 
         // TC creates missing target folders on copy
-        Directory.CreateDirectory(dir);
+        if (RemotePath.IsRemote(dir))
+        {
+            var (fs, inner) = vfs.Remote.Get(dir);
+            CreateRemoteDirectories(fs, inner, CancellationToken.None);
+        }
+        else
+        {
+            Directory.CreateDirectory(dir);
+        }
         return dir;
     }
 
@@ -212,63 +235,95 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
             ct.ThrowIfCancellationRequested();
             var rootName = renameTo ?? src.Name;
 
-            if (src.IsInArchive)
-            {
-                var loc = vfs.Resolve(Path.GetDirectoryName(src.FullPath)!);
-                var inner = loc.InnerPath.Length == 0 ? src.Name : loc.InnerPath + "/" + src.Name;
-                using var reader = ArchiveReader.Open(loc.ArchiveFile!);
-
-                if (!src.IsDirectory)
-                {
-                    var e = VirtualFileSystem.FindItem(reader, inner);
-                    if (e != null)
-                        plan.Add(new PlanItem(src.FullPath, rootName, false, e.Size, e.Modified, e.Mode, loc.ArchiveFile, e.RawKey));
-                    continue;
-                }
-
-                plan.Add(new PlanItem(src.FullPath, rootName, true, 0, src.Modified, null, loc.ArchiveFile, inner + "/"));
-                var prefix = inner + "/";
-                var seenDirs = new HashSet<string>(StringComparer.Ordinal);
-                foreach (var e in reader.Items)
-                {
-                    if (!e.Key.StartsWith(prefix, StringComparison.Ordinal))
-                        continue;
-
-                    var rest = e.Key[prefix.Length..];
-                    // the folder itself plus implied intermediate folders
-                    var parts = rest.Split('/');
-                    for (var i = 0; i < parts.Length - (e.IsDirectory ? 0 : 1); i++)
-                    {
-                        var rel = String.Join('/', parts.Take(i + 1));
-                        if (seenDirs.Add(rel))
-                            plan.Add(new PlanItem(Path.Combine(src.FullPath, rel), JoinRel(rootName, rel), true, 0, e.Modified, null, loc.ArchiveFile, prefix + rel + "/"));
-                    }
-                    if (!e.IsDirectory)
-                        plan.Add(new PlanItem(Path.Combine(src.FullPath, rest), JoinRel(rootName, rest), false, e.Size, e.Modified, e.Mode, loc.ArchiveFile, e.RawKey));
-                }
-                continue;
-            }
-
-            if (!src.IsDirectory)
-            {
-                plan.Add(new PlanItem(src.FullPath, rootName, false, src.Size, src.Modified, src.UnixMode));
-                continue;
-            }
-
-            plan.Add(new PlanItem(src.FullPath, rootName, true, 0, src.Modified, src.UnixMode));
-            var opts = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true, AttributesToSkip = 0 };
-            foreach (var info in new DirectoryInfo(src.FullPath).EnumerateFileSystemInfos("*", opts))
-            {
-                ct.ThrowIfCancellationRequested();
-                var rel = Path.GetRelativePath(src.FullPath, info.FullName).Replace('\\', '/');
-                var entry = FileEntry.FromInfo(info);
-                plan.Add(new PlanItem(info.FullName, JoinRel(rootName, rel), entry.IsDirectory, entry.Size, entry.Modified, entry.UnixMode));
-            }
+            if (src.IsRemote)
+                this.PlanRemote(plan, src, rootName, ct);
+            else
+                this.PlanLocalOrArchive(plan, src, rootName, ct);
         }
         return plan;
     }
 
+    void PlanLocalOrArchive(List<PlanItem> plan, FileEntry src, string rootName, CancellationToken ct)
+    {
+        if (src.IsInArchive)
+        {
+            var loc = vfs.Resolve(Path.GetDirectoryName(src.FullPath)!);
+            var inner = loc.InnerPath.Length == 0 ? src.Name : loc.InnerPath + "/" + src.Name;
+            using var reader = ArchiveReader.Open(loc.ArchiveFile!);
+
+            if (!src.IsDirectory)
+            {
+                var e = VirtualFileSystem.FindItem(reader, inner);
+                if (e != null)
+                    plan.Add(new PlanItem(src.FullPath, rootName, false, e.Size, e.Modified, e.Mode, loc.ArchiveFile, e.RawKey));
+                return;
+            }
+
+            plan.Add(new PlanItem(src.FullPath, rootName, true, 0, src.Modified, null, loc.ArchiveFile, inner + "/"));
+            var prefix = inner + "/";
+            var seenDirs = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var e in reader.Items.Where(x => x.Key.StartsWith(prefix, StringComparison.Ordinal)))
+            {
+                var rest = e.Key[prefix.Length..];
+                // the folder itself plus implied intermediate folders
+                var parts = rest.Split('/');
+                for (var i = 0; i < parts.Length - (e.IsDirectory ? 0 : 1); i++)
+                {
+                    var rel = String.Join('/', parts.Take(i + 1));
+                    if (seenDirs.Add(rel))
+                        plan.Add(new PlanItem(Path.Combine(src.FullPath, rel), JoinRel(rootName, rel), true, 0, e.Modified, null, loc.ArchiveFile, prefix + rel + "/"));
+                }
+                if (!e.IsDirectory)
+                    plan.Add(new PlanItem(Path.Combine(src.FullPath, rest), JoinRel(rootName, rest), false, e.Size, e.Modified, e.Mode, loc.ArchiveFile, e.RawKey));
+            }
+            return;
+        }
+
+        if (!src.IsDirectory)
+        {
+            plan.Add(new PlanItem(src.FullPath, rootName, false, src.Size, src.Modified, src.UnixMode));
+            return;
+        }
+
+        plan.Add(new PlanItem(src.FullPath, rootName, true, 0, src.Modified, src.UnixMode));
+        var opts = new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true, AttributesToSkip = 0 };
+        foreach (var info in new DirectoryInfo(src.FullPath).EnumerateFileSystemInfos("*", opts))
+        {
+            ct.ThrowIfCancellationRequested();
+            var rel = Path.GetRelativePath(src.FullPath, info.FullName).Replace('\\', '/');
+            var entry = FileEntry.FromInfo(info);
+            plan.Add(new PlanItem(info.FullName, JoinRel(rootName, rel), entry.IsDirectory, entry.Size, entry.Modified, entry.UnixMode));
+        }
+    }
+
     static string JoinRel(string a, string b) => a + "/" + b;
+
+    // a file, or a folder walked to the bottom - the server is asked folder by folder
+    void PlanRemote(List<PlanItem> plan, FileEntry src, string rootName, CancellationToken ct)
+    {
+        if (!src.IsDirectory)
+        {
+            plan.Add(new PlanItem(src.FullPath, rootName, false, src.Size, src.Modified, src.UnixMode, FromRemote: true));
+            return;
+        }
+
+        var (fs, _) = vfs.Remote.Get(src.FullPath);
+        plan.Add(new PlanItem(src.FullPath, rootName, true, 0, src.Modified, src.UnixMode, FromRemote: true));
+        var pending = new Stack<(string Path, string Rel)>([(src.FullPath, rootName)]);
+        while (pending.Count > 0)
+        {
+            ct.ThrowIfCancellationRequested();
+            var (dir, rel) = pending.Pop();
+            foreach (var item in fs.ListAsync(RemotePath.Split(dir).Inner, ct).GetAwaiter().GetResult())
+            {
+                var path = RemotePath.Combine(dir, item.Name);
+                var itemRel = JoinRel(rel, item.Name);
+                plan.Add(new PlanItem(path, itemRel, item.IsDirectory, item.IsDirectory ? 0 : item.Size, item.Modified, item.Mode, FromRemote: true));
+                if (item.IsDirectory)
+                    pending.Push((path, itemRel));
+            }
+        }
+    }
 
     async Task<ConflictAction> Resolve(RunState state, FileConflict conflict, CancellationToken ct)
     {
@@ -320,6 +375,10 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
             else if (item.FromArchive)
             {
                 fromArchives.Add(item); // read in one pass per archive below
+            }
+            else if (item.FromRemote)
+            {
+                this.WriteFile(item, destDir, () => vfs.OpenRead(item.SourcePath), buffer, state, ct);
             }
             else
             {
@@ -449,7 +508,7 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
         var taken = existing.Keys.ToHashSet(StringComparer.Ordinal);
 
         // files from inside another archive (or this one) are unpacked first, one pass per archive
-        var fromArchives = plan.Where(x => x.FromArchive && !x.IsDirectory).ToList();
+        var fromArchives = plan.Where(x => (x.FromArchive || x.FromRemote) && !x.IsDirectory).ToList();
         var staging = fromArchives.Count > 0 ? Path.Combine(Path.GetTempPath(), "shinycommander-" + Guid.NewGuid().ToString("N")[..8]) : null;
         try
         {
@@ -470,7 +529,7 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
                     continue;
                 }
 
-                var source = item.FromArchive ? staged.GetValueOrDefault(item) : item.SourcePath;
+                var source = item.FromArchive || item.FromRemote ? staged.GetValueOrDefault(item) : item.SourcePath;
                 if (source == null)
                     continue; // couldn't be unpacked - already counted as an error
 
@@ -511,6 +570,179 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
                 try { Directory.Delete(staging, true); } catch { }
             }
         }
+    }
+
+    void WriteToRemote(List<PlanItem> plan, VfsLocation dest, RunState state, CancellationToken ct)
+    {
+        var (fs, destInner) = vfs.Remote.Get(dest.Path);
+
+        // archive entries are unpacked first, one pass per archive - other files stream straight up
+        var fromArchives = plan.Where(x => x.FromArchive && !x.IsDirectory).ToList();
+        var staging = fromArchives.Count > 0 ? Path.Combine(Path.GetTempPath(), "shinycommander-" + Guid.NewGuid().ToString("N")[..8]) : null;
+        try
+        {
+            var staged = staging == null ? [] : this.Stage(fromArchives, staging, state, ct);
+            foreach (var item in plan)
+            {
+                ct.ThrowIfCancellationRequested();
+                var target = RemotePath.CombineInner(destInner, item.RelativePath);
+                if (item.IsDirectory)
+                {
+                    RemoteStep(item, state, () =>
+                    {
+                        if (fs.GetItemAsync(target, ct).GetAwaiter().GetResult() is not { IsDirectory: true })
+                            fs.CreateDirectoryAsync(target, ct).GetAwaiter().GetResult();
+                    });
+                    state.ItemsDone++;
+                    state.Report(item.RelativePath);
+                }
+                else if (!item.FromArchive || staged.ContainsKey(item))
+                {
+                    Func<Stream> open = item.FromArchive
+                        ? () => File.OpenRead(staged[item])
+                        : item.FromRemote
+                            ? () => vfs.OpenRead(item.SourcePath)
+                            : () => new FileStream(item.SourcePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, BufferSize, FileOptions.SequentialScan);
+                    this.UploadFile(fs, item, target, RemotePath.Combine(dest.Path, item.RelativePath), open, state, ct);
+                }
+            }
+        }
+        finally
+        {
+            if (staging != null)
+            {
+                try { Directory.Delete(staging, true); } catch { }
+            }
+        }
+    }
+
+    void UploadFile(IRemoteFileSystem fs, PlanItem item, string target, string targetDisplay, Func<Stream> open, RunState state, CancellationToken ct)
+    {
+        var there = fs.GetItemAsync(target, ct).GetAwaiter().GetResult();
+        if (there is { IsDirectory: false })
+        {
+            var action = this.Resolve(state, new FileConflict(item.SourcePath, item.Size, item.Modified, targetDisplay, there.Size, there.Modified), ct).GetAwaiter().GetResult();
+            if (action == ConflictAction.Skip)
+            {
+                state.Skipped++;
+                state.SkippedSources.Add(item.SourcePath);
+                state.BytesDone += item.Size;
+                state.ItemsDone++;
+                state.Report(item.RelativePath);
+                return;
+            }
+            if (action == ConflictAction.KeepBoth)
+                target = UniqueRemoteName(fs, target, ct);
+        }
+
+        RemoteStep(item, state, () =>
+        {
+            using var input = new ProgressStream(open(), n =>
+            {
+                ct.ThrowIfCancellationRequested();
+                state.BytesDone += n;
+                state.Report(item.RelativePath);
+            });
+            fs.WriteAsync(target, input, item.Size, item.Modified > DateTime.MinValue ? item.Modified : null, ct).GetAwaiter().GetResult();
+        });
+        state.ItemsDone++;
+        state.Report(item.RelativePath);
+    }
+
+    // one server call - a failure is that item's error, a cancel stops everything
+    static void RemoteStep(PlanItem item, RunState state, Action step)
+    {
+        try
+        {
+            step();
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            state.Errors.Add($"{item.RelativePath}: {ex.Message}");
+            state.SkippedSources.Add(item.SourcePath);
+        }
+    }
+
+    static string UniqueRemoteName(IRemoteFileSystem fs, string inner, CancellationToken ct)
+    {
+        var slash = inner.LastIndexOf('/');
+        var dir = inner[..(slash + 1)];
+        var file = inner[(slash + 1)..];
+        var name = Path.GetFileNameWithoutExtension(file);
+        var ext = Path.GetExtension(file);
+        for (var i = 2; ; i++)
+        {
+            var candidate = $"{dir}{name} ({i}){ext}";
+            if (fs.GetItemAsync(candidate, ct).GetAwaiter().GetResult() == null)
+                return candidate;
+        }
+    }
+
+    static void CreateRemoteDirectories(IRemoteFileSystem fs, string inner, CancellationToken ct)
+    {
+        var path = "/";
+        foreach (var part in inner.Split('/', StringSplitOptions.RemoveEmptyEntries))
+        {
+            path = RemotePath.CombineInner(path, part);
+            if (fs.GetItemAsync(path, ct).GetAwaiter().GetResult() is not { IsDirectory: true })
+                fs.CreateDirectoryAsync(path, ct).GetAwaiter().GetResult();
+        }
+    }
+
+    OperationResult MoveWithinRemote(List<FileEntry> items, VfsLocation dest, string? renameTo, RunState state, CancellationToken ct)
+    {
+        var (fs, destInner) = vfs.Remote.Get(dest.Path);
+        state.ItemsTotal = items.Count;
+        foreach (var item in items)
+        {
+            ct.ThrowIfCancellationRequested();
+            var from = RemotePath.Split(item.FullPath).Inner;
+            var to = RemotePath.CombineInner(destInner, renameTo ?? item.Name);
+            if (from != to && to.StartsWith(from + "/", StringComparison.Ordinal))
+                throw new IOException($"Cannot move '{item.Name}' into its own subfolder");
+
+            var skip = from == to;
+            if (!skip && fs.GetItemAsync(to, ct).GetAwaiter().GetResult() is { } there)
+            {
+                var action = this.Resolve(state, new FileConflict(item.FullPath, item.Size, item.Modified, RemotePath.Combine(dest.Path, renameTo ?? item.Name), there.Size, there.Modified), ct).GetAwaiter().GetResult();
+                if (action == ConflictAction.Skip)
+                {
+                    state.Skipped++;
+                    skip = true;
+                }
+                else if (action == ConflictAction.KeepBoth)
+                {
+                    to = UniqueRemoteName(fs, to, ct);
+                }
+                else if (there.IsDirectory)
+                {
+                    fs.DeleteDirectoryAsync(to, ct).GetAwaiter().GetResult();
+                }
+                else
+                {
+                    fs.DeleteFileAsync(to, ct).GetAwaiter().GetResult();
+                }
+            }
+
+            if (!skip)
+            {
+                try
+                {
+                    fs.RenameAsync(from, to, item.IsDirectory, ct).GetAwaiter().GetResult();
+                }
+                catch (Exception ex) when (ex is not OperationCanceledException)
+                {
+                    state.Errors.Add($"{item.Name}: {ex.Message}");
+                }
+            }
+            state.ItemsDone++;
+            state.Report(item.Name);
+        }
+        return new OperationResult(state.ItemsDone, state.Skipped, state.Errors);
     }
 
     // unpacks archive files to a temporary folder - a pass of their own, so they don't count as copied yet
@@ -599,7 +831,9 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
             ArchiveWriter.Apply(group.Key, changes, ct);
         }
 
-        var local = plan.Where(x => !x.FromArchive).ToList();
+        this.DeleteMovedRemoteSources(plan, state, ct);
+
+        var local = plan.Where(x => !x.FromArchive && !x.FromRemote).ToList();
         foreach (var item in local.Where(x => !x.IsDirectory && !state.SkippedSources.Contains(x.SourcePath)))
         {
             ct.ThrowIfCancellationRequested();
@@ -624,6 +858,29 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
             {
                 state.Errors.Add($"{dir.SourcePath}: {ex.Message}");
             }
+        }
+    }
+
+    void DeleteMovedRemoteSources(List<PlanItem> plan, RunState state, CancellationToken ct)
+    {
+        var remote = plan.Where(x => x.FromRemote).ToList();
+        foreach (var item in remote.Where(x => !x.IsDirectory && !state.SkippedSources.Contains(x.SourcePath)))
+        {
+            ct.ThrowIfCancellationRequested();
+            RemoteStep(item, state, () =>
+            {
+                var (fs, inner) = vfs.Remote.Get(item.SourcePath);
+                fs.DeleteFileAsync(inner, ct).GetAwaiter().GetResult();
+            });
+        }
+        foreach (var dir in remote.Where(x => x.IsDirectory).OrderByDescending(x => x.SourcePath.Length))
+        {
+            RemoteStep(dir, state, () =>
+            {
+                var (fs, inner) = vfs.Remote.Get(dir.SourcePath);
+                if (fs.ListAsync(inner, ct).GetAwaiter().GetResult().Count == 0)
+                    fs.DeleteDirectoryAsync(inner, ct).GetAwaiter().GetResult();
+            });
         }
     }
 
@@ -658,7 +915,16 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
             state.Report(item.Name);
             try
             {
-                if (useTrash && trash != null && trash.TryMoveToTrash(item.FullPath))
+                if (item.IsRemote)
+                {
+                    // servers have no trash - the UI says so before asking
+                    var (fs, inner) = vfs.Remote.Get(item.FullPath);
+                    if (item.IsDirectory)
+                        fs.DeleteDirectoryAsync(inner, ct).GetAwaiter().GetResult();
+                    else
+                        fs.DeleteFileAsync(inner, ct).GetAwaiter().GetResult();
+                }
+                else if (useTrash && trash != null && trash.TryMoveToTrash(item.FullPath))
                 {
                     // done
                 }
@@ -719,6 +985,12 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
     {
         ValidateName(name, allowSubPaths: true);
         var loc = vfs.Resolve(parentPath);
+        if (loc.IsRemote)
+        {
+            var (fs, inner) = vfs.Remote.Get(loc.Path);
+            CreateRemoteDirectories(fs, RemotePath.CombineInner(inner, name), CancellationToken.None);
+            return;
+        }
         if (!loc.IsArchive)
         {
             Directory.CreateDirectory(Path.Combine(loc.Path, name));
@@ -736,6 +1008,14 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
     {
         ValidateName(name, allowSubPaths: false);
         var loc = vfs.Resolve(parentPath);
+        if (loc.IsRemote)
+        {
+            var (fs, inner) = vfs.Remote.Get(loc.Path);
+            var target = RemotePath.CombineInner(inner, name);
+            if (fs.GetItemAsync(target).GetAwaiter().GetResult() == null)
+                fs.WriteAsync(target, new MemoryStream(), 0, DateTime.Now).GetAwaiter().GetResult();
+            return;
+        }
         if (loc.IsArchive)
         {
             if (loc.IsReadOnlyArchive)
@@ -762,6 +1042,17 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
         ValidateName(newName, allowSubPaths: false);
         if (entry.IsParentLink || entry.Name == newName)
             return;
+
+        if (entry.IsRemote)
+        {
+            var (fs, oldInner) = vfs.Remote.Get(entry.FullPath);
+            var newInner = RemotePath.CombineInner(RemotePath.Split(RemotePath.GetParent(entry.FullPath)!).Inner, newName);
+            var caseOnlyRemote = String.Equals(entry.Name, newName, StringComparison.OrdinalIgnoreCase);
+            if (!caseOnlyRemote && fs.GetItemAsync(newInner).GetAwaiter().GetResult() != null)
+                throw new IOException($"'{newName}' already exists");
+            fs.RenameAsync(oldInner, newInner, entry.IsDirectory).GetAwaiter().GetResult();
+            return;
+        }
 
         if (entry.IsInArchive)
         {
@@ -821,6 +1112,8 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
     )
     {
         archivePath = VirtualFileSystem.Normalize(archivePath);
+        if (RemotePath.IsRemote(archivePath))
+            throw new NotSupportedException("Archives are packed on this computer - pack here, then copy the archive to the server");
         if (!ArchiveFormats.CanPack(archivePath))
         {
             if (ArchiveFormats.IsSupported(archivePath))
@@ -857,7 +1150,7 @@ public sealed class FileOperationService(VirtualFileSystem vfs, ITrashService? t
         var skipped = 0;
         var errors = new List<string>();
 
-        foreach (var archive in archives.Where(x => x.IsArchive && !x.IsInArchive))
+        foreach (var archive in archives.Where(x => x.IsArchive && !x.IsInArchive && !x.IsRemote))
         {
             var root = await vfs.ListAsync(archive.FullPath, true, ct).ConfigureAwait(false);
             var target = folderPerArchive ? Path.Combine(destDir, ArchiveFormats.StripExtension(archive.Name)) : destDir;

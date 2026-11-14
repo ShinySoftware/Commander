@@ -17,5 +17,6 @@
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\..\src\ShinyCommander.Core\ShinyCommander.Core.csproj" />
+        <ProjectReference Include="..\..\src\ShinyCommander.Remote\ShinyCommander.Remote.csproj" />
     </ItemGroup>
 </Project>

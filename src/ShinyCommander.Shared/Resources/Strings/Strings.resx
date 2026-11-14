@@ -1709,4 +1709,269 @@ Quitting stops them part-way. What's already been copied, moved or deleted stays
     <value>… {0} more bytes not shown</value>
     <comment>End of a hex dump; {0} = byte count</comment>
   </data>
+  <data name="Cmd_Connections" xml:space="preserve">
+    <value>Connect…</value>
+    <comment>Ribbon: servers and storage accounts (⌘K)</comment>
+  </data>
+  <data name="Ribbon_Group_Remote" xml:space="preserve">
+    <value>Remote</value>
+    <comment>Ribbon group on the Go tab</comment>
+  </data>
+  <data name="Remote_Connect" xml:space="preserve">
+    <value>Connect</value>
+    <comment>Button that signs in to a server</comment>
+  </data>
+  <data name="Remote_PasswordTitleFormat" xml:space="preserve">
+    <value>Sign in to {0}</value>
+    <comment>Password prompt title; {0} = connection name</comment>
+  </data>
+  <data name="Remote_PasswordMessageFormat" xml:space="preserve">
+    <value>Password for {0}. It's kept in your keychain.</value>
+    <comment>Password prompt; {0} = user@host or connection name</comment>
+  </data>
+  <data name="Remote_PasswordRetryFormat" xml:space="preserve">
+    <value>{0} didn't accept that: {1}
+Try again.</value>
+    <comment>Password prompt after a refusal; {0} = user@host, {1} = server's error</comment>
+  </data>
+  <data name="Remote_NoFileManager" xml:space="preserve">
+    <value>Files on a server can't be shown in the file manager</value>
+    <comment>Toast for Reveal on a remote file</comment>
+  </data>
+  <data name="Remote_NoBranchView" xml:space="preserve">
+    <value>Branch view works on local folders only</value>
+    <comment>Toast for Ctrl+B on a server</comment>
+  </data>
+  <data name="Connections_Title" xml:space="preserve">
+    <value>Connections</value>
+    <comment>Page title</comment>
+  </data>
+  <data name="Connections_Intro" xml:space="preserve">
+    <value>Servers and storage accounts open in a panel like any folder. Passwords are kept in your keychain.</value>
+    <comment>Intro text on the Connections page</comment>
+  </data>
+  <data name="Connections_New" xml:space="preserve">
+    <value>New Connection</value>
+    <comment>Toolbar button</comment>
+  </data>
+  <data name="Connections_Share" xml:space="preserve">
+    <value>Connect to Share…</value>
+    <comment>Toolbar button: mount an smb:// share</comment>
+  </data>
+  <data name="Connections_Saved" xml:space="preserve">
+    <value>SAVED</value>
+    <comment>Section header</comment>
+  </data>
+  <data name="Connections_Nearby" xml:space="preserve">
+    <value>ON THIS NETWORK</value>
+    <comment>Section header: servers found by Bonjour</comment>
+  </data>
+  <data name="Connections_Empty" xml:space="preserve">
+    <value>No connections yet - add an SFTP, FTP, WebDAV, S3 or Azure one with New Connection.</value>
+    <comment>Empty list</comment>
+  </data>
+  <data name="Connections_Connected" xml:space="preserve">
+    <value>connected</value>
+    <comment>Pill on a live connection</comment>
+  </data>
+  <data name="Connections_Open" xml:space="preserve">
+    <value>Open in panel</value>
+    <comment>Tooltip</comment>
+  </data>
+  <data name="Connections_Edit" xml:space="preserve">
+    <value>Edit</value>
+    <comment>Tooltip</comment>
+  </data>
+  <data name="Connections_Disconnect" xml:space="preserve">
+    <value>Disconnect</value>
+    <comment>Tooltip</comment>
+  </data>
+  <data name="Connections_DisconnectedFormat" xml:space="preserve">
+    <value>Disconnected from {0}</value>
+    <comment>Toast; {0} = connection name</comment>
+  </data>
+  <data name="Connections_DeleteTitle" xml:space="preserve">
+    <value>Delete Connection</value>
+    <comment>Confirm title</comment>
+  </data>
+  <data name="Connections_DeleteMessageFormat" xml:space="preserve">
+    <value>Delete {0} and forget its password? Nothing on the server is touched.</value>
+    <comment>Confirm message; {0} = connection name</comment>
+  </data>
+  <data name="Connections_Rescan" xml:space="preserve">
+    <value>Scan again</value>
+    <comment>Tooltip</comment>
+  </data>
+  <data name="Connections_Scanning" xml:space="preserve">
+    <value>Looking for servers…</value>
+    <comment>Status while scanning</comment>
+  </data>
+  <data name="Connections_NoneFound" xml:space="preserve">
+    <value>No file servers announced themselves.</value>
+    <comment>Status after an empty scan</comment>
+  </data>
+  <data name="Connections_ShareTitle" xml:space="preserve">
+    <value>Connect to Share</value>
+    <comment>Dialog title</comment>
+  </data>
+  <data name="Connections_ShareMessage" xml:space="preserve">
+    <value>The share's address, like smb://nas/media or \\nas\media.</value>
+    <comment>Prompt for an SMB address</comment>
+  </data>
+  <data name="Connections_ShareInvalid" xml:space="preserve">
+    <value>That isn't a share address.</value>
+    <comment>Error</comment>
+  </data>
+  <data name="Connections_ShareNameFormat" xml:space="preserve">
+    <value>Which share on {0}?</value>
+    <comment>Prompt; {0} = server</comment>
+  </data>
+  <data name="Connections_ShareUserFormat" xml:space="preserve">
+    <value>{0} wants an account. User name:</value>
+    <comment>Prompt; {0} = server</comment>
+  </data>
+  <data name="ConnectionEdit_NewTitle" xml:space="preserve">
+    <value>New Connection</value>
+    <comment>Page title</comment>
+  </data>
+  <data name="ConnectionEdit_EditTitle" xml:space="preserve">
+    <value>Edit Connection</value>
+    <comment>Page title</comment>
+  </data>
+  <data name="ConnectionEdit_Test" xml:space="preserve">
+    <value>Test</value>
+    <comment>Toolbar button</comment>
+  </data>
+  <data name="ConnectionEdit_Server" xml:space="preserve">
+    <value>SERVER</value>
+    <comment>Section header</comment>
+  </data>
+  <data name="ConnectionEdit_SignIn" xml:space="preserve">
+    <value>SIGN IN</value>
+    <comment>Section header</comment>
+  </data>
+  <data name="ConnectionEdit_Protocol" xml:space="preserve">
+    <value>Protocol</value>
+    <comment>Field label</comment>
+  </data>
+  <data name="ConnectionEdit_Name" xml:space="preserve">
+    <value>Name</value>
+    <comment>Field label</comment>
+  </data>
+  <data name="ConnectionEdit_NamePlaceholder" xml:space="preserve">
+    <value>Shown in the drive bar</value>
+    <comment>Placeholder</comment>
+  </data>
+  <data name="ConnectionEdit_Host" xml:space="preserve">
+    <value>Server</value>
+    <comment>Field label</comment>
+  </data>
+  <data name="ConnectionEdit_Account" xml:space="preserve">
+    <value>Storage account</value>
+    <comment>Field label (Azure)</comment>
+  </data>
+  <data name="ConnectionEdit_Port" xml:space="preserve">
+    <value>Port</value>
+    <comment>Field label</comment>
+  </data>
+  <data name="ConnectionEdit_StartPath" xml:space="preserve">
+    <value>Start folder</value>
+    <comment>Field label</comment>
+  </data>
+  <data name="ConnectionEdit_Region" xml:space="preserve">
+    <value>Region</value>
+    <comment>Field label (S3)</comment>
+  </data>
+  <data name="ConnectionEdit_Endpoint" xml:space="preserve">
+    <value>Endpoint</value>
+    <comment>Field label (S3/Azure)</comment>
+  </data>
+  <data name="ConnectionEdit_EndpointPlaceholder" xml:space="preserve">
+    <value>Only for MinIO, R2, Azurite…</value>
+    <comment>Placeholder</comment>
+  </data>
+  <data name="ConnectionEdit_User" xml:space="preserve">
+    <value>User name</value>
+    <comment>Field label</comment>
+  </data>
+  <data name="ConnectionEdit_AccessKey" xml:space="preserve">
+    <value>Access key ID</value>
+    <comment>Field label (S3)</comment>
+  </data>
+  <data name="ConnectionEdit_Anonymous" xml:space="preserve">
+    <value>Empty for anonymous</value>
+    <comment>Placeholder</comment>
+  </data>
+  <data name="ConnectionEdit_KeyFile" xml:space="preserve">
+    <value>Private key</value>
+    <comment>Field label (SFTP)</comment>
+  </data>
+  <data name="ConnectionEdit_Password" xml:space="preserve">
+    <value>Password</value>
+    <comment>Field label</comment>
+  </data>
+  <data name="ConnectionEdit_Passphrase" xml:space="preserve">
+    <value>Key passphrase</value>
+    <comment>Field label (SFTP with a key)</comment>
+  </data>
+  <data name="ConnectionEdit_SecretKey" xml:space="preserve">
+    <value>Secret access key</value>
+    <comment>Field label (S3)</comment>
+  </data>
+  <data name="ConnectionEdit_AccountKey" xml:space="preserve">
+    <value>Key, SAS or connection string</value>
+    <comment>Field label (Azure)</comment>
+  </data>
+  <data name="ConnectionEdit_SecretSaved" xml:space="preserve">
+    <value>Saved - leave empty to keep it</value>
+    <comment>Placeholder when a secret is in the keychain</comment>
+  </data>
+  <data name="ConnectionEdit_KeychainNote" xml:space="preserve">
+    <value>Kept in your keychain, never in the settings file. Leave it empty to be asked when connecting.</value>
+    <comment>Hint under the password</comment>
+  </data>
+  <data name="ConnectionEdit_Forget" xml:space="preserve">
+    <value>Forget saved password</value>
+    <comment>Button</comment>
+  </data>
+  <data name="ConnectionEdit_SecretForgotten" xml:space="preserve">
+    <value>Password forgotten</value>
+    <comment>Toast</comment>
+  </data>
+  <data name="ConnectionEdit_PathPreview" xml:space="preserve">
+    <value>Opens at</value>
+    <comment>Before the path preview</comment>
+  </data>
+  <data name="ConnectionEdit_NeedName" xml:space="preserve">
+    <value>Give the connection a name.</value>
+    <comment>Validation</comment>
+  </data>
+  <data name="ConnectionEdit_NeedHost" xml:space="preserve">
+    <value>Enter the server's name or address.</value>
+    <comment>Validation</comment>
+  </data>
+  <data name="ConnectionEdit_NeedAccount" xml:space="preserve">
+    <value>Enter the storage account's name.</value>
+    <comment>Validation</comment>
+  </data>
+  <data name="ConnectionEdit_KeyFileMissing" xml:space="preserve">
+    <value>The private key file wasn't found.</value>
+    <comment>Validation</comment>
+  </data>
+  <data name="ConnectionEdit_ClashFormat" xml:space="preserve">
+    <value>{0} already connects to the same place.</value>
+    <comment>Validation; {0} = other connection</comment>
+  </data>
+  <data name="ConnectionEdit_TestOkFormat" xml:space="preserve">
+    <value>Connected to {0}</value>
+    <comment>Toast; {0} = connection name</comment>
+  </data>
+  <data name="ConnectionEdit_TestFailed" xml:space="preserve">
+    <value>Couldn't connect</value>
+    <comment>Alert title</comment>
+  </data>
+  <data name="ConnectionEdit_TestTimeout" xml:space="preserve">
+    <value>The server didn't answer in 30 seconds.</value>
+    <comment>Alert message</comment>
+  </data>
 </root>

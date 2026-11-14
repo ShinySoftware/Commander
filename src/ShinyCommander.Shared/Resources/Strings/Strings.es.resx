@@ -1541,4 +1541,203 @@ Salir las detiene a medias. Lo que ya se copió, movió o eliminó se queda así
   <data name="Preview_MoreBytes" xml:space="preserve">
     <value>… {0} bytes más no mostrados</value>
   </data>
+  <data name="Cmd_Connections" xml:space="preserve">
+    <value>Conexiones…</value>
+  </data>
+  <data name="Ribbon_Group_Remote" xml:space="preserve">
+    <value>Remoto</value>
+  </data>
+  <data name="Remote_Connect" xml:space="preserve">
+    <value>Conectar</value>
+  </data>
+  <data name="Remote_PasswordTitleFormat" xml:space="preserve">
+    <value>Iniciar sesión en {0}</value>
+  </data>
+  <data name="Remote_PasswordMessageFormat" xml:space="preserve">
+    <value>Contraseña de {0}. Se guarda en tu llavero.</value>
+  </data>
+  <data name="Remote_PasswordRetryFormat" xml:space="preserve">
+    <value>{0} no lo aceptó: {1}
+Inténtalo de nuevo.</value>
+  </data>
+  <data name="Remote_NoFileManager" xml:space="preserve">
+    <value>Los archivos de un servidor no se pueden mostrar en el administrador de archivos</value>
+  </data>
+  <data name="Remote_NoBranchView" xml:space="preserve">
+    <value>La vista de rama solo funciona en carpetas locales</value>
+  </data>
+  <data name="Connections_Title" xml:space="preserve">
+    <value>Conexiones</value>
+  </data>
+  <data name="Connections_Intro" xml:space="preserve">
+    <value>Los servidores y cuentas de almacenamiento se abren en un panel como cualquier carpeta. Las contraseñas se guardan en tu llavero.</value>
+  </data>
+  <data name="Connections_New" xml:space="preserve">
+    <value>Nueva conexión</value>
+  </data>
+  <data name="Connections_Share" xml:space="preserve">
+    <value>Conectar a recurso compartido…</value>
+  </data>
+  <data name="Connections_Saved" xml:space="preserve">
+    <value>GUARDADAS</value>
+  </data>
+  <data name="Connections_Nearby" xml:space="preserve">
+    <value>EN ESTA RED</value>
+  </data>
+  <data name="Connections_Empty" xml:space="preserve">
+    <value>Aún no hay conexiones: agrega una SFTP, FTP, WebDAV, S3 o Azure con Nueva conexión.</value>
+  </data>
+  <data name="Connections_Connected" xml:space="preserve">
+    <value>conectado</value>
+  </data>
+  <data name="Connections_Open" xml:space="preserve">
+    <value>Abrir en el panel</value>
+  </data>
+  <data name="Connections_Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="Connections_Disconnect" xml:space="preserve">
+    <value>Desconectar</value>
+  </data>
+  <data name="Connections_DisconnectedFormat" xml:space="preserve">
+    <value>Desconectado de {0}</value>
+  </data>
+  <data name="Connections_DeleteTitle" xml:space="preserve">
+    <value>Eliminar conexión</value>
+  </data>
+  <data name="Connections_DeleteMessageFormat" xml:space="preserve">
+    <value>¿Eliminar {0} y olvidar su contraseña? No se toca nada en el servidor.</value>
+  </data>
+  <data name="Connections_Rescan" xml:space="preserve">
+    <value>Buscar de nuevo</value>
+  </data>
+  <data name="Connections_Scanning" xml:space="preserve">
+    <value>Buscando servidores…</value>
+  </data>
+  <data name="Connections_NoneFound" xml:space="preserve">
+    <value>Ningún servidor de archivos se ha anunciado.</value>
+  </data>
+  <data name="Connections_ShareTitle" xml:space="preserve">
+    <value>Conectar a recurso compartido</value>
+  </data>
+  <data name="Connections_ShareMessage" xml:space="preserve">
+    <value>La dirección del recurso, como smb://nas/media o \\nas\media.</value>
+  </data>
+  <data name="Connections_ShareInvalid" xml:space="preserve">
+    <value>Esa no es una dirección de recurso compartido.</value>
+  </data>
+  <data name="Connections_ShareNameFormat" xml:space="preserve">
+    <value>¿Qué recurso de {0}?</value>
+  </data>
+  <data name="Connections_ShareUserFormat" xml:space="preserve">
+    <value>{0} pide una cuenta. Nombre de usuario:</value>
+  </data>
+  <data name="ConnectionEdit_NewTitle" xml:space="preserve">
+    <value>Nueva conexión</value>
+  </data>
+  <data name="ConnectionEdit_EditTitle" xml:space="preserve">
+    <value>Editar conexión</value>
+  </data>
+  <data name="ConnectionEdit_Test" xml:space="preserve">
+    <value>Probar</value>
+  </data>
+  <data name="ConnectionEdit_Server" xml:space="preserve">
+    <value>SERVIDOR</value>
+  </data>
+  <data name="ConnectionEdit_SignIn" xml:space="preserve">
+    <value>INICIO DE SESIÓN</value>
+  </data>
+  <data name="ConnectionEdit_Protocol" xml:space="preserve">
+    <value>Protocolo</value>
+  </data>
+  <data name="ConnectionEdit_Name" xml:space="preserve">
+    <value>Nombre</value>
+  </data>
+  <data name="ConnectionEdit_NamePlaceholder" xml:space="preserve">
+    <value>Se muestra en la barra de unidades</value>
+  </data>
+  <data name="ConnectionEdit_Host" xml:space="preserve">
+    <value>Servidor</value>
+  </data>
+  <data name="ConnectionEdit_Account" xml:space="preserve">
+    <value>Cuenta de almacenamiento</value>
+  </data>
+  <data name="ConnectionEdit_Port" xml:space="preserve">
+    <value>Puerto</value>
+  </data>
+  <data name="ConnectionEdit_StartPath" xml:space="preserve">
+    <value>Carpeta inicial</value>
+  </data>
+  <data name="ConnectionEdit_Region" xml:space="preserve">
+    <value>Región</value>
+  </data>
+  <data name="ConnectionEdit_Endpoint" xml:space="preserve">
+    <value>Punto de conexión</value>
+  </data>
+  <data name="ConnectionEdit_EndpointPlaceholder" xml:space="preserve">
+    <value>Solo para MinIO, R2, Azurite…</value>
+  </data>
+  <data name="ConnectionEdit_User" xml:space="preserve">
+    <value>Nombre de usuario</value>
+  </data>
+  <data name="ConnectionEdit_AccessKey" xml:space="preserve">
+    <value>ID de clave de acceso</value>
+  </data>
+  <data name="ConnectionEdit_Anonymous" xml:space="preserve">
+    <value>Vacío para anónimo</value>
+  </data>
+  <data name="ConnectionEdit_KeyFile" xml:space="preserve">
+    <value>Clave privada</value>
+  </data>
+  <data name="ConnectionEdit_Password" xml:space="preserve">
+    <value>Contraseña</value>
+  </data>
+  <data name="ConnectionEdit_Passphrase" xml:space="preserve">
+    <value>Frase de contraseña de la clave</value>
+  </data>
+  <data name="ConnectionEdit_SecretKey" xml:space="preserve">
+    <value>Clave de acceso secreta</value>
+  </data>
+  <data name="ConnectionEdit_AccountKey" xml:space="preserve">
+    <value>Clave, SAS o cadena de conexión</value>
+  </data>
+  <data name="ConnectionEdit_SecretSaved" xml:space="preserve">
+    <value>Guardada: déjalo vacío para conservarla</value>
+  </data>
+  <data name="ConnectionEdit_KeychainNote" xml:space="preserve">
+    <value>Se guarda en tu llavero, nunca en el archivo de ajustes. Déjalo vacío para que se pida al conectar.</value>
+  </data>
+  <data name="ConnectionEdit_Forget" xml:space="preserve">
+    <value>Olvidar la contraseña guardada</value>
+  </data>
+  <data name="ConnectionEdit_SecretForgotten" xml:space="preserve">
+    <value>Contraseña olvidada</value>
+  </data>
+  <data name="ConnectionEdit_PathPreview" xml:space="preserve">
+    <value>Se abre en</value>
+  </data>
+  <data name="ConnectionEdit_NeedName" xml:space="preserve">
+    <value>Ponle un nombre a la conexión.</value>
+  </data>
+  <data name="ConnectionEdit_NeedHost" xml:space="preserve">
+    <value>Escribe el nombre o la dirección del servidor.</value>
+  </data>
+  <data name="ConnectionEdit_NeedAccount" xml:space="preserve">
+    <value>Escribe el nombre de la cuenta de almacenamiento.</value>
+  </data>
+  <data name="ConnectionEdit_KeyFileMissing" xml:space="preserve">
+    <value>No se encontró el archivo de clave privada.</value>
+  </data>
+  <data name="ConnectionEdit_ClashFormat" xml:space="preserve">
+    <value>{0} ya se conecta al mismo lugar.</value>
+  </data>
+  <data name="ConnectionEdit_TestOkFormat" xml:space="preserve">
+    <value>Conectado a {0}</value>
+  </data>
+  <data name="ConnectionEdit_TestFailed" xml:space="preserve">
+    <value>No se pudo conectar</value>
+  </data>
+  <data name="ConnectionEdit_TestTimeout" xml:space="preserve">
+    <value>El servidor no respondió en 30 segundos.</value>
+  </data>
 </root>

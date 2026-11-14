@@ -251,6 +251,7 @@
                     </Grid>
                 </Border>
                 <shiny:PillView Grid.Column="4" Text="{Binding ActiveTab.ArchiveBadge}" IsVisible="{Binding ActiveTab.IsArchive}" Type="Warning" FontSize="10" VerticalOptions="Center" Margin="4,0" />
+                <shiny:PillView Grid.Column="4" Text="{Binding ActiveTab.ArchiveBadge}" IsVisible="{Binding ActiveTab.IsRemote}" Type="Info" FontSize="10" VerticalOptions="Center" Margin="4,0" AutomationId="RemoteBadge" />
                 <!-- the customizable part (PaneToolbar): right-click it, or Settings, to choose what goes here -->
                 <HorizontalStackLayout Grid.Column="5" Grid.ColumnSpan="2" x:Name="ToolbarStrip" Spacing="0" BindableLayout.ItemsSource="{Binding ToolbarItems}">
                     <BindableLayout.ItemTemplate>

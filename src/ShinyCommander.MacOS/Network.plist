@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Connections (⌘K) lists the file servers on the network through Bonjour - macOS only answers for the types listed
+         here, and asks the user once for Local Network access with this reason -->
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>ShinyCommander looks for file servers (SMB, SFTP, WebDAV, FTP) on your network so you can connect to them.</string>
+    <key>NSBonjourServices</key>
+    <array>
+        <string>_smb._tcp</string>
+        <string>_sftp-ssh._tcp</string>
+        <string>_webdav._tcp</string>
+        <string>_webdavs._tcp</string>
+        <string>_ftp._tcp</string>
+    </array>
+</dict>
+</plist>

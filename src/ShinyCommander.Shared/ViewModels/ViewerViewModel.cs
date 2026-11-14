@@ -148,7 +148,7 @@ public partial class ViewerViewModel(VirtualFileSystem vfs, AppSettings settings
     // TC lister: N/P walk the files in the same folder without leaving the viewer
     async Task Step(int delta)
     {
-        var dir = Path.GetDirectoryName(this.FilePath);
+        var dir = VirtualFileSystem.GetDirectory(this.FilePath);
         if (dir == null)
             return;
 

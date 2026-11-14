@@ -89,6 +89,12 @@ public sealed class Commander(AgentClient client)
     /// <summary>The UI language from here on ("fr", "es") - dialogs and newly opened pages. Reset goes back to English.</summary>
     public Task<AppState> Culture(string name) => this.Call("culture", new { name });
 
+    /// <summary>Saves a remote connection (memory keychain); <see cref="LastResult"/> is its start path.</summary>
+    public Task<AppState> Connection(string protocol, string name, string host, int port, string user, string secret, string start = "/")
+        => this.Call("connection", new { protocol, name, host, port, user, secret, start });
+
+    public Task<AppState> RemoveConnection(string name) => this.Call("connection", new { remove = name });
+
     /// <summary>Deletes go to the trash (a test folder, <see cref="TestConfig.TrashDir"/>) until the next reset.</summary>
     public Task<AppState> UseTrash(bool on = true) => this.Call("use_trash", new { on });
 

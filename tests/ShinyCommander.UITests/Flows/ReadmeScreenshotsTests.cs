@@ -22,6 +22,23 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
         await File.WriteAllBytesAsync(Path.Combine(OutDir, name + ".png"), png!);
     }
 
+    async Task RightClick(string text, string within)
+    {
+        var (x, y) = await this.Ui.Center(await this.Ui.ByText(text, within: within));
+        await this.App.ClickAt(x, y, secondary: true);
+    }
+
+    // a tab's colour and icon, from its menu
+    async Task StyleTab(string side, string tab, string color, string? icon = null)
+    {
+        await this.RightClick(tab, side + "Tabs");
+        await this.Ui.ById(side + "TabMenu");
+        await this.Ui.Tap("TabColor:" + color);
+        if (icon != null)
+            await this.Ui.Tap("TabIcon:" + icon);
+        await this.Ui.Tap(side + "TabMenuBackdrop");
+    }
+
     async Task Back()
     {
         await this.Ui.Tap("PageBack");
@@ -38,12 +55,60 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
         await this.Fixture.Client.ResizeAsync(1440, 900);
         await this.App.Reset(root, views);
 
+        // tabs: the repo itself locked, blue, starred; docs and tests beside it; the Core project on the right
+        var repoName = Path.GetFileName(root);
+        await this.RightClick(repoName, "LeftTabs");
+        await this.Ui.Click("Lock tab", within: "LeftTabMenu");
+        await this.StyleTab("Left", repoName, "Blue", "star");
+        foreach (var (folder, color) in new[] { ("docs", "Green"), ("tests", "Orange") })
+        {
+            await this.Ui.Tap("LeftNewTab"); // a new, unlocked tab on the same folder - then off to its own
+            await this.App.Navigate(Path.Combine(root, folder), "left");
+            await this.StyleTab("Left", folder, color);
+        }
+        await this.Ui.Click(repoName, within: "LeftTabs");
+
+        await this.Ui.Tap("RightNewTab");
+        await this.App.Navigate(Path.Combine(root, "src", "ShinyCommander.Core"), "right");
+        await this.StyleTab("Right", "ShinyCommander.Core", "Purple", "database");
+        await this.Ui.Click("Views", within: "RightTabs");
+
         // the main window: a few marked files on the right. No folder tree - it would show whatever else sits beside
         // the repo on this machine
         await this.App.Cursor("MainPage.xaml", "right");
         await this.App.Mark("FilePanelView.xaml", "FilePanelView.xaml.cs", "MainPage.xaml", "MainPage.xaml.cs");
         await this.App.Cursor("README.md", "left");
         await this.Shot("main");
+
+        // a tab's menu: lock, name, colour, icon
+        await this.RightClick(repoName, "LeftTabs");
+        await this.Ui.ById("LeftTabMenu");
+        await this.Shot("tab-menu");
+        await this.Ui.Tap("LeftTabMenuBackdrop");
+
+        // the breadcrumbs: a crumb drops down the folders inside it
+        await this.Ui.Tap(await this.Ui.Tappable(await this.Ui.ById("CrumbMenu:" + Path.Combine(root, "src"))));
+        await this.Ui.ById("RightCrumbMenu");
+        await this.Shot("breadcrumbs");
+        await this.App.Navigate(Path.Combine(root, "src"), "right"); // a folder change closes the dropdown
+        await this.App.Navigate(views, "right");
+
+        // an archive, browsed and changed like a folder: the docs folder packed to 7z
+        // into the UI tests' (ignored) artifacts folder, so the path reads as part of the repo
+        var packed = Path.Combine(root, "tests", "ShinyCommander.UITests", "artifacts", "docs.7z");
+        if (File.Exists(packed))
+            File.Delete(packed);
+        await this.App.Cursor("docs", "left");
+        await this.App.Answer(packed);
+        await this.App.Key("Alt+F5");
+        for (var i = 0; i < 100 && !File.Exists(packed); i++)
+            await Task.Delay(100);
+        await this.App.WaitFor(x => x.Jobs.Count > 0 && x.Jobs.All(j => j.State != "Running"), "the pack to finish", TimeSpan.FromSeconds(30));
+        await this.App.Navigate(Path.Combine(packed, "docs"), "right");
+        await this.App.Cursor("screenshots", "right");
+        await this.Shot("archive");
+        await this.App.Navigate(views, "right");
+        await this.App.Cursor("README.md", "left");
 
         // quick view: the other panel renders the file under the cursor
         await this.App.Command("QuickView");

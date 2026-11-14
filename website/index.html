@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ShinyCommander — the dual-pane file manager</title>
+    <meta name="description" content="A keyboard-first, dual-pane file manager for macOS, Windows and Linux. Folder tabs you can lock, archives that work like folders, and the full Total Commander keymap.">
+    <meta name="theme-color" content="#1a1440">
+    <meta property="og:title" content="ShinyCommander — the dual-pane file manager">
+    <meta property="og:description" content="Keyboard-first, dual-pane file management for macOS, Windows and Linux.">
+    <meta property="og:url" content="https://shinysoftware.github.io/Commander/">
+    <meta property="og:image" content="https://shinysoftware.github.io/Commander/screenshots/main.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <link rel="icon" type="image/png" href="appicon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- the hero, on the icon's indigo night -->
+<header class="hero">
+    <div class="glow glow-pink"></div>
+    <div class="glow glow-purple"></div>
+    <div class="glow glow-green"></div>
+
+    <nav class="nav wrap">
+        <a class="brand" href="#">
+            <img src="appicon.png" alt="" width="34" height="34">
+            <span>ShinyCommander</span>
+        </a>
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#archives">Archives</a>
+            <a href="#keyboard">Keyboard</a>
+            <a href="#gallery">Gallery</a>
+            <a class="nav-cta" href="#download">Download</a>
+        </div>
+    </nav>
+
+    <div class="hero-copy wrap">
+        <p class="eyebrow">Free &amp; open source · macOS · Windows · Linux</p>
+        <h1>Two panels.<br><span class="gradient-text">Every file, at your fingertips.</span></h1>
+        <p class="lede">
+            A modern, keyboard-first file manager in the spirit of Total Commander. Lock your favourite folders into
+            tabs, open zip, 7z and tar archives like folders, and keep both hands on the keyboard.
+        </p>
+        <div class="hero-actions">
+            <a class="button primary" href="#download">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16"/></svg>
+                Download
+            </a>
+            <a class="button ghost" href="https://github.com/ShinySoftware/Commander">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+                View on GitHub
+            </a>
+        </div>
+    </div>
+
+    <div class="hero-shot wrap">
+        <figure class="window">
+            <div class="window-bar"><i></i><i></i><i></i></div>
+            <img src="screenshots/main.png" alt="ShinyCommander showing two panels with coloured folder tabs, breadcrumbs and marked files" width="1440" height="900">
+        </figure>
+    </div>
+</header>
+
+<main>
+
+    <!-- the headline features, each with its picture -->
+    <section id="features" class="section">
+        <div class="wrap">
+            <p class="section-eyebrow">Made for moving fast</p>
+            <h2>Everything a power user reaches for</h2>
+            <p class="section-lede">Built with .NET MAUI and Shiny Controls - a native app on all three desktops, from one code base.</p>
+
+            <article class="showcase">
+                <div class="showcase-copy">
+                    <span class="chip">New</span>
+                    <h3>Folder tabs, your way</h3>
+                    <p>Tabs sit on top of each panel like real folder tabs, with a badge counting what you've marked. Right-click one to rename it, give it a colour and an icon.</p>
+                    <ul class="ticks">
+                        <li><strong>Lock</strong> a tab and it stays on its folder - anywhere else opens in a new tab</li>
+                        <li>Home, Desktop, Documents, Downloads and cloud folders start as locked tabs</li>
+                        <li>Tabs, locks, names and colours come back on the next launch</li>
+                    </ul>
+                </div>
+                <figure class="shot focus" style="--x: 0%; --y: 19%" data-zoom><img src="screenshots/tab-menu.png" alt="The tab menu with lock, rename, colour swatches and icons" loading="lazy" width="1440" height="900"></figure>
+            </article>
+
+            <article class="showcase flip">
+                <div class="showcase-copy">
+                    <span class="chip">New</span>
+                    <h3>Breadcrumbs that drop down</h3>
+                    <p>The path is a breadcrumb trail. Click a crumb to jump there, or its chevron to see the folders inside - and pick one without leaving the keyboard row.</p>
+                    <ul class="ticks">
+                        <li>The folder you're in is always in view, however deep</li>
+                        <li>Prefer typing? The pencil turns it back into a path box</li>
+                    </ul>
+                </div>
+                <figure class="shot focus" style="--x: 50%; --y: 19%" data-zoom><img src="screenshots/breadcrumbs.png" alt="A breadcrumb dropdown listing the folders inside src" loading="lazy" width="1440" height="900"></figure>
+            </article>
+
+            <article class="showcase" id="archives">
+                <div class="showcase-copy">
+                    <span class="chip">New</span>
+                    <h3>Archives that act like folders</h3>
+                    <p>Press Enter on an archive and work inside it like any folder: copy in and out, move, rename, delete, make folders - or press F4 to edit a file and save it straight back in.</p>
+                    <div class="formats">
+                        <span class="format rw">zip</span><span class="format rw">7z</span><span class="format rw">tar</span><span class="format rw">tar.gz</span><span class="format rw">tar.bz2</span><span class="format rw">tar.zst</span>
+                        <span class="format ro">rar</span><span class="format ro">tar.xz</span>
+                    </div>
+                    <p class="note"><span class="dot rw"></span>read &amp; write <span class="dot ro"></span>browse &amp; copy out</p>
+                    <ul class="ticks">
+                        <li><strong>Pack</strong> files or whole folders - everything under them - into any writable format</li>
+                        <li>Copy straight from one archive into another</li>
+                    </ul>
+                </div>
+                <figure class="shot focus" style="--x: 50%; --y: 19%" data-zoom><img src="screenshots/archive.png" alt="A 7z archive open in the right panel like a folder" loading="lazy" width="1440" height="900"></figure>
+            </article>
+
+            <article class="showcase flip">
+                <div class="showcase-copy">
+                    <h3>Quick view, side by side</h3>
+                    <p>Turn the other panel into a live preview of whatever is under the cursor - text, images and beautifully rendered Markdown, inside archives too.</p>
+                    <ul class="ticks">
+                        <li>The lister (F3) adds hex view and walks the folder with N / P</li>
+                        <li>Thumbnails, details and a folder tree, chosen per panel</li>
+                    </ul>
+                </div>
+                <figure class="shot focus" style="--x: 50%; --y: 19%" data-zoom><img src="screenshots/quick-view.png" alt="Quick view rendering a Markdown file in the other panel" loading="lazy" width="1440" height="900"></figure>
+            </article>
+        </div>
+    </section>
+
+    <!-- the rest, as a grid -->
+    <section class="section tinted">
+        <div class="wrap">
+            <p class="section-eyebrow">And so much more</p>
+            <h2>The details that make it yours</h2>
+            <div class="grid">
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="16" rx="2"/><rect x="13" y="4" width="8" height="16" rx="2"/></svg>
+                    <h4>Dual panels</h4>
+                    <p>Side by side or stacked, with drive chips, a free-space meter, sortable columns and live refresh.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><path d="M7 3h10l4 4v14H3V3h4z"/><path d="M8 13h8M8 17h5"/></svg>
+                    <h4>Background jobs</h4>
+                    <p>Copy, move, delete, pack and unpack keep running while you work - with progress, Stop and Go To.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                    <h4>Find files</h4>
+                    <p>Total Commander masks like <code>*.cs | bin/</code>, content search, size filters and go-to-file.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7"/><path d="m17 15 3 3-3 3"/></svg>
+                    <h4>Multi-rename</h4>
+                    <p>Placeholders, counters, regex search &amp; replace and a live preview - with undo, even inside archives.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>
+                    <h4>Synchronize folders</h4>
+                    <p>Compare trees by date, size or content and copy what's different, in either direction.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 10 3 2-3 2M12 15h5"/></svg>
+                    <h4>Command line</h4>
+                    <p>Type anywhere: <code>cd</code> moves the panel, anything else runs in your shell with output in a console.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 14l2 2 4-4"/></svg>
+                    <h4>Built-in editor</h4>
+                    <p>Edit with F4 - Markdown gets a live preview - or hand files to your favourite editor.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+                    <h4>Light &amp; dark</h4>
+                    <p>Follows your system, or pick a theme. Every icon and colour is tuned for both.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>
+                    <h4>Speaks your language</h4>
+                    <p>English, French and Spanish, following your system or chosen in Settings.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- the keymap, as keycaps -->
+    <section id="keyboard" class="section">
+        <div class="wrap">
+            <p class="section-eyebrow">Keyboard first</p>
+            <h2>The keys you already know</h2>
+            <p class="section-lede">The full Total Commander keymap, on every platform. <kbd>⌘</kbd> on a Mac, <kbd>Ctrl</kbd> everywhere else - and <kbd>F1</kbd> shows them all.</p>
+            <div class="keys">
+                <div class="key"><kbd>F3</kbd><span>View</span></div>
+                <div class="key"><kbd>F4</kbd><span>Edit</span></div>
+                <div class="key"><kbd>F5</kbd><span>Copy</span></div>
+                <div class="key"><kbd>F6</kbd><span>Move</span></div>
+                <div class="key"><kbd>F7</kbd><span>New folder</span></div>
+                <div class="key"><kbd>F8</kbd><span>Delete</span></div>
+                <div class="key"><kbd>Alt</kbd><kbd>F5</kbd><span>Pack</span></div>
+                <div class="key"><kbd>Alt</kbd><kbd>F9</kbd><span>Unpack</span></div>
+                <div class="key"><kbd>Alt</kbd><kbd>F7</kbd><span>Find files</span></div>
+                <div class="key"><kbd>⌘</kbd><kbd>T</kbd><span>New tab</span></div>
+                <div class="key"><kbd>Ctrl</kbd><kbd>Tab</kbd><span>Next tab</span></div>
+                <div class="key"><kbd>⌘</kbd><kbd>M</kbd><span>Multi-rename</span></div>
+                <div class="key"><kbd>Ctrl</kbd><kbd>Q</kbd><span>Quick view</span></div>
+                <div class="key"><kbd>⌘</kbd><kbd>J</kbd><span>Jobs</span></div>
+                <div class="key"><kbd>⌘</kbd><kbd>D</kbd><span>Hotlist</span></div>
+                <div class="key"><kbd>Tab</kbd><span>Other panel</span></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- every other picture -->
+    <section id="gallery" class="section tinted">
+        <div class="wrap">
+            <p class="section-eyebrow">Gallery</p>
+            <h2>Have a look around</h2>
+            <div class="gallery">
+                <figure class="shot" data-zoom><img src="screenshots/dark.png" alt="Dark mode" loading="lazy" width="1440" height="900"><figcaption>Dark mode</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/thumbnails.png" alt="Thumbnails view" loading="lazy" width="1440" height="900"><figcaption>Thumbnails</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/viewer.png" alt="The lister showing rendered Markdown" loading="lazy" width="1440" height="900"><figcaption>Lister (F3)</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/find.png" alt="Find files" loading="lazy" width="1440" height="900"><figcaption>Find files</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/multi-rename.png" alt="Multi-rename with a live preview" loading="lazy" width="1440" height="900"><figcaption>Multi-rename</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/settings.png" alt="Settings" loading="lazy" width="1440" height="900"><figcaption>Settings</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/customize-toolbar.png" alt="Choosing the buttons beside each path" loading="lazy" width="1440" height="900"><figcaption>Your own toolbar</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/tab-menu.png" alt="The tab menu" loading="lazy" width="1440" height="900"><figcaption>Tab colours &amp; icons</figcaption></figure>
+            </div>
+        </div>
+    </section>
+
+    <!-- downloads -->
+    <section id="download" class="section download">
+        <div class="glow glow-purple"></div>
+        <div class="wrap">
+            <img class="download-icon" src="appicon.png" alt="" width="96" height="96">
+            <h2>Get ShinyCommander</h2>
+            <p class="section-lede">Free and open source. Pick your desktop.</p>
+            <div class="platforms">
+                <a class="platform" href="https://github.com/ShinySoftware/Commander/releases/latest">
+                    <svg viewBox="0 0 24 24"><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.1-1.7-2.9-1.9-3.5-1.9-1.5-.2-2.9.9-3.7.9-.8 0-1.9-.9-3.2-.8-1.6 0-3.2 1-4 2.4-1.7 3-.4 7.4 1.2 9.8.8 1.2 1.8 2.5 3 2.4 1.2 0 1.7-.8 3.1-.8 1.5 0 1.9.8 3.2.8 1.3 0 2.2-1.2 3-2.4.9-1.4 1.3-2.7 1.3-2.8-.1 0-2.5-1-2.5-3.9zM14 5.5c.7-.8 1.1-1.9 1-3-1 0-2.1.7-2.8 1.5-.6.7-1.2 1.8-1 2.9 1.1.1 2.1-.6 2.8-1.4z"/></svg>
+                    <strong>macOS</strong>
+                    <span>Apple silicon · signed &amp; notarized · updates itself</span>
+                </a>
+                <a class="platform" href="https://github.com/ShinySoftware/Commander/releases/latest">
+                    <svg viewBox="0 0 24 24"><path d="M3 5.5 10 4.5v7H3zM11 4.4 21 3v8.5H11zM3 12.5h7v7l-7-1zM11 12.5h10V21l-10-1.4z"/></svg>
+                    <strong>Windows</strong>
+                    <span>Installer for x64 and Arm64</span>
+                </a>
+                <a class="platform" href="https://github.com/ShinySoftware/Commander/releases/latest">
+                    <svg viewBox="0 0 24 24"><path d="M12 2c-2 0-3 1.8-3 4 0 1.4.4 2.3.1 3.4-.4 1.4-2.6 3.3-3 6-.3 1.8.5 2.8 1.3 3.2-.3.9.3 2.4 2.4 2.4 1.1 0 1.6-.6 2.2-.6s1.1.6 2.2.6c2.1 0 2.7-1.5 2.4-2.4.8-.4 1.6-1.4 1.3-3.2-.4-2.7-2.6-4.6-3-6-.3-1.1.1-2-.1-3.4C15 3.8 14 2 12 2z"/><circle cx="10.5" cy="6" r=".6"/><circle cx="13.5" cy="6" r=".6"/></svg>
+                    <strong>Linux</strong>
+                    <span>.deb and .rpm for x64 and Arm64</span>
+                </a>
+            </div>
+            <p class="small">Every release, with checksums, is on <a href="https://github.com/ShinySoftware/Commander/releases">GitHub</a>.</p>
+        </div>
+    </section>
+</main>
+
+<footer class="footer">
+    <div class="wrap footer-row">
+        <div class="brand small-brand">
+            <img src="appicon.png" alt="" width="24" height="24">
+            <span>ShinyCommander</span>
+        </div>
+        <p>Built with <a href="https://github.com/dotnet/maui">.NET MAUI</a>, <a href="https://github.com/dotnet/maui-labs">maui-labs</a> and <a href="https://github.com/shinyorg/controls">Shiny Controls</a> · <a href="https://github.com/ShinySoftware/Commander">Source on GitHub</a></p>
+    </div>
+</footer>
+
+<div class="lightbox" hidden>
+    <button class="lightbox-close" aria-label="Close">×</button>
+    <img alt="">
+</div>
+
+<script src="site.js"></script>
+</body>
+</html>

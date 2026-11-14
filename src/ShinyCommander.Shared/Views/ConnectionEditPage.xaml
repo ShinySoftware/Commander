@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:l="clr-namespace:ShinyCommander"
+             x:Class="ShinyCommander.Views.ConnectionEditPage"
+             x:DataType="vm:ConnectionEditViewModel">
+
+    <shiny:KeyboardShortcuts.Shortcuts>
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
+        <shiny:KeyboardShortcut Gesture="Primary+S" Command="{Binding SaveCommand}" Description="{l:Tr Common_Save}" />
+    </shiny:KeyboardShortcuts.Shortcuts>
+
+    <ContentPage.Resources>
+        <!-- one row of the form: label on the left, field on the right -->
+        <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource Subtle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="VerticalOptions" Value="Center" />
+            <Setter Property="HorizontalTextAlignment" Value="End" />
+        </Style>
+        <Style x:Key="FieldRow" TargetType="Grid">
+            <Setter Property="ColumnDefinitions" Value="150,*" />
+            <Setter Property="ColumnSpacing" Value="14" />
+            <Setter Property="MinimumHeightRequest" Value="36" />
+        </Style>
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+            <shiny:ShinyButton AutomationId="PageBack" Text="{l:Tr Page_Back}" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="{Binding Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" />
+            <shiny:ShinyButton Grid.Column="2" AutomationId="TestConnection" Text="{l:Tr ConnectionEdit_Test}" LeftMotionIcon="activity" Command="{Binding TestCommand}" Appearance="Text" FontSize="12" IconSize="13" ContentPadding="6,2" />
+            <shiny:ShinyButton Grid.Column="3" AutomationId="SaveConnection" Text="{l:Tr Common_Save}" LeftMotionIcon="check" Command="{Binding SaveCommand}" Appearance="Text" FontSize="12" IconSize="13" ContentPadding="6,2" />
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <Grid HorizontalOptions="Center" WidthRequest="640" Padding="0,16" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
+                <Border Style="{StaticResource Card}" Padding="16,12">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{l:Tr ConnectionEdit_Server}" Style="{StaticResource SectionTitle}" FontSize="11" Margin="0,0,0,4" />
+
+                        <Grid Style="{StaticResource FieldRow}">
+                            <Label Text="{l:Tr ConnectionEdit_Protocol}" Style="{StaticResource FieldLabel}" />
+                            <Picker Grid.Column="1" AutomationId="ConnProtocol" ItemsSource="{Binding Protocols}" SelectedIndex="{Binding ProtocolIndex, Mode=TwoWay}" FontSize="13" />
+                        </Grid>
+                        <Grid Style="{StaticResource FieldRow}">
+                            <Label Text="{l:Tr ConnectionEdit_Name}" Style="{StaticResource FieldLabel}" />
+                            <Entry Grid.Column="1" AutomationId="ConnName" Text="{Binding Name}" Placeholder="{l:Tr ConnectionEdit_NamePlaceholder}" />
+                        </Grid>
+                        <Grid Style="{StaticResource FieldRow}" IsVisible="{Binding ShowHost}">
+                            <Label Text="{Binding HostLabel}" Style="{StaticResource FieldLabel}" />
+                            <Entry Grid.Column="1" AutomationId="ConnHost" Text="{Binding Host}" Placeholder="{Binding HostPlaceholder}" />
+                        </Grid>
+                        <Grid Style="{StaticResource FieldRow}" IsVisible="{Binding IsServer}">
+                            <Label Text="{l:Tr ConnectionEdit_Port}" Style="{StaticResource FieldLabel}" />
+                            <Entry Grid.Column="1" AutomationId="ConnPort" Text="{Binding Port}" Placeholder="{Binding PortPlaceholder}" Keyboard="Numeric" WidthRequest="100" HorizontalOptions="Start" />
+                        </Grid>
+                        <Grid Style="{StaticResource FieldRow}">
+                            <Label Text="{l:Tr ConnectionEdit_StartPath}" Style="{StaticResource FieldLabel}" />
+                            <Entry Grid.Column="1" AutomationId="ConnStartPath" Text="{Binding StartPath}" Placeholder="/" />
+                        </Grid>
+                        <Grid Style="{StaticResource FieldRow}" IsVisible="{Binding IsS3}">
+                            <Label Text="{l:Tr ConnectionEdit_Region}" Style="{StaticResource FieldLabel}" />
+                            <Entry Grid.Column="1" AutomationId="ConnRegion" Text="{Binding Region}" Placeholder="us-east-1" />
+                        </Grid>
+                        <Grid Style="{StaticResource FieldRow}" IsVisible="{Binding IsObjectStorage}">
+                            <Label Text="{l:Tr ConnectionEdit_Endpoint}" Style="{StaticResource FieldLabel}" />
+                            <Entry Grid.Column="1" AutomationId="ConnEndpoint" Text="{Binding Endpoint}" Placeholder="{l:Tr ConnectionEdit_EndpointPlaceholder}" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border Grid.Row="1" Style="{StaticResource Card}" Padding="16,12">
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="{l:Tr ConnectionEdit_SignIn}" Style="{StaticResource SectionTitle}" FontSize="11" Margin="0,0,0,4" />
+
+                        <Grid Style="{StaticResource FieldRow}" IsVisible="{Binding ShowUser}">
+                            <Label Text="{Binding UserLabel}" Style="{StaticResource FieldLabel}" />
+                            <Entry Grid.Column="1" AutomationId="ConnUser" Text="{Binding UserName}" Placeholder="{Binding UserPlaceholder}" />
+                        </Grid>
+                        <Grid Style="{StaticResource FieldRow}" IsVisible="{Binding IsSftp}">
+                            <Label Text="{l:Tr ConnectionEdit_KeyFile}" Style="{StaticResource FieldLabel}" />
+                            <Entry Grid.Column="1" AutomationId="ConnKeyFile" Text="{Binding KeyFile}" Placeholder="~/.ssh/id_ed25519" />
+                        </Grid>
+                        <Grid Style="{StaticResource FieldRow}">
+                            <Label Text="{Binding SecretLabel}" Style="{StaticResource FieldLabel}" />
+                            <Entry Grid.Column="1" AutomationId="ConnSecret" Text="{Binding Secret}" IsPassword="True" Placeholder="{Binding SecretPlaceholder}" />
+                        </Grid>
+                        <Grid Style="{StaticResource FieldRow}">
+                            <Label Grid.Column="1" Text="{l:Tr ConnectionEdit_KeychainNote}" Style="{StaticResource Subtle}" FontSize="11" />
+                        </Grid>
+                        <Grid Style="{StaticResource FieldRow}" IsVisible="{Binding CanForget}">
+                            <shiny:ShinyButton Grid.Column="1" Text="{l:Tr ConnectionEdit_Forget}" Command="{Binding ForgetSecretCommand}" Appearance="Text" FontSize="12" ContentPadding="0,2" HorizontalOptions="Start" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Grid Grid.Row="2" ColumnDefinitions="164,*" IsVisible="{Binding HasPreview}">
+                    <Label Grid.Column="1" Style="{StaticResource Subtle}" FontSize="11" LineBreakMode="MiddleTruncation">
+                        <Label.FormattedText>
+                            <FormattedString>
+                                <Span Text="{l:Tr ConnectionEdit_PathPreview}" />
+                                <Span Text=" " />
+                                <Span Text="{Binding Preview}" FontFamily="{DynamicResource MonoFont}" />
+                            </FormattedString>
+                        </Label.FormattedText>
+                    </Label>
+                </Grid>
+
+                <ActivityIndicator Grid.RowSpan="3" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Grid>
+        </ScrollView>
+    </Grid>
+</ContentPage>

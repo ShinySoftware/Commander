@@ -62,6 +62,9 @@ public partial class AppSettings
     /// <summary>Pane toolbar command keys, comma separated (PaneToolbar) - null until customized.</summary>
     [Bind] public partial string? PaneToolbar { get; set; }
 
+    /// <summary>Saved servers and storage accounts (Core.Remote.RemoteConnection, as JSON) - their secrets are in the keychain.</summary>
+    [Bind] public partial string? RemoteConnections { get; set; }
+
     /// <summary>Directory hotlist (Ctrl+D) - newline separated.</summary>
     [Bind] public partial string? Hotlist { get; set; }
 

@@ -37,6 +37,7 @@ RIBBON = [
    ("History",[("Back","arrow-left","GoBackCommand","L","Alt+Left"),("Forward","arrow-right","GoForwardCommand","S","Alt+Right"),("Parent","arrow-up","GoParentCommand","S","Backspace")]),
    ("Places",[("Home","home","GoHomeCommand","L","Primary+Shift+H"),("Root","database","GoRootCommand","S","Primary+\\"),("Hotlist","star","HotlistCommand","S","Primary+D")]),
    ("Drives",[("Left Drive…","compass","DriveMenuLeftCommand","S","Alt+F1"),("Right Drive…","compass","DriveMenuRightCommand","S","Alt+F2"),("Other Panel","chevron-right","OpenInOtherPanelCommand","S","Primary+Right")]),
+   ("Remote",[("Connect…","wifi","ConnectionsCommand","L","Primary+K")]),
  ]),
  ("Tools","tools",ICON,[
    ("Find",[("Find Files","search","FindCommand","L","Alt+F7")]),

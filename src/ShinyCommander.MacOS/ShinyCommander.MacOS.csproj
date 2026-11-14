@@ -42,6 +42,8 @@
         <MauiIcon Include="..\ShinyCommander.Shared\Resources\AppIcon\appicon.png" />
         <!-- maui-labs writes this key in a partial plist that never reaches Info.plist, so the icon wouldn't show -->
         <PartialAppManifest Include="AppIcon.plist" />
+        <!-- Bonjour service types + the Local Network prompt for Connections' network list -->
+        <PartialAppManifest Include="Network.plist" />
     </ItemGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Debug'">

@@ -15,6 +15,9 @@ public sealed record FileEntry
     public UnixFileMode? UnixMode { get; init; }
     public bool IsParentLink { get; init; }
     public bool IsInArchive { get; init; }
+
+    /// <summary>On a server or storage account - <see cref="FullPath"/> is a URI (Remote.RemotePath).</summary>
+    public bool IsRemote { get; init; }
     public bool IsSymlink { get; init; }
 
     public string Extension => this.IsDirectory || this.IsParentLink

@@ -122,6 +122,7 @@ run.sh   build + run, filters, flags
 | `LeakTests` | Round trips (lister, help, tabs, navigation, thumbnails, quick view, dialogs, reset) leave no native views behind |
 | `ScrollTests` | A 2000-file folder stays virtualized; scroll steps, Down and PageDown keep the UI thread busy for less than a set budget (net of the test's own call overhead) |
 | `ScreensTests` (opt-in) | Screenshots of 23 screens and modes for a visual review |
+| `RemoteTests` (opt-in) | A WebDAV server in a panel: F7 makes a folder on it, F5 uploads into it; screenshots of the panel, Connections and the connection editor into `artifacts/screens/remote-*.png`. Needs `SC_UITEST_WEBDAV=host:port:user:password` (see below) |
 | `PerformanceTests` (explicit, known red) | How long F1/F3/back and tab switches keep the UI thread busy (see below) |
 
 ### Known issues the suite has pinned down
@@ -138,6 +139,25 @@ run.sh   build + run, filters, flags
   the options of every choice dialog (overwrite/skip, the drive menu, the hotlist, the columns) to zero height.
   `ShinyAppDialogs` now sizes the options list itself until #830 ships. `LayoutTests.Choice_dialogs_show_their_options`
   guards it.
+
+## Remote file systems
+
+The providers (SFTP, FTP, WebDAV, S3, Azure Blob) are covered three ways:
+
+- **`RemoteTests` in Core.Tests:** remote paths, connections, password prompting and every file operation against an
+  in-memory `IRemoteFileSystem` (`MemoryRemote`). No server needed; runs with the rest.
+- **Against real servers**, without Docker: wsgidav (WebDAV), pyftpdlib (FTP) and moto (S3) from a Python venv,
+  Azurite (`npx -p azurite azurite-blob`) for Azure, and a user-level `sshd -f <config> -D` on a high port with key
+  auth for SFTP. Point a `RemoteSessions` at each and run copy up/down, rename, move, delete and bucket create/delete
+  through `FileOperationService`.
+- **`RemoteTests` in the UI suite** (opt-in), e.g. with wsgidav on port 8090:
+
+  ```bash
+  SC_UITEST_WEBDAV=127.0.0.1:8090:tester:secret tests/ShinyCommander.UITests/run.sh -t RemoteTests
+  ```
+
+The Bonjour list on the Connections page shows a service advertised with
+`dns-sd -R "Test" _sftp-ssh._tcp local 2222`.
 
 ## Before a commit
 

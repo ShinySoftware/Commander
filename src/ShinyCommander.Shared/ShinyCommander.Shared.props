@@ -44,9 +44,12 @@
         <PackageReference Include="Shiny.Extensions.Stores" />
         <PackageReference Include="Microsoft.Extensions.Localization" />
         <PackageReference Include="Shiny.Extensions.Localization.Generator" PrivateAssets="all" />
+        <!-- servers on the local network (Bonjour) for Connect to Server -->
+        <PackageReference Include="Shiny.Net.Discovery" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="$(CommanderSharedDir)..\ShinyCommander.Core\ShinyCommander.Core.csproj" />
+        <ProjectReference Include="$(CommanderSharedDir)..\ShinyCommander.Remote\ShinyCommander.Remote.csproj" />
     </ItemGroup>
 </Project>

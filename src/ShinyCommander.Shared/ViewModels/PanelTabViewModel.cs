@@ -136,6 +136,9 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
 
     public bool IsArchive { get; private set; }
 
+    /// <summary>On a server or storage account.</summary>
+    public bool IsRemote { get; private set; }
+
     /// <summary>Inside a tar / 7z / rar / gz - browse and extract only.</summary>
     public bool IsReadOnlyArchive { get; private set; }
 
@@ -152,7 +155,11 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
             if (this.Place is { } place)
                 return place.Kind == DriveKind.Home ? L.Tree_Home : place.Label;
 
-            var name = System.IO.Path.GetFileName(this.Path);
+            // a server's root is titled by the connection ("Work NAS"), not "me@nas"
+            if (RemotePath.IsRemote(this.Path) && RemotePath.GetParent(this.Path) == null)
+                return this.vfs.Remote.Find(this.Path)?.Name ?? RemotePath.GetName(this.Path);
+
+            var name = VirtualFileSystem.GetName(this.Path);
             return String.IsNullOrEmpty(name) ? this.Path : name;
         }
     }
@@ -308,14 +315,16 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
         if (parent == null)
             return;
 
-        var child = System.IO.Path.GetFileName(this.Path);
+        var child = VirtualFileSystem.GetName(this.Path);
         await this.NavigateAsync(parent, child);
     }
 
     public Task GoRootAsync()
     {
         var loc = this.vfs.Resolve(this.Path);
-        var root = System.IO.Path.GetPathRoot(loc.ArchiveFile ?? loc.Path) ?? "/";
+        var root = loc.IsRemote
+            ? RemotePath.Split(loc.Path).Root + "/"
+            : System.IO.Path.GetPathRoot(loc.ArchiveFile ?? loc.Path) ?? "/";
         return this.NavigateAsync(root);
     }
 
@@ -347,19 +356,24 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
                 Columns = this.columns,
                 IsMarked = marked.Contains(e.FullPath),
                 CalculatedSize = sizes.GetValueOrDefault(e.FullPath),
-                Location = this.IsBranchView && !e.IsParentLink ? System.IO.Path.GetRelativePath(this.Path, System.IO.Path.GetDirectoryName(e.FullPath)!) : null
+                Location = this.IsBranchView && !e.IsParentLink ? System.IO.Path.GetRelativePath(this.Path, VirtualFileSystem.GetDirectory(e.FullPath)!) : null
             }).ToList();
 
             this.Error = null;
             var location = this.vfs.Resolve(this.Path);
             this.IsArchive = location.IsArchive;
+            this.IsRemote = location.IsRemote;
             this.IsReadOnlyArchive = location.IsReadOnlyArchive;
             this.ArchiveBadge = location.IsArchive
                 ? (location.IsReadOnlyArchive
                     ? L.Panel_ArchiveReadOnlyFormat(ArchiveFormats.Describe(ArchiveFormats.GetKind(location.ArchiveFile!)))
                     : ArchiveFormats.Describe(ArchiveFormats.GetKind(location.ArchiveFile!)))
-                : String.Empty;
+                : location.Connection is { } connection
+                    ? $"{RemoteProtocolText(connection.Protocol)} • {connection.Name}"
+                    : String.Empty;
             this.OnPropertyChanged(nameof(this.IsArchive));
+            this.OnPropertyChanged(nameof(this.IsRemote));
+            this.OnPropertyChanged(nameof(this.Title));
             this.OnPropertyChanged(nameof(this.IsReadOnlyArchive));
             this.OnPropertyChanged(nameof(this.ArchiveBadge));
             this.ApplyView(focusName);
@@ -381,6 +395,17 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
                 this.IsLoading = false;
         }
     }
+
+    public static string RemoteProtocolText(RemoteProtocol protocol) => protocol switch
+    {
+        RemoteProtocol.Sftp => "SFTP",
+        RemoteProtocol.Ftp => "FTP",
+        RemoteProtocol.Ftps => "FTPS",
+        RemoteProtocol.WebDav => "WebDAV",
+        RemoteProtocol.WebDavs => "WebDAV (https)",
+        RemoteProtocol.S3 => "S3",
+        _ => "Azure Blob"
+    };
 
     async Task<IReadOnlyList<FileEntry>> LoadBranchAsync(CancellationToken ct)
     {

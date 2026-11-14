@@ -129,6 +129,7 @@ public class DriveIconConverter : IValueConverter
         DriveKind.Home => "home",
         DriveKind.Cloud => "cloud",
         DriveKind.Network => "wifi",
+        DriveKind.Remote => drive.RootPath.StartsWith("s3:", StringComparison.Ordinal) || drive.RootPath.StartsWith("az:", StringComparison.Ordinal) ? "cloud" : "wifi",
         DriveKind.Special => drive.Name switch
         {
             "Downloads" => "download",

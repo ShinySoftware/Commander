@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/ShinyCommander.Core/ShinyCommander.Core.csproj" />
+    <Project Path="src/ShinyCommander.Remote/ShinyCommander.Remote.csproj" />
     <Project Path="src/ShinyCommander.MacOS/ShinyCommander.MacOS.csproj" />
     <Project Path="src/ShinyCommander.Linux/ShinyCommander.Linux.csproj" />
     <Project Path="src/ShinyCommander.Windows/ShinyCommander.Windows.csproj" />

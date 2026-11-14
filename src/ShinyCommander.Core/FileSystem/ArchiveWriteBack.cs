@@ -5,7 +5,7 @@ namespace ShinyCommander.Core.FileSystem;
 /// <summary>
 /// A file opened out of an archive is a copy in a temporary folder - the editor, or whatever app opened it, saves
 /// there. This watches those copies and writes each save back into its archive, so editing a file inside an archive
-/// works like editing it in a folder.
+/// works like editing it in a folder. Files opened from a server are watched the same way and uploaded on each save.
 /// </summary>
 public sealed class ArchiveWriteBack : IDisposable
 {
@@ -28,7 +28,21 @@ public sealed class ArchiveWriteBack : IDisposable
         {
             if (this.sessions.Any(x => x.Copy == copy))
                 return;
-            this.sessions.Add(new Session(this, copy, archiveFile, key, mode));
+            this.sessions.Add(new Session(this, copy, archiveFile, key, mode, null));
+        }
+    }
+
+    /// <summary>
+    /// Starts watching <paramref name="copy"/>, a download of <paramref name="key"/> (its name) from the folder
+    /// <paramref name="target"/>; <paramref name="save"/> uploads the copy at the given path.
+    /// </summary>
+    public void Watch(string copy, string target, string key, Action<string> save)
+    {
+        lock (this.gate)
+        {
+            if (this.sessions.Any(x => x.Copy == copy))
+                return;
+            this.sessions.Add(new Session(this, copy, target, key, null, save));
         }
     }
 
@@ -53,9 +67,16 @@ public sealed class ArchiveWriteBack : IDisposable
                 if (!info.Exists || (info.LastWriteTimeUtc, info.Length) == session.Written)
                     return;
 
-                var changes = new ArchiveChanges();
-                changes.Adds.Add(new ArchiveAdd(session.Key, false, () => File.OpenRead(session.Copy), info.LastWriteTime, session.Mode));
-                ArchiveWriter.Apply(session.ArchiveFile, changes);
+                if (session.Save != null)
+                {
+                    session.Save(session.Copy);
+                }
+                else
+                {
+                    var changes = new ArchiveChanges();
+                    changes.Adds.Add(new ArchiveAdd(session.Key, false, () => File.OpenRead(session.Copy), info.LastWriteTime, session.Mode));
+                    ArchiveWriter.Apply(session.ArchiveFile, changes);
+                }
                 session.Written = (info.LastWriteTimeUtc, info.Length);
                 this.Saved?.Invoke(this, new ArchiveWriteBackEventArgs(session.ArchiveFile, session.Key, null));
             }
@@ -71,8 +92,9 @@ public sealed class ArchiveWriteBack : IDisposable
         readonly FileSystemWatcher watcher;
         readonly Timer settle;
 
-        public Session(ArchiveWriteBack owner, string copy, string archiveFile, string key, UnixFileMode? mode)
+        public Session(ArchiveWriteBack owner, string copy, string archiveFile, string key, UnixFileMode? mode, Action<string>? save)
         {
+            this.Save = save;
             this.Copy = copy;
             this.ArchiveFile = archiveFile;
             this.Key = key;
@@ -97,6 +119,7 @@ public sealed class ArchiveWriteBack : IDisposable
         public string ArchiveFile { get; }
         public string Key { get; }
         public UnixFileMode? Mode { get; }
+        public Action<string>? Save { get; }
         public (DateTime, long) Written { get; set; }
 
         void Poke() => this.settle.Change(500, Timeout.Infinite);

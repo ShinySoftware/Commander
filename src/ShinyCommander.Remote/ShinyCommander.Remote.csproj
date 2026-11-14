@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <!--
+        The remote file systems: SFTP, FTP/FTPS, WebDAV, S3 and Azure Blob Storage behind Core's IRemoteFileSystem.
+        Kept out of Core, which is AOT-clean: the AWS and Azure SDKs aren't.
+    -->
+    <PropertyGroup>
+        <TargetFramework>$(BaseTargetFramework)</TargetFramework>
+        <RootNamespace>ShinyCommander.Remote</RootNamespace>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="SSH.NET" />
+        <PackageReference Include="FluentFTP" />
+        <PackageReference Include="AWSSDK.S3" />
+        <PackageReference Include="Azure.Storage.Blobs" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\ShinyCommander.Core\ShinyCommander.Core.csproj" />
+    </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="ShinyCommander.Core.Tests" />
+    </ItemGroup>
+</Project>

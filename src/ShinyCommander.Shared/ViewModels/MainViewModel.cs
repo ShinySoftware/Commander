@@ -20,6 +20,7 @@ public partial class MainViewModel : ObservableObject,
     readonly Shiny.Maui.Controls.IKeyboardShortcutService shortcuts;
     readonly ColumnSet columns;
     readonly QuitGuard quitGuard;
+    readonly RemoteConnections connections;
     // one conflict question at a time, whichever job asks
     readonly SemaphoreSlim conflictGate = new(1, 1);
     // files opened out of archives, saved back into them
@@ -39,9 +40,11 @@ public partial class MainViewModel : ObservableObject,
         ColumnSet columns,
         PaneToolbar toolbar,
         JobQueue jobs,
-        QuitGuard quitGuard
+        QuitGuard quitGuard,
+        RemoteConnections connections
     )
     {
+        this.connections = connections;
         this.shortcuts = shortcuts;
         this.columns = columns;
         this.Jobs = jobs;
@@ -65,11 +68,12 @@ public partial class MainViewModel : ObservableObject,
         this.mainThread = mainThread;
         this.writeBack.Saved += (_, e) => this.mainThread.BeginInvokeOnMainThread(async () =>
         {
-            await this.dialogs.Toast(L.Main_ArchiveSavedFormat(Path.GetFileName(e.Key), Path.GetFileName(e.ArchiveFile)), ToastKind.Success);
-            await this.Changed(Path.GetDirectoryName(e.ArchiveFile));
+            // a server's folder (uploads), or an archive file (and the folder it's in)
+            await this.dialogs.Toast(L.Main_ArchiveSavedFormat(Path.GetFileName(e.Key), VirtualFileSystem.GetName(e.ArchiveFile)), ToastKind.Success);
+            await this.Changed(RemotePath.IsRemote(e.ArchiveFile) ? e.ArchiveFile : Path.GetDirectoryName(e.ArchiveFile));
         });
         this.writeBack.Failed += (_, e) => this.mainThread.BeginInvokeOnMainThread(async () =>
-            await this.dialogs.Toast(L.Main_ArchiveSaveFailedFormat(Path.GetFileName(e.Key), Path.GetFileName(e.ArchiveFile), e.Error?.Message ?? String.Empty), ToastKind.Error));
+            await this.dialogs.Toast(L.Main_ArchiveSaveFailedFormat(Path.GetFileName(e.Key), VirtualFileSystem.GetName(e.ArchiveFile), e.Error?.Message ?? String.Empty), ToastKind.Error));
 
         // the ribbon's tab colours come from converters, which only run when RibbonTab changes - a theme switch while
         // running would leave light colours on a dark ribbon
@@ -90,6 +94,13 @@ public partial class MainViewModel : ObservableObject,
         this.Left.ScrollRequested += this.OnPanelCursorMoved;
         this.Right.ScrollRequested += this.OnPanelCursorMoved;
         this.StackPanels = settings.StackPanels;
+
+        // a connection added, removed, opened or closed - the drive bars show them
+        connections.Changed += (_, _) => mainThread.BeginInvokeOnMainThread(() =>
+        {
+            this.Left.RefreshDrives();
+            this.Right.RefreshDrives();
+        });
 
         // row colours come from converters - rebuild rows so they pick up the new palette
         if (Application.Current != null)
@@ -312,7 +323,7 @@ public partial class MainViewModel : ObservableObject,
             var dirs = @event.Directories.Select(VirtualFileSystem.Normalize).ToHashSet();
             foreach (var tab in this.Left.Tabs.Concat(this.Right.Tabs))
             {
-                if (dirs.Contains(tab.Path) || dirs.Any(d => tab.Path.StartsWith(d + Path.DirectorySeparatorChar)) || tab.IsArchive)
+                if (dirs.Contains(tab.Path) || dirs.Any(d => tab.Path.StartsWith(d + (RemotePath.IsRemote(d) ? '/' : Path.DirectorySeparatorChar))) || tab.IsArchive)
                     await tab.RefreshAsync();
             }
             this.Left.RefreshDrives();
@@ -385,12 +396,16 @@ public partial class MainViewModel : ObservableObject,
         tab.ToggleMark(item);
         if (item is { IsDirectory: true, IsMarked: true, CalculatedSize: null })
         {
-            item.CalculatedSize = item.Entry.IsInArchive
-                ? await this.vfs.CalculateArchiveFolderSizeAsync(item.Entry.FullPath)
-                : await FileOperationService.CalculateSizeAsync(item.Entry.FullPath);
+            item.CalculatedSize = await this.FolderSize(item.Entry);
             tab.UpdateStatus();
         }
     }
+
+    Task<long> FolderSize(FileEntry entry) => entry.IsRemote
+        ? this.vfs.CalculateRemoteFolderSizeAsync(entry.FullPath)
+        : entry.IsInArchive
+            ? this.vfs.CalculateArchiveFolderSizeAsync(entry.FullPath)
+            : FileOperationService.CalculateSizeAsync(entry.FullPath);
 
     [RelayCommand(CanExecute = nameof(CommandLineEmpty))]
     Task Backspace() => this.Tab?.GoUpAsync() ?? Task.CompletedTask;
@@ -451,7 +466,8 @@ public partial class MainViewModel : ObservableObject,
             {
                 await tab.GoUpAsync();
             }
-            else if (item.IsDirectory || item.Entry.IsArchive && !item.Entry.IsInArchive)
+            // an archive on a server opens like any other file (downloaded) - browsing into it needs it on disk
+            else if (item.IsDirectory || item.Entry.IsArchive && !item.Entry.IsInArchive && !item.Entry.IsRemote)
             {
                 await tab.NavigateAsync(item.Entry.FullPath);
             }
@@ -579,6 +595,12 @@ public partial class MainViewModel : ObservableObject,
         if (this.Tab is not { } tab)
             return;
 
+        if (tab.IsRemote && !tab.IsBranchView)
+        {
+            await this.dialogs.Toast(L.Remote_NoBranchView, ToastKind.Warning);
+            return;
+        }
+
         tab.IsBranchView = !tab.IsBranchView;
         await tab.RefreshAsync();
     }
@@ -668,13 +690,15 @@ public partial class MainViewModel : ObservableObject,
     async Task DriveMenu(PanelViewModel panel)
     {
         panel.RefreshDrives();
-        var options = panel.Drives.Select(d => $"{d.Name}   {d.Label}   ({L.Main_DriveFreeFormat(SizeFormatter.Friendly(d.FreeSpace))})").ToList();
+        var options = panel.Drives.Select(d => d.Kind == DriveKind.Remote
+            ? $"{d.Name}   {d.Label}"
+            : $"{d.Name}   {d.Label}   ({L.Main_DriveFreeFormat(SizeFormatter.Friendly(d.FreeSpace))})").ToList();
         var choice = await this.dialogs.Choose(panel.Side == PanelSide.Left ? L.Main_DriveMenuLeft : L.Main_DriveMenuRight, options);
         var index = choice == null ? -1 : options.IndexOf(choice);
         if (index >= 0)
         {
             this.Activate(panel);
-            await panel.NavigateAsync(panel.Drives[index].RootPath);
+            await panel.NavigateAsync(panel.Drives[index].Target);
         }
     }
 
@@ -881,13 +905,19 @@ public partial class MainViewModel : ObservableObject,
     void CloseOutput() => this.ShowOutput = false;
 
     [RelayCommand]
-    void OpenTerminal() => ShellLauncher.OpenTerminal(this.vfs.Resolve(this.ActivePanel.Path) is { IsArchive: false } l ? l.Path : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+    void OpenTerminal() => ShellLauncher.OpenTerminal(this.vfs.Resolve(this.ActivePanel.Path) is { IsArchive: false, IsRemote: false } l ? l.Path : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
 
     [RelayCommand]
     void RevealInFileManager()
     {
         if (this.Tab?.CursorItem is not { Entry.IsParentLink: false } item)
             return;
+
+        if (item.Entry.IsRemote)
+        {
+            _ = this.dialogs.Toast(L.Remote_NoFileManager, ToastKind.Warning);
+            return;
+        }
 
         // inside an archive, the archive itself is what the file manager can show
         var path = item.Entry.IsInArchive ? this.vfs.Resolve(Path.GetDirectoryName(item.Entry.FullPath)!).ArchiveFile! : item.Entry.FullPath;
@@ -907,9 +937,7 @@ public partial class MainViewModel : ObservableObject,
         if (item.IsDirectory)
         {
             // TC: F3 on a folder shows its size
-            item.CalculatedSize = item.Entry.IsInArchive
-                ? await this.vfs.CalculateArchiveFolderSizeAsync(item.Entry.FullPath)
-                : await FileOperationService.CalculateSizeAsync(item.Entry.FullPath);
+            item.CalculatedSize = await this.FolderSize(item.Entry);
             this.Tab.UpdateStatus();
             return;
         }
@@ -962,7 +990,18 @@ public partial class MainViewModel : ObservableObject,
     async Task<string> LocalCopy(FileEntry entry)
     {
         var path = await this.vfs.MaterializeAsync(entry.FullPath);
-        if (entry.IsInArchive)
+        if (entry.IsRemote)
+        {
+            // a download - each save goes back up to the server
+            var remotePath = entry.FullPath;
+            this.writeBack.Watch(path, VirtualFileSystem.GetDirectory(remotePath)!, entry.Name, copy =>
+            {
+                var (fs, inner) = this.vfs.Remote.Get(remotePath);
+                using var stream = File.OpenRead(copy);
+                fs.WriteAsync(inner, stream, stream.Length, File.GetLastWriteTime(copy)).GetAwaiter().GetResult();
+            });
+        }
+        else if (entry.IsInArchive)
         {
             var loc = this.vfs.Resolve(Path.GetDirectoryName(entry.FullPath)!);
             var key = loc.InnerPath.Length == 0 ? entry.Name : loc.InnerPath + "/" + entry.Name;
@@ -1133,7 +1172,8 @@ public partial class MainViewModel : ObservableObject,
         if (tab == null || items.Count == 0)
             return;
 
-        trash = trash && !tab.IsArchive;
+        // servers have no trash - asked as a permanent delete
+        trash = trash && !tab.IsArchive && !tab.IsRemote;
         var what = What(items);
         if (this.settings.ConfirmDelete || !trash)
         {
@@ -1331,7 +1371,7 @@ public partial class MainViewModel : ObservableObject,
     // ===========================================================================================
 
     [RelayCommand]
-    Task Find() => this.navigator.NavigateTo<SearchViewModel>(vm => vm.StartPath = this.vfs.Resolve(this.ActivePanel.Path) is { IsArchive: false } l ? l.Path : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
+    Task Find() => this.navigator.NavigateTo<SearchViewModel>(vm => vm.StartPath = this.vfs.Resolve(this.ActivePanel.Path) is { IsArchive: false, IsRemote: false } l ? l.Path : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile));
 
     [RelayCommand]
     async Task MultiRename()
@@ -1384,6 +1424,10 @@ public partial class MainViewModel : ObservableObject,
 
     [RelayCommand]
     Task Settings() => this.navigator.NavigateTo<SettingsViewModel>();
+
+    /// <summary>⌘K / Ctrl+K - saved servers and storage accounts, and the file servers on the network.</summary>
+    [RelayCommand]
+    Task Connections() => this.navigator.NavigateTo<ConnectionsViewModel>();
 
     [RelayCommand]
     Task CustomizeToolbar() => this.navigator.NavigateTo<CustomizeToolbarViewModel>();
