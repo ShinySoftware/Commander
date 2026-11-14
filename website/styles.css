@@ -258,7 +258,7 @@ h2 {
    the screenshot); the lightbox still opens the whole thing */
 .shot.focus { aspect-ratio: 16 / 10; }
 .shot.focus img {
-    width: 200%;
+    width: var(--zoom, 200%);
     max-width: none;
     transform: translate(calc(var(--x) * -1), calc(var(--y) * -1));
 }
@@ -331,7 +331,7 @@ kbd {
     border-bottom-width: 3px;
     border-radius: 8px;
 }
-.section-lede kbd { min-width: 0; font-size: 13px; padding: 2px 7px; }
+.section-lede kbd, .showcase-copy p kbd { min-width: 0; font-size: 13px; padding: 2px 7px; }
 
 /* gallery */
 .gallery { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-top: 52px; }

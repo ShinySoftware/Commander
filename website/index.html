@@ -4,10 +4,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ShinyCommander — the dual-pane file manager</title>
-    <meta name="description" content="A keyboard-first, dual-pane file manager for macOS, Windows and Linux. Folder tabs you can lock, archives that work like folders, and the full Total Commander keymap.">
+    <meta name="description" content="A keyboard-first, dual-pane file manager for macOS, Windows and Linux. Folder tabs you can lock, archives that work like folders, SFTP, FTP, WebDAV, S3 and Azure in a panel, and the full Total Commander keymap.">
     <meta name="theme-color" content="#1a1440">
     <meta property="og:title" content="ShinyCommander — the dual-pane file manager">
-    <meta property="og:description" content="Keyboard-first, dual-pane file management for macOS, Windows and Linux.">
+    <meta property="og:description" content="Keyboard-first, dual-pane file management for macOS, Windows and Linux - local disks, archives, servers and cloud storage.">
     <meta property="og:url" content="https://shinysoftware.github.io/Commander/">
     <meta property="og:image" content="https://shinysoftware.github.io/Commander/screenshots/main.png">
     <meta name="twitter:card" content="summary_large_image">
@@ -33,6 +33,7 @@
         <div class="nav-links">
             <a href="#features">Features</a>
             <a href="#archives">Archives</a>
+            <a href="#remote">Remote</a>
             <a href="#keyboard">Keyboard</a>
             <a href="#gallery">Gallery</a>
             <a class="nav-cta" href="#download">Download</a>
@@ -44,7 +45,8 @@
         <h1>Two panels.<br><span class="gradient-text">Every file, at your fingertips.</span></h1>
         <p class="lede">
             A modern, keyboard-first file manager in the spirit of Total Commander. Lock your favourite folders into
-            tabs, open zip, 7z and tar archives like folders, and keep both hands on the keyboard.
+            tabs, open zip, 7z and tar archives like folders, work on servers and cloud storage side by side with your
+            disk, and keep both hands on the keyboard.
         </p>
         <div class="hero-actions">
             <a class="button primary" href="#download">
@@ -120,6 +122,38 @@
                 <figure class="shot focus" style="--x: 50%; --y: 19%" data-zoom><img src="screenshots/archive.png" alt="A 7z archive open in the right panel like a folder" loading="lazy" width="1440" height="900"></figure>
             </article>
 
+            <article class="showcase flip" id="remote">
+                <div class="showcase-copy">
+                    <span class="chip">New</span>
+                    <h3>Servers and cloud storage, in a panel</h3>
+                    <p>Open an SFTP server, a WebDAV share or an S3 bucket and it works like any folder: copy up and down with F5, move, rename, delete, make folders - or press F4 to edit a file and every save goes straight back to the server.</p>
+                    <div class="formats">
+                        <span class="format rw">SFTP</span><span class="format rw">FTP</span><span class="format rw">FTPS</span><span class="format rw">WebDAV</span><span class="format rw">Amazon S3</span><span class="format rw">Azure Blob</span><span class="format rw">SMB shares</span>
+                    </div>
+                    <ul class="ticks">
+                        <li><strong>Buckets and containers</strong> are folders - make one to create it, delete one to remove it</li>
+                        <li>S3-compatible services too: MinIO, Cloudflare R2, Wasabi, Backblaze B2</li>
+                        <li>Moves on the same server are instant renames - nothing comes down and goes back up</li>
+                        <li>Saved connections sit in the drive bar beside your disks</li>
+                    </ul>
+                </div>
+                <figure class="shot focus" style="--x: 50%; --y: 19%" data-zoom><img src="screenshots/remote.png" alt="A website folder on the left and its S3 bucket open in the right panel" loading="lazy" width="1440" height="900"></figure>
+            </article>
+
+            <article class="showcase">
+                <div class="showcase-copy">
+                    <span class="chip">New</span>
+                    <h3>Connect in a keystroke</h3>
+                    <p>Press <kbd>⌘</kbd><kbd>K</kbd> - or <kbd>Ctrl</kbd><kbd>K</kbd> on Windows and Linux - for your saved connections and the file servers announcing themselves on your network.</p>
+                    <ul class="ticks">
+                        <li><strong>Network shares</strong> found by Bonjour mount the way your OS does it, then open like any drive</li>
+                        <li>Passwords live in your <strong>keychain</strong> - macOS Keychain, Windows Credential Manager or the Linux Secret Service - never in a settings file</li>
+                        <li>SSH keys, host keys checked on every connect, and a Test button before you save</li>
+                    </ul>
+                </div>
+                <figure class="shot focus" style="--zoom: 150%; --x: 0%; --y: 5%" data-zoom><img src="screenshots/connections.png" alt="The Connections page with saved servers and storage accounts beside the servers found on the network" loading="lazy" width="1440" height="900"></figure>
+            </article>
+
             <article class="showcase flip">
                 <div class="showcase-copy">
                     <h3>Quick view, side by side</h3>
@@ -148,7 +182,7 @@
                 <div class="card">
                     <svg viewBox="0 0 24 24"><path d="M7 3h10l4 4v14H3V3h4z"/><path d="M8 13h8M8 17h5"/></svg>
                     <h4>Background jobs</h4>
-                    <p>Copy, move, delete, pack and unpack keep running while you work - with progress, Stop and Go To.</p>
+                    <p>Copy, move, delete, pack and unpack keep running while you work - uploads and downloads too - with progress, Stop and Go To.</p>
                 </div>
                 <div class="card">
                     <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -174,6 +208,21 @@
                     <svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 14l2 2 4-4"/></svg>
                     <h4>Built-in editor</h4>
                     <p>Edit with F4 - Markdown gets a live preview - or hand files to your favourite editor.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                    <h4>Your keys stay yours</h4>
+                    <p>Server passwords and storage keys go to the OS keychain. Forget one any time from its connection.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1"/></svg>
+                    <h4>Finds your network</h4>
+                    <p>NAS boxes, Macs and servers that announce themselves show up ready to connect - SMB, SFTP, WebDAV and FTP.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>
+                    <h4>Edit anywhere</h4>
+                    <p>F4 on a file in an archive or on a server edits a copy - and every save is written back where it came from.</p>
                 </div>
                 <div class="card">
                     <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
@@ -211,6 +260,10 @@
                 <div class="key"><kbd>Ctrl</kbd><kbd>Q</kbd><span>Quick view</span></div>
                 <div class="key"><kbd>⌘</kbd><kbd>J</kbd><span>Jobs</span></div>
                 <div class="key"><kbd>⌘</kbd><kbd>D</kbd><span>Hotlist</span></div>
+                <div class="key"><kbd>⌘</kbd><kbd>K</kbd><span>Connect</span></div>
+                <div class="key"><kbd>⌘</kbd><kbd>B</kbd><span>Branch view</span></div>
+                <div class="key"><kbd>⌘</kbd><kbd>F</kbd><span>Quick filter</span></div>
+                <div class="key"><kbd>⌘</kbd><kbd>R</kbd><span>Reread</span></div>
                 <div class="key"><kbd>Tab</kbd><span>Other panel</span></div>
             </div>
         </div>
@@ -230,6 +283,10 @@
                 <figure class="shot" data-zoom><img src="screenshots/settings.png" alt="Settings" loading="lazy" width="1440" height="900"><figcaption>Settings</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/customize-toolbar.png" alt="Choosing the buttons beside each path" loading="lazy" width="1440" height="900"><figcaption>Your own toolbar</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/tab-menu.png" alt="The tab menu" loading="lazy" width="1440" height="900"><figcaption>Tab colours &amp; icons</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/remote.png" alt="An S3 bucket open in a panel" loading="lazy" width="1440" height="900"><figcaption>An S3 bucket in a panel</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/connections.png" alt="Saved connections and servers on the network" loading="lazy" width="1440" height="900"><figcaption>Connections (⌘K)</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/connection-edit.png" alt="Adding an SFTP connection with a private key" loading="lazy" width="1440" height="900"><figcaption>A new connection</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/archive.png" alt="A 7z archive open like a folder" loading="lazy" width="1440" height="900"><figcaption>Archives as folders</figcaption></figure>
             </div>
         </div>
     </section>

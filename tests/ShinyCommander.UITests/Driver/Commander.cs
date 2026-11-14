@@ -93,6 +93,9 @@ public sealed class Commander(AgentClient client)
     public Task<AppState> Connection(string protocol, string name, string host, int port, string user, string secret, string start = "/")
         => this.Call("connection", new { protocol, name, host, port, user, secret, start });
 
+    /// <summary>Saves any connection from an anonymous object of the hook's fields (protocol, name, host, port, user, secret, start, keyFile, region, endpoint).</summary>
+    public Task<AppState> Connection(object fields) => this.Call("connection", fields);
+
     public Task<AppState> RemoveConnection(string name) => this.Call("connection", new { remove = name });
 
     /// <summary>Deletes go to the trash (a test folder, <see cref="TestConfig.TrashDir"/>) until the next reset.</summary>

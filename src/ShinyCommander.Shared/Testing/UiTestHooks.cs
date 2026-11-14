@@ -45,7 +45,7 @@ public static class UiTestHooks
         Map(ext, "job", "Act on a job in the jobs pane, newest first: { index = 0, action = stop|goto|dismiss|errors|clear }", JobAction);
         Map(ext, "close_window", "Press the main window's close button (macOS) - the quit guard may stop it", CloseWindow);
         Map(ext, "culture", "Switch the UI language live: { name = \"fr\" } - text already on screen stays; new pages and dialogs use it. Reset goes back to en", SetCulture);
-        Map(ext, "connection", "Save a remote connection (in-memory settings, memory keychain): { protocol, name, host, port, user, secret, start } - returns its start path; { remove = name } deletes one", (_, a) =>
+        Map(ext, "connection", "Save a remote connection (in-memory settings, memory keychain): { protocol, name, host, port, user, secret, start, keyFile, region, endpoint } - returns its start path; { remove = name } deletes one", (_, a) =>
         {
             var connections = Service<RemoteConnections>();
             if (a.TryGetProperty("remove", out var remove))
@@ -63,7 +63,10 @@ public static class UiTestHooks
                 Host = Text("host") ?? "127.0.0.1",
                 Port = a.TryGetProperty("port", out var port) ? port.GetInt32() : 0,
                 UserName = Text("user") ?? String.Empty,
-                StartPath = Text("start") ?? "/"
+                StartPath = Text("start") ?? "/",
+                KeyFile = Text("keyFile"),
+                Region = Text("region"),
+                Endpoint = Text("endpoint")
             };
             connections.Save(connection, Text("secret"));
             return Task.FromResult<object>(connection.StartUri);
