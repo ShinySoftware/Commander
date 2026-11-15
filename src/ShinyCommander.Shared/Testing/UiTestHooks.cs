@@ -325,6 +325,8 @@ public static class UiTestHooks
         var chain = new List<string>();
         for (var v = hit; v != null && chain.Count < 12; v = v.Superview)
             chain.Add(v.GetType().Name);
+        if (args.TryGetProperty("hitOnly", out var ho) && ho.GetBoolean())
+            return new { hit = String.Join(" < ", chain), element = HitElement(hit) };
 
         // a button's mouseDown tracks the mouse in a loop until mouse-up arrives from the event queue - so queue the up
         // first, then deliver the down. The up is stamped after the down: a click gesture recognizer (what a MAUI tap is on

@@ -107,6 +107,9 @@ public sealed class Commander(AgentClient client)
     /// <summary>A real mouse click at a page point (macOS): mouse down/up go through the window's event routing, unlike a DevFlow tap. <see cref="LastResult"/> has <c>hit</c>, the native view chain under the point, and <c>element</c>, the MAUI elements behind it.</summary>
     public Task<AppState> ClickAt(double x, double y, bool secondary = false) => this.Call("click_at", new { x, y, secondary });
 
+    /// <summary>What a click at a page point would hit, without clicking (a popup's menu would hold the main thread).</summary>
+    public Task<AppState> HitAt(double x, double y) => this.Call("click_at", new { x, y, hitOnly = true });
+
     public Task<AppState> Reset(string left, string right) => this.Call("reset", new { left, right });
 
     /// <summary>Real (Shiny) dialogs from here on, for this test - driven with DevFlow taps/fills. Reset turns it off.</summary>

@@ -35,7 +35,10 @@
         </Grid>
 
         <ScrollView Grid.Row="1">
-            <Grid HorizontalOptions="Center" WidthRequest="640" Padding="0,16" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
+            <!-- the content fills the width and the columns centre the form: on AppKit the scroll view's document view
+                 takes the content's size, so a Center-aligned 640 form left the controls on its right outside it and deaf to clicks -->
+            <Grid ColumnDefinitions="*,640,*">
+            <Grid Grid.Column="1" Padding="0,16" RowDefinitions="Auto,Auto,Auto" RowSpacing="12">
                 <Border Style="{StaticResource Card}" Padding="16,12">
                     <VerticalStackLayout Spacing="6">
                         <Label Text="{l:Tr ConnectionEdit_Server}" Style="{StaticResource SectionTitle}" FontSize="11" Margin="0,0,0,4" />
@@ -109,6 +112,7 @@
                 </Grid>
 
                 <ActivityIndicator Grid.RowSpan="3" IsRunning="{Binding IsBusy}" IsVisible="{Binding IsBusy}" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Grid>
             </Grid>
         </ScrollView>
     </Grid>

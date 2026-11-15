@@ -431,6 +431,27 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
         await this.Ui.ByText("the quick brown fox", timeout: TimeSpan.FromSeconds(5));
     }
 
+    // the form is centred in a scroll view - its document view once took the form's 640 width at x=0, and the controls on
+    // the right of a freshly opened editor fell outside it, so the protocol dropdown ignored the first clicks
+    [Fact]
+    public async Task The_new_connection_form_takes_clicks_on_the_protocol_dropdown()
+    {
+        await this.Start(l => l.File("a.txt"));
+        await this.App.Command("Connections");
+        await this.App.WaitFor(x => x.Page == "ConnectionsPage", "the Connections page");
+        await this.Ui.Tap("NewConnection");
+        await this.App.WaitFor(x => x.Page == "ConnectionEditPage", "the connection editor");
+
+        foreach (var (id, element) in new[] { ("ConnProtocol", "Picker#ConnProtocol"), ("ConnName", "Entry#ConnName") })
+        {
+            var (x, y) = await this.Ui.Center(await this.Ui.ById(id));
+            await this.App.HitAt(x, y);
+            this.App.LastResult.GetProperty("element").GetString().ShouldStartWith(element);
+        }
+        await this.Ui.Tap("PageBack");
+        await this.Ui.Tap("PageBack");
+    }
+
     async Task<ElementInfo> DialogEntry()
     {
         var known = new HashSet<string?> { "CommandLine", "LeftPath", "RightPath", "LeftFilter", "RightFilter" };
