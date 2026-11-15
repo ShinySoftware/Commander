@@ -101,7 +101,8 @@
                                             </views:LockGlyph.GestureRecognizers>
                                         </views:LockGlyph>
                                         <Label Text="✕"
-                                               IsVisible="{Binding ShowClose}"
+                                               AutomationId="{Binding Path, StringFormat='TabClose:{0}'}"
+                                               IsVisible="{Binding CanClose}"
                                                FontSize="10"
                                                VerticalTextAlignment="Center"
                                                ToolTipProperties.Text="{l:Tr Tab_Close}"
@@ -293,18 +294,24 @@
                                     ItemSizingStrategy="MeasureFirstItem">
                         <CollectionView.ItemTemplate>
                             <DataTemplate x:DataType="vm:FolderRow">
+                                <!-- taps on the leaves, not the row: on AppKit a row's recognizer would take the chevron's clicks too -->
                                 <Grid ColumnDefinitions="14,Auto,*" ColumnSpacing="5" HeightRequest="22" Padding="{Binding Indent}"
                                       BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolColor}, ConverterParameter='CursorInactive|Transparent'}">
-                                    <Grid.GestureRecognizers>
-                                        <TapGestureRecognizer Tapped="OnTreeRowTapped" />
-                                    </Grid.GestureRecognizers>
-                                    <Label Text="{Binding Chevron}" FontSize="11" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}">
+                                    <Label Text="{Binding Chevron}" AutomationId="{Binding Path, StringFormat='TreeChevron:{0}'}" FontSize="11" VerticalTextAlignment="Center" HorizontalTextAlignment="Center" TextColor="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}">
                                         <Label.GestureRecognizers>
                                             <TapGestureRecognizer Tapped="OnTreeChevronTapped" />
                                         </Label.GestureRecognizers>
                                     </Label>
-                                    <shiny:MotionIconView Grid.Column="1" Icon="{Binding Icon}" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Hover" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" />
-                                    <Label Grid.Column="2" Text="{Binding Name}" FontSize="12" VerticalTextAlignment="Center" LineBreakMode="TailTruncation" MaxLines="1" />
+                                    <shiny:MotionIconView Grid.Column="1" Icon="{Binding Icon}" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Hover" WidthRequest="14" HeightRequest="14" VerticalOptions="Center">
+                                        <shiny:MotionIconView.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnTreeRowTapped" />
+                                        </shiny:MotionIconView.GestureRecognizers>
+                                    </shiny:MotionIconView>
+                                    <Label Grid.Column="2" Text="{Binding Name}" FontSize="12" VerticalTextAlignment="Center" LineBreakMode="TailTruncation" MaxLines="1">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnTreeRowTapped" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
                                 </Grid>
                             </DataTemplate>
                         </CollectionView.ItemTemplate>

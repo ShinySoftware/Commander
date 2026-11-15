@@ -73,6 +73,7 @@ public partial class FilePanelView : ContentView
         {
             this.panel.ScrollRequested -= this.OnScrollRequested;
             this.panel.PropertyChanged -= this.OnPanelPropertyChanged;
+            this.panel.Tabs.CollectionChanged -= this.OnTabsChanged;
         }
         this.panel = this.Panel;
         this.WatchTab(this.panel?.ActiveTab);
@@ -101,7 +102,21 @@ public partial class FilePanelView : ContentView
 
             this.panel.ScrollRequested += this.OnScrollRequested;
             this.panel.PropertyChanged += this.OnPanelPropertyChanged;
+            this.panel.Tabs.CollectionChanged += this.OnTabsChanged;
         }
+    }
+
+    // on AppKit the tab row keeps the width of a closed tab (the + stays where it was) until it's asked to measure again
+    void OnTabsChanged(object? sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+    {
+        if (e.Action != System.Collections.Specialized.NotifyCollectionChangedAction.Remove)
+            return;
+
+        this.Dispatcher.Dispatch(() =>
+        {
+            ((IView)this.TabStrip).InvalidateMeasure();
+            (this.TabStrip.Parent as IView)?.InvalidateMeasure();
+        });
     }
 
     void OnPanelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
@@ -370,8 +385,10 @@ public partial class FilePanelView : ContentView
         if (this.menuTab is not { } tab || this.Panel is not { } p)
             return;
 
+        // the first tab is locked in place for good - nothing to lock or unlock
         this.TabMenuLock.Text = tab.IsLocked ? L.Tab_Unlock : L.Tab_Lock;
-        var closable = !tab.IsLocked && p.Tabs.Count > 1;
+        this.TabMenuLock.IsVisible = !tab.IsFirst;
+        var closable = tab.CanClose && p.Tabs.Count > 1;
         this.TabMenuClose.IsVisible = closable;
         this.TabMenuCloseLine.IsVisible = closable;
         BindableLayout.SetItemsSource(this.TabColorSwatches, TabColors.Choices(tab.ColorKey));

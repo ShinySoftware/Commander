@@ -165,6 +165,8 @@ public static class DriveService
             yield return ("Desktop", Path.Combine(home, "Desktop"));
             yield return ("Documents", Path.Combine(home, "Documents"));
             yield return ("Downloads", Path.Combine(home, "Downloads"));
+            if (OperatingSystem.IsMacOS())
+                yield return ("Applications", "/Applications");
         }
     }
 

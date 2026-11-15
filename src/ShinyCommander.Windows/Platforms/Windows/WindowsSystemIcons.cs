@@ -19,6 +19,11 @@ sealed class WindowsSystemIcons : ISystemIcons
     readonly Dictionary<(string Extension, int Size), ImageSource?> byExtension = [];
     readonly Dictionary<(int Index, bool Link, int Size), ImageSource?> byIndex = [];
 
+    // programs and the shortcuts that start them
+    static readonly HashSet<string> Apps = new(StringComparer.OrdinalIgnoreCase) { "exe", "lnk", "appref-ms" };
+
+    public bool IsApp(FileEntry entry) => !entry.IsDirectory && !entry.IsInArchive && Apps.Contains(entry.Extension);
+
     public ImageSource? Get(FileEntry entry, int size)
     {
         var sizeFlag = size <= 16 ? SHGFI_SMALLICON : SHGFI_LARGEICON;

@@ -1460,6 +1460,9 @@ Salir las detiene a medias. Lo que ya se copió, movió o eliminó se queda así
   <data name="Tab_UnlockToClose" xml:space="preserve">
     <value>Esta pestaña está bloqueada: desbloquéala para cerrarla</value>
   </data>
+  <data name="Tab_FirstCantClose" xml:space="preserve">
+    <value>La primera pestaña siempre permanece abierta</value>
+  </data>
   <data name="Tab_New" xml:space="preserve">
     <value>Nueva pestaña</value>
   </data>

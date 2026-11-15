@@ -38,6 +38,13 @@ public partial class AppSettings
     /// <summary>The places (Home, Desktop...) have been added as locked tabs - once, when they left the drive bar.</summary>
     [Bind] public partial bool PlaceTabsSeeded { get; set; }
 
+    /// <summary>The main window's size when it was last resized - restored on startup (0 until then).</summary>
+    [Bind] public partial int WindowWidth { get; set; }
+    [Bind] public partial int WindowHeight { get; set; }
+
+    /// <summary>The ribbon tab last picked (the AppKit ribbon bar).</summary>
+    [Bind] public partial string? RibbonTab { get; set; }
+
     /// <summary>Panels stacked top/bottom instead of side by side.</summary>
     [Bind] public partial bool StackPanels { get; set; }
 

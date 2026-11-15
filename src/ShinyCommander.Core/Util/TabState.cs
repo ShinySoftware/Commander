@@ -1,11 +1,19 @@
 namespace ShinyCommander.Core.Util;
 
 /// <summary>
-/// What's saved for one folder tab: its folder, whether it's locked, and the name, colour and icon the user gave it.
-/// One line per tab - the path, then tab separated <c>locked</c>, <c>alias=…</c>, <c>color=…</c>, <c>icon=…</c> as
-/// they apply, so a plain tab is still just its path.
+/// What's saved for one folder tab: its folder, whether it's locked, the name, colour and icon the user gave it, and how
+/// it's sorted. One line per tab - the path, then tab separated <c>locked</c>, <c>alias=…</c>, <c>color=…</c>,
+/// <c>icon=…</c>, <c>sort=…</c>, <c>desc</c> as they apply, so a plain tab is still just its path.
 /// </summary>
-public sealed record TabState(string Path, bool Locked = false, string? Alias = null, string? Color = null, string? Icon = null)
+public sealed record TabState(
+    string Path,
+    bool Locked = false,
+    string? Alias = null,
+    string? Color = null,
+    string? Icon = null,
+    SortColumn Sort = SortColumn.Name,
+    bool Descending = false
+)
 {
     const string LegacyLockedPrefix = "locked|";
 
@@ -22,7 +30,9 @@ public sealed record TabState(string Path, bool Locked = false, string? Alias = 
             options.Contains("locked"),
             Value(options, "alias="),
             Value(options, "color="),
-            Value(options, "icon=")
+            Value(options, "icon="),
+            Enum.TryParse<SortColumn>(Value(options, "sort="), out var sort) ? sort : SortColumn.Name,
+            options.Contains("desc")
         );
     }
 
@@ -37,6 +47,10 @@ public sealed record TabState(string Path, bool Locked = false, string? Alias = 
             fields.Add("color=" + this.Color);
         if (!String.IsNullOrWhiteSpace(this.Icon))
             fields.Add("icon=" + this.Icon);
+        if (this.Sort != SortColumn.Name)
+            fields.Add("sort=" + this.Sort);
+        if (this.Descending)
+            fields.Add("desc");
         return String.Join('\t', fields);
     }
 

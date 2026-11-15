@@ -42,10 +42,19 @@ public partial class App : Application
         var window = new Window(new AppShell())
         {
             Title = "ShinyCommander",
-            Width = 1280,
-            Height = 820,
+            // the size it was left at - never below the minimum
+            Width = Math.Max(900, this.settings.WindowWidth > 0 ? this.settings.WindowWidth : 1280),
+            Height = Math.Max(560, this.settings.WindowHeight > 0 ? this.settings.WindowHeight : 820),
             MinimumWidth = 900,
             MinimumHeight = 560
+        };
+        window.SizeChanged += (_, _) =>
+        {
+            if (window.Width <= 0 || window.Height <= 0)
+                return;
+
+            this.settings.WindowWidth = (int)window.Width;
+            this.settings.WindowHeight = (int)window.Height;
         };
 #if MACOS_APPKIT
         // the default unified, full-size titlebar reserves a 52pt band above the ribbon with nothing in it -

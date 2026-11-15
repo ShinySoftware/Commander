@@ -1460,6 +1460,9 @@ Quitter les arrête en cours de route. Ce qui a déjà été copié, déplacé o
   <data name="Tab_UnlockToClose" xml:space="preserve">
     <value>Cet onglet est verrouillé - déverrouillez-le pour le fermer</value>
   </data>
+  <data name="Tab_FirstCantClose" xml:space="preserve">
+    <value>Le premier onglet reste toujours ouvert</value>
+  </data>
   <data name="Tab_New" xml:space="preserve">
     <value>Nouvel onglet</value>
   </data>

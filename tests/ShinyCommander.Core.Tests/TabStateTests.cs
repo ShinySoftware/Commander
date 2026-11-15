@@ -23,6 +23,17 @@ public class TabStateTests
     }
 
     [Fact]
+    public void SortRoundTrip()
+    {
+        var tab = new TabState("/x", Sort: SortColumn.Size, Descending: true);
+        tab.Format().ShouldBe("/x\tsort=Size\tdesc");
+        TabState.Parse(tab.Format()).ShouldBe(tab);
+    }
+
+    [Fact]
+    public void UnknownSortFallsBackToName() => TabState.Parse("/x\tsort=Bogus").Sort.ShouldBe(SortColumn.Name);
+
+    [Fact]
     public void NameOnly()
     {
         var tab = new TabState("/x", Alias: "Inbox");

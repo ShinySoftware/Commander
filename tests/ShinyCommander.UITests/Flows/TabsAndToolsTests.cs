@@ -109,17 +109,18 @@ public class TabsAndToolsTests(AppFixture fixture) : UiTest(fixture)
     [Fact]
     public async Task A_locked_tab_stays_put_and_opens_folders_in_a_new_tab()
     {
-        await this.Start(l => l.Dir("sub").File("sub/inside.txt"));
+        await this.Start(l => l.Dir("other").Dir("sub").File("sub/inside.txt"));
+        await this.OpenSecondTab("other");
 
         // right-click the tab, "Lock tab"
-        await this.TabMenu("left", "Lock tab");
-        (await this.App.WaitFor(x => x.Left.LockedTabs.SequenceEqual([true]), "the tab to lock")).Left.Tabs.Count.ShouldBe(1);
+        await this.TabMenu("other", "Lock tab");
+        await this.App.WaitFor(x => x.Left.LockedTabs.SequenceEqual([false, true]), "the tab to lock");
 
         await this.App.Navigate(this.LeftTree["sub"]);
-        var s = await this.App.WaitFor(x => x.Left.Tabs.Count == 2, "a new tab for the folder");
-        s.Left.Tabs.ShouldBe([this.LeftTree.Path, this.LeftTree["sub"]]);
-        s.Left.LockedTabs.ShouldBe([true, false]);
-        s.Left.ActiveTab.ShouldBe(1);
+        var s = await this.App.WaitFor(x => x.Left.Tabs.Count == 3, "a new tab for the folder");
+        s.Left.Tabs.ShouldBe([this.LeftTree.Path, this.LeftTree["other"], this.LeftTree["sub"]]);
+        s.Left.LockedTabs.ShouldBe([false, true, false]);
+        s.Left.ActiveTab.ShouldBe(2);
         s.Left.Names.ShouldBe(["inside.txt"]);
     }
 
@@ -127,20 +128,53 @@ public class TabsAndToolsTests(AppFixture fixture) : UiTest(fixture)
     public async Task A_locked_tab_cannot_be_closed_until_unlocked()
     {
         await this.Start(l => l.Dir("sub"));
-        await this.Ui.Tap("LeftNewTab");
-        await this.App.WaitFor(x => x.Left.Tabs.Count == 2, "the + button to open a tab");
-        await this.App.Key("Ctrl+Shift+Tab");
+        await this.OpenSecondTab("sub");
 
-        await this.TabMenu("left", "Lock tab");
-        await this.App.WaitFor(x => x.Left.LockedTabs.SequenceEqual([true, false]), "the first tab to lock");
+        await this.TabMenu("sub", "Lock tab");
+        await this.App.WaitFor(x => x.Left.LockedTabs.SequenceEqual([false, true]), "the second tab to lock");
+        (await this.Ui.Exists(x => x.AutomationId == "TabClose:" + this.LeftTree["sub"] && x.IsVisible)).ShouldBeFalse("no ✕ on a locked tab");
 
         var s = await this.App.Key("Primary+W");
         s.Left.Tabs.Count.ShouldBe(2);
         s.Dialogs.ShouldContain(d => d.Kind == "toast" && d.Message!.Contains("locked"));
 
-        await this.Ui.Tap("TabLock:" + this.LeftTree.Path); // the padlock unlocks
+        await this.Ui.Tap("TabLock:" + this.LeftTree["sub"]); // the padlock unlocks
         await this.App.WaitFor(x => x.Left.LockedTabs.SequenceEqual([false, false]), "the tab to unlock");
         (await this.App.Key("Primary+W")).Left.Tabs.Count.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task The_first_tab_cannot_be_closed_or_locked_but_goes_anywhere()
+    {
+        await this.Start(l => l.Dir("sub"));
+
+        // no ✕, and nothing to lock in its menu
+        (await this.Ui.Exists(x => x.AutomationId == "TabClose:" + this.LeftTree.Path && x.IsVisible)).ShouldBeFalse("no ✕ on the first tab");
+        await this.OpenTabMenu("left");
+        (await this.Ui.Exists(x => x.Text is "Lock tab" or "Unlock tab" && x.IsVisible)).ShouldBeFalse("no lock in the first tab's menu");
+        await this.Ui.Tap("LeftTabMenuBackdrop");
+
+        var s = await this.App.Key("Primary+W");
+        s.Left.Tabs.Count.ShouldBe(1);
+        s.Dialogs.ShouldContain(d => d.Kind == "toast" && d.Message!.Contains("first tab"));
+
+        // not locked: it moves rather than opening a new tab
+        s = await this.App.Navigate(this.LeftTree["sub"]);
+        s.Left.Tabs.ShouldBe([this.LeftTree["sub"]]);
+        s.Left.LockedTabs.ShouldBe([false]);
+    }
+
+    [Fact]
+    public async Task Every_unlocked_tab_shows_its_close_button_selected_or_not()
+    {
+        await this.Start(l => l.Dir("sub"));
+        await this.OpenSecondTab("sub");
+        await this.App.Key("Ctrl+Shift+Tab"); // back to the first - the second isn't the one you're on now
+
+        var close = await this.Ui.ById("TabClose:" + this.LeftTree["sub"]);
+        await this.Ui.ShouldBeVisible(close, "the ✕ on a tab that isn't selected");
+        await this.Ui.Tap(close);
+        await this.App.WaitFor(x => x.Left.Tabs.Count == 1, "the ✕ to close it");
     }
 
     [Fact]
@@ -175,25 +209,35 @@ public class TabsAndToolsTests(AppFixture fixture) : UiTest(fixture)
     [Fact]
     public async Task With_tabs_turned_off_a_locked_tab_navigates_and_goes_home_when_they_come_back()
     {
-        await this.Start(l => l.Dir("sub"));
-        await this.TabMenu("left", "Lock tab");
-        await this.App.WaitFor(x => x.Left.LockedTabs.SequenceEqual([true]), "the tab to lock");
+        await this.Start(l => l.Dir("sub").Dir("other"));
+        await this.OpenSecondTab("sub");
+        await this.TabMenu("sub", "Lock tab");
+        await this.App.WaitFor(x => x.Left.LockedTabs.SequenceEqual([false, true]), "the tab to lock");
 
         var s = await this.App.ShowTabs(false);
         s.Left.ShowTabs.ShouldBeFalse();
         var strip = (await this.Ui.All()).First(x => x.AutomationId == "LeftTabs");
         (await this.Ui.WhyHidden(strip)).ShouldNotBeNull("the tab row is turned off");
 
-        s = await this.App.Navigate(this.LeftTree["sub"]);
-        s.Left.Tabs.ShouldBe([this.LeftTree["sub"]]); // the lock doesn't apply - no new tab
-        (await this.App.Key("Primary+T")).Left.Tabs.Count.ShouldBe(1);
+        s = await this.App.Navigate(this.LeftTree["other"]);
+        s.Left.Tabs.ShouldBe([this.LeftTree.Path, this.LeftTree["other"]]); // the lock doesn't apply - no new tab
+        (await this.App.Key("Primary+T")).Left.Tabs.Count.ShouldBe(2);
 
         // back on: the locked tab goes home, and where it had got to opens next to it
         s = await this.App.ShowTabs(true);
-        s.Left.Tabs.ShouldBe([this.LeftTree.Path, this.LeftTree["sub"]]);
-        s.Left.LockedTabs.ShouldBe([true, false]);
-        s.Left.ActiveTab.ShouldBe(1);
+        s.Left.Tabs.ShouldBe([this.LeftTree.Path, this.LeftTree["sub"], this.LeftTree["other"]]);
+        s.Left.LockedTabs.ShouldBe([false, true, false]);
+        s.Left.ActiveTab.ShouldBe(2);
         await this.Ui.ShouldBeVisible(await this.Ui.ById("LeftTabs"), "the tab row");
+    }
+
+    // the + opens a tab on the same folder - then it goes to its own, so the tabs can be told apart
+    async Task OpenSecondTab(string folder)
+    {
+        await this.Ui.Tap("LeftNewTab");
+        await this.App.WaitFor(x => x.Left.Tabs.Count == 2, "the + button to open a tab");
+        await this.App.Navigate(this.LeftTree[folder]);
+        await this.App.WaitFor(x => x.Left.Tabs.SequenceEqual([this.LeftTree.Path, this.LeftTree[folder]]), "the new tab to move");
     }
 
     // right-click a tab (by what it shows) for its menu

@@ -1615,6 +1615,10 @@ Quitting stops them part-way. What's already been copied, moved or deleted stays
     <value>This tab is locked - unlock it to close it</value>
     <comment>Toast when closing a locked tab</comment>
   </data>
+  <data name="Tab_FirstCantClose" xml:space="preserve">
+    <value>The first tab always stays open</value>
+    <comment>Toast when closing a panel's first tab</comment>
+  </data>
   <data name="Tab_New" xml:space="preserve">
     <value>New tab</value>
     <comment>Tooltip for the + button after the tabs</comment>

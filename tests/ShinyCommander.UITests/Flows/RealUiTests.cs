@@ -174,6 +174,63 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
     }
 
     [Fact]
+    public async Task A_tree_chevron_collapses_and_expands_its_folder()
+    {
+        // the disk's root: near the top of the tree, so its row is on screen without scrolling
+        await this.Start();
+        await this.App.Navigate("/", "left");
+        // the app is shared between tests - the tree may still be on from an earlier one
+        if (!(await this.App.State()).Left.ShowTree)
+            await this.Ui.Tap("LeftTreeToggle");
+        try
+        {
+            await this.App.WaitFor(x => x.Left.TreePath == "/", "the tree to reveal the root", TimeSpan.FromSeconds(10));
+
+            // folders an earlier test left open can push the root's row out of sight - fold everything first
+            for (var i = 0; i < 20; i++)
+            {
+                var open = (await this.Ui.All()).FirstOrDefault(e => e.AutomationId?.StartsWith("TreeChevron:", StringComparison.Ordinal) == true && e.Text == "▾" && e.IsVisible);
+                if (open == null)
+                    break;
+                await this.ClickChevron(open.AutomationId!["TreeChevron:".Length..]);
+            }
+
+            // real clicks through AppKit's hit testing - the row's own tap used to take the chevron's clicks
+            await this.ClickChevron("/");
+            await this.WaitForTreeRow("/Users", true);
+
+            await this.ClickChevron("/");
+            await this.WaitForTreeRow("/Users", false);
+            (await this.App.State()).Left.Path.ShouldBe("/"); // the chevron doesn't navigate
+        }
+        finally
+        {
+            await this.Ui.Tap("LeftTreeToggle");
+        }
+    }
+
+    // window bounds: a list row's own bounds don't say where in the list it is. Each click replaces the tree's rows -
+    // give the list a moment to lay them out before the next one is looked for
+    async Task ClickChevron(string path)
+    {
+        var at = (await this.Ui.ById("TreeChevron:" + path)).WindowBounds!;
+        await this.App.ClickAt(at.X + at.Width / 2, at.Y + at.Height / 2);
+        await Task.Delay(400);
+    }
+
+    // by the row's chevron - the folder's name is in the breadcrumbs too
+    async Task WaitForTreeRow(string path, bool shown)
+    {
+        var deadline = DateTime.UtcNow.AddSeconds(5);
+        while (await this.Ui.Exists(e => e.AutomationId == "TreeChevron:" + path && e.IsVisible) != shown)
+        {
+            if (DateTime.UtcNow > deadline)
+                throw new ShouldAssertException($"the tree row for {path} should be {(shown ? "shown" : "gone")}");
+            await Task.Delay(100);
+        }
+    }
+
+    [Fact]
     public async Task Both_panels_have_a_tree_that_follows_their_own_folder()
     {
         await this.Start(l => l.Dir("left-a/left-b"), r => r.Dir("right-x/right-y"));

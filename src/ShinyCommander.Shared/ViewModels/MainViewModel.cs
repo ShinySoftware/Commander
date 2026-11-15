@@ -94,6 +94,7 @@ public partial class MainViewModel : ObservableObject,
         this.Left.ScrollRequested += this.OnPanelCursorMoved;
         this.Right.ScrollRequested += this.OnPanelCursorMoved;
         this.StackPanels = settings.StackPanels;
+        this.RibbonTab = settings.RibbonTab is { Length: > 0 } ribbonTab ? ribbonTab : "files";
 
         // a connection added, removed, opened or closed - the drive bars show them
         connections.Changed += (_, _) => mainThread.BeginInvokeOnMainThread(() =>
@@ -166,6 +167,8 @@ public partial class MainViewModel : ObservableObject,
 
     [RelayCommand]
     void SelectRibbonTab(string key) => this.RibbonTab = key;
+
+    partial void OnRibbonTabChanged(string value) => this.settings.RibbonTab = value;
 
     public int PanelFontSize => Math.Max(10, this.settings.PanelFontSize);
 
@@ -244,6 +247,8 @@ public partial class MainViewModel : ObservableObject,
             tab.Alias = state.Alias;
             tab.ColorKey = state.Color;
             tab.IconKey = state.Icon;
+            tab.SortColumn = state.Sort;
+            tab.SortDescending = state.Descending;
         }
 
         panel.ActiveTab = panel.Tabs[Math.Clamp(active, 0, panel.Tabs.Count - 1)];
@@ -258,7 +263,8 @@ public partial class MainViewModel : ObservableObject,
     }
 
     // a locked tab is saved at its own folder, even if it wandered while tabs were off
-    static string TabLine(PanelTabViewModel tab) => new TabState(tab.LockedPath ?? tab.Path, tab.IsLocked, tab.Alias, tab.ColorKey, tab.IconKey).Format();
+    static string TabLine(PanelTabViewModel tab)
+        => new TabState(tab.LockedPath ?? tab.Path, tab.IsLocked, tab.Alias, tab.ColorKey, tab.IconKey, tab.SortColumn, tab.SortDescending).Format();
 
     void OnPanelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -524,7 +530,9 @@ public partial class MainViewModel : ObservableObject,
         if (this.settings.HideTabs)
             return;
 
-        if (this.Tab is { IsLocked: true })
+        if (this.Tab is { IsFirst: true })
+            await this.dialogs.Toast(L.Tab_FirstCantClose);
+        else if (this.Tab is { IsLocked: true })
             await this.dialogs.Toast(L.Tab_UnlockToClose);
         else
             this.ActivePanel.CloseTab(null);

@@ -31,7 +31,7 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
 
     /// <summary>Stays on its folder: going anywhere else opens a new tab, and it can't be closed until unlocked.</summary>
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowClose))]
+    [NotifyPropertyChangedFor(nameof(CanClose))]
     public partial bool IsLocked { get; set; }
 
     /// <summary>The folder a locked tab belongs to - it can wander while tabs are turned off, and goes back here.</summary>
@@ -49,8 +49,16 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
         return true;
     }
 
-    /// <summary>The ✕ - only on the tab you're on, and never on a locked one.</summary>
-    public bool ShowClose => this.IsSelected && !this.IsLocked;
+    /// <summary>
+    /// The panel's first tab: always there - it can't be closed or locked (it's permanently locked in place), but unlike a
+    /// locked tab it can still go to any folder.
+    /// </summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CanClose))]
+    public partial bool IsFirst { get; set; }
+
+    /// <summary>Every tab but the first and locked ones - they show the ✕, whether they're the one you're on or not.</summary>
+    public bool CanClose => !this.IsFirst && !this.IsLocked;
 
     /// <summary>The name the user gave the tab - shown instead of the folder's when set.</summary>
     [ObservableProperty]
@@ -131,7 +139,7 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     public partial int MarkedCount { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowClose), nameof(IsActiveTab), nameof(TabBackground), nameof(IconColor))]
+    [NotifyPropertyChangedFor(nameof(IsActiveTab), nameof(TabBackground), nameof(IconColor))]
     public partial bool IsSelected { get; set; }
 
     public bool IsArchive { get; private set; }

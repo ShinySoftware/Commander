@@ -134,6 +134,7 @@ public class DriveIconConverter : IValueConverter
         {
             "Downloads" => "download",
             "Documents" => "file-text",
+            "Applications" => "rocket",
             _ => "folder"
         },
         _ => "database"

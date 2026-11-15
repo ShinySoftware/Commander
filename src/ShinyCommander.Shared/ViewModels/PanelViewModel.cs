@@ -203,6 +203,11 @@ public partial class PanelViewModel : ObservableObject
             this.UpdateLocation();
             this.OnPropertyChanged(nameof(this.Path));
         }
+        else if (e.PropertyName is nameof(PanelTabViewModel.SortColumn) or nameof(PanelTabViewModel.SortDescending))
+        {
+            // each tab's sort is saved with it
+            this.TabsChanged?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     void UpdateLocation()
@@ -266,7 +271,9 @@ public partial class PanelViewModel : ObservableObject
     {
         var tab = new PanelTabViewModel(this.vfs, this.settings, this.Columns, VirtualFileSystem.Normalize(path));
         tab.OpenInNewTabRequested += this.OnOpenInNewTabRequested;
-        this.Tabs.Insert(Math.Clamp(index ?? this.Tabs.Count, 0, this.Tabs.Count), tab);
+        // nothing goes in front of the first tab
+        this.Tabs.Insert(Math.Clamp(index ?? this.Tabs.Count, Math.Min(1, this.Tabs.Count), this.Tabs.Count), tab);
+        this.UpdateFirstTab();
         this.OnPropertyChanged(nameof(this.HasMultipleTabs));
         if (activate)
             this.ActiveTab = tab;
@@ -276,8 +283,8 @@ public partial class PanelViewModel : ObservableObject
             // folder vanished since last run - fall back to home
             await tab.NavigateAsync(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), addHistory: false);
         }
-        // locked once it's where it belongs: the fallback above has to be able to move it
-        tab.IsLocked = locked;
+        // locked once it's where it belongs: the fallback above has to be able to move it. The first tab never is.
+        tab.IsLocked = locked && !tab.IsFirst;
         this.TabsChanged?.Invoke(this, EventArgs.Empty);
         return tab;
     }
@@ -289,7 +296,21 @@ public partial class PanelViewModel : ObservableObject
             await this.AddTabAsync(e.Path, focusName: e.FocusName, index: this.Tabs.IndexOf(tab) + 1);
     }
 
-    public void SetTabLocked(PanelTabViewModel tab, bool locked) => this.EditTab(tab, x => x.IsLocked = locked);
+    public void SetTabLocked(PanelTabViewModel tab, bool locked)
+    {
+        if (!tab.IsFirst)
+            this.EditTab(tab, x => x.IsLocked = locked);
+    }
+
+    // the first tab stays open and goes anywhere: it can't be closed, so it's never locked either
+    void UpdateFirstTab()
+    {
+        for (var i = 0; i < this.Tabs.Count; i++)
+            this.Tabs[i].IsFirst = i == 0;
+
+        if (this.Tabs.Count > 0)
+            this.Tabs[0].IsLocked = false;
+    }
 
     /// <summary>Changes something saved about a tab (lock, name, colour) and has it saved.</summary>
     public void EditTab(PanelTabViewModel tab, Action<PanelTabViewModel> edit)
@@ -319,11 +340,12 @@ public partial class PanelViewModel : ObservableObject
     public void CloseTab(PanelTabViewModel? tab)
     {
         tab ??= this.ActiveTab;
-        if (tab == null || tab.IsLocked || this.Tabs.Count <= 1)
+        if (tab == null || !tab.CanClose || this.Tabs.Count <= 1)
             return;
 
         var index = this.Tabs.IndexOf(tab);
         this.Tabs.Remove(tab);
+        this.UpdateFirstTab();
         tab.OpenInNewTabRequested -= this.OnOpenInNewTabRequested;
         tab.Dispose();
         if (this.ActiveTab == tab)

@@ -27,6 +27,9 @@ sealed class MacSystemIcons : ISystemIcons
 
     readonly Dictionary<(string Key, int Size), ImageSource?> cache = [];
 
+    public bool IsApp(FileEntry entry)
+        => entry.IsDirectory && !entry.IsInArchive && entry.Name.EndsWith(".app", StringComparison.OrdinalIgnoreCase);
+
     public ImageSource? Get(FileEntry entry, int size)
     {
         var key = KeyFor(entry);

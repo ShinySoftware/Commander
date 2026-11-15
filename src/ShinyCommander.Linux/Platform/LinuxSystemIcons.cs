@@ -14,6 +14,10 @@ sealed class LinuxSystemIcons : ISystemIcons
     readonly Dictionary<(string Key, int Size), ImageSource?> byKey = [];
     readonly Dictionary<(string File, int Size), ImageSource> byFile = [];
 
+    // a launcher names the app's icon; an AppImage has nothing the theme can look up, so it keeps the motion icon
+    public bool IsApp(FileEntry entry)
+        => !entry.IsDirectory && !entry.IsInArchive && entry.Extension.Equals("desktop", StringComparison.OrdinalIgnoreCase);
+
     public ImageSource? Get(FileEntry entry, int size)
     {
         // a folder's or launcher's icon depends on the item itself, so isn't cached by its key

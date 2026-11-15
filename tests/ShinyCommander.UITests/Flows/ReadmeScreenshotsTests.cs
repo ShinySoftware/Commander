@@ -55,10 +55,8 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
         await this.Fixture.Client.ResizeAsync(1440, 900);
         await this.App.Reset(root, views);
 
-        // tabs: the repo itself locked, blue, starred; docs and tests beside it; the Core project on the right
+        // tabs: the repo itself (the first tab) blue, starred; docs locked and tests beside it; the Core project on the right
         var repoName = Path.GetFileName(root);
-        await this.RightClick(repoName, "LeftTabs");
-        await this.Ui.Click("Lock tab", within: "LeftTabMenu");
         await this.StyleTab("Left", repoName, "Blue", "star");
         foreach (var (folder, color) in new[] { ("docs", "Green"), ("tests", "Orange") })
         {
@@ -66,6 +64,8 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
             await this.App.Navigate(Path.Combine(root, folder), "left");
             await this.StyleTab("Left", folder, color);
         }
+        await this.RightClick("docs", "LeftTabs");
+        await this.Ui.Click("Lock tab", within: "LeftTabMenu");
         await this.Ui.Click(repoName, within: "LeftTabs");
 
         await this.Ui.Tap("RightNewTab");
@@ -80,8 +80,8 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
         await this.App.Cursor("README.md", "left");
         await this.Shot("main");
 
-        // a tab's menu: lock, name, colour, icon
-        await this.RightClick(repoName, "LeftTabs");
+        // a tab's menu: lock, name, colour, icon (the first tab has no lock - it's always there)
+        await this.RightClick("docs", "LeftTabs");
         await this.Ui.ById("LeftTabMenu");
         await this.Shot("tab-menu");
         await this.Ui.Tap("LeftTabMenuBackdrop");
