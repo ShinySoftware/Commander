@@ -1743,4 +1743,13 @@ Inténtalo de nuevo.</value>
   <data name="ConnectionEdit_TestTimeout" xml:space="preserve">
     <value>El servidor no respondió en 30 segundos.</value>
   </data>
+  <data name="Cmd_CalculateFolderSizes" xml:space="preserve">
+    <value>Tamaño carpeta</value>
+  </data>
+  <data name="Ribbon_Group_Info" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="Key_FolderSizes" xml:space="preserve">
+    <value>Tamaño de carpetas (marcadas, bajo el cursor o todas)</value>
+  </data>
 </root>

@@ -407,6 +407,30 @@ public partial class MainViewModel : ObservableObject,
         }
     }
 
+    /// <summary>
+    /// The marked folders' sizes, or the folder under the cursor, or (on a file or "..") every folder in the list - TC's
+    /// Alt+Shift+Enter. Unlike Space, the marks stay as they are.
+    /// </summary>
+    [RelayCommand(CanExecute = nameof(CanNavigate))]
+    async Task CalculateFolderSizes()
+    {
+        var tab = this.Tab;
+        if (tab == null)
+            return;
+
+        var folders = tab.MarkedItems.Where(x => x.IsDirectory).ToList();
+        if (folders.Count == 0 && tab.CursorItem is { IsDirectory: true, Entry.IsParentLink: false } cursor)
+            folders = [cursor];
+        if (folders.Count == 0)
+            folders = tab.Items.Where(x => x.IsDirectory && !x.Entry.IsParentLink).ToList();
+
+        foreach (var folder in folders)
+        {
+            folder.CalculatedSize = await this.FolderSize(folder.Entry);
+            tab.UpdateStatus();
+        }
+    }
+
     Task<long> FolderSize(FileEntry entry) => entry.IsRemote
         ? this.vfs.CalculateRemoteFolderSizeAsync(entry.FullPath)
         : entry.IsInArchive

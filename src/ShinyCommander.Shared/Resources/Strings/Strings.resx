@@ -1978,4 +1978,13 @@ Try again.</value>
     <value>The server didn't answer in 30 seconds.</value>
     <comment>Alert message</comment>
   </data>
+  <data name="Cmd_CalculateFolderSizes" xml:space="preserve">
+    <value>Folder Size</value>
+  </data>
+  <data name="Ribbon_Group_Info" xml:space="preserve">
+    <value>Info</value>
+  </data>
+  <data name="Key_FolderSizes" xml:space="preserve">
+    <value>Folder sizes (marked, cursor or all folders)</value>
+  </data>
 </root>

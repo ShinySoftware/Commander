@@ -22,6 +22,7 @@ RIBBON = [
    ("Open",[("View","eye","ViewCommand","L","F3"),("Edit","file-text","EditCommand","S","F4"),("Terminal","external-link","OpenTerminalCommand","S","Primary+O"),("Reveal","search","RevealInFileManagerCommand","S","Primary+E")]),
    ("Archive",[("Pack","download","PackCommand","S","Alt+F5"),("Unpack","upload","UnpackCommand","S","Alt+F9")]),
    ("Clipboard",[("Copy Paths","clipboard","CopyPathsToClipboardCommand","S","Primary+Shift+C"),("Name to Cmd","arrow-down","CopyNameToCommandLineCommand","S","Primary+Enter")]),
+   ("Info",[("Folder Size","chart","CalculateFolderSizesCommand","L","Alt+Shift+Enter")]),
  ]),
  ("Selection","select",ICON,[
    ("Mark",[("Select All","check-circle","SelectAllCommand","L","Primary+A"),("Unselect All","x-circle","DeselectAllCommand","S","Primary+Shift+A"),("Invert","shuffle","InvertSelectionCommand","S","Primary+I")]),

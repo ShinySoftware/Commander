@@ -51,6 +51,28 @@ public class SelectionTests(AppFixture fixture) : UiTest(fixture)
     }
 
     [Fact]
+    public async Task The_folder_size_button_sizes_the_cursor_folder_without_marking_it()
+    {
+        await this.Start(l => l.Dir("big").File("big/one.bin", new string('x', 1000)).Dir("big/sub").File("big/sub/two.bin", new string('y', 500)));
+        await this.App.Cursor("big");
+
+        await this.Ui.Tap("ribbon-tab-files"); // only the selected ribbon tab is in the tree
+        await this.Ui.Tap("ribbon-CalculateFolderSizes");
+        var s = await this.App.WaitFor(x => x.Left.Item("big").SizeText.Replace(",", "") == "1500", "the folder size");
+        s.Left.Marked.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Alt_Shift_Enter_on_a_file_sizes_every_folder()
+    {
+        await this.Start(l => l.Dir("a").File("a/one.bin", new string('x', 100)).Dir("b").File("b/two.bin", new string('y', 200)).File("c.txt"));
+        await this.App.Cursor("c.txt");
+
+        await this.App.Key("Alt+Shift+Enter");
+        await this.App.WaitFor(x => x.Left.Item("a").SizeText == "100" && x.Left.Item("b").SizeText == "200", "both folder sizes");
+    }
+
+    [Fact]
     public async Task Shift_Down_marks_as_it_moves()
     {
         await this.Start(l => l.File("a.txt").File("b.txt").File("c.txt"));

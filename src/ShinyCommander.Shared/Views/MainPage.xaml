@@ -36,6 +36,7 @@
         <shiny:KeyboardShortcut Gesture="Primary+D" Command="{Binding HotlistCommand}" Description="{l:Tr Key_Hotlist}" Category="{l:Tr Cat_Navigation}" />
         <shiny:KeyboardShortcut Gesture="Insert" Command="{Binding InsertCommand}" Description="{l:Tr Key_Insert}" Category="{l:Tr Cat_Selection}" TextInput="Always" AllowRepeat="True" />
         <shiny:KeyboardShortcut Gesture="Space" Command="{Binding SpaceCommand}" Description="{l:Tr Key_Space}" Category="{l:Tr Cat_Selection}" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Alt+Shift+Enter" Command="{Binding CalculateFolderSizesCommand}" Description="{l:Tr Key_FolderSizes}" Category="{l:Tr Cat_Selection}" />
         <shiny:KeyboardShortcut Gesture="Shift+Up" Command="{Binding MarkUpCommand}" Description="{l:Tr Key_MarkUp}" Category="{l:Tr Cat_Selection}" TextInput="Always" AllowRepeat="True" />
         <shiny:KeyboardShortcut Gesture="Shift+Down" Command="{Binding MarkDownCommand}" Description="{l:Tr Key_MarkDown}" Category="{l:Tr Cat_Selection}" TextInput="Always" AllowRepeat="True" />
         <shiny:KeyboardShortcut Gesture="Primary+A" Command="{Binding SelectAllCommand}" Description="{l:Tr Key_SelectAll}" Category="{l:Tr Cat_Selection}" />
@@ -199,6 +200,13 @@
                     <shiny:RibbonButton Text="{l:Tr Cmd_CopyNameToCommandLine}" Size="Small" Command="{Binding CopyNameToCommandLineCommand}" Shortcut="Primary+Enter" Tooltip="{l:Tr Cmd_CopyNameToCommandLine, Suffix=' (Primary+Enter)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="arrow-down" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Info}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_CalculateFolderSizes}" Size="Large" Command="{Binding CalculateFolderSizesCommand}" Shortcut="Alt+Shift+Enter" Tooltip="{l:Tr Cmd_CalculateFolderSizes, Suffix=' (Alt+Shift+Enter)'}">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="chart" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
@@ -603,6 +611,19 @@
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
                             <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Clipboard}" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-CalculateFolderSizes" ToolTipProperties.Text="{l:Tr Cmd_CalculateFolderSizes, Suffix=' (Alt+Shift+Enter)'}">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding CalculateFolderSizesCommand}" /></Border.GestureRecognizers>
+                                <VerticalStackLayout Spacing="3">
+                                    <shiny:MotionIconView Icon="chart" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                    <Label Text="{l:Tr Cmd_CalculateFolderSizes}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </Border>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Info}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                     </HorizontalStackLayout>
                     <HorizontalStackLayout Spacing="0" IsVisible="{Binding RibbonTab, Converter={StaticResource RibbonTabVisible}, ConverterParameter=select}">
