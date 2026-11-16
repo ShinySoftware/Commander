@@ -59,9 +59,12 @@ public class FileDetailsView : GraphicsView, IDrawable
         this.Invalidate();
     }
 
+    // room for the cloud badge, left of the columns - only on rows that show it, so the columns stay aligned
+    const float CloudWidth = 20;
+
     void UpdateWidth()
     {
-        var w = this.columns?.DetailsWidth ?? 0;
+        var w = (this.columns?.DetailsWidth ?? 0) + (this.Item?.IsCloudOnly == true ? CloudWidth : 0);
         if (Math.Abs(this.WidthRequest - w) > 0.5)
             this.WidthRequest = w;
     }
@@ -83,6 +86,12 @@ public class FileDetailsView : GraphicsView, IDrawable
         var plain = new Font(null, bold ? FontWeights.Bold : FontWeights.Normal);
 
         float x = 0;
+        if (item.IsCloudOnly)
+        {
+            DrawCloud(canvas, rect.Height / 2);
+            x = CloudWidth;
+        }
+
         void Column(bool show, double width, string text, Font font, float size, HorizontalAlignment align, float rightPad = 0)
         {
             if (!show)
@@ -101,5 +110,25 @@ public class FileDetailsView : GraphicsView, IDrawable
         Column(c.ShowModified, ColumnLayout.DateColumnWidth, item.DateText, plain, 12, HorizontalAlignment.Left);
         Column(c.ShowCreated, ColumnLayout.DateColumnWidth, item.CreatedText, plain, 12, HorizontalAlignment.Left);
         Column(c.ShowAttributes, ColumnLayout.AttrColumnWidth, item.AttributeText, mono, 12, HorizontalAlignment.Left);
+    }
+
+    // a line cloud like the motion icons: three bumps on a flat base, 14 x 9, centred on the row
+    static void DrawCloud(ICanvas canvas, float midY)
+    {
+        var top = midY - 4.5f;
+        var path = new PathF();
+        path.MoveTo(4, top + 9);
+        path.CurveTo(1.5f, top + 9, 0.5f, top + 7.5f, 0.5f, top + 6);
+        path.CurveTo(0.5f, top + 4.2f, 1.9f, top + 3, 3.5f, top + 3.1f);
+        path.CurveTo(4.1f, top + 1.2f, 5.8f, top, 7.6f, top);
+        path.CurveTo(9.8f, top, 11.4f, top + 1.6f, 11.6f, top + 3.6f);
+        path.CurveTo(13, top + 3.8f, 14, top + 4.9f, 14, top + 6.3f);
+        path.CurveTo(14, top + 7.8f, 12.8f, top + 9, 11.3f, top + 9);
+        path.Close();
+
+        canvas.StrokeColor = ThemeColors.Get("Subtle");
+        canvas.StrokeSize = 1.3f;
+        canvas.StrokeLineJoin = LineJoin.Round;
+        canvas.DrawPath(path);
     }
 }

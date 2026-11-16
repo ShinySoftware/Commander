@@ -50,7 +50,8 @@ public partial class FileItemViewModel(FileEntry entry, bool friendlySizes) : Ob
     /// <summary>The full file name - thumbnails show it under the picture.</summary>
     public string FullName => this.Entry.Name;
 
-    public bool HasThumbnail => !this.Entry.IsDirectory && !this.Entry.IsInArchive && FileIcons.IsImage(this.Entry.Extension);
+    // a cloud-only picture would download just to draw its thumbnail
+    public bool HasThumbnail => !this.Entry.IsDirectory && !this.Entry.IsInArchive && !this.Entry.IsCloudOnly && FileIcons.IsImage(this.Entry.Extension);
 
     ImageSource? thumbnail;
     ImageSource? systemTile;
@@ -77,6 +78,9 @@ public partial class FileItemViewModel(FileEntry entry, bool friendlySizes) : Ob
     public string AttributeText => this.Entry.AttributeText;
     public bool IsDirectory => this.Entry.IsDirectory;
     public bool IsHidden => this.Entry.IsHidden;
+
+    /// <summary>Only in the cloud (a sync client's placeholder) - the row shows a cloud.</summary>
+    public bool IsCloudOnly => this.Entry.IsCloudOnly;
 
     /// <summary>Relative path shown in branch view (Ctrl+B) where the list contains files from many folders.</summary>
     public string? Location { get; init; }

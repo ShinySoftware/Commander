@@ -1,3 +1,5 @@
+using ShinyCommander.Core.Platform;
+
 namespace ShinyCommander.Core.Models;
 
 /// <summary>
@@ -19,6 +21,9 @@ public sealed record FileEntry
     /// <summary>On a server or storage account - <see cref="FullPath"/> is a URI (Remote.RemotePath).</summary>
     public bool IsRemote { get; init; }
     public bool IsSymlink { get; init; }
+
+    /// <summary>Kept in the cloud by a sync client - opening it downloads it first (CloudFiles).</summary>
+    public bool IsCloudOnly { get; init; }
 
     public string Extension => this.IsDirectory || this.IsParentLink
         ? String.Empty
@@ -95,6 +100,7 @@ public sealed record FileEntry
         try { modified = info.LastWriteTime; } catch { modified = DateTime.MinValue; }
         try { created = info.CreationTime; } catch { created = DateTime.MinValue; }
 
+        var attributes = SafeAttributes(info);
         return new FileEntry
         {
             Name = info.Name,
@@ -103,9 +109,10 @@ public sealed record FileEntry
             Size = size,
             Modified = modified,
             Created = created,
-            Attributes = SafeAttributes(info),
+            Attributes = attributes,
             UnixMode = mode,
-            IsSymlink = info.LinkTarget != null
+            IsSymlink = info.LinkTarget != null,
+            IsCloudOnly = !isDir && CloudFiles.IsOnlineOnly(info.FullName, attributes)
         };
     }
 
