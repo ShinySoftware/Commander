@@ -38,6 +38,8 @@
         <PackageReference Include="Shiny.Maui.Controls" />
         <PackageReference Include="Shiny.Maui.Controls.Markdown" />
         <PackageReference Include="Shiny.Maui.Controls.Desktop" />
+        <!-- the database editor's schema diagram -->
+        <PackageReference Include="Shiny.Maui.Controls.Diagram" />
         <PackageReference Include="Shiny.Maui.Shell" />
         <PackageReference Include="Shiny.Mediator.Maui" />
         <PackageReference Include="Shiny.Extensions.DependencyInjection" />

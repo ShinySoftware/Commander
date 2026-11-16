@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using Shiny.Mediator;
+using ShinyCommander.Services.Editors;
 
 namespace ShinyCommander;
 
@@ -38,6 +39,12 @@ public static class MauiProgramExtensions
         builder.Services.TryAddSingleton<ITrashService, TrashService>();
         builder.Services.AddSingleton(sp => new FileOperationService(sp.GetRequiredService<VirtualFileSystem>(), sp.GetRequiredService<ITrashService>()));
         builder.Services.TryAddSingleton<IAppDialogs, ShinyAppDialogs>();
+        // F4: an editor per file type, asked in order - the text editor takes whatever none of them claims
+        builder.Services.AddSingleton<FileEditors>();
+        builder.Services
+            .AddFileEditor<ImageMetadataFileEditor>()
+            .AddFileEditor<SqliteFileEditor>()
+            .AddFileEditor<TextFileEditor>();
         // for UpdateService's hourly check
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddSingleton(sp => sp.GetRequiredService<IDispatcherProvider>().GetForCurrentThread()!);

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:views="clr-namespace:ShinyCommander.Views"
+             xmlns:conv="clr-namespace:ShinyCommander.Converters"
+             xmlns:diagram="clr-namespace:Shiny.Maui.Controls.Diagram;assembly=Shiny.Maui.Controls.Diagram"
+             xmlns:l="clr-namespace:ShinyCommander"
+             x:Class="ShinyCommander.Views.DatabasePage"
+             x:DataType="vm:DatabaseViewModel">
+
+    <ContentPage.Resources>
+        <conv:BoolToThemeColorConverter x:Key="BoolColor" />
+    </ContentPage.Resources>
+
+    <shiny:KeyboardShortcuts.Shortcuts>
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Enter" Command="{Binding RunSqlCommand}" Description="{l:Tr Database_Run}" />
+        <shiny:KeyboardShortcut Gesture="F5" Command="{Binding RefreshCommand}" Description="{l:Tr Database_Refresh}" />
+    </shiny:KeyboardShortcuts.Shortcuts>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10">
+            <shiny:ShinyButton AutomationId="PageBack" Text="{l:Tr Page_Back}" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="{Binding Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
+            <HorizontalStackLayout Grid.Column="2" Spacing="4" IsVisible="{Binding IsDiagram}">
+                <shiny:ShinyButton AutomationId="DbDiagramFit" Text="{l:Tr Database_Fit}" Clicked="OnFitDiagram" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton AutomationId="DbDiagramDelete" Text="{l:Tr Database_DeleteSelected}" Clicked="OnDeleteInDiagram" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            </HorizontalStackLayout>
+            <HorizontalStackLayout Grid.Column="2" Spacing="4" IsVisible="{Binding IsData}">
+                <shiny:ShinyButton AutomationId="DbRefresh" Text="{l:Tr Database_Refresh}" Command="{Binding RefreshCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton AutomationId="DbInsert" Text="{l:Tr Database_InsertRow}" Command="{Binding BeginInsertCommand}" IsEnabled="{Binding CanEditRows}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+                <shiny:ShinyButton AutomationId="DbDelete" Text="{l:Tr Database_DeleteRow}" Command="{Binding DeleteRowCommand}" IsEnabled="{Binding HasCurrentRow}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            </HorizontalStackLayout>
+            <shiny:ButtonGroup Grid.Column="3" AutomationId="DbMode" SelectionMode="Single" SelectedIndex="{Binding ModeIndex, Mode=TwoWay}" VerticalOptions="Center">
+                <shiny:ShinyButton Text="{l:Tr Database_ModeData}" FontSize="12" ContentPadding="10,2" />
+                <shiny:ShinyButton Text="{l:Tr Database_ModeSchema}" FontSize="12" ContentPadding="10,2" />
+                <shiny:ShinyButton Text="{l:Tr Database_ModeDiagram}" FontSize="12" ContentPadding="10,2" />
+                <shiny:ShinyButton Text="{l:Tr Database_ModeSql}" FontSize="12" ContentPadding="10,2" />
+            </shiny:ButtonGroup>
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnDefinitions="230,*">
+            <!-- tables and views -->
+            <Border Style="{StaticResource Card}" Margin="8,8,0,8" Padding="0">
+                <Grid RowDefinitions="*,Auto">
+                <ScrollView>
+                    <VerticalStackLayout Padding="6" Spacing="2" BindableLayout.ItemsSource="{Binding Objects}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:DatabaseObjectItem">
+                                <!-- a converter, not a DataTrigger: the AppKit backend doesn't restore trigger setters on exit -->
+                                <Border StrokeThickness="0" StrokeShape="RoundRectangle 6" Padding="8,5" AutomationId="{Binding Name, StringFormat='DbObject_{0}'}"
+                                        BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolColor}, ConverterParameter='CursorInactive|Transparent'}">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnObjectTapped" /></Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                        <shiny:MotionIconView Icon="{Binding Icon}" Trigger="Hover,Press" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" />
+                                        <VerticalStackLayout Grid.Column="1" Spacing="0">
+                                            <Label Text="{Binding Name}" FontSize="13" LineBreakMode="TailTruncation" />
+                                            <Label Text="{Binding Detail}" Style="{StaticResource Subtle}" FontSize="11" />
+                                        </VerticalStackLayout>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </ScrollView>
+                <shiny:ShinyButton Grid.Row="1" AutomationId="DbNew" Text="{l:Tr Database_NewButton}" Command="{Binding NewObjectCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" HorizontalOptions="Start" Margin="8,4" />
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1" Style="{StaticResource Card}" Margin="8" Padding="0">
+                <Grid>
+                    <!-- Data: the grid is built in code - its columns are the table's -->
+                    <ContentView x:Name="GridHost" IsVisible="{Binding ShowGrid}" />
+
+                    <!-- Data, inserting: one field per column -->
+                    <Grid IsVisible="{Binding IsInserting}" RowDefinitions="Auto,*,Auto" Padding="16,12">
+                        <Label Text="{l:Tr Database_NewRow}" Style="{StaticResource SectionTitle}" />
+                        <ScrollView Grid.Row="1" Margin="0,8">
+                            <VerticalStackLayout Spacing="6" BindableLayout.ItemsSource="{Binding InsertFields}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:DatabaseInsertField">
+                                        <Grid ColumnDefinitions="180,*" ColumnSpacing="12">
+                                            <Label Text="{Binding Name}" VerticalOptions="Center" LineBreakMode="TailTruncation" />
+                                            <Entry Grid.Column="1" Text="{Binding Text, Mode=TwoWay}" Placeholder="{Binding Placeholder}" FontFamily="{DynamicResource MonoFont}" AutomationId="{Binding Name, StringFormat='DbInsert_{0}'}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </ScrollView>
+                        <HorizontalStackLayout Grid.Row="2" Spacing="8" HorizontalOptions="End">
+                            <shiny:ShinyButton Text="{l:Tr Common_Cancel}" Command="{Binding CancelInsertCommand}" Appearance="Text" FontSize="12" ContentPadding="10,3" />
+                            <shiny:ShinyButton AutomationId="DbInsertConfirm" Text="{l:Tr Database_Insert}" Command="{Binding ConfirmInsertCommand}" Appearance="Filled" FontSize="12" ContentPadding="10,3" />
+                        </HorizontalStackLayout>
+                    </Grid>
+
+                    <!-- Schema: the table designer, and every object's CREATE statement -->
+                    <ScrollView IsVisible="{Binding IsSchema}">
+                        <VerticalStackLayout Margin="16,12" Spacing="6">
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" IsVisible="{Binding IsTableSelected}">
+                                <HorizontalStackLayout Spacing="10">
+                                    <Label Text="{l:Tr Database_TableName}" Style="{StaticResource SectionTitle}" VerticalOptions="Center" />
+                                    <Entry Text="{Binding DesignName, Mode=TwoWay}" AutomationId="DbDesignName" WidthRequest="260" FontFamily="{DynamicResource MonoFont}" />
+                                </HorizontalStackLayout>
+                                <HorizontalStackLayout Grid.Column="1" Spacing="4">
+                                    <shiny:ShinyButton Text="{l:Tr Database_Revert}" Command="{Binding RevertDesignCommand}" Appearance="Text" FontSize="12" ContentPadding="10,3" />
+                                    <shiny:ShinyButton AutomationId="DbApplyDesign" Text="{l:Tr Common_Apply}" Command="{Binding ApplyDesignCommand}" Appearance="Filled" FontSize="12" ContentPadding="10,3" />
+                                </HorizontalStackLayout>
+                            </Grid>
+
+                            <Label Text="{Binding RebuildBlocker, StringFormat={l:Tr Database_RebuildBlockerFormat}}" IsVisible="{Binding HasRebuildBlocker}" Style="{StaticResource Subtle}" TextColor="{AppThemeBinding Light={StaticResource MarkedLight}, Dark={StaticResource MarkedDark}}" />
+
+                            <VerticalStackLayout Spacing="4" IsVisible="{Binding IsTableSelected}">
+                                <Grid ColumnDefinitions="180,150,70,70,70,*,32" ColumnSpacing="8" Margin="0,10,0,0">
+                                    <Label Text="{l:Tr Database_Columns}" Style="{StaticResource SectionTitle}" />
+                                    <Label Grid.Column="1" Text="{l:Tr Database_ColType}" Style="{StaticResource Subtle}" />
+                                    <Label Grid.Column="2" Text="PK" Style="{StaticResource Subtle}" HorizontalTextAlignment="Center" />
+                                    <Label Grid.Column="3" Text="NOT NULL" Style="{StaticResource Subtle}" HorizontalTextAlignment="Center" />
+                                    <Label Grid.Column="4" Text="UNIQUE" Style="{StaticResource Subtle}" HorizontalTextAlignment="Center" />
+                                    <Label Grid.Column="5" Text="{l:Tr Database_ColDefault}" Style="{StaticResource Subtle}" />
+                                </Grid>
+                                <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding DesignColumns}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:DesignerColumn">
+                                            <Grid ColumnDefinitions="180,150,70,70,70,*,32" ColumnSpacing="8">
+                                                <Entry Text="{Binding Name, Mode=TwoWay}" FontFamily="{DynamicResource MonoFont}" />
+                                                <Entry Grid.Column="1" Text="{Binding Type, Mode=TwoWay}" Placeholder="TEXT" FontFamily="{DynamicResource MonoFont}" />
+                                                <CheckBox Grid.Column="2" IsChecked="{Binding PrimaryKey, Mode=TwoWay}" HorizontalOptions="Center" />
+                                                <CheckBox Grid.Column="3" IsChecked="{Binding NotNull, Mode=TwoWay}" HorizontalOptions="Center" />
+                                                <CheckBox Grid.Column="4" IsChecked="{Binding Unique, Mode=TwoWay}" HorizontalOptions="Center" />
+                                                <Entry Grid.Column="5" Text="{Binding Default, Mode=TwoWay}" Placeholder="NULL" FontFamily="{DynamicResource MonoFont}" />
+                                                <shiny:ShinyButton Grid.Column="6" Text="✕" Command="{Binding RemoveColumnCommand, Source={RelativeSource AncestorType={x:Type vm:DatabaseViewModel}}}" CommandParameter="{Binding .}" Appearance="Text" FontSize="12" ContentPadding="4,2" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                                <shiny:ShinyButton AutomationId="DbAddColumn" Text="{l:Tr Database_AddColumn}" Command="{Binding AddColumnCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" HorizontalOptions="Start" />
+
+                                <Label Text="{l:Tr Database_ForeignKeys}" Style="{StaticResource SectionTitle}" Margin="0,12,0,0" />
+                                <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding DesignForeignKeys}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:DesignerForeignKey">
+                                            <Grid ColumnDefinitions="180,24,150,150,150,*,32" ColumnSpacing="8">
+                                                <Picker IsVisible="{Binding IsSimple}" ItemsSource="{Binding DesignColumnNames, Source={RelativeSource AncestorType={x:Type vm:DatabaseViewModel}}}" SelectedItem="{Binding Column, Mode=TwoWay}" FontSize="13" />
+                                                <Label Grid.Column="1" Text="→" IsVisible="{Binding IsSimple}" VerticalOptions="Center" HorizontalTextAlignment="Center" />
+                                                <Picker Grid.Column="2" IsVisible="{Binding IsSimple}" ItemsSource="{Binding TableNames, Source={RelativeSource AncestorType={x:Type vm:DatabaseViewModel}}}" SelectedItem="{Binding RefTable, Mode=TwoWay}" FontSize="13" />
+                                                <Picker Grid.Column="3" IsVisible="{Binding IsSimple}" ItemsSource="{Binding RefColumns}" SelectedItem="{Binding RefColumn, Mode=TwoWay}" FontSize="13" />
+                                                <Picker Grid.Column="4" IsVisible="{Binding IsSimple}" ItemsSource="{Binding Actions}" SelectedItem="{Binding OnDelete, Mode=TwoWay}" FontSize="13" ToolTipProperties.Text="ON DELETE" />
+                                                <Label Grid.ColumnSpan="6" Text="{Binding Summary}" IsVisible="{Binding IsComposite}" FontFamily="{DynamicResource MonoFont}" VerticalOptions="Center" />
+                                                <shiny:ShinyButton Grid.Column="6" Text="✕" Command="{Binding RemoveForeignKeyCommand, Source={RelativeSource AncestorType={x:Type vm:DatabaseViewModel}}}" CommandParameter="{Binding .}" Appearance="Text" FontSize="12" ContentPadding="4,2" />
+                                            </Grid>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                                <shiny:ShinyButton AutomationId="DbAddFk" Text="{l:Tr Database_AddForeignKey}" Command="{Binding AddForeignKeyCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" HorizontalOptions="Start" />
+
+                                <Label Text="{l:Tr Database_IndexesTriggers}" Style="{StaticResource SectionTitle}" Margin="0,12,0,0" IsVisible="{Binding HasDependents}" />
+                                <VerticalStackLayout Spacing="2" BindableLayout.ItemsSource="{Binding Dependents}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="vm:DatabaseObjectItem">
+                                            <Label Text="{Binding Name}" FontFamily="{DynamicResource MonoFont}" TextColor="{StaticResource Accent}">
+                                                <Label.GestureRecognizers><TapGestureRecognizer Tapped="OnObjectTapped" /></Label.GestureRecognizers>
+                                            </Label>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+                            </VerticalStackLayout>
+
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Margin="0,16,0,0">
+                                <Label Text="{l:Tr Database_CreateStatement}" Style="{StaticResource SectionTitle}" VerticalOptions="Center" />
+                                <HorizontalStackLayout Grid.Column="1" Spacing="4">
+                                    <shiny:ShinyButton AutomationId="DbDrop" Text="{l:Tr Database_Drop}" Command="{Binding DropObjectCommand}" Appearance="Text" FontSize="12" ContentPadding="10,3" TextColor="{AppThemeBinding Light={StaticResource MarkedLight}, Dark={StaticResource MarkedDark}}" />
+                                    <shiny:ShinyButton AutomationId="DbApplySql" Text="{l:Tr Database_ApplySql}" Command="{Binding ApplySqlCommand}" Appearance="Outlined" FontSize="12" ContentPadding="10,3" />
+                                </HorizontalStackLayout>
+                            </Grid>
+                            <Border Style="{StaticResource Card}" Padding="0" HeightRequest="200">
+                                <Editor Text="{Binding ObjectSql, Mode=TwoWay}"
+                                        AutomationId="DbObjectSql"
+                                        FontFamily="{DynamicResource MonoFont}"
+                                        FontSize="12"
+                                        Margin="6,4"
+                                        AutoSize="Disabled"
+                                        IsSpellCheckEnabled="False"
+                                        IsTextPredictionEnabled="False" />
+                            </Border>
+                        </VerticalStackLayout>
+                    </ScrollView>
+
+                    <!-- Diagram: tables and their foreign keys -->
+                    <Grid IsVisible="{Binding IsDiagram}" RowDefinitions="*,Auto">
+                        <diagram:DiagramView x:Name="Diagram"
+                                             AutomationId="DbDiagram"
+                                             Nodes="{Binding DiagramNodes}"
+                                             Connections="{Binding DiagramConnections}"
+                                             LayoutKind="Layered"
+                                             Direction="LeftToRight"
+                                             LevelSpacing="150"
+                                             NodeSpacing="40"
+                                             Router="Orthogonal"
+                                             AllowNodeDrag="True"
+                                             AllowConnectionEdit="True"
+                                             ShowGrid="True"
+                                             NodeTapped="OnDiagramNodeTapped"
+                                             Editing="OnDiagramEditing">
+                            <diagram:DiagramView.NodeTemplate>
+                                <DataTemplate>
+                                    <views:DiagramTableCard />
+                                </DataTemplate>
+                            </diagram:DiagramView.NodeTemplate>
+                        </diagram:DiagramView>
+                        <Label Grid.Row="1" Text="{l:Tr Database_DiagramHint}" Style="{StaticResource Subtle}" Margin="12,6" />
+                    </Grid>
+
+                    <!-- SQL -->
+                    <Grid IsVisible="{Binding IsSql}" RowDefinitions="140,Auto,*">
+                        <Editor Text="{Binding SqlText, Mode=TwoWay}"
+                                AutomationId="DbSql"
+                                FontFamily="{DynamicResource MonoFont}"
+                                FontSize="13"
+                                Margin="8,6"
+                                AutoSize="Disabled"
+                                IsSpellCheckEnabled="False"
+                                IsTextPredictionEnabled="False" />
+                        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Padding="12,4" ColumnSpacing="10">
+                            <Label Text="{Binding QueryStatus}" Style="{StaticResource Subtle}" VerticalOptions="Center" LineBreakMode="TailTruncation" AutomationId="DbQueryStatus" />
+                            <shiny:ShinyButton Grid.Column="1" AutomationId="DbRun" Text="{l:Tr Database_Run}" Command="{Binding RunSqlCommand}" Appearance="Filled" FontSize="12" ContentPadding="10,3" ToolTipProperties.Text="Primary+Enter" />
+                        </Grid>
+                        <BoxView Grid.Row="1" Style="{StaticResource Hairline}" />
+                        <ContentView Grid.Row="2" x:Name="QueryHost" />
+                    </Grid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="2" Style="{StaticResource Toolbar}" Padding="10,4">
+            <Label Text="{Binding Status}" Style="{StaticResource Subtle}" />
+        </Grid>
+    </Grid>
+</ContentPage>

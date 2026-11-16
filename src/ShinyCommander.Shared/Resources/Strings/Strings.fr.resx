@@ -1752,4 +1752,268 @@ Réessayez.</value>
   <data name="Key_FolderSizes" xml:space="preserve">
     <value>Taille des dossiers (marqués, sous le curseur ou tous)</value>
   </data>
+  <data name="ImageMeta_InfoFormat" xml:space="preserve">
+    <value>{0} · {1} balises EXIF</value>
+  </data>
+  <data name="ImageMeta_InvalidDate" xml:space="preserve">
+    <value>La date de prise de vue n'est pas une date - utilisez AAAA-MM-JJ HH:MM:SS.</value>
+  </data>
+  <data name="ImageMeta_InvalidLocation" xml:space="preserve">
+    <value>La latitude doit être entre -90 et 90 et la longitude entre -180 et 180 - remplissez les deux, ou aucune.</value>
+  </data>
+  <data name="ImageMeta_RemoveLocation" xml:space="preserve">
+    <value>Supprimer la position</value>
+  </data>
+  <data name="ImageMeta_RemoveLocationConfirm" xml:space="preserve">
+    <value>Supprimer la position GPS de cette photo ? Les autres métadonnées restent.</value>
+  </data>
+  <data name="ImageMeta_RemoveAll" xml:space="preserve">
+    <value>Supprimer toutes les métadonnées</value>
+  </data>
+  <data name="ImageMeta_RemoveAllConfirm" xml:space="preserve">
+    <value>Supprimer toutes les balises EXIF de cette photo ? L'appareil, les dates et la position sont perdus. L'image elle-même n'est pas modifiée.</value>
+  </data>
+  <data name="ImageMeta_SectionDescription" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="ImageMeta_Title" xml:space="preserve">
+    <value>Titre</value>
+  </data>
+  <data name="ImageMeta_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="ImageMeta_Keywords" xml:space="preserve">
+    <value>Mots-clés</value>
+  </data>
+  <data name="ImageMeta_Comment" xml:space="preserve">
+    <value>Commentaire</value>
+  </data>
+  <data name="ImageMeta_SectionOrigin" xml:space="preserve">
+    <value>Origine</value>
+  </data>
+  <data name="ImageMeta_Artist" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <data name="ImageMeta_Copyright" xml:space="preserve">
+    <value>Copyright</value>
+  </data>
+  <data name="ImageMeta_DateTaken" xml:space="preserve">
+    <value>Date de prise de vue</value>
+  </data>
+  <data name="ImageMeta_Software" xml:space="preserve">
+    <value>Logiciel</value>
+  </data>
+  <data name="ImageMeta_SectionCamera" xml:space="preserve">
+    <value>Appareil photo</value>
+  </data>
+  <data name="ImageMeta_Make" xml:space="preserve">
+    <value>Marque</value>
+  </data>
+  <data name="ImageMeta_Model" xml:space="preserve">
+    <value>Modèle</value>
+  </data>
+  <data name="ImageMeta_SectionLocation" xml:space="preserve">
+    <value>Position</value>
+  </data>
+  <data name="ImageMeta_Latitude" xml:space="preserve">
+    <value>Latitude</value>
+  </data>
+  <data name="ImageMeta_Longitude" xml:space="preserve">
+    <value>Longitude</value>
+  </data>
+  <data name="ImageMeta_SectionAllTags" xml:space="preserve">
+    <value>Toutes les balises</value>
+  </data>
+  <data name="ImageMeta_NoTags" xml:space="preserve">
+    <value>Aucune métadonnée EXIF</value>
+  </data>
+  <data name="Database_AutoNumber" xml:space="preserve">
+    <value>automatique</value>
+  </data>
+  <data name="Database_DefaultFormat" xml:space="preserve">
+    <value>défaut {0}</value>
+  </data>
+  <data name="Database_Required" xml:space="preserve">
+    <value>obligatoire</value>
+  </data>
+  <data name="Database_StatusFormat" xml:space="preserve">
+    <value>{0} tables · {1} vues · {2}</value>
+  </data>
+  <data name="Database_RowsFormat" xml:space="preserve">
+    <value>{0} lignes</value>
+  </data>
+  <data name="Database_Inserted" xml:space="preserve">
+    <value>Ligne insérée</value>
+  </data>
+  <data name="Database_InsertFailed" xml:space="preserve">
+    <value>Impossible d'insérer la ligne</value>
+  </data>
+  <data name="Database_UpdateFailed" xml:space="preserve">
+    <value>Impossible de modifier la ligne</value>
+  </data>
+  <data name="Database_DeleteFailed" xml:space="preserve">
+    <value>Impossible de supprimer la ligne</value>
+  </data>
+  <data name="Database_PickRow" xml:space="preserve">
+    <value>Cliquez d'abord sur une ligne</value>
+  </data>
+  <data name="Database_DeleteRow" xml:space="preserve">
+    <value>Supprimer la ligne</value>
+  </data>
+  <data name="Database_DeleteConfirmFormat" xml:space="preserve">
+    <value>Supprimer la ligne {0} ? C'est irréversible.</value>
+  </data>
+  <data name="Database_QueryRowsFormat" xml:space="preserve">
+    <value>{0} lignes</value>
+  </data>
+  <data name="Database_QueryTruncatedFormat" xml:space="preserve">
+    <value>{0} premières lignes</value>
+  </data>
+  <data name="Database_QueryChangedFormat" xml:space="preserve">
+    <value>{0} lignes modifiées</value>
+  </data>
+  <data name="Database_Run" xml:space="preserve">
+    <value>Exécuter</value>
+  </data>
+  <data name="Database_Refresh" xml:space="preserve">
+    <value>Actualiser</value>
+  </data>
+  <data name="Database_InsertRow" xml:space="preserve">
+    <value>Insérer une ligne</value>
+  </data>
+  <data name="Database_Insert" xml:space="preserve">
+    <value>Insérer</value>
+  </data>
+  <data name="Database_NewRow" xml:space="preserve">
+    <value>Nouvelle ligne - les champs vides prennent la valeur par défaut</value>
+  </data>
+  <data name="Database_ModeData" xml:space="preserve">
+    <value>Données</value>
+  </data>
+  <data name="Database_ModeSchema" xml:space="preserve">
+    <value>Schéma</value>
+  </data>
+  <data name="Database_ModeSql" xml:space="preserve">
+    <value>SQL</value>
+  </data>
+  <data name="Database_Columns" xml:space="preserve">
+    <value>Colonnes</value>
+  </data>
+  <data name="Database_NoRows" xml:space="preserve">
+    <value>Aucune ligne</value>
+  </data>
+  <data name="Database_OnTableFormat" xml:space="preserve">
+    <value>sur {0}</value>
+  </data>
+  <data name="Database_SchemaFailed" xml:space="preserve">
+    <value>Impossible de modifier le schéma</value>
+  </data>
+  <data name="Database_SchemaSaved" xml:space="preserve">
+    <value>Schéma enregistré</value>
+  </data>
+  <data name="Database_NamesRequired" xml:space="preserve">
+    <value>La table et chaque colonne doivent avoir un nom.</value>
+  </data>
+  <data name="Database_Drop" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="Database_DropConfirmFormat" xml:space="preserve">
+    <value>Supprimer {0} ? Ses lignes sont effacées et c'est irréversible.</value>
+  </data>
+  <data name="Database_DropFk" xml:space="preserve">
+    <value>Supprimer la clé étrangère</value>
+  </data>
+  <data name="Database_New" xml:space="preserve">
+    <value>Nouveau</value>
+  </data>
+  <data name="Database_NewButton" xml:space="preserve">
+    <value>+ Nouveau</value>
+  </data>
+  <data name="Database_NewTable" xml:space="preserve">
+    <value>Table</value>
+  </data>
+  <data name="Database_NewView" xml:space="preserve">
+    <value>Vue</value>
+  </data>
+  <data name="Database_NewIndex" xml:space="preserve">
+    <value>Index</value>
+  </data>
+  <data name="Database_NewTrigger" xml:space="preserve">
+    <value>Déclencheur</value>
+  </data>
+  <data name="Database_NewNameMessage" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="Database_NewSqlHint" xml:space="preserve">
+    <value>Terminez l'instruction et exécutez-la</value>
+  </data>
+  <data name="Database_FkColumnFormat" xml:space="preserve">
+    <value>Quelle colonne de {0} pointe vers {1} ?</value>
+  </data>
+  <data name="Database_FkRefColumnFormat" xml:space="preserve">
+    <value>Quelle colonne de {0} ?</value>
+  </data>
+  <data name="Database_ModeDiagram" xml:space="preserve">
+    <value>Diagramme</value>
+  </data>
+  <data name="Database_Fit" xml:space="preserve">
+    <value>Ajuster</value>
+  </data>
+  <data name="Database_DeleteSelected" xml:space="preserve">
+    <value>Supprimer la sélection</value>
+  </data>
+  <data name="Database_DiagramPick" xml:space="preserve">
+    <value>Sélectionnez d'abord une table ou une clé étrangère</value>
+  </data>
+  <data name="Database_DiagramHint" xml:space="preserve">
+    <value>Faites glisser les tables pour les disposer. Tirez du bord d'une table vers une autre pour ajouter une clé étrangère ; sélectionnez une ligne ou une table puis Supprimer la sélection.</value>
+  </data>
+  <data name="Database_TableName" xml:space="preserve">
+    <value>Table</value>
+  </data>
+  <data name="Database_Revert" xml:space="preserve">
+    <value>Annuler les modifications</value>
+  </data>
+  <data name="Database_RebuildBlockerFormat" xml:space="preserve">
+    <value>Cette table utilise {0}, que le concepteur ne peut pas conserver : les renommages et ajouts ou suppressions de colonnes fonctionnent - modifiez le reste dans l'instruction CREATE ci-dessous.</value>
+  </data>
+  <data name="Database_ColType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Database_ColDefault" xml:space="preserve">
+    <value>Défaut</value>
+  </data>
+  <data name="Database_AddColumn" xml:space="preserve">
+    <value>+ Ajouter une colonne</value>
+  </data>
+  <data name="Database_ForeignKeys" xml:space="preserve">
+    <value>Clés étrangères</value>
+  </data>
+  <data name="Database_AddForeignKey" xml:space="preserve">
+    <value>+ Ajouter une clé étrangère</value>
+  </data>
+  <data name="Database_IndexesTriggers" xml:space="preserve">
+    <value>Index et déclencheurs</value>
+  </data>
+  <data name="Database_CreateStatement" xml:space="preserve">
+    <value>Instruction CREATE</value>
+  </data>
+  <data name="Database_ApplySql" xml:space="preserve">
+    <value>Appliquer le SQL</value>
+  </data>
+  <data name="ImageMeta_ModeMetadata" xml:space="preserve">
+    <value>Métadonnées</value>
+  </data>
+  <data name="ImageMeta_ModeEdit" xml:space="preserve">
+    <value>Modifier l'image</value>
+  </data>
+  <data name="ImageMeta_DiscardEdits" xml:space="preserve">
+    <value>Abandonner les modifications ?</value>
+  </data>
+  <data name="ImageMeta_DiscardEditsMessage" xml:space="preserve">
+    <value>Les modifications de l'image n'ont pas été enregistrées.</value>
+  </data>
+  <data name="ImageMeta_ExportUnsupported" xml:space="preserve">
+    <value>L'image n'a pas été enregistrée : l'ImageEditor de Shiny ne sait pas encore exporter une image modifiée sur cette plateforme. La photo n'a pas changé.</value>
+  </data>
 </root>

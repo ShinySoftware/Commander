@@ -35,7 +35,9 @@ and **Linux** (GTK4 via maui-labs), and dressed in [Shiny Controls](https://gith
 | **Operations** | copy/move/delete with byte progress, conflict resolution (overwrite / all / older / skip / keep both), move-by-rename fast path, trash/recycle bin (⌘⌫ on a Mac, like Finder) |
 | **Background jobs (Primary+J)** | copy, move, delete, pack and unpack run in the background while you keep working: live progress per job, Stop, Go To (opens where the result went, cursor on it), Clear Completed. Closing or quitting while a job runs asks first |
 | **Lister (F3)** | text, hex, images, rendered Markdown — also for files inside archives; N/P walks the folder |
-| **Editor (F4)** | built-in editor (Markdown files get Shiny's MarkdownEditor with live preview) or your external editor - inside an archive too, saving back into it |
+| **Editor (F4)** | F4 picks an editor by file type (`IFileEditor` plugins in `Services/Editors`, registered with `AddFileEditor<T>()`): the database and photo editors below, else the text editor (Markdown files get Shiny's MarkdownEditor with live preview) or your external editor - inside an archive or on a server too, saving back into it |
+| **Database editor** | F4 on a SQLite file (`.db`, `.sqlite`, `.sqlite3`, `.db3` - checked by its header, so `Thumbs.db` still opens as text): tables, views, indexes and triggers; rows a page at a time with in-place edit, insert and delete; a table designer (columns, types, keys, defaults, foreign keys - ALTER where SQLite can, otherwise its create-copy-drop rebuild keeping rows, indexes and triggers); editable CREATE statements; a diagram of every table and foreign key where a drag between tables adds a key; and a SQL box |
+| **Photo metadata** | F4 on a JPEG edits its EXIF - title, description, keywords, author, copyright, date taken, camera, GPS - without re-encoding the picture; remove the location or all metadata; every tag listed |
 | **Find files** | wildcard masks with TC syntax (`*.cs;*.xaml \| bin/ obj/`), content search, size filter, go-to-file |
 | **Multi-rename (Ctrl/⌘+M)** | `[N] [N2-5] [E] [C] [P] [YMD] [hms]` placeholders, search/replace (plain or regex), case, counters, live preview, undo - on disk and inside archives |
 | **Synchronize dirs** | compare trees by date/size/content, per-row direction, copy both ways |
@@ -44,27 +46,45 @@ and **Linux** (GTK4 via maui-labs), and dressed in [Shiny Controls](https://gith
 | **Languages** | English, French and Spanish - follows the system language, or pick one in Settings (applies on the next launch) |
 | **Also** | branch view, quick filter (Ctrl+F), directory hotlist (Primary+D), swap panels, compare files by content |
 
-## Libraries
+## Tech stack
+
+**C# / .NET 10** throughout. One shared **.NET MAUI** UI runs on three native heads: **WinUI** on Windows, **AppKit**
+on macOS and **GTK4** on Linux (the last two from [maui-labs](https://github.com/dotnet/maui-labs)). The file-system
+core (`ShinyCommander.Core`) and the remote providers (`ShinyCommander.Remote`) are plain .NET with no UI dependency.
+Tests use xUnit v3, and the UI suite drives the real app through MAUI DevFlow.
 
 | Library | Version | Used for |
 |---|---|---|
+| **UI & platforms** | | |
 | [.NET MAUI](https://github.com/dotnet/maui) (`Microsoft.Maui.Controls`) | 10.0.110 | the UI framework - one shared UI for all three platforms |
 | [maui-labs](https://github.com/dotnet/maui-labs) (`Microsoft.Maui.Platforms.MacOS`, `.MacOS.Essentials`) | 0.1.0-preview.14 | the native AppKit macOS head (not Mac Catalyst) |
 | [maui-labs](https://github.com/dotnet/maui-labs) (`Microsoft.Maui.Platforms.Linux.Gtk4`, `.Linux.Gtk4.Essentials`) | 0.1.0-preview.14 | the GTK4 Linux head |
-| [Microsoft.Maui.DevFlow](https://github.com/dotnet/maui-labs) (`.Agent`, `.Agent.Gtk`, `.Client`) | 0.1.0-preview.14 | the in-app agent and client the UI tests drive the real app through (Debug only) |
-| [Shiny.Maui.Controls](https://github.com/shinyorg/controls) | 2.4.0 | ribbon, motion icons, keyboard shortcuts, dialogs, toasts, data grids, table views, pills, badges, progress bars, buttons |
-| [Shiny.Maui.Controls.Markdown](https://github.com/shinyorg/controls) | 2.4.0 | Markdown in the lister, the editor and F1 help |
-| [Shiny.Maui.Controls.Desktop](https://github.com/shinyorg/controls) | 2.4.0 | AppKit / GTK keyboard sources for the shortcuts |
+| [Shiny.Maui.Controls](https://github.com/shinyorg/controls) | 2.5.0 | ribbon, motion icons, keyboard shortcuts, dialogs, toasts, data grids, table views, pills, badges, progress bars, buttons |
+| [Shiny.Maui.Controls.Markdown](https://github.com/shinyorg/controls) | 2.5.0 | Markdown in the lister, the editor and F1 help |
+| [Shiny.Maui.Controls.Desktop](https://github.com/shinyorg/controls) | 2.5.0 | AppKit / GTK keyboard sources for the shortcuts |
+| [Shiny.Maui.Controls.Diagram](https://github.com/shinyorg/controls) | 2.5.0 | the database editor's schema diagram |
+| **App architecture** | | |
 | [Shiny.Maui.Shell](https://github.com/shinyorg/maui) | 7.0.3 | ViewModel-first navigation (`[ShellMap]`, `[ShellProperty]`) |
 | [Shiny.Mediator.Maui](https://github.com/shinyorg/mediator) | 6.12.0 | file-system-changed and go-to events between pages |
 | [Shiny.Extensions.DependencyInjection](https://github.com/shinyorg/extensions) | 6.0.1 | `[Singleton]` source-generated service registration |
 | [Shiny.Extensions.Stores](https://github.com/shinyorg/extensions) | 6.0.1 | `[Bind]` persisted settings |
 | [Shiny.Extensions.Localization.Generator](https://github.com/shinyorg/extensions) | 2.1.2 | strongly typed `StringsLocalized` from the `.resx` files |
-| [SharpCompress](https://github.com/adamhathcock/sharpcompress) | 1.0.0 | reading 7z, rar and compressed tars; bzip2 / zstd compression and the LZMA encoder behind the 7z writer |
 | [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) | 8.4.2 | `[ObservableProperty]` / `[RelayCommand]` view models |
 | [Microsoft.Extensions.Localization](https://github.com/dotnet/runtime) | 10.0.0 | the resource-string plumbing the localization generator builds on |
 | [Microsoft.Extensions.Logging.Debug](https://github.com/dotnet/runtime) | 10.0.0 | debug logging |
+| **Files & formats** | | |
 | System.IO.Compression · System.Formats.Tar (.NET) | 10.0 | zip read/write; tar read/write |
+| [SharpCompress](https://github.com/adamhathcock/sharpcompress) | 1.0.0 | reading 7z, rar and compressed tars; bzip2 / zstd compression and the LZMA encoder behind the 7z writer |
+| [ExifLibNet](https://github.com/oozcitak/exiflibrary) | 2.1.4 | lossless EXIF edits in JPEGs |
+| [Microsoft.Data.Sqlite](https://github.com/dotnet/efcore) | 10.0.15 | the SQLite database editor |
+| **Servers & cloud** | | |
+| [SSH.NET](https://github.com/sshnet/SSH.NET) | 2026.0.0 | SFTP |
+| [FluentFTP](https://github.com/robinrodricks/FluentFTP) | 55.1.0 | FTP and FTPS |
+| [AWSSDK.S3](https://github.com/aws/aws-sdk-net) | 4.1.0 | Amazon S3 and S3-compatible storage (MinIO, R2, Wasabi, B2) |
+| [Azure.Storage.Blobs](https://github.com/Azure/azure-sdk-for-net) | 12.30.1 | Azure Blob storage |
+| [Shiny.Net.Discovery](https://github.com/shinyorg/shiny) | 6.5.2 | finding file servers on the network (Bonjour / mDNS) |
+| **Testing** | | |
+| [Microsoft.Maui.DevFlow](https://github.com/dotnet/maui-labs) (`.Agent`, `.Agent.Gtk`, `.Client`) | 0.1.0-preview.14 | the in-app agent and client the UI tests drive the real app through (Debug only) |
 | [xunit.v3](https://github.com/xunit/xunit) · xunit.runner.visualstudio | 3.2.2 · 3.1.5 | tests |
 | [Shouldly](https://github.com/shouldly/shouldly) | 4.3.0 | test assertions |
 | Microsoft.NET.Test.Sdk | 18.0.1 | test runner |
@@ -134,3 +154,10 @@ dotnet build src/ShinyCommander.Windows
   (`tools/ribbon.py`). Windows and Linux use the Shiny Ribbon directly.
 * Row/tab visuals use converters rather than `DataTrigger`s because the AppKit backend doesn't restore trigger
   setters on exit.
+
+---
+
+<p align="center">
+  Built by<br>
+  <img src="art/shinysoft-logo.png" alt="ShinySoft Technologies" width="200">
+</p>

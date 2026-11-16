@@ -154,6 +154,34 @@
                 <figure class="shot focus" style="--zoom: 150%; --x: 0%; --y: 5%" data-zoom><img src="screenshots/connections.png" alt="The Connections page with saved servers and storage accounts beside the servers found on the network" loading="lazy" width="1440" height="900"></figure>
             </article>
 
+            <article class="showcase flip" id="database">
+                <div class="showcase-copy">
+                    <span class="chip">New</span>
+                    <h3>A SQLite workbench behind F4</h3>
+                    <p>Press F4 on a <code>.db</code>, <code>.sqlite</code> or <code>.db3</code> file and get a database editor, not a wall of bytes: tables, views, indexes and triggers down the side, the rows a page at a time.</p>
+                    <ul class="ticks">
+                        <li><strong>Edit rows in place</strong> - click a row to change it, insert with a form, delete with a confirm</li>
+                        <li><strong>Design tables</strong>: rename, add and drop columns, change types, keys, defaults and foreign keys - SQLite's table rebuild done for you, rows, indexes and triggers kept</li>
+                        <li><strong>A live diagram</strong> of every table and foreign key - drag from one table to another to add a key, select a line to drop it</li>
+                        <li>Run any SQL, edit any CREATE statement, make new tables, views, indexes and triggers</li>
+                    </ul>
+                </div>
+                <figure class="shot" data-zoom><img src="screenshots/database.png" alt="The database editor's diagram of four tables joined by their foreign keys" loading="lazy" width="1280" height="780"></figure>
+            </article>
+
+            <article class="showcase" id="photos">
+                <div class="showcase-copy">
+                    <span class="chip">New</span>
+                    <h3>Photo metadata, edited losslessly</h3>
+                    <p>F4 on a JPEG opens its EXIF: title, description, keywords, author, copyright, date taken, camera and GPS location - with every other tag listed below.</p>
+                    <ul class="ticks">
+                        <li>Only the metadata is rewritten - <strong>the picture stays byte for byte</strong> what it was</li>
+                        <li><strong>Remove location</strong> or <strong>strip everything</strong> before you share a photo</li>
+                    </ul>
+                </div>
+                <figure class="shot" data-zoom><img src="screenshots/photo-metadata.png" alt="A photo beside its title, description, author, copyright and date taken" loading="lazy" width="1280" height="780"></figure>
+            </article>
+
             <article class="showcase flip">
                 <div class="showcase-copy">
                     <h3>Quick view, side by side</h3>
@@ -206,8 +234,18 @@
                 </div>
                 <div class="card">
                     <svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 14l2 2 4-4"/></svg>
-                    <h4>Built-in editor</h4>
-                    <p>Edit with F4 - Markdown gets a live preview - or hand files to your favourite editor.</p>
+                    <h4>An editor for each kind of file</h4>
+                    <p>F4 picks the editor that understands the file - SQLite databases, photo metadata, Markdown with a live preview, text for the rest - or hands it to your favourite editor.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 15v-2M12 15v-4M16 15v-3"/></svg>
+                    <h4>Folder sizes</h4>
+                    <p><kbd>Alt</kbd><kbd>Shift</kbd><kbd>Enter</kbd> or the ribbon sizes the marked folders, the one under the cursor, or every folder at once.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/></svg>
+                    <h4>Cloud-only files</h4>
+                    <p>Files iCloud Drive, OneDrive or Dropbox keep only in the cloud wear a cloud, so you know before you open one.</p>
                 </div>
                 <div class="card">
                     <svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
@@ -280,6 +318,7 @@
                 <figure class="shot" data-zoom><img src="screenshots/viewer.png" alt="The lister showing rendered Markdown" loading="lazy" width="1440" height="900"><figcaption>Lister (F3)</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/find.png" alt="Find files" loading="lazy" width="1440" height="900"><figcaption>Find files</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/multi-rename.png" alt="Multi-rename with a live preview" loading="lazy" width="1440" height="900"><figcaption>Multi-rename</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/database-designer.png" alt="The table designer: columns, keys and foreign keys" loading="lazy" width="1280" height="780"><figcaption>Table designer</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/settings.png" alt="Settings" loading="lazy" width="1440" height="900"><figcaption>Settings</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/customize-toolbar.png" alt="Choosing the buttons beside each path" loading="lazy" width="1440" height="900"><figcaption>Your own toolbar</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/tab-menu.png" alt="The tab menu" loading="lazy" width="1440" height="900"><figcaption>Tab colours &amp; icons</figcaption></figure>
@@ -287,6 +326,69 @@
                 <figure class="shot" data-zoom><img src="screenshots/connections.png" alt="Saved connections and servers on the network" loading="lazy" width="1440" height="900"><figcaption>Connections (⌘K)</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/connection-edit.png" alt="Adding an SFTP connection with a private key" loading="lazy" width="1440" height="900"><figcaption>A new connection</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/archive.png" alt="A 7z archive open like a folder" loading="lazy" width="1440" height="900"><figcaption>Archives as folders</figcaption></figure>
+            </div>
+        </div>
+    </section>
+
+    <!-- what it's built with -->
+    <section id="stack" class="section">
+        <div class="wrap">
+            <p class="section-eyebrow">Under the hood</p>
+            <h2>The tech stack</h2>
+            <p class="section-lede">C# and .NET 10 from top to bottom. One shared .NET MAUI interface runs natively on WinUI, AppKit and GTK4 - no web view, no Electron.</p>
+            <div class="stack">
+                <div class="stack-group">
+                    <h4>Language &amp; runtime</h4>
+                    <ul>
+                        <li><a href="https://dotnet.microsoft.com/">.NET 10</a><span>the runtime, on all three desktops</span></li>
+                        <li><a href="https://learn.microsoft.com/dotnet/csharp/">C#</a><span>every line of the app</span></li>
+                        <li><a href="https://learn.microsoft.com/dotnet/maui/xaml/">XAML</a><span>the pages and controls</span></li>
+                    </ul>
+                </div>
+                <div class="stack-group">
+                    <h4>UI &amp; platforms</h4>
+                    <ul>
+                        <li><a href="https://github.com/dotnet/maui">.NET MAUI</a><span>the shared UI</span></li>
+                        <li><a href="https://github.com/dotnet/maui-labs">maui-labs</a><span>native AppKit on macOS, GTK4 on Linux</span></li>
+                        <li><a href="https://github.com/shinyorg/controls">Shiny Controls</a><span>ribbon, data grids, keyboard shortcuts, dialogs, Markdown, diagrams</span></li>
+                    </ul>
+                </div>
+                <div class="stack-group">
+                    <h4>App architecture</h4>
+                    <ul>
+                        <li><a href="https://github.com/shinyorg/maui">Shiny MAUI Shell</a><span>ViewModel-first navigation</span></li>
+                        <li><a href="https://github.com/shinyorg/mediator">Shiny Mediator</a><span>events between pages</span></li>
+                        <li><a href="https://github.com/shinyorg/extensions">Shiny Extensions</a><span>DI, persisted settings, typed localization</span></li>
+                        <li><a href="https://github.com/CommunityToolkit/dotnet">CommunityToolkit.Mvvm</a><span>view models</span></li>
+                    </ul>
+                </div>
+                <div class="stack-group">
+                    <h4>Files &amp; formats</h4>
+                    <ul>
+                        <li><a href="https://github.com/adamhathcock/sharpcompress">SharpCompress</a><span>7z, rar and compressed tars</span></li>
+                        <li><a href="https://github.com/dotnet/runtime">System.IO.Compression · System.Formats.Tar</a><span>zip and tar</span></li>
+                        <li><a href="https://github.com/oozcitak/exiflibrary">ExifLibNet</a><span>lossless EXIF edits</span></li>
+                        <li><a href="https://github.com/dotnet/efcore">Microsoft.Data.Sqlite</a><span>the SQLite editor</span></li>
+                    </ul>
+                </div>
+                <div class="stack-group">
+                    <h4>Servers &amp; cloud</h4>
+                    <ul>
+                        <li><a href="https://github.com/sshnet/SSH.NET">SSH.NET</a><span>SFTP</span></li>
+                        <li><a href="https://github.com/robinrodricks/FluentFTP">FluentFTP</a><span>FTP and FTPS</span></li>
+                        <li><a href="https://github.com/aws/aws-sdk-net">AWS SDK for .NET</a><span>S3 and S3-compatible storage</span></li>
+                        <li><a href="https://github.com/Azure/azure-sdk-for-net">Azure SDK for .NET</a><span>Azure Blob storage</span></li>
+                        <li><a href="https://github.com/shinyorg/shiny">Shiny.Net.Discovery</a><span>servers on your network</span></li>
+                    </ul>
+                </div>
+                <div class="stack-group">
+                    <h4>Testing</h4>
+                    <ul>
+                        <li><a href="https://github.com/xunit/xunit">xUnit v3</a><span>tests</span></li>
+                        <li><a href="https://github.com/shouldly/shouldly">Shouldly</a><span>assertions</span></li>
+                        <li><a href="https://github.com/dotnet/maui-labs">MAUI DevFlow</a><span>UI tests that drive the real app</span></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </section>
@@ -326,7 +428,11 @@
             <img src="appicon.png" alt="" width="24" height="24">
             <span>ShinyCommander</span>
         </div>
-        <p>Built with <a href="https://github.com/dotnet/maui">.NET MAUI</a>, <a href="https://github.com/dotnet/maui-labs">maui-labs</a> and <a href="https://github.com/shinyorg/controls">Shiny Controls</a> · <a href="https://github.com/ShinySoftware/Commander">Source on GitHub</a></p>
+        <p>Free &amp; open source · <a href="#stack">Tech stack</a> · <a href="https://github.com/ShinySoftware/Commander">Source on GitHub</a></p>
+    </div>
+    <div class="wrap made-by">
+        <span>Built by</span>
+        <img src="shinysoft-logo.png" alt="ShinySoft Technologies" width="200" height="68">
     </div>
 </footer>
 

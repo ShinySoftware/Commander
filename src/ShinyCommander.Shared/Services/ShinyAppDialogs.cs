@@ -98,7 +98,6 @@ public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThre
         => this.Run(async () =>
         {
             var task = dialogs.Prompt(title, message, placeholder, Tr(okText), L.Common_Cancel, initialValue, configure: c => c.MaxWidth = 620);
-            this.FocusDialogEntry();
             var result = await task;
             return result.Ok ? result.Value : null;
         });
@@ -111,39 +110,12 @@ public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThre
                 c.MaxWidth = 620;
                 c.IsPassword = true;
             });
-            this.FocusDialogEntry();
             var result = await task;
             return result.Ok ? result.Value : null;
         });
 
-    /// <summary>
-    /// The dialog's text field doesn't always take first responder on the desktop backends (the command
-    /// line keeps it), which also means Return never reaches it. Find the field and focus it.
-    /// </summary>
-    void FocusDialogEntry()
-    {
-        var dispatcher = Application.Current?.Dispatcher;
-        if (dispatcher == null)
-            return;
-
-        dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(120), () =>
-        {
-            var page = Shell.Current?.CurrentPage ?? Application.Current?.Windows.FirstOrDefault()?.Page;
-            if (page == null)
-                return;
-
-            var entry = Descendants(page)
-                .OfType<Entry>()
-                .LastOrDefault(e => Ancestors(e).Any(a => a.GetType().Name == "DialogView"));
-
-            if (entry != null)
-            {
-                entry.Focus();
-                entry.CursorPosition = 0;
-                entry.SelectionLength = entry.Text?.Length ?? 0;
-            }
-        });
-    }
+    // the prompt's text field takes the keyboard itself since Shiny.Maui.Controls 2.5.0 (DialogView.FocusInput). Focusing it
+    // again from here ended that first edit, and on AppKit ending an edit is Completed - the prompt confirmed itself, empty
 
     static IEnumerable<Element> Ancestors(Element e)
     {

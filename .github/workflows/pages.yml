@@ -9,6 +9,7 @@ on:
     paths:
       - 'website/**'
       - 'docs/screenshots/**'
+      - 'art/shinysoft-logo.png'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 

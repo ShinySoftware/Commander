@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Puts the website together in one folder: the pages here, plus the README's screenshots and the app icon, which
-# live elsewhere in the repo so there's one copy of each.
+# Puts the website together in one folder: the pages here, plus the README's screenshots, the app icon and the
+# ShinySoft logo, which live elsewhere in the repo so there's one copy of each.
 #
 #   website/build.sh <out-dir>     assemble (the Pages workflow uses this)
 #   website/build.sh --serve       assemble into a temp folder and serve it on http://localhost:8080
@@ -16,6 +16,7 @@ assemble() {
     cp "$HERE"/index.html "$HERE"/styles.css "$HERE"/site.js "$out/"
     cp "$ROOT"/docs/screenshots/*.png "$out/screenshots/"
     cp "$ROOT"/src/ShinyCommander.Shared/Resources/AppIcon/appicon.png "$out/appicon.png"
+    cp "$ROOT"/art/shinysoft-logo.png "$out/shinysoft-logo.png"
 }
 
 if [[ "${1:-}" == "--serve" ]]; then

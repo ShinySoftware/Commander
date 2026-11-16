@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:meta="clr-namespace:ShinyCommander.Core.Metadata;assembly=ShinyCommander.Core"
+             xmlns:l="clr-namespace:ShinyCommander"
+             x:Class="ShinyCommander.Views.ImageMetadataPage"
+             x:DataType="vm:ImageMetadataViewModel">
+
+    <shiny:KeyboardShortcuts.Shortcuts>
+        <shiny:KeyboardShortcut Gesture="Primary+S" Command="{Binding SaveCommand}" Description="{l:Tr Common_Save}" />
+        <shiny:KeyboardShortcut Gesture="F2" Command="{Binding SaveCommand}" Description="{l:Tr Common_Save}" />
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CloseCommand}" Description="{l:Tr Common_Close}" />
+    </shiny:KeyboardShortcuts.Shortcuts>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Grid Grid.Row="0" Style="{StaticResource Toolbar}" Padding="10,6" HeightRequest="44" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+            <shiny:ShinyButton AutomationId="PageBack" Text="{l:Tr Page_Back}" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" />
+            <Label Grid.Column="1" Text="{Binding Title}" FontAttributes="Bold" FontSize="15" VerticalOptions="Center" LineBreakMode="MiddleTruncation" />
+            <HorizontalStackLayout Grid.Column="2" Spacing="10">
+                <shiny:ShinyButton AutomationId="ImageMetaSave" Text="{l:Tr Page_Save}" Command="{Binding SaveCommand}" IsVisible="{Binding IsMetadata}" Appearance="Filled" FontSize="12" ContentPadding="10,3" />
+                <shiny:ButtonGroup AutomationId="ImageMetaMode" SelectionMode="Single" SelectedIndex="{Binding ModeIndex, Mode=TwoWay}" VerticalOptions="Center">
+                    <shiny:ShinyButton Text="{l:Tr ImageMeta_ModeMetadata}" FontSize="12" ContentPadding="10,2" />
+                    <shiny:ShinyButton Text="{l:Tr ImageMeta_ModeEdit}" FontSize="12" ContentPadding="10,2" />
+                </shiny:ButtonGroup>
+            </HorizontalStackLayout>
+        </Grid>
+
+        <!-- Edit image: the editor's own toolbar carries Save -->
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="8" Padding="0" IsVisible="{Binding IsEditingImage}">
+            <shiny:ImageEditor AutomationId="ImageEditor"
+                               Source="{Binding EditorImage}"
+                               SaveCommand="{Binding SaveImageCommand}"
+                               SaveText="{l:Tr Common_Save}"
+                               CanUndo="{Binding HasImageEdits, Mode=OneWayToSource}" />
+        </Border>
+
+        <Grid Grid.Row="1" ColumnDefinitions="*,460" IsVisible="{Binding IsMetadata}">
+            <Border Style="{StaticResource Card}" Margin="8" Padding="0">
+                <Image Source="{Binding Image}" Aspect="AspectFit" Margin="10" />
+            </Border>
+
+            <shiny:TableView Grid.Column="1"
+                             AutomationId="ImageMetaFields"
+                             CellAccentColor="{StaticResource Accent}"
+                             CellBackgroundColor="{AppThemeBinding Light={StaticResource PanelLight}, Dark={StaticResource PanelDark}}"
+                             CellTitleColor="{AppThemeBinding Light={StaticResource TextLight}, Dark={StaticResource TextDark}}"
+                             CellDescriptionColor="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}"
+                             CellValueTextColor="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}"
+                             CellTitleFontSize="13"
+                             CellDescriptionFontSize="11"
+                             CellValueTextFontSize="13"
+                             SeparatorColor="{AppThemeBinding Light=#E6E9EE, Dark=#2C3036}"
+                             SeparatorPadding="16"
+                             HeaderBackgroundColor="Transparent"
+                             HeaderTextColor="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}"
+                             HeaderFontSize="11"
+                             HeaderFontAttributes="Bold"
+                             HeaderPadding="16,18,16,6"
+                             ShowSectionSeparator="False">
+                <shiny:TableRoot>
+                    <shiny:TableSection Title="{l:Tr ImageMeta_SectionDescription}">
+                        <shiny:EntryCell Title="{l:Tr ImageMeta_Title}" ValueText="{Binding PhotoTitle, Mode=TwoWay}" AutomationId="ImageMetaTitle" />
+                        <shiny:EntryCell Title="{l:Tr ImageMeta_Description}" ValueText="{Binding Description, Mode=TwoWay}" />
+                        <shiny:EntryCell Title="{l:Tr ImageMeta_Keywords}" ValueText="{Binding Keywords, Mode=TwoWay}" />
+                        <shiny:EntryCell Title="{l:Tr ImageMeta_Comment}" ValueText="{Binding Comment, Mode=TwoWay}" />
+                    </shiny:TableSection>
+
+                    <shiny:TableSection Title="{l:Tr ImageMeta_SectionOrigin}">
+                        <shiny:EntryCell Title="{l:Tr ImageMeta_Artist}" ValueText="{Binding Artist, Mode=TwoWay}" />
+                        <shiny:EntryCell Title="{l:Tr ImageMeta_Copyright}" ValueText="{Binding Copyright, Mode=TwoWay}" />
+                        <shiny:EntryCell Title="{l:Tr ImageMeta_DateTaken}" Placeholder="YYYY-MM-DD HH:MM:SS" ValueText="{Binding DateTaken, Mode=TwoWay}" />
+                        <shiny:EntryCell Title="{l:Tr ImageMeta_Software}" ValueText="{Binding Software, Mode=TwoWay}" />
+                    </shiny:TableSection>
+
+                    <shiny:TableSection Title="{l:Tr ImageMeta_SectionCamera}">
+                        <shiny:EntryCell Title="{l:Tr ImageMeta_Make}" ValueText="{Binding Make, Mode=TwoWay}" />
+                        <shiny:EntryCell Title="{l:Tr ImageMeta_Model}" ValueText="{Binding Model, Mode=TwoWay}" />
+                    </shiny:TableSection>
+
+                    <shiny:TableSection Title="{l:Tr ImageMeta_SectionLocation}">
+                        <shiny:EntryCell Title="{l:Tr ImageMeta_Latitude}" Placeholder="46.2044" ValueText="{Binding Latitude, Mode=TwoWay}" />
+                        <shiny:EntryCell Title="{l:Tr ImageMeta_Longitude}" Placeholder="6.1432" ValueText="{Binding Longitude, Mode=TwoWay}" />
+                        <shiny:ButtonCell Title="{l:Tr ImageMeta_RemoveLocation}" ButtonTextColor="{StaticResource Accent}" Command="{Binding RemoveLocationCommand}" />
+                    </shiny:TableSection>
+
+                    <shiny:TableSection Title="{l:Tr ImageMeta_SectionAllTags}" ItemsSource="{Binding Tags}">
+                        <shiny:TableSection.ItemTemplate>
+                            <DataTemplate x:DataType="meta:ImageMetadataTag">
+                                <shiny:LabelCell Title="{Binding Name}" Description="{Binding Group}" ValueText="{Binding Value}" />
+                            </DataTemplate>
+                        </shiny:TableSection.ItemTemplate>
+                    </shiny:TableSection>
+
+                    <shiny:TableSection>
+                        <shiny:LabelCell Title="{l:Tr ImageMeta_NoTags}" IsVisible="{Binding HasNoTags}" />
+                        <shiny:ButtonCell Title="{l:Tr ImageMeta_RemoveAll}" ButtonTextColor="{AppThemeBinding Light={StaticResource MarkedLight}, Dark={StaticResource MarkedDark}}" Command="{Binding RemoveAllCommand}" />
+                    </shiny:TableSection>
+                </shiny:TableRoot>
+            </shiny:TableView>
+        </Grid>
+
+        <Grid Grid.Row="2" Style="{StaticResource Toolbar}" Padding="10,4">
+            <Label Text="{Binding Info}" Style="{StaticResource Subtle}" />
+        </Grid>
+    </Grid>
+</ContentPage>

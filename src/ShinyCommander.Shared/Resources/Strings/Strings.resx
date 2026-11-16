@@ -1987,4 +1987,268 @@ Try again.</value>
   <data name="Key_FolderSizes" xml:space="preserve">
     <value>Folder sizes (marked, cursor or all folders)</value>
   </data>
+  <data name="ImageMeta_InfoFormat" xml:space="preserve">
+    <value>{0} · {1} EXIF tags</value>
+  </data>
+  <data name="ImageMeta_InvalidDate" xml:space="preserve">
+    <value>The date taken isn't a date - use YYYY-MM-DD HH:MM:SS.</value>
+  </data>
+  <data name="ImageMeta_InvalidLocation" xml:space="preserve">
+    <value>Latitude must be between -90 and 90 and longitude between -180 and 180 - fill in both, or neither.</value>
+  </data>
+  <data name="ImageMeta_RemoveLocation" xml:space="preserve">
+    <value>Remove location</value>
+  </data>
+  <data name="ImageMeta_RemoveLocationConfirm" xml:space="preserve">
+    <value>Remove the GPS location from this photo? The other metadata stays.</value>
+  </data>
+  <data name="ImageMeta_RemoveAll" xml:space="preserve">
+    <value>Remove all metadata</value>
+  </data>
+  <data name="ImageMeta_RemoveAllConfirm" xml:space="preserve">
+    <value>Remove every EXIF tag from this photo? The camera, dates and location are all lost. The picture itself isn't changed.</value>
+  </data>
+  <data name="ImageMeta_SectionDescription" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="ImageMeta_Title" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="ImageMeta_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="ImageMeta_Keywords" xml:space="preserve">
+    <value>Keywords</value>
+  </data>
+  <data name="ImageMeta_Comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="ImageMeta_SectionOrigin" xml:space="preserve">
+    <value>Origin</value>
+  </data>
+  <data name="ImageMeta_Artist" xml:space="preserve">
+    <value>Author</value>
+  </data>
+  <data name="ImageMeta_Copyright" xml:space="preserve">
+    <value>Copyright</value>
+  </data>
+  <data name="ImageMeta_DateTaken" xml:space="preserve">
+    <value>Date taken</value>
+  </data>
+  <data name="ImageMeta_Software" xml:space="preserve">
+    <value>Software</value>
+  </data>
+  <data name="ImageMeta_SectionCamera" xml:space="preserve">
+    <value>Camera</value>
+  </data>
+  <data name="ImageMeta_Make" xml:space="preserve">
+    <value>Make</value>
+  </data>
+  <data name="ImageMeta_Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="ImageMeta_SectionLocation" xml:space="preserve">
+    <value>Location</value>
+  </data>
+  <data name="ImageMeta_Latitude" xml:space="preserve">
+    <value>Latitude</value>
+  </data>
+  <data name="ImageMeta_Longitude" xml:space="preserve">
+    <value>Longitude</value>
+  </data>
+  <data name="ImageMeta_SectionAllTags" xml:space="preserve">
+    <value>All tags</value>
+  </data>
+  <data name="ImageMeta_NoTags" xml:space="preserve">
+    <value>No EXIF metadata</value>
+  </data>
+  <data name="Database_AutoNumber" xml:space="preserve">
+    <value>automatic</value>
+  </data>
+  <data name="Database_DefaultFormat" xml:space="preserve">
+    <value>default {0}</value>
+  </data>
+  <data name="Database_Required" xml:space="preserve">
+    <value>required</value>
+  </data>
+  <data name="Database_StatusFormat" xml:space="preserve">
+    <value>{0} tables · {1} views · {2}</value>
+  </data>
+  <data name="Database_RowsFormat" xml:space="preserve">
+    <value>{0} rows</value>
+  </data>
+  <data name="Database_Inserted" xml:space="preserve">
+    <value>Row inserted</value>
+  </data>
+  <data name="Database_InsertFailed" xml:space="preserve">
+    <value>Couldn't insert the row</value>
+  </data>
+  <data name="Database_UpdateFailed" xml:space="preserve">
+    <value>Couldn't update the row</value>
+  </data>
+  <data name="Database_DeleteFailed" xml:space="preserve">
+    <value>Couldn't delete the row</value>
+  </data>
+  <data name="Database_PickRow" xml:space="preserve">
+    <value>Click a row first</value>
+  </data>
+  <data name="Database_DeleteRow" xml:space="preserve">
+    <value>Delete row</value>
+  </data>
+  <data name="Database_DeleteConfirmFormat" xml:space="preserve">
+    <value>Delete the row {0}? This can't be undone.</value>
+  </data>
+  <data name="Database_QueryRowsFormat" xml:space="preserve">
+    <value>{0} rows</value>
+  </data>
+  <data name="Database_QueryTruncatedFormat" xml:space="preserve">
+    <value>First {0} rows</value>
+  </data>
+  <data name="Database_QueryChangedFormat" xml:space="preserve">
+    <value>{0} rows changed</value>
+  </data>
+  <data name="Database_Run" xml:space="preserve">
+    <value>Run</value>
+  </data>
+  <data name="Database_Refresh" xml:space="preserve">
+    <value>Refresh</value>
+  </data>
+  <data name="Database_InsertRow" xml:space="preserve">
+    <value>Insert row</value>
+  </data>
+  <data name="Database_Insert" xml:space="preserve">
+    <value>Insert</value>
+  </data>
+  <data name="Database_NewRow" xml:space="preserve">
+    <value>New row - empty fields take the column's default</value>
+  </data>
+  <data name="Database_ModeData" xml:space="preserve">
+    <value>Data</value>
+  </data>
+  <data name="Database_ModeSchema" xml:space="preserve">
+    <value>Schema</value>
+  </data>
+  <data name="Database_ModeSql" xml:space="preserve">
+    <value>SQL</value>
+  </data>
+  <data name="Database_Columns" xml:space="preserve">
+    <value>Columns</value>
+  </data>
+  <data name="Database_NoRows" xml:space="preserve">
+    <value>No rows</value>
+  </data>
+  <data name="Database_OnTableFormat" xml:space="preserve">
+    <value>on {0}</value>
+  </data>
+  <data name="Database_SchemaFailed" xml:space="preserve">
+    <value>Couldn't change the schema</value>
+  </data>
+  <data name="Database_SchemaSaved" xml:space="preserve">
+    <value>Schema saved</value>
+  </data>
+  <data name="Database_NamesRequired" xml:space="preserve">
+    <value>The table and every column need a name.</value>
+  </data>
+  <data name="Database_Drop" xml:space="preserve">
+    <value>Drop</value>
+  </data>
+  <data name="Database_DropConfirmFormat" xml:space="preserve">
+    <value>Drop {0}? Its rows are deleted and this can't be undone.</value>
+  </data>
+  <data name="Database_DropFk" xml:space="preserve">
+    <value>Remove foreign key</value>
+  </data>
+  <data name="Database_New" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="Database_NewButton" xml:space="preserve">
+    <value>+ New</value>
+  </data>
+  <data name="Database_NewTable" xml:space="preserve">
+    <value>Table</value>
+  </data>
+  <data name="Database_NewView" xml:space="preserve">
+    <value>View</value>
+  </data>
+  <data name="Database_NewIndex" xml:space="preserve">
+    <value>Index</value>
+  </data>
+  <data name="Database_NewTrigger" xml:space="preserve">
+    <value>Trigger</value>
+  </data>
+  <data name="Database_NewNameMessage" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Database_NewSqlHint" xml:space="preserve">
+    <value>Finish the statement and Run it</value>
+  </data>
+  <data name="Database_FkColumnFormat" xml:space="preserve">
+    <value>Which column of {0} points at {1}?</value>
+  </data>
+  <data name="Database_FkRefColumnFormat" xml:space="preserve">
+    <value>Which column of {0}?</value>
+  </data>
+  <data name="Database_ModeDiagram" xml:space="preserve">
+    <value>Diagram</value>
+  </data>
+  <data name="Database_Fit" xml:space="preserve">
+    <value>Fit</value>
+  </data>
+  <data name="Database_DeleteSelected" xml:space="preserve">
+    <value>Delete selected</value>
+  </data>
+  <data name="Database_DiagramPick" xml:space="preserve">
+    <value>Select a table or a foreign key first</value>
+  </data>
+  <data name="Database_DiagramHint" xml:space="preserve">
+    <value>Drag tables to arrange them. Drag from a table's edge to another table to add a foreign key; select a line or a table and Delete selected to remove it.</value>
+  </data>
+  <data name="Database_TableName" xml:space="preserve">
+    <value>Table</value>
+  </data>
+  <data name="Database_Revert" xml:space="preserve">
+    <value>Revert</value>
+  </data>
+  <data name="Database_RebuildBlockerFormat" xml:space="preserve">
+    <value>This table uses {0}, which the designer can't keep: renames and added or dropped columns still work - change anything else in the CREATE statement below.</value>
+  </data>
+  <data name="Database_ColType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Database_ColDefault" xml:space="preserve">
+    <value>Default</value>
+  </data>
+  <data name="Database_AddColumn" xml:space="preserve">
+    <value>+ Add column</value>
+  </data>
+  <data name="Database_ForeignKeys" xml:space="preserve">
+    <value>Foreign keys</value>
+  </data>
+  <data name="Database_AddForeignKey" xml:space="preserve">
+    <value>+ Add foreign key</value>
+  </data>
+  <data name="Database_IndexesTriggers" xml:space="preserve">
+    <value>Indexes and triggers</value>
+  </data>
+  <data name="Database_CreateStatement" xml:space="preserve">
+    <value>CREATE statement</value>
+  </data>
+  <data name="Database_ApplySql" xml:space="preserve">
+    <value>Apply SQL</value>
+  </data>
+  <data name="ImageMeta_ModeMetadata" xml:space="preserve">
+    <value>Metadata</value>
+  </data>
+  <data name="ImageMeta_ModeEdit" xml:space="preserve">
+    <value>Edit image</value>
+  </data>
+  <data name="ImageMeta_DiscardEdits" xml:space="preserve">
+    <value>Discard image edits?</value>
+  </data>
+  <data name="ImageMeta_DiscardEditsMessage" xml:space="preserve">
+    <value>The changes to the picture haven't been saved.</value>
+  </data>
+  <data name="ImageMeta_ExportUnsupported" xml:space="preserve">
+    <value>The picture wasn't saved: Shiny's ImageEditor can't export an edited picture on this platform yet. The photo is unchanged.</value>
+  </data>
 </root>

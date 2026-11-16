@@ -21,6 +21,7 @@ public partial class MainViewModel : ObservableObject,
     readonly ColumnSet columns;
     readonly QuitGuard quitGuard;
     readonly RemoteConnections connections;
+    readonly FileEditors editors;
     // one conflict question at a time, whichever job asks
     readonly SemaphoreSlim conflictGate = new(1, 1);
     // files opened out of archives, saved back into them
@@ -41,10 +42,12 @@ public partial class MainViewModel : ObservableObject,
         PaneToolbar toolbar,
         JobQueue jobs,
         QuitGuard quitGuard,
-        RemoteConnections connections
+        RemoteConnections connections,
+        FileEditors editors
     )
     {
         this.connections = connections;
+        this.editors = editors;
         this.shortcuts = shortcuts;
         this.columns = columns;
         this.Jobs = jobs;
@@ -997,17 +1000,8 @@ public partial class MainViewModel : ObservableObject,
 
             // inside an archive this edits a copy, and each save goes back in
             var path = await this.LocalCopy(entry);
-            if (!String.IsNullOrWhiteSpace(this.settings.ExternalEditor))
-            {
-                ShellLauncher.OpenWith(this.settings.ExternalEditor, path);
-                return;
-            }
-            if (entry.Size > 20 * 1024 * 1024)
-            {
-                ShellLauncher.OpenWithDefaultApp(path);
-                return;
-            }
-            await this.navigator.NavigateTo<EditorViewModel>(vm => vm.FilePath = path);
+            // the editor for the file's type (Services/Editors) - the text editor when there's none
+            await this.editors.Open(path);
         }
         catch (Exception ex)
         {

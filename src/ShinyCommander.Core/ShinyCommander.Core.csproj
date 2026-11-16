@@ -6,6 +6,8 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="SharpCompress" />
+        <PackageReference Include="ExifLibNet" />
+        <PackageReference Include="Microsoft.Data.Sqlite" />
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="ShinyCommander.Core.Tests" />
