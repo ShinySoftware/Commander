@@ -71,6 +71,14 @@ public sealed record PanelState
     public string? QuickFilter { get; init; }
     public bool IsBranchView { get; init; }
     public string? Sort { get; init; }
+
+    /// <summary>The folder's column set (photos, music...), or null.</summary>
+    public string? ColumnSet { get; init; }
+    public List<string>? CustomColumns { get; init; }
+
+    /// <summary>The custom column headers that fit, with the sort arrow.</summary>
+    public List<string> CustomHeaders { get; init; } = [];
+    public bool IsReadingMetadata { get; init; }
     public bool CanGoBack { get; init; }
     public List<ItemState> Items { get; init; } = [];
 
@@ -110,6 +118,9 @@ public sealed record ItemState
     public bool Marked { get; init; }
     public long Size { get; init; }
     public string SizeText { get; init; } = "";
+
+    /// <summary>The row's text in each custom column, in <see cref="PanelState.CustomColumns"/> order.</summary>
+    public List<string>? Custom { get; init; }
 }
 
 public sealed record JobRecord

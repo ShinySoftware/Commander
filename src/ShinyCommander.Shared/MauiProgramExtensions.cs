@@ -55,6 +55,9 @@ public static class MauiProgramExtensions
             .AddFilePreviewer<HtmlFilePreviewer>()
             .AddFilePreviewer<PdfFilePreviewer>()
             .AddFilePreviewer<SqliteFilePreviewer>();
+
+        builder.Services.AddSingleton<FileColumns>();
+        builder.Services.AddBuiltInFileColumns();
         // for UpdateService's hourly check
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddSingleton(sp => sp.GetRequiredService<IDispatcherProvider>().GetForCurrentThread()!);

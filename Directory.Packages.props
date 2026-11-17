@@ -28,6 +28,8 @@
         <!-- editors: lossless EXIF writes in JPEGs, and SQLite databases -->
         <PackageVersion Include="ExifLibNet" Version="2.1.4" />
         <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.15" />
+        <!-- custom columns: duration, dimensions and tags of audio, video and pictures (LGPL-2.1, used unmodified) -->
+        <PackageVersion Include="TagLibSharp" Version="2.3.0" />
 
         <!-- remote file systems (ShinyCommander.Remote) -->
         <PackageVersion Include="SSH.NET" Version="2026.0.0" />

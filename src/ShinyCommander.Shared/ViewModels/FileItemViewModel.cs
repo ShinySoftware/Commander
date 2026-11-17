@@ -89,6 +89,14 @@ public partial class FileItemViewModel(FileEntry entry, bool friendlySizes) : Ob
     [NotifyPropertyChangedFor(nameof(SizeText))]
     public partial long? CalculatedSize { get; set; }
 
+    /// <summary>What the custom columns show - read in the background once the folder has a column set.</summary>
+    [ObservableProperty]
+    public partial FileMetadata? Metadata { get; set; }
+
+    /// <summary>The row's text in a custom column; blank until its metadata is read, and for files the column isn't for.</summary>
+    public string CustomText(IFileColumn column)
+        => this.Metadata is { } m && column.Kinds.Contains(FileKinds.Of(this.Entry)) ? column.Format(m) : String.Empty;
+
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(RowState))]
     public partial bool IsMarked { get; set; }

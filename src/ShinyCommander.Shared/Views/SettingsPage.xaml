@@ -62,6 +62,15 @@
                         <shiny:SwitchCell Title="{l:Tr Settings_ColModified}" On="{Binding ShowDateColumn, Mode=TwoWay}" />
                         <shiny:SwitchCell Title="{l:Tr Settings_ColCreated}" On="{Binding ShowCreatedColumn, Mode=TwoWay}" />
                         <shiny:SwitchCell Title="{l:Tr Settings_ColAttributes}" On="{Binding ShowAttrColumn, Mode=TwoWay}" />
+                        <shiny:ButtonCell Title="{l:Tr Settings_ColumnSetsEdit}" ButtonTextColor="{StaticResource Accent}" Command="{Binding EditColumnSetsCommand}" AutomationId="SettingsEditColumnSets" />
+                    </shiny:TableSection>
+
+                    <shiny:TableSection Title="{l:Tr Settings_ColumnSets}" FooterText="{l:Tr Settings_ColumnSetsDesc}" ItemsSource="{Binding ColumnSets}">
+                        <shiny:TableSection.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ColumnSetToggle">
+                                <shiny:SwitchCell Title="{Binding Title}" Description="{Binding Description}" On="{Binding IsEnabled, Mode=TwoWay}" AutomationId="{Binding Key, StringFormat='SettingsColumnSet_{0}'}" />
+                            </DataTemplate>
+                        </shiny:TableSection.ItemTemplate>
                     </shiny:TableSection>
 
                     <shiny:TableSection Title="{l:Tr Settings_Operations}">

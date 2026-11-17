@@ -9,11 +9,17 @@ public enum SortColumn
     Size,
     Modified,
     Attributes,
-    Created
+    Created,
+
+    /// <summary>A custom column (Shared: IFileColumn) - the tab's sort key says which.</summary>
+    Custom
 }
 
-/// <summary>Parent link first, folders before files, then by the chosen column (TC's ordering).</summary>
-public sealed class FileEntryComparer(SortColumn column, bool descending) : IComparer<FileEntry>
+/// <summary>
+/// Parent link first, folders before files, then by the chosen column (TC's ordering). A custom column sorts by
+/// <paramref name="customValue"/>; files without a value go last whichever way it's sorted.
+/// </summary>
+public sealed class FileEntryComparer(SortColumn column, bool descending, Func<FileEntry, IComparable?>? customValue = null) : IComparer<FileEntry>
 {
     static readonly StringComparer NameComparer = StringComparer.Create(System.Globalization.CultureInfo.CurrentCulture, System.Globalization.CompareOptions.IgnoreCase | System.Globalization.CompareOptions.NumericOrdering);
 
@@ -26,6 +32,19 @@ public sealed class FileEntryComparer(SortColumn column, bool descending) : ICom
         if (y.IsParentLink) return 1;
         if (x.IsDirectory != y.IsDirectory)
             return x.IsDirectory ? -1 : 1;
+
+        if (column == SortColumn.Custom && customValue != null)
+        {
+            var a = customValue(x);
+            var b = customValue(y);
+            if (a == null || b == null)
+                return a == b ? NameComparer.Compare(x.Name, y.Name) : a == null ? 1 : -1;
+
+            var custom = a is string sa && b is string sb ? NameComparer.Compare(sa, sb) : a.CompareTo(b);
+            if (custom == 0)
+                custom = NameComparer.Compare(x.Name, y.Name);
+            return descending ? -custom : custom;
+        }
 
         var result = column switch
         {

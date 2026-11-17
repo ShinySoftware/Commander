@@ -6,7 +6,7 @@ using Font = Microsoft.Maui.Graphics.Font;
 namespace ShinyCommander.Views;
 
 /// <summary>
-/// A file row's detail columns (Ext, Size, Date, Created, Attr) drawn into one view instead of five labels. Rows are
+/// A file row's detail columns (Ext, Size, Date, Created, Attr and the folder's custom ones) drawn into one view instead of five labels. Rows are
 /// created and bound as the list scrolls, and on the AppKit head every label is a native text field with its own
 /// bindings - drawing the columns halves the native views per row and drops most of its bindings.
 /// </summary>
@@ -49,7 +49,7 @@ public class FileDetailsView : GraphicsView, IDrawable
 
     void OnItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        if (e.PropertyName is nameof(FileItemViewModel.RowState) or nameof(FileItemViewModel.SizeText))
+        if (e.PropertyName is nameof(FileItemViewModel.RowState) or nameof(FileItemViewModel.SizeText) or nameof(FileItemViewModel.Metadata))
             this.Invalidate();
     }
 
@@ -110,6 +110,8 @@ public class FileDetailsView : GraphicsView, IDrawable
         Column(c.ShowModified, ColumnLayout.DateColumnWidth, item.DateText, plain, 12, HorizontalAlignment.Left);
         Column(c.ShowCreated, ColumnLayout.DateColumnWidth, item.CreatedText, plain, 12, HorizontalAlignment.Left);
         Column(c.ShowAttributes, ColumnLayout.AttrColumnWidth, item.AttributeText, mono, 12, HorizontalAlignment.Left);
+        foreach (var custom in c.CustomShown)
+            Column(true, custom.Width, item.CustomText(custom), plain, 12, custom.AlignRight ? HorizontalAlignment.Right : HorizontalAlignment.Left, custom.AlignRight ? 8 : 6);
     }
 
     // a line cloud like the motion icons: three bumps on a flat base, 14 x 9, centred on the row

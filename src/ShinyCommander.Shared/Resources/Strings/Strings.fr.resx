@@ -2070,4 +2070,145 @@ Réessayez.</value>
   <data name="OpenWith_Open" xml:space="preserve">
     <value>Ouvrir</value>
   </data>
+  <data name="Column_Dimensions" xml:space="preserve">
+    <value>Dimensions</value>
+  </data>
+  <data name="Column_Duration" xml:space="preserve">
+    <value>Durée</value>
+  </data>
+  <data name="Column_DateTaken" xml:space="preserve">
+    <value>Prise le</value>
+  </data>
+  <data name="Column_Camera" xml:space="preserve">
+    <value>Appareil</value>
+  </data>
+  <data name="Column_Lens" xml:space="preserve">
+    <value>Objectif</value>
+  </data>
+  <data name="Column_Aperture" xml:space="preserve">
+    <value>Ouverture</value>
+  </data>
+  <data name="Column_Shutter" xml:space="preserve">
+    <value>Vitesse</value>
+  </data>
+  <data name="Column_Iso" xml:space="preserve">
+    <value>ISO</value>
+  </data>
+  <data name="Column_FocalLength" xml:space="preserve">
+    <value>Focale</value>
+  </data>
+  <data name="Column_Orientation" xml:space="preserve">
+    <value>Orientation</value>
+  </data>
+  <data name="Column_Location" xml:space="preserve">
+    <value>GPS</value>
+  </data>
+  <data name="Column_VideoCodec" xml:space="preserve">
+    <value>Codec vidéo</value>
+  </data>
+  <data name="Column_AudioCodec" xml:space="preserve">
+    <value>Codec audio</value>
+  </data>
+  <data name="Column_Bitrate" xml:space="preserve">
+    <value>Débit</value>
+  </data>
+  <data name="Column_SampleRate" xml:space="preserve">
+    <value>Échantillonnage</value>
+  </data>
+  <data name="Column_Title" xml:space="preserve">
+    <value>Titre</value>
+  </data>
+  <data name="Column_Artist" xml:space="preserve">
+    <value>Artiste</value>
+  </data>
+  <data name="Column_Album" xml:space="preserve">
+    <value>Album</value>
+  </data>
+  <data name="Column_Track" xml:space="preserve">
+    <value>Piste</value>
+  </data>
+  <data name="Column_Year" xml:space="preserve">
+    <value>Année</value>
+  </data>
+  <data name="Column_Genre" xml:space="preserve">
+    <value>Genre</value>
+  </data>
+  <data name="Column_Pages" xml:space="preserve">
+    <value>Pages</value>
+  </data>
+  <data name="Column_Words" xml:space="preserve">
+    <value>Mots</value>
+  </data>
+  <data name="Column_Author" xml:space="preserve">
+    <value>Auteur</value>
+  </data>
+  <data name="Column_Lines" xml:space="preserve">
+    <value>Lignes</value>
+  </data>
+  <data name="Column_Files" xml:space="preserve">
+    <value>Fichiers</value>
+  </data>
+  <data name="Column_Unpacked" xml:space="preserve">
+    <value>Décompressé</value>
+  </data>
+  <data name="Column_Version" xml:space="preserve">
+    <value>Version</value>
+  </data>
+  <data name="Column_Company" xml:space="preserve">
+    <value>Éditeur</value>
+  </data>
+  <data name="ColumnSet_Photos" xml:space="preserve">
+    <value>Photos</value>
+  </data>
+  <data name="ColumnSet_Video" xml:space="preserve">
+    <value>Vidéo</value>
+  </data>
+  <data name="ColumnSet_Music" xml:space="preserve">
+    <value>Musique</value>
+  </data>
+  <data name="ColumnSet_Documents" xml:space="preserve">
+    <value>Documents</value>
+  </data>
+  <data name="ColumnSet_Text" xml:space="preserve">
+    <value>Texte et code</value>
+  </data>
+  <data name="ColumnSet_Archives" xml:space="preserve">
+    <value>Archives</value>
+  </data>
+  <data name="ColumnSet_Apps" xml:space="preserve">
+    <value>Applications</value>
+  </data>
+  <data name="Orientation_Normal" xml:space="preserve">
+    <value>Normale</value>
+  </data>
+  <data name="Orientation_Rotated90" xml:space="preserve">
+    <value>Pivotée 90°</value>
+  </data>
+  <data name="Orientation_Rotated180" xml:space="preserve">
+    <value>Pivotée 180°</value>
+  </data>
+  <data name="Orientation_Rotated270" xml:space="preserve">
+    <value>Pivotée 270°</value>
+  </data>
+  <data name="Orientation_Mirrored" xml:space="preserve">
+    <value>En miroir</value>
+  </data>
+  <data name="Main_ColumnInSet" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+  <data name="Settings_ColumnSets" xml:space="preserve">
+    <value>Jeux de colonnes</value>
+  </data>
+  <data name="Settings_ColumnSetsDesc" xml:space="preserve">
+    <value>Un dossier qui contient surtout un type de fichier (photos, musique, vidéo) ajoute les colonnes de ce jeu. Les colonnes trop larges pour le panneau sont omises.</value>
+  </data>
+  <data name="Settings_ColumnSetsEdit" xml:space="preserve">
+    <value>Choisir les colonnes des jeux…</value>
+  </data>
+  <data name="Settings_ColumnSetColumns" xml:space="preserve">
+    <value>Colonnes : {0}</value>
+  </data>
+  <data name="Settings_ColumnSetEmpty" xml:space="preserve">
+    <value>Aucune colonne</value>
+  </data>
 </root>

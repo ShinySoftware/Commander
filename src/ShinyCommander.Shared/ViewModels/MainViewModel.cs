@@ -26,6 +26,7 @@ public partial class MainViewModel : ObservableObject,
     readonly SemaphoreSlim conflictGate = new(1, 1);
     // files opened out of archives, saved back into them
     readonly ArchiveWriteBack writeBack = new();
+    readonly FileColumns fileColumns;
     CancellationTokenSource? commandCts;
     bool initialized;
 
@@ -44,9 +45,11 @@ public partial class MainViewModel : ObservableObject,
         QuitGuard quitGuard,
         RemoteConnections connections,
         FileEditors editors,
-        PreviewPaneViewModel preview
+        PreviewPaneViewModel preview,
+        FileColumns fileColumns
     )
     {
+        this.fileColumns = fileColumns;
         this.connections = connections;
         this.editors = editors;
         this.shortcuts = shortcuts;
@@ -89,8 +92,8 @@ public partial class MainViewModel : ObservableObject,
                     tab.RefreshTheme();
             };
 
-        this.Left = new PanelViewModel(PanelSide.Left, vfs, settings, columns, toolbar);
-        this.Right = new PanelViewModel(PanelSide.Right, vfs, settings, columns, toolbar);
+        this.Left = new PanelViewModel(PanelSide.Left, vfs, settings, columns, fileColumns, toolbar);
+        this.Right = new PanelViewModel(PanelSide.Right, vfs, settings, columns, fileColumns, toolbar);
         this.Left.PropertyChanged += this.OnPanelPropertyChanged;
         this.Right.PropertyChanged += this.OnPanelPropertyChanged;
         this.Left.TabsChanged += (_, _) => this.SaveState();
@@ -260,6 +263,7 @@ public partial class MainViewModel : ObservableObject,
             tab.Alias = state.Alias;
             tab.ColorKey = state.Color;
             tab.IconKey = state.Icon;
+            tab.SortKey = state.SortKey;
             tab.SortColumn = state.Sort;
             tab.SortDescending = state.Descending;
         }
@@ -277,7 +281,7 @@ public partial class MainViewModel : ObservableObject,
 
     // a locked tab is saved at its own folder, even if it wandered while tabs were off
     static string TabLine(PanelTabViewModel tab)
-        => new TabState(tab.LockedPath ?? tab.Path, tab.IsLocked, tab.Alias, tab.ColorKey, tab.IconKey, tab.SortColumn, tab.SortDescending).Format();
+        => new TabState(tab.LockedPath ?? tab.Path, tab.IsLocked, tab.Alias, tab.ColorKey, tab.IconKey, tab.SortColumn, tab.SortDescending, tab.SortKey).Format();
 
     void OnPanelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -690,15 +694,23 @@ public partial class MainViewModel : ObservableObject,
     [RelayCommand]
     void QuickView() => this.Preview.IsOpen = !this.Preview.IsOpen;
 
-    /// <summary>Pick which detail columns the panels show; the list stays open until Done.</summary>
+    /// <summary>
+    /// Pick which detail columns the panels show - and, in a folder with a column set (photos, music...), which of its
+    /// columns; the list stays open until Done.
+    /// </summary>
     [RelayCommand]
     async Task ChooseColumns()
     {
         var done = L.Common_Done;
+        var set = this.ActivePanel.ActiveTab?.ColumnSet;
         while (true)
         {
-            var options = Enum.GetValues<PanelColumn>()
-                .Select(c => (this.columns.IsVisible(c) ? "✓  " : "     ") + ColumnSet.Label(c))
+            var builtIn = Enum.GetValues<PanelColumn>();
+            IReadOnlyList<IFileColumn> chosen = set == null ? [] : this.fileColumns.ColumnsOf(set);
+            IReadOnlyList<IFileColumn> custom = set == null ? [] : this.fileColumns.CandidatesFor(set);
+            var options = builtIn
+                .Select(c => Tick(this.columns.IsVisible(c)) + ColumnSet.Label(c))
+                .Concat(custom.Select(c => Tick(chosen.Contains(c)) + L.Main_ColumnInSetFormat(c.Title, set!.Title)))
                 .ToList();
 
             var choice = await this.dialogs.Choose(L.Main_Columns, options, done);
@@ -706,11 +718,15 @@ public partial class MainViewModel : ObservableObject,
                 break;
 
             var index = options.IndexOf(choice);
-            if (index >= 0)
-                this.columns.Toggle(Enum.GetValues<PanelColumn>()[index]);
+            if (index >= 0 && index < builtIn.Length)
+                this.columns.Toggle(builtIn[index]);
+            else if (index >= builtIn.Length)
+                this.fileColumns.Toggle(set!, custom[index - builtIn.Length]);
         }
         this.RequestCommandLineFocus();
     }
+
+    static string Tick(bool on) => on ? "✓  " : "     ";
 
     [RelayCommand]
     void QuickFilter()

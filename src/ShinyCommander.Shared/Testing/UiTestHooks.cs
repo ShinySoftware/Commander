@@ -158,6 +158,8 @@ public static class UiTestHooks
                 || main.IsCommandRunning
                 || main.Left.ActiveTab?.IsLoading == true
                 || main.Right.ActiveTab?.IsLoading == true
+                || main.Left.ActiveTab?.IsReadingMetadata == true
+                || main.Right.ActiveTab?.IsReadingMetadata == true
                 || main.Preview.IsLoading;
             if (!busy)
                 break;
@@ -464,6 +466,8 @@ public static class UiTestHooks
         main.Preview.IsOpen = false;
         main.Preview.Position = PreviewPosition.Right;
         Service<AppSettings>().DisabledPreviewers = null;
+        Service<AppSettings>().ColumnSets = null;
+        Service<AppSettings>().DisabledColumnSets = null;
         foreach (var (panel, path) in new[] { (main.Left, Str(args, "left")), (main.Right, Str(args, "right")) })
         {
             panel.ShowTree = false;
@@ -487,6 +491,7 @@ public static class UiTestHooks
                 tab.IsBranchView = false;
                 tab.SortDescending = false;
                 tab.SortColumn = SortColumn.Name;
+                tab.SortKey = null;
                 if (path != null)
                     await tab.NavigateAsync(path);
                 else
@@ -675,7 +680,11 @@ public static class UiTestHooks
             archiveBadge = tab?.ArchiveBadge,
             quickFilter = tab?.QuickFilter,
             isBranchView = tab?.IsBranchView ?? false,
-            sort = tab == null ? null : $"{tab.SortColumn}{(tab.SortDescending ? " desc" : String.Empty)}",
+            sort = tab == null ? null : $"{(tab.SortColumn == SortColumn.Custom ? ColumnHeader.CustomPrefix + tab.SortKey : tab.SortColumn)}{(tab.SortDescending ? " desc" : String.Empty)}",
+            columnSet = tab?.ColumnSet?.Key,
+            customColumns = tab?.CustomColumns.Select(c => c.Key).ToList(),
+            customHeaders = p.CustomHeaders.Select(h => h.Text).ToList(),
+            isReadingMetadata = tab?.IsReadingMetadata ?? false,
             canGoBack = tab?.CanGoBack ?? false,
             items = tab?.Items.Select(i => new
             {
@@ -684,7 +693,8 @@ public static class UiTestHooks
                 parent = i.Entry.IsParentLink,
                 marked = i.IsMarked,
                 size = i.Entry.Size,
-                sizeText = i.SizeText
+                sizeText = i.SizeText,
+                custom = tab.CustomColumns.Count == 0 ? null : tab.CustomColumns.Select(i.CustomText).ToList()
             }).ToList()
         };
     }

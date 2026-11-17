@@ -16,6 +16,10 @@
         <Using Include="Shouldly" />
     </ItemGroup>
     <ItemGroup>
+        <!-- media, PDF and plist samples for FileMetadataReaderTests -->
+        <None Include="Fixtures\**" CopyToOutputDirectory="PreserveNewest" />
+    </ItemGroup>
+    <ItemGroup>
         <ProjectReference Include="..\..\src\ShinyCommander.Core\ShinyCommander.Core.csproj" />
         <ProjectReference Include="..\..\src\ShinyCommander.Remote\ShinyCommander.Remote.csproj" />
     </ItemGroup>

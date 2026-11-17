@@ -5,6 +5,7 @@ global using ShinyCommander.Core.Models;
 global using ShinyCommander.Core.FileSystem;
 global using ShinyCommander.Core.Operations;
 global using ShinyCommander.Core.Util;
+global using ShinyCommander.Core.Metadata;
 global using ShinyCommander.Core.Remote;
 global using ShinyCommander.Services;
 global using ShinyCommander.ViewModels;

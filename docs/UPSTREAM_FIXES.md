@@ -19,6 +19,7 @@ Each item lists where the bug is, how to reproduce it, the fix, how to know it's
 | 9 | ExifLibNet | IFD entries written in insertion order, not ascending tag order | Medium |
 | 10 | ExifLibNet | `Properties.Set(tag, string)` adds instead of replacing | Low |
 | 11 | ExifLibNet | TIFF saves are unreadable; PNG metadata isn't written | Medium - why only JPEG is editable |
+| 12 | TagLibSharp | A constant bitrate MP3's "Info" header is ignored, and the file is timed by its first frame | Medium - low-bitrate MP3s showed half their length |
 
 ---
 
@@ -200,6 +201,27 @@ EXIF as an `eXIf` chunk before the first `IDAT` (PNG 1.5 extension), and read it
 **Then here:** add `tif`, `tiff` and `png` to `ImageMetadata.Editable` (with a header check per format) - today
 `ImageMetadata.CanEdit` takes JPEG only for this reason. HEIC/WebP would need a different library either way.
 
+## TagLibSharp
+
+[mono/taglib-sharp](https://github.com/mono/taglib-sharp), 2.3.0 (LGPL-2.1, used unmodified) - the custom columns'
+duration, dimensions and tags.
+
+### 12. MP3 "Info" header ignored
+
+**Where:** `TagLib.Mpeg.XingHeader` only recognises the `Xing` tag. lame writes `Info` in the same place for a
+constant bitrate file, so `XingHeader.Present` is false and `AudioHeader.Duration` falls back to the stream size over
+the first frame's bitrate. lame writes that first (Info) frame at a higher bitrate when the file's own is too small to
+hold it - a 32 kbit/s file's first frame is 64 kbit/s - so the file reads half as long (a 6 s file: 3.07 s).
+
+**Reproduce:** `ffmpeg -f lavfi -i anullsrc=r=44100:cl=stereo -t 6 -c:a libmp3lame -b:a 32k low.mp3`, then
+`TagLib.File.Create("low.mp3").Properties.Duration`.
+
+**Fix:** accept `Info` as well as `Xing` in `XingHeader` (same layout), and take the duration from its frame count.
+
+**Remove here:** `MpegFrames` and the block that calls it in `FileMetadataReader.ReadMedia`
+(`src/ShinyCommander.Core/Metadata/FileMetadataReader.cs`). `FileMetadataReaderTests.Low_bitrate_mp3_is_timed_by_its_frame_count`
+stays as the check.
+
 ---
 
 ## Order
@@ -209,6 +231,7 @@ EXIF as an `eXIf` chunk before the first `IDAT` (PNG 1.5 extension), and read it
 2. **#3 DataGrid** and **#4 Diagram probes** - each a small change in Shiny with a workaround in this repo to delete.
 3. **#6 Shell generator**, **#5 / #7 docs**.
 4. **ExifLibNet #8-#11** - decide fork vs. own writer first; #8-#10 are a few lines each, #11 is the real work.
+5. **TagLibSharp #12** - a one-line change upstream; the workaround here is small and well covered.
 
 After each Shiny release: bump `ShinyControlsVersion` in `Directory.Packages.props`, remove the workaround listed
 above, and run just the tests named in that item.

@@ -9,19 +9,23 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     readonly VirtualFileSystem vfs;
     readonly AppSettings settings;
     readonly ColumnLayout columns;
+    readonly FileColumns fileColumns;
     readonly Stack<string> back = new();
     readonly Stack<string> forward = new();
     List<FileItemViewModel> all = [];
     FileSystemWatcher? watcher;
     CancellationTokenSource? loadCts;
+    CancellationTokenSource? metadataCts;
     Timer? refreshDebounce;
 
-    public PanelTabViewModel(VirtualFileSystem vfs, AppSettings settings, ColumnLayout columns, string path)
+    public PanelTabViewModel(VirtualFileSystem vfs, AppSettings settings, ColumnLayout columns, FileColumns fileColumns, string path)
     {
         this.vfs = vfs;
         this.settings = settings;
         this.columns = columns;
+        this.fileColumns = fileColumns;
         this.Path = path;
+        fileColumns.Changed += this.OnFileColumnsChanged;
     }
 
     public event EventHandler? CursorMoved;
@@ -120,6 +124,21 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     [ObservableProperty]
     public partial bool SortDescending { get; set; }
 
+    /// <summary>The custom column (IFileColumn.Key) it's sorted by when <see cref="SortColumn"/> is Custom.</summary>
+    [ObservableProperty]
+    public partial string? SortKey { get; set; }
+
+    /// <summary>The folder's column set (FileColumns.Detect): null for a mixed folder, an archive or a server.</summary>
+    [ObservableProperty]
+    public partial FileColumnSet? ColumnSet { get; set; }
+
+    /// <summary>The set's columns, shown right of the built-in ones.</summary>
+    public IReadOnlyList<IFileColumn> CustomColumns { get; private set; } = [];
+
+    /// <summary>The custom columns' metadata is still being read.</summary>
+    [ObservableProperty]
+    public partial bool IsReadingMetadata { get; set; }
+
     [ObservableProperty]
     public partial bool IsLoading { get; set; }
 
@@ -195,6 +214,7 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     partial void OnQuickFilterChanged(string value) => this.ApplyView(this.CursorItem?.Entry.Name);
     partial void OnSortColumnChanged(SortColumn value) => this.SortChanged();
     partial void OnSortDescendingChanged(bool value) => this.SortChanged();
+    partial void OnSortKeyChanged(string? value) => this.SortChanged();
     partial void OnMarkedCountChanged(int value) => this.OnPropertyChanged(nameof(this.MarkedBadge));
 
     /// <summary>BadgeView hides itself on an empty string.</summary>
@@ -384,7 +404,9 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
             this.OnPropertyChanged(nameof(this.Title));
             this.OnPropertyChanged(nameof(this.IsReadOnlyArchive));
             this.OnPropertyChanged(nameof(this.ArchiveBadge));
+            this.UpdateColumnSet();
             this.ApplyView(focusName);
+            this.LoadMetadata();
             this.Watch();
             return true;
         }
@@ -445,7 +467,11 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
             view = view.Where(x => x.Entry.IsParentLink || mask.IsMatch(x.Entry.Name));
         }
 
-        var comparer = new FileEntryComparer(this.SortColumn, this.SortDescending);
+        // sorted by a column this folder doesn't have (one of the music folder's, in a photo folder) - by name until it's back
+        var column = this.SortedColumn;
+        var comparer = this.SortColumn == SortColumn.Custom && column == null
+            ? new FileEntryComparer(SortColumn.Name, false)
+            : new FileEntryComparer(this.SortColumn, this.SortDescending, column == null ? null : e => this.CustomValue(column, e));
         var sorted = view.OrderBy(x => x.Entry, comparer).ToList();
 
         // parent link always first even when sorting descending
@@ -581,6 +607,25 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>The custom column the tab is sorted by, if it's one this folder shows.</summary>
+    IFileColumn? SortedColumn => this.SortColumn == SortColumn.Custom ? this.CustomColumns.FirstOrDefault(x => x.Key == this.SortKey) : null;
+
+    IComparable? CustomValue(IFileColumn column, FileEntry entry)
+        => column.Kinds.Contains(FileKinds.Of(entry)) && this.fileColumns.Cached(entry) is { } metadata ? column.Value(metadata) : null;
+
+    /// <summary>A custom column's header: by it, then the other way.</summary>
+    public void SortByCustom(string key)
+    {
+        if (this.SortColumn == SortColumn.Custom && this.SortKey == key)
+        {
+            this.SortDescending = !this.SortDescending;
+            return;
+        }
+        this.SortKey = key;
+        this.SortDescending = false;
+        this.SortColumn = SortColumn.Custom;
+    }
+
     public void SortBy(SortColumn column)
     {
         if (this.SortColumn == column)
@@ -629,8 +674,99 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
         this.refreshDebounce = new Timer(_ => MainThread.BeginInvokeOnMainThread(() => _ = this.RefreshAsync()), null, 400, Timeout.Infinite);
     }
 
+    // --- custom columns ---------------------------------------------------------------------
+
+    void UpdateColumnSet()
+    {
+        // an archive's or a server's files would have to be downloaded to read
+        this.ColumnSet = this.IsArchive || this.IsRemote ? null : this.fileColumns.Detect(this.all.Select(x => x.Entry).ToList());
+        this.CustomColumns = this.ColumnSet == null ? [] : this.fileColumns.ColumnsOf(this.ColumnSet);
+        this.OnPropertyChanged(nameof(this.CustomColumns));
+    }
+
+    // a set turned on or off, or its columns changed in Settings
+    void OnFileColumnsChanged(object? sender, EventArgs e) => MainThread.BeginInvokeOnMainThread(() =>
+    {
+        this.UpdateColumnSet();
+        this.ApplyView(this.CursorItem?.Entry.Name);
+        this.LoadMetadata();
+    });
+
+    /// <summary>
+    /// Fills the rows' metadata for the custom columns: what's cached at once, the rest read in the background in list
+    /// order (the rows on screen first) and handed to the rows in batches. Cloud-only files aren't read - that would
+    /// download them.
+    /// </summary>
+    void LoadMetadata()
+    {
+        this.metadataCts?.Cancel();
+        this.IsReadingMetadata = false;
+        var kinds = this.CustomColumns.SelectMany(x => x.Kinds).ToHashSet();
+        if (kinds.Count == 0)
+            return;
+
+        var position = this.Items.Select((x, i) => (x, i)).ToDictionary(x => x.x, x => x.i);
+        var pending = new List<FileItemViewModel>();
+        foreach (var item in this.all.Where(x => kinds.Contains(FileKinds.Of(x.Entry))))
+        {
+            item.Metadata ??= this.fileColumns.Cached(item.Entry);
+            if (item.Metadata == null && !item.Entry.IsCloudOnly)
+                pending.Add(item);
+        }
+        if (pending.Count == 0)
+            return;
+
+        var cts = this.metadataCts = new CancellationTokenSource();
+        var ordered = pending.OrderBy(x => position.GetValueOrDefault(x, Int32.MaxValue)).ToList();
+        this.IsReadingMetadata = true;
+        _ = Task.Run(() => this.ReadMetadata(ordered, cts));
+    }
+
+    void ReadMetadata(IReadOnlyList<FileItemViewModel> pending, CancellationTokenSource cts)
+    {
+        var batch = new List<(FileItemViewModel Item, FileMetadata Metadata)>();
+        var since = System.Diagnostics.Stopwatch.StartNew();
+        try
+        {
+            foreach (var item in pending)
+            {
+                cts.Token.ThrowIfCancellationRequested();
+                batch.Add((item, this.fileColumns.Read(item.Entry, cts.Token)));
+                if (since.ElapsedMilliseconds > 150)
+                {
+                    this.ApplyMetadata(batch, cts, false);
+                    batch = [];
+                    since.Restart();
+                }
+            }
+            this.ApplyMetadata(batch, cts, true);
+        }
+        catch (OperationCanceledException)
+        {
+        }
+    }
+
+    void ApplyMetadata(IReadOnlyList<(FileItemViewModel Item, FileMetadata Metadata)> batch, CancellationTokenSource cts, bool done) => MainThread.BeginInvokeOnMainThread(() =>
+    {
+        if (cts.IsCancellationRequested)
+            return;
+
+        foreach (var (item, metadata) in batch)
+            item.Metadata = metadata;
+
+        if (!done)
+            return;
+
+        this.IsReadingMetadata = false;
+        // the values it's sorted by have all come in
+        if (this.SortedColumn != null)
+            this.ApplyView(this.CursorItem?.Entry.Name);
+    });
+
     public void Dispose()
     {
+        this.fileColumns.Changed -= this.OnFileColumnsChanged;
+        this.metadataCts?.Cancel();
         this.loadCts?.Cancel();
         this.watcher?.Dispose();
         this.refreshDebounce?.Dispose();

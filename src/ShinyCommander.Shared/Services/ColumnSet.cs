@@ -65,9 +65,10 @@ public partial class ColumnSet(AppSettings settings) : ObservableObject
 }
 
 /// <summary>
-/// One panel's columns: the user's choice (<see cref="ColumnSet"/>) narrowed to what fits. When the panel is too
-/// narrow for a readable Name column - a folder tree open, panels stacked in a small window - the least useful
-/// columns go first (Attr, Created, Date, Ext). Rows and the header bind their widths here.
+/// One panel's columns: the user's choice (<see cref="ColumnSet"/>) plus the folder's custom columns
+/// (<see cref="Custom"/>), narrowed to what fits. When the panel is too narrow for a readable Name column - a folder
+/// tree open, panels stacked in a small window - the least useful columns go first (Attr, Created, the custom ones from
+/// the right, Date, Ext). Rows and the header bind their widths here.
 /// </summary>
 public partial class ColumnLayout : ObservableObject
 {
@@ -75,23 +76,17 @@ public partial class ColumnLayout : ObservableObject
     const double MinNameWidth = 150;
     const double Fixed = 24 + 16; // icon column + row padding
     static readonly GridLength Hidden = new(0);
-    static readonly (PanelColumn Column, double Width)[] DropOrder =
-    [
-        (PanelColumn.Attributes, 84),
-        (PanelColumn.Created, 122),
-        (PanelColumn.Modified, 122),
-        (PanelColumn.Extension, 56),
-        (PanelColumn.Size, 92)
-    ];
 
     readonly ColumnSet columns;
     readonly HashSet<PanelColumn> dropped = [];
+    readonly HashSet<IFileColumn> droppedCustom = [];
+    IReadOnlyList<IFileColumn> custom = [];
     double width;
 
     public ColumnLayout(ColumnSet columns)
     {
         this.columns = columns;
-        columns.PropertyChanged += (_, _) => this.Recalculate();
+        columns.PropertyChanged += (_, _) => this.Recalculate(true);
     }
 
     /// <summary>The list's width - the panel view sets it as it resizes.</summary>
@@ -103,9 +98,25 @@ public partial class ColumnLayout : ObservableObject
             if (Math.Abs(this.width - value) < 1)
                 return;
             this.width = value;
-            this.Recalculate();
+            this.Recalculate(false);
         }
     }
+
+    /// <summary>The active tab's custom columns (its folder's column set), right of the built-in ones.</summary>
+    public IReadOnlyList<IFileColumn> Custom
+    {
+        get => this.custom;
+        set
+        {
+            if (this.custom.SequenceEqual(value))
+                return;
+            this.custom = value;
+            this.Recalculate(true);
+        }
+    }
+
+    /// <summary>The custom columns that fit, left to right.</summary>
+    public IReadOnlyList<IFileColumn> CustomShown { get; private set; } = [];
 
     bool Shows(PanelColumn c) => this.columns.IsVisible(c) && !this.dropped.Contains(c);
 
@@ -120,30 +131,48 @@ public partial class ColumnLayout : ObservableObject
     public GridLength ModifiedWidth => this.ShowModified ? new GridLength(122) : Hidden;
     public GridLength CreatedWidth => this.ShowCreated ? new GridLength(122) : Hidden;
     public GridLength AttrWidth => this.ShowAttributes ? new GridLength(84) : Hidden;
+    public GridLength CustomWidth => new(this.CustomShown.Sum(x => x.Width));
 
     /// <summary>Total width of the detail columns that show - the drawn details view in each row (FileDetailsView).</summary>
     public double DetailsWidth =>
         (this.ShowExtension ? ExtColumnWidth : 0) + (this.ShowSize ? SizeColumnWidth : 0) + (this.ShowModified ? DateColumnWidth : 0)
-        + (this.ShowCreated ? DateColumnWidth : 0) + (this.ShowAttributes ? AttrColumnWidth : 0);
+        + (this.ShowCreated ? DateColumnWidth : 0) + (this.ShowAttributes ? AttrColumnWidth : 0) + this.CustomShown.Sum(x => x.Width);
 
-    void Recalculate()
+    void Recalculate(bool changed)
     {
         var before = this.dropped.ToHashSet();
+        var beforeCustom = this.droppedCustom.ToHashSet();
         this.dropped.Clear();
+        this.droppedCustom.Clear();
         if (this.width > 0)
         {
-            var used = Fixed + DropOrder.Where(x => this.columns.IsVisible(x.Column)).Sum(x => x.Width);
-            foreach (var (column, w) in DropOrder)
+            // what goes first when it doesn't fit, of the columns the user has on
+            var order = new List<(PanelColumn? Column, IFileColumn? Custom, double Width)>
+            {
+                (PanelColumn.Attributes, null, AttrColumnWidth),
+                (PanelColumn.Created, null, DateColumnWidth)
+            };
+            order.AddRange(this.custom.Reverse().Select(x => ((PanelColumn?)null, (IFileColumn?)x, x.Width)));
+            order.Add((PanelColumn.Modified, null, DateColumnWidth));
+            order.Add((PanelColumn.Extension, null, ExtColumnWidth));
+            order.Add((PanelColumn.Size, null, SizeColumnWidth));
+            var visible = order.Where(x => x.Column is not { } c || this.columns.IsVisible(c)).ToList();
+
+            var used = Fixed + visible.Sum(x => x.Width);
+            foreach (var (column, customColumn, w) in visible)
             {
                 if (this.width - used >= MinNameWidth)
                     break;
-                if (!this.columns.IsVisible(column))
-                    continue;
-                this.dropped.Add(column);
+                if (column is { } c)
+                    this.dropped.Add(c);
+                else
+                    this.droppedCustom.Add(customColumn!);
                 used -= w;
             }
         }
-        if (!before.SetEquals(this.dropped) || before.Count == 0)
+        this.CustomShown = this.custom.Where(x => !this.droppedCustom.Contains(x)).ToList();
+
+        if (changed || !before.SetEquals(this.dropped) || !beforeCustom.SetEquals(this.droppedCustom) || before.Count + beforeCustom.Count == 0)
             this.OnPropertyChanged(String.Empty);
     }
 }

@@ -8,6 +8,7 @@
         <PackageReference Include="SharpCompress" />
         <PackageReference Include="ExifLibNet" />
         <PackageReference Include="Microsoft.Data.Sqlite" />
+        <PackageReference Include="TagLibSharp" />
     </ItemGroup>
     <ItemGroup>
         <InternalsVisibleTo Include="ShinyCommander.Core.Tests" />

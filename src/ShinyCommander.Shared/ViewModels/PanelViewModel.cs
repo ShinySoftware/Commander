@@ -22,13 +22,16 @@ public partial class PanelViewModel : ObservableObject
 {
     readonly VirtualFileSystem vfs;
     readonly AppSettings settings;
+    readonly FileColumns fileColumns;
 
-    public PanelViewModel(PanelSide side, VirtualFileSystem vfs, AppSettings settings, ColumnSet columns, PaneToolbar toolbar)
+    public PanelViewModel(PanelSide side, VirtualFileSystem vfs, AppSettings settings, ColumnSet columns, FileColumns fileColumns, PaneToolbar toolbar)
     {
         this.Side = side;
         this.vfs = vfs;
         this.settings = settings;
+        this.fileColumns = fileColumns;
         this.Columns = new ColumnLayout(columns);
+        this.Columns.PropertyChanged += (_, _) => this.UpdateCustomHeaders();
         this.Tree = new FolderTreeViewModel(settings);
         this.ShowTree = side == PanelSide.Left ? settings.LeftShowTree : settings.RightShowTree;
         var savedWidth = side == PanelSide.Left ? settings.LeftTreeWidth : settings.RightTreeWidth;
@@ -47,6 +50,34 @@ public partial class PanelViewModel : ObservableObject
     public partial IReadOnlyList<PaneToolbarItem> ToolbarItems { get; set; }
     /// <summary>This panel's columns - the user's choice, narrowed to what fits the panel.</summary>
     public ColumnLayout Columns { get; }
+
+    /// <summary>The headers of the custom columns that fit, right of the built-in ones.</summary>
+    [ObservableProperty]
+    public partial IReadOnlyList<ColumnHeader> CustomHeaders { get; set; } = [];
+
+    // the active tab's folder decides the custom columns
+    void UpdateCustomColumns()
+    {
+        this.Columns.Custom = this.ActiveTab?.CustomColumns ?? [];
+        this.UpdateCustomHeaders();
+    }
+
+    void UpdateCustomHeaders()
+    {
+        var tab = this.ActiveTab;
+        var headers = this.Columns.CustomShown
+            .Select(x => new ColumnHeader(
+                x.Key,
+                tab is { SortColumn: SortColumn.Custom } && tab.SortKey == x.Key ? x.Title + (tab.SortDescending ? " ▼" : " ▲") : x.Title,
+                x.Width,
+                x.AlignRight,
+                this.SortCommand
+            ))
+            .ToList();
+        // the layout says it changed on every resize - only rebuild the header labels when they're different
+        if (!headers.SequenceEqual(this.CustomHeaders))
+            this.CustomHeaders = headers;
+    }
 
     /// <summary>This panel's folder tree (rows for a virtualized list).</summary>
     public FolderTreeViewModel Tree { get; }
@@ -165,6 +196,7 @@ public partial class PanelViewModel : ObservableObject
             newValue.CursorMoved += this.OnTabCursorMoved;
             newValue.SetPanelActive(this.IsActive);
             newValue.IsSelected = true;
+            this.UpdateCustomColumns();
             this.UpdateLocation();
             this.ScrollRequested?.Invoke(this, newValue.CursorIndex);
         }
@@ -184,10 +216,15 @@ public partial class PanelViewModel : ObservableObject
             this.UpdateLocation();
             this.OnPropertyChanged(nameof(this.Path));
         }
-        else if (e.PropertyName is nameof(PanelTabViewModel.SortColumn) or nameof(PanelTabViewModel.SortDescending))
+        else if (e.PropertyName is nameof(PanelTabViewModel.SortColumn) or nameof(PanelTabViewModel.SortDescending) or nameof(PanelTabViewModel.SortKey))
         {
             // each tab's sort is saved with it
+            this.UpdateCustomHeaders();
             this.TabsChanged?.Invoke(this, EventArgs.Empty);
+        }
+        else if (e.PropertyName == nameof(PanelTabViewModel.CustomColumns))
+        {
+            this.UpdateCustomColumns();
         }
     }
 
@@ -250,7 +287,7 @@ public partial class PanelViewModel : ObservableObject
     /// <param name="index">Where the tab goes; the end when null.</param>
     public async Task<PanelTabViewModel> AddTabAsync(string path, bool activate = true, string? focusName = null, bool locked = false, int? index = null)
     {
-        var tab = new PanelTabViewModel(this.vfs, this.settings, this.Columns, VirtualFileSystem.Normalize(path));
+        var tab = new PanelTabViewModel(this.vfs, this.settings, this.Columns, this.fileColumns, VirtualFileSystem.Normalize(path));
         tab.OpenInNewTabRequested += this.OnOpenInNewTabRequested;
         // nothing goes in front of the first tab
         this.Tabs.Insert(Math.Clamp(index ?? this.Tabs.Count, Math.Min(1, this.Tabs.Count), this.Tabs.Count), tab);
@@ -358,7 +395,9 @@ public partial class PanelViewModel : ObservableObject
     [RelayCommand]
     void Sort(string column)
     {
-        if (Enum.TryParse<SortColumn>(column, out var c))
+        if (column.StartsWith(ColumnHeader.CustomPrefix, StringComparison.Ordinal))
+            this.ActiveTab?.SortByCustom(column[ColumnHeader.CustomPrefix.Length..]);
+        else if (Enum.TryParse<SortColumn>(column, out var c))
             this.ActiveTab?.SortBy(c);
     }
 
@@ -413,4 +452,16 @@ public partial class PanelViewModel : ObservableObject
 
     [RelayCommand]
     void ToggleViewMode() => this.ViewMode = this.IsThumbnails ? PanelViewMode.Details : PanelViewMode.Thumbnails;
+}
+
+/// <summary>A custom column's header label: its title (with the sort arrow), width and alignment; a tap sorts by it.</summary>
+public sealed record ColumnHeader(string Key, string Text, double Width, bool AlignRight, IRelayCommand<string> Sort)
+{
+    public const string CustomPrefix = "custom:";
+
+    public string SortParameter => CustomPrefix + this.Key;
+    public TextAlignment Alignment => this.AlignRight ? TextAlignment.End : TextAlignment.Start;
+
+    // the drawn rows pad the same way (FileDetailsView)
+    public Thickness Padding => this.AlignRight ? new Thickness(0, 0, 8, 0) : new Thickness(0, 0, 6, 0);
 }

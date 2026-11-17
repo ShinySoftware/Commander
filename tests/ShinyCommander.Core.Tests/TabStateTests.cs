@@ -23,6 +23,14 @@ public class TabStateTests
     }
 
     [Fact]
+    public void CustomSortKeepsItsColumn()
+    {
+        var tab = new TabState("/music", Sort: SortColumn.Custom, Descending: true, SortKey: "duration");
+        tab.Format().ShouldBe("/music\tsort=Custom\tsortkey=duration\tdesc");
+        TabState.Parse(tab.Format()).ShouldBe(tab);
+    }
+
+    [Fact]
     public void SortRoundTrip()
     {
         var tab = new TabState("/x", Sort: SortColumn.Size, Descending: true);

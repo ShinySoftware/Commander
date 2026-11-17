@@ -1,7 +1,7 @@
 namespace ShinyCommander.ViewModels;
 
 [ShellMap<SettingsPage>("Settings")]
-public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, UpdateService updates, INavigator navigator, IAppDialogs dialogs, FilePreviewers previewers, PreviewPaneViewModel preview) : ObservableObject
+public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, UpdateService updates, INavigator navigator, IAppDialogs dialogs, FilePreviewers previewers, PreviewPaneViewModel preview, FileColumns fileColumns) : ObservableObject
 {
     /// <summary>"Right" or "Bottom" - moves the open panel at once.</summary>
     public string PreviewPosition
@@ -18,6 +18,37 @@ public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, 
 
     /// <summary>One switch per preview plugin; a type whose previewer is off shows as text / hex.</summary>
     public IReadOnlyList<PreviewerToggle> Previewers { get; } = previewers.All.Select(x => new PreviewerToggle(previewers, x)).ToList();
+
+    /// <summary>One switch per column set: on, a folder that's mostly its kind of file shows its columns.</summary>
+    public IReadOnlyList<ColumnSetToggle> ColumnSets { get; } = fileColumns.Sets.Select(x => new ColumnSetToggle(fileColumns, x)).ToList();
+
+    /// <summary>Pick a column set, then its columns; both lists stay open until Done.</summary>
+    [RelayCommand]
+    async Task EditColumnSets()
+    {
+        var done = L.Common_Done;
+        while (true)
+        {
+            var sets = fileColumns.Sets.Select(x => x.Title).ToList();
+            var pick = await dialogs.Choose(L.Settings_ColumnSetsEdit, sets, done);
+            var set = fileColumns.Sets.FirstOrDefault(x => x.Title == pick);
+            if (set == null)
+                break;
+
+            while (true)
+            {
+                var chosen = fileColumns.ColumnsOf(set);
+                var candidates = fileColumns.CandidatesFor(set);
+                var options = candidates.Select(x => (chosen.Contains(x) ? "✓  " : "     ") + x.Title).ToList();
+                var choice = await dialogs.Choose(L.Settings_ColumnSetColumnsFormat(set.Title), options, done);
+                var index = choice == null ? -1 : options.IndexOf(choice);
+                if (index < 0)
+                    break;
+                fileColumns.Toggle(set, candidates[index]);
+                this.ColumnSets.First(x => x.Key == set.Key).Refresh();
+            }
+        }
+    }
 
     public bool ShowExtColumn { get => columns.ShowExtension; set { columns.Set(PanelColumn.Extension, value); this.OnPropertyChanged(); } }
     public bool ShowSizeColumn { get => columns.ShowSize; set { columns.Set(PanelColumn.Size, value); this.OnPropertyChanged(); } }
@@ -147,6 +178,29 @@ public sealed class PreviewerToggle(FilePreviewers previewers, IFilePreviewer pr
         set
         {
             previewers.SetEnabled(previewer, value);
+            this.OnPropertyChanged();
+        }
+    }
+}
+
+// no subscription to FileColumns.Changed: the registry outlives the page, and would keep every visit's toggles
+public sealed class ColumnSetToggle(FileColumns columns, FileColumnSet columnSet) : ObservableObject
+{
+    public string Title => columnSet.Title;
+    public string Key => columnSet.Key;
+
+    /// <summary>Its columns were picked again.</summary>
+    public void Refresh() => this.OnPropertyChanged(nameof(this.Description));
+
+    /// <summary>Its columns, in order.</summary>
+    public string Description => columns.ColumnsOf(columnSet) is { Count: > 0 } chosen ? String.Join(" · ", chosen.Select(x => x.Title)) : L.Settings_ColumnSetEmpty;
+
+    public bool IsEnabled
+    {
+        get => columns.IsEnabled(columnSet);
+        set
+        {
+            columns.SetEnabled(columnSet, value);
             this.OnPropertyChanged();
         }
     }

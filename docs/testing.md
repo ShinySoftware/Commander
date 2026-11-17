@@ -2,7 +2,7 @@
 
 | Suite | What it proves | Run |
 |---|---|---|
-| `tests/ShinyCommander.Core.Tests` (xunit v3) | The file system layer without UI: listing disk and archives, copy/move/delete/pack/extract, conflicts, search masks, multi-rename, directory compare | `dotnet test tests/ShinyCommander.Core.Tests` (~1s) |
+| `tests/ShinyCommander.Core.Tests` (xunit v3) | The file system layer without UI: listing disk and archives, copy/move/delete/pack/extract, conflicts, search masks, multi-rename, directory compare, and what the custom columns read from files (`FileMetadataReaderTests`, with small media, PDF and plist samples in `Fixtures/`) | `dotnet test tests/ShinyCommander.Core.Tests` (~1s) |
 | **`tests/ShinyCommander.UITests`** (xunit v3 + MAUI DevFlow) | **The real macOS (AppKit) app**: the keymap, panels, file operations, archives, views, dialogs, mouse clicks, ribbon, layout and leaks | `tests/ShinyCommander.UITests/run.sh` |
 
 ## UI tests
@@ -119,6 +119,7 @@ run.sh   build + run, filters, flags
 | `TabsAndToolsTests` | Tabs (open on folder, close, cycle, last can't close), lister (disk and archive), help, find, multi-rename, sync dirs, hotlist |
 | `RealUiTests` | Both panels' trees open at once, each following its own folder and resizing with its splitter; clicking and double-clicking rows, the function key bar, every ribbon tab and button, the path box, the per-panel tree, thumbnail tiles, the real prompt/confirm/choice dialogs, keyboard focus (native first responder: the dialog field on open, the command line after a dialog or page), the Settings page |
 | `LayoutTests` | Content that exists but can't be *seen*: the console text, choice dialog options, names with a tree open, the path label. `Ui.WhyHidden` clips an element against every ancestor |
+| `CustomColumnTests` | Custom columns: a music folder gets the music set (durations from real WAV headers), sorting by a custom column with files that have no value last both ways, a mixed folder has no set and a custom sort waits for one, the column chooser adds a set's column, Settings turns a set off. With `--screens`, music and photo folders on real files (needs ffmpeg) |
 | `PreviewPaneTests` | The preview panel (Ctrl+Q): docked right of both panels or under them, follows the active panel, a previewer per type (image, Markdown, HTML with scripts off, PDF, SQLite), a previewer turned off falls back to text, Settings moves it, folder summaries |
 | `LeakTests` | Round trips (lister, help, tabs, navigation, thumbnails, preview panel, dialogs, reset) leave no native views behind |
 | `ScrollTests` | A 2000-file folder stays virtualized; scroll steps, Down and PageDown keep the UI thread busy for less than a set budget (net of the test's own call overhead) |

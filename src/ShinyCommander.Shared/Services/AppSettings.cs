@@ -74,6 +74,12 @@ public partial class AppSettings
     [Bind] public partial bool HideAttrColumn { get; set; }
     [Bind] public partial bool ShowCreatedColumn { get; set; }
 
+    /// <summary>Each column set's chosen columns (FileColumns) - "photos=dimensions,taken|music=duration"; unlisted sets use their defaults.</summary>
+    [Bind] public partial string? ColumnSets { get; set; }
+
+    /// <summary>Column sets turned off in Settings (FileColumnSet.Key), comma separated.</summary>
+    [Bind] public partial string? DisabledColumnSets { get; set; }
+
     /// <summary>Pane toolbar command keys, comma separated (PaneToolbar) - null until customized.</summary>
     [Bind] public partial string? PaneToolbar { get; set; }
 

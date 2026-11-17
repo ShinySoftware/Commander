@@ -329,7 +329,7 @@
                     <!-- details: column headers (click to sort) + rows -->
                     <Grid RowDefinitions="Auto,*" IsVisible="{Binding IsDetails}">
                         <Grid Grid.Row="0" Padding="6,4">
-                            <BoxView Grid.ColumnSpan="7" Style="{StaticResource Hairline}" Margin="-6,0,-6,-4" />
+                            <BoxView Grid.ColumnSpan="8" Style="{StaticResource Hairline}" Margin="-6,0,-6,-4" />
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="24" />
                                 <ColumnDefinition Width="*" />
@@ -338,6 +338,7 @@
                                 <ColumnDefinition Width="{Binding Columns.ModifiedWidth}" />
                                 <ColumnDefinition Width="{Binding Columns.CreatedWidth}" />
                                 <ColumnDefinition Width="{Binding Columns.AttrWidth}" />
+                                <ColumnDefinition Width="{Binding Columns.CustomWidth}" />
                             </Grid.ColumnDefinitions>
                             <Label Grid.Column="1" Text="{Binding ActiveTab.NameHeader}" Style="{StaticResource HeaderLabel}">
                                 <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Name" /></Label.GestureRecognizers>
@@ -357,6 +358,18 @@
                             <Label Grid.Column="6" Text="{Binding ActiveTab.AttrHeader}" Style="{StaticResource HeaderLabel}" IsVisible="{Binding Columns.ShowAttributes}">
                                 <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding SortCommand}" CommandParameter="Attributes" /></Label.GestureRecognizers>
                             </Label>
+                            <!-- the folder's column set (photos, music...) - see FileColumns -->
+                            <HorizontalStackLayout Grid.Column="7" BindableLayout.ItemsSource="{Binding CustomHeaders}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ColumnHeader">
+                                        <Label Text="{Binding Text}" Style="{StaticResource HeaderLabel}" WidthRequest="{Binding Width}" Padding="{Binding Padding}"
+                                               HorizontalTextAlignment="{Binding Alignment}"
+                                               AutomationId="{Binding Key, StringFormat='ColumnHeader_{0}'}">
+                                            <Label.GestureRecognizers><TapGestureRecognizer Command="{Binding Sort}" CommandParameter="{Binding SortParameter}" /></Label.GestureRecognizers>
+                                        </Label>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </HorizontalStackLayout>
                         </Grid>
 
                         <!-- ItemsSource is set from code: only the list that's showing gets items (a hidden one would
