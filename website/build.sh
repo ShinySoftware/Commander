@@ -13,7 +13,7 @@ assemble() {
     local out="$1"
     rm -rf "$out"
     mkdir -p "$out/screenshots"
-    cp "$HERE"/index.html "$HERE"/styles.css "$HERE"/site.js "$out/"
+    cp "$HERE"/index.html "$HERE"/styles.css "$HERE"/site.js "$HERE"/social-card.png "$out/"
     cp "$ROOT"/docs/screenshots/*.png "$out/screenshots/"
     cp "$ROOT"/src/ShinyCommander.Shared/Resources/AppIcon/appicon.png "$out/appicon.png"
     cp "$ROOT"/art/shinysoft-logo.png "$out/shinysoft-logo.png"

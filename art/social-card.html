@@ -1,0 +1,48 @@
+<!doctype html>
+<!-- The website's social preview (og:image), 1200x630. Render it to website/social-card.png with:
+     msedge --headless --hide-scrollbars --window-size=1200,630 --screenshot=website/social-card.png art/social-card.html -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;800&display=swap" rel="stylesheet">
+<style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+    body {
+        position: relative;
+        background: radial-gradient(120% 90% at 30% 0%, #2A1D66 0%, #160F35 50%, #0D0A22 100%);
+        color: #F4F2FF;
+        font-family: "Inter", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+    }
+    .glow { position: absolute; border-radius: 50%; filter: blur(90px); }
+    .pink { width: 460px; height: 460px; background: #EC4899; top: -200px; left: -160px; opacity: .38; }
+    .purple { width: 560px; height: 560px; background: #8B5CF6; top: 160px; right: -160px; opacity: .45; }
+    .green { width: 300px; height: 300px; background: #4ADE80; bottom: -180px; left: 260px; opacity: .2; }
+
+    .copy { position: absolute; left: 72px; top: 0; bottom: 0; width: 520px; display: flex; flex-direction: column; justify-content: center; }
+    .brand { display: flex; align-items: center; gap: 14px; font-weight: 600; font-size: 26px; letter-spacing: -.01em; }
+    .brand img { width: 56px; height: 56px; border-radius: 13px; }
+    h1 { margin: 34px 0 0; font-weight: 800; font-size: 62px; line-height: 1.04; letter-spacing: -.035em; }
+    .gradient { background: linear-gradient(95deg, #FF8AC8 0%, #C084FC 45%, #8BE9A6 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .sub { margin: 26px 0 0; font-size: 21px; line-height: 1.45; color: rgba(244, 242, 255, .78); }
+    .meta { margin-top: 30px; display: inline-flex; align-self: flex-start; padding: 8px 16px; border-radius: 999px; background: rgba(255, 255, 255, .08); border: 1px solid rgba(255, 255, 255, .14); font-size: 16px; font-weight: 500; color: rgba(244, 242, 255, .85); }
+
+    .shot { position: absolute; left: 640px; top: 92px; width: 840px; border-radius: 14px; box-shadow: 0 40px 90px -20px rgba(0, 0, 0, .75), 0 0 0 1px rgba(255, 255, 255, .12); transform: perspective(1800px) rotateY(-12deg) rotateX(4deg); transform-origin: left center; }
+</style>
+</head>
+<body>
+    <div class="glow pink"></div>
+    <div class="glow purple"></div>
+    <div class="glow green"></div>
+
+    <img class="shot" src="../docs/screenshots/dark.png" alt="">
+
+    <div class="copy">
+        <div class="brand"><img src="../src/ShinyCommander.Shared/Resources/AppIcon/appicon.png" alt="">ShinyCommander</div>
+        <h1>Two panels.<br><span class="gradient">Every file, at your fingertips.</span></h1>
+        <p class="sub">A keyboard-first, dual-pane file manager for local disks, archives, servers and cloud storage.</p>
+        <span class="meta">Free &amp; open source · macOS · Windows · Linux</span>
+    </div>
+</body>
+</html>
