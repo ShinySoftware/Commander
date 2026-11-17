@@ -67,6 +67,12 @@ public static class ArchiveFormats
 
     public static bool IsSupported(string fileName) => GetKind(fileName) != ArchiveKind.None;
 
+    // zips that are documents first: Enter opens them in their app, Primary+PageDown still goes inside
+    static readonly HashSet<string> Documents = new(StringComparer.OrdinalIgnoreCase) { ".docx", ".xlsx", ".pptx", ".odt", ".ods", ".epub" };
+
+    /// <summary>A Word, Excel, PowerPoint, OpenDocument or e-book file - a zip, but opened like a document.</summary>
+    public static bool IsDocument(string fileName) => Documents.Contains(Path.GetExtension(fileName));
+
     /// <summary>Archives that can be changed like a folder - copy into, delete, rename, new folder, edit.</summary>
     public static bool IsWritable(string fileName) => GetKind(fileName) is ArchiveKind.Zip or ArchiveKind.SevenZip
         or ArchiveKind.Tar or ArchiveKind.TarGz or ArchiveKind.TarBz2 or ArchiveKind.TarZst;

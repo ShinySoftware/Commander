@@ -80,6 +80,9 @@ public partial class AppSettings
     /// <summary>Column sets turned off in Settings (FileColumnSet.Key), comma separated.</summary>
     [Bind] public partial string? DisabledColumnSets { get; set; }
 
+    /// <summary>Folders with their own columns, sort and view mode (FolderSetups) - JSON, see FolderSetup.</summary>
+    [Bind] public partial string? FolderSetups { get; set; }
+
     /// <summary>Pane toolbar command keys, comma separated (PaneToolbar) - null until customized.</summary>
     [Bind] public partial string? PaneToolbar { get; set; }
 

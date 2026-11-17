@@ -99,10 +99,9 @@ public class PreviewPaneTests(AppFixture fixture) : UiTest(fixture)
         if (Environment.GetEnvironmentVariable("SC_UITEST_SCREENS") is not ("1" or "true"))
             return;
 
+        // the whole window: walking the element tree stalls for minutes while a spreadsheet is on screen
         await Task.Delay(600);
-        var current = (await this.App.StateNow()).Page;
-        var page = (await this.Ui.All()).LastOrDefault(x => x.Type == current && x.Bounds is { Width: > 0 });
-        if (page != null && await this.Fixture.Client.ScreenshotAsync(elementId: page.Id) is { } png)
+        if (await this.Fixture.Client.ScreenshotAsync() is { } png)
         {
             var dir = Path.Combine(TestConfig.ArtifactDir, "screens");
             Directory.CreateDirectory(dir);
@@ -135,6 +134,91 @@ public class PreviewPaneTests(AppFixture fixture) : UiTest(fixture)
         // the file itself, loaded from disk (LoadFileUrl on macOS)
         var location = await Poll(() => this.App.PreviewJs("location.href"), x => x?.EndsWith("doc.pdf") == true);
         location.ShouldEndWith("doc.pdf");
+    }
+
+    [Fact]
+    public async Task Audio_and_video_go_to_the_media_previewer()
+    {
+        await this.Start(l => l
+            .Bytes("tone.wav", Wav(2))
+            .Bytes("clip.mp4", File.ReadAllBytes(SampleFile("clip.mp4")))
+            .File("broken.mkv", "not a video"));
+        await this.App.Cursor("tone.wav");
+        await this.App.Key("Ctrl+Q");
+        var s = await this.App.WaitFor(x => x.Preview.Previewer == "media", "the media previewer");
+        s.Preview.ViewType.ShouldBe("MediaPreviewView");
+        (await this.Ui.ById("PreviewMedia")).ShouldNotBeNull();
+        // no tags - its name stands in for the title
+        (await this.Ui.ByText("tone", within: "PreviewPane")).ShouldNotBeNull();
+        await this.Shot("preview-audio");
+
+        await this.App.Cursor("clip.mp4");
+        s = await this.App.WaitFor(x => x.Preview.Previewer == "media" && x.Preview.Title == "clip.mp4", "the video");
+        s.Preview.ViewType.ShouldBe("MediaPreviewView");
+        await this.Shot("preview-video");
+
+        // what the platform can't decode says so instead of showing a dead transport bar
+        await this.App.Cursor("broken.mkv");
+        await this.App.WaitFor(x => x.Preview.Title == "broken.mkv" && x.Preview.Previewer == "media", "the mkv");
+        (await this.Ui.ById("PreviewMediaFailed", TimeSpan.FromSeconds(10))).ShouldNotBeNull();
+    }
+
+    [Fact]
+    public async Task Word_excel_and_powerpoint_open_read_only_in_their_viewers()
+    {
+        await this.Start(l => l
+            .Bytes("report.docx", OfficeSamples.Docx("<h1>Quarterly report</h1><p>Revenue grew <b>12%</b> on the quarter.</p><ul><li>North</li><li>South</li></ul>"))
+            .Bytes("budget.xlsx", OfficeSamples.Xlsx("Budget", [["Item", "Q1", "Q2"], ["Rent", 1200, 1200], ["Travel", 340, 610]]))
+            .Bytes("talk.pptx", OfficeSamples.Pptx(("Shiny Commander", "Two panels, one preview"), ("Previews", "Word, Excel and PowerPoint")))
+            .File("fake.docx", "not a zip"));
+        await this.App.Cursor("report.docx");
+        await this.App.Key("Ctrl+Q");
+        var s = await this.App.WaitFor(x => x.Preview.Previewer == "word", "the word previewer");
+        s.Preview.ViewType.ShouldBe("DocumentView");
+        await this.Shot("preview-word");
+
+        await this.App.Cursor("budget.xlsx");
+        s = await this.App.WaitFor(x => x.Preview.Previewer == "excel", "the excel previewer");
+        s.Preview.ViewType.ShouldBe("SpreadsheetView");
+        await this.Shot("preview-excel");
+
+        await this.App.Cursor("talk.pptx");
+        s = await this.App.WaitFor(x => x.Preview.Previewer == "powerpoint", "the powerpoint previewer");
+        s.Preview.ViewType.ShouldBe("SlideView");
+        await this.Shot("preview-powerpoint");
+
+        // not a zip, so not Word: text
+        await this.App.Cursor("fake.docx");
+        (await this.App.WaitFor(x => x.Preview.Title == "fake.docx" && x.Preview.Kind == "Text", "the fake docx as text")).Preview.Previewer.ShouldBeNull();
+    }
+
+    static string SampleFile(string name)
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null && !Directory.Exists(Path.Combine(dir.FullName, "tests", "ShinyCommander.Core.Tests")))
+            dir = dir.Parent;
+        return Path.Combine(dir!.FullName, "tests", "ShinyCommander.Core.Tests", "Fixtures", name);
+    }
+
+    static byte[] Wav(double seconds, int sampleRate = 8000)
+    {
+        var data = (int)(sampleRate * seconds) * 2;
+        using var ms = new MemoryStream();
+        using var w = new BinaryWriter(ms);
+        w.Write("RIFF"u8);
+        w.Write(36 + data);
+        w.Write("WAVEfmt "u8);
+        w.Write(16);
+        w.Write((short)1);
+        w.Write((short)1);
+        w.Write(sampleRate);
+        w.Write(sampleRate * 2);
+        w.Write((short)2);
+        w.Write((short)16);
+        w.Write("data"u8);
+        w.Write(data);
+        w.Write(new byte[data]);
+        return ms.ToArray();
     }
 
     // a web view loads after the state settles - ask until it answers

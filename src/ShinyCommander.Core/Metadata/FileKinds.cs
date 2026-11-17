@@ -61,6 +61,9 @@ public static class FileKinds
         return FileKind.Other;
     }
 
+    /// <summary>A file's kind by its name alone.</summary>
+    public static FileKind OfName(string fileName) => Of(new FileEntry { Name = fileName, FullPath = fileName });
+
     /// <summary>A macOS application - a folder the Finder shows as one file.</summary>
     public static bool IsAppBundle(string name) => name.EndsWith(".app", StringComparison.OrdinalIgnoreCase);
 }

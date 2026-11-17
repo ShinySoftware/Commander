@@ -21,6 +21,7 @@
         <shiny:KeyboardShortcut Gesture="Home" Command="{Binding HomeCommand}" Description="{l:Tr Key_Home}" Category="{l:Tr Cat_Navigation}" TextInput="Always" />
         <shiny:KeyboardShortcut Gesture="End" Command="{Binding EndCommand}" Description="{l:Tr Key_End}" Category="{l:Tr Cat_Navigation}" TextInput="Always" />
         <shiny:KeyboardShortcut Gesture="Enter" Command="{Binding EnterCommand}" Description="{l:Tr Key_Enter}" Category="{l:Tr Cat_Navigation}" TextInput="Always" />
+        <shiny:KeyboardShortcut Gesture="Primary+PageDown" Command="{Binding OpenAsArchiveCommand}" Description="{l:Tr Key_OpenAsArchive}" Category="{l:Tr Cat_Navigation}" TextInput="Always" />
         <shiny:KeyboardShortcut Gesture="Backspace" Command="{Binding BackspaceCommand}" Description="{l:Tr Key_ParentFolder}" Category="{l:Tr Cat_Navigation}" TextInput="Always" AllowRepeat="True" />
         <shiny:KeyboardShortcut Gesture="Tab" Command="{Binding SwitchPanelCommand}" Description="{l:Tr Key_SwitchPanel}" Category="{l:Tr Cat_Navigation}" TextInput="Always" />
         <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding EscapeCommand}" Description="{l:Tr Key_Escape}" Category="{l:Tr Cat_Navigation}" />
@@ -71,6 +72,7 @@
         <shiny:KeyboardShortcut Gesture="Primary+Shift+F1" Command="{Binding ThumbnailViewCommand}" Description="{l:Tr Key_Thumbnails}" Category="{l:Tr Cat_View}" />
         <shiny:KeyboardShortcut Gesture="Primary+F2" Command="{Binding DetailsViewCommand}" Description="{l:Tr Key_Details}" Category="{l:Tr Cat_View}" />
         <shiny:KeyboardShortcut Gesture="Primary+Shift+K" Command="{Binding ChooseColumnsCommand}" Description="{l:Tr Key_Columns}" Category="{l:Tr Cat_View}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+V" Command="{Binding SetUpFolderCommand}" Description="{l:Tr Key_SetUpFolder}" Category="{l:Tr Cat_View}" />
         <shiny:KeyboardShortcut Gesture="Ctrl+Q" Command="{Binding QuickViewCommand}" Description="{l:Tr Key_QuickView}" Category="{l:Tr Cat_View}" />
         <shiny:KeyboardShortcut Gesture="Primary+J" Command="{Binding ToggleJobsCommand}" Description="{l:Tr Key_Jobs}" Category="{l:Tr Cat_View}" />
         <shiny:KeyboardShortcut Gesture="Primary+Shift+L" Command="{Binding TogglePanelLayoutCommand}" Description="{l:Tr Key_PanelLayout}" Category="{l:Tr Cat_View}" />
@@ -284,6 +286,11 @@
                     <shiny:RibbonButton Text="{l:Tr Cmd_ChooseColumns}" Size="Small" Command="{Binding ChooseColumnsCommand}" Shortcut="Primary+Shift+K" Tooltip="{l:Tr Cmd_ChooseColumns, Suffix=' (Primary+Shift+K)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="sort" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="{l:Tr Cmd_SetUpFolder}" Size="Small" Command="{Binding SetUpFolderCommand}" Shortcut="Primary+Shift+V" Tooltip="{l:Tr Cmd_SetUpFolder, Suffix=' (Primary+Shift+V)'}">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="bookmark" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                     <shiny:RibbonButton Text="{l:Tr Cmd_ToggleTree}" Size="Small" Command="{Binding ToggleTreeCommand}" Shortcut="Primary+F8" Tooltip="{l:Tr Cmd_ToggleTree, Suffix=' (Primary+F8)'}">
@@ -746,6 +753,15 @@
                                         <Label Text="{l:Tr Cmd_ChooseColumns}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
                                     </HorizontalStackLayout>
                                 </Border>
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-SetUpFolder" ToolTipProperties.Text="{l:Tr Cmd_SetUpFolder, Suffix=' (Primary+Shift+V)'}">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding SetUpFolderCommand}" /></Border.GestureRecognizers>
+                                    <HorizontalStackLayout Spacing="6">
+                                        <shiny:MotionIconView Icon="bookmark" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                        <Label Text="{l:Tr Cmd_SetUpFolder}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                    </HorizontalStackLayout>
+                                </Border>
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
                                 <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-ToggleTree" ToolTipProperties.Text="{l:Tr Cmd_ToggleTree, Suffix=' (Primary+F8)'}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleTreeCommand}" /></Border.GestureRecognizers>
                                     <HorizontalStackLayout Spacing="6">

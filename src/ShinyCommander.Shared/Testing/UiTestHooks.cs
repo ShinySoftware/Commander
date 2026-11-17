@@ -468,6 +468,8 @@ public static class UiTestHooks
         Service<AppSettings>().DisabledPreviewers = null;
         Service<AppSettings>().ColumnSets = null;
         Service<AppSettings>().DisabledColumnSets = null;
+        UiTestMode.Opened.Clear();
+        Service<FolderSetups>().Clear();
         foreach (var (panel, path) in new[] { (main.Left, Str(args, "left")), (main.Right, Str(args, "right")) })
         {
             panel.ShowTree = false;
@@ -543,10 +545,12 @@ public static class UiTestHooks
                 title = main.Preview.Title,
                 kind = main.Preview.Kind?.ToString(),
                 previewer = main.Preview.PreviewerKey,
-                viewType = main.Preview.PluginView?.GetType().Name,
+                // the plugin's own view, not the wrapper that releases it
+                viewType = (main.Preview.PluginView is PreviewHost host ? host.Content : main.Preview.PluginView)?.GetType().Name,
                 info = main.Preview.Info,
                 text = main.Preview.Text.Length > 500 ? main.Preview.Text[..500] : main.Preview.Text
             },
+            opened = UiTestMode.Opened.ToList(),
             dialogs = dialogs.Log,
             pendingAnswers = dialogs.PendingAnswers,
             focus = NativeFocus(),
@@ -681,6 +685,9 @@ public static class UiTestHooks
             quickFilter = tab?.QuickFilter,
             isBranchView = tab?.IsBranchView ?? false,
             sort = tab == null ? null : $"{(tab.SortColumn == SortColumn.Custom ? ColumnHeader.CustomPrefix + tab.SortKey : tab.SortColumn)}{(tab.SortDescending ? " desc" : String.Empty)}",
+            setup = tab?.Setup?.Path,
+            setupSubfolders = tab?.Setup?.IncludeSubfolders ?? false,
+            panelColumns = Enum.GetValues<PanelColumn>().Where(p.Columns.IsOn).Select(x => x.ToString()).ToList(),
             columnSet = tab?.ColumnSet?.Key,
             customColumns = tab?.CustomColumns.Select(c => c.Key).ToList(),
             customHeaders = p.CustomHeaders.Select(h => h.Text).ToList(),

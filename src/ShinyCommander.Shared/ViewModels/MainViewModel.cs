@@ -27,6 +27,7 @@ public partial class MainViewModel : ObservableObject,
     // files opened out of archives, saved back into them
     readonly ArchiveWriteBack writeBack = new();
     readonly FileColumns fileColumns;
+    readonly FolderSetups folderSetups;
     CancellationTokenSource? commandCts;
     bool initialized;
 
@@ -46,10 +47,12 @@ public partial class MainViewModel : ObservableObject,
         RemoteConnections connections,
         FileEditors editors,
         PreviewPaneViewModel preview,
-        FileColumns fileColumns
+        FileColumns fileColumns,
+        FolderSetups folderSetups
     )
     {
         this.fileColumns = fileColumns;
+        this.folderSetups = folderSetups;
         this.connections = connections;
         this.editors = editors;
         this.shortcuts = shortcuts;
@@ -92,8 +95,14 @@ public partial class MainViewModel : ObservableObject,
                     tab.RefreshTheme();
             };
 
-        this.Left = new PanelViewModel(PanelSide.Left, vfs, settings, columns, fileColumns, toolbar);
-        this.Right = new PanelViewModel(PanelSide.Right, vfs, settings, columns, fileColumns, toolbar);
+        this.Left = new PanelViewModel(PanelSide.Left, vfs, settings, columns, fileColumns, folderSetups, toolbar);
+        this.Right = new PanelViewModel(PanelSide.Right, vfs, settings, columns, fileColumns, folderSetups, toolbar);
+        foreach (var panel in new[] { this.Left, this.Right })
+            panel.FolderSetupRequested += async (_, _) =>
+            {
+                this.Activate(panel);
+                await this.FolderSetupMenu(panel);
+            };
         this.Left.PropertyChanged += this.OnPanelPropertyChanged;
         this.Right.PropertyChanged += this.OnPanelPropertyChanged;
         this.Left.TabsChanged += (_, _) => this.SaveState();
@@ -263,9 +272,7 @@ public partial class MainViewModel : ObservableObject,
             tab.Alias = state.Alias;
             tab.ColorKey = state.Color;
             tab.IconKey = state.Icon;
-            tab.SortKey = state.SortKey;
-            tab.SortColumn = state.Sort;
-            tab.SortDescending = state.Descending;
+            tab.RestoreSort(state.Sort, state.SortKey, state.Descending);
         }
 
         panel.ActiveTab = panel.Tabs[Math.Clamp(active, 0, panel.Tabs.Count - 1)];
@@ -281,7 +288,7 @@ public partial class MainViewModel : ObservableObject,
 
     // a locked tab is saved at its own folder, even if it wandered while tabs were off
     static string TabLine(PanelTabViewModel tab)
-        => new TabState(tab.LockedPath ?? tab.Path, tab.IsLocked, tab.Alias, tab.ColorKey, tab.IconKey, tab.SortColumn, tab.SortDescending, tab.SortKey).Format();
+        => new TabState(tab.LockedPath ?? tab.Path, tab.IsLocked, tab.Alias, tab.ColorKey, tab.IconKey, tab.OwnSort.Sort, tab.OwnSort.Descending, tab.OwnSort.Key).Format();
 
     void OnPanelPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
     {
@@ -510,8 +517,9 @@ public partial class MainViewModel : ObservableObject,
             {
                 await tab.GoUpAsync();
             }
-            // an archive on a server opens like any other file (downloaded) - browsing into it needs it on disk
-            else if (item.IsDirectory || item.Entry.IsArchive && !item.Entry.IsInArchive && !item.Entry.IsRemote)
+            // an archive on a server opens like any other file (downloaded) - browsing into it needs it on disk; a .docx
+            // or .xlsx is a zip but opens in its app (Primary+PageDown goes inside)
+            else if (item.IsDirectory || CanBrowse(item.Entry) && !ArchiveFormats.IsDocument(item.Entry.Name))
             {
                 await tab.NavigateAsync(item.Entry.FullPath);
             }
@@ -526,6 +534,16 @@ public partial class MainViewModel : ObservableObject,
         {
             await this.dialogs.Alert(L.Main_CannotOpen, ex.Message);
         }
+    }
+
+    static bool CanBrowse(FileEntry entry) => entry.IsArchive && !entry.IsInArchive && !entry.IsRemote;
+
+    /// <summary>Primary+PageDown (TC's Ctrl+PgDn): into the archive under the cursor - for a .docx or .xlsx, which Enter opens in its app.</summary>
+    [RelayCommand]
+    async Task OpenAsArchive()
+    {
+        if (this.Tab is { CursorItem.Entry: { } entry } tab && CanBrowse(entry))
+            await tab.NavigateAsync(entry.FullPath);
     }
 
     // nothing is registered for the file's type - ask which app to use
@@ -702,31 +720,108 @@ public partial class MainViewModel : ObservableObject,
     async Task ChooseColumns()
     {
         var done = L.Common_Done;
-        var set = this.ActivePanel.ActiveTab?.ColumnSet;
+        var panel = this.ActivePanel;
         while (true)
         {
+            var tab = panel.ActiveTab;
+            var set = tab?.ColumnSet;
+            var setup = tab?.Setup;
             var builtIn = Enum.GetValues<PanelColumn>();
-            IReadOnlyList<IFileColumn> chosen = set == null ? [] : this.fileColumns.ColumnsOf(set);
-            IReadOnlyList<IFileColumn> custom = set == null ? [] : this.fileColumns.CandidatesFor(set);
+            IReadOnlyList<IFileColumn> chosen = tab?.CustomColumns ?? [];
+            // a folder setup can take any custom column; the global choice is per column set
+            IReadOnlyList<IFileColumn> custom = setup != null
+                ? (set == null ? this.fileColumns.All : this.fileColumns.CandidatesFor(set)).Union(chosen).ToList()
+                : set == null ? [] : this.fileColumns.CandidatesFor(set);
+            var group = setup != null ? VirtualFileSystem.GetName(setup.Path) : set?.Title;
             var options = builtIn
-                .Select(c => Tick(this.columns.IsVisible(c)) + ColumnSet.Label(c))
-                .Concat(custom.Select(c => Tick(chosen.Contains(c)) + L.Main_ColumnInSetFormat(c.Title, set!.Title)))
+                .Select(c => Tick(panel.Columns.IsOn(c)) + ColumnSet.Label(c))
+                .Concat(custom.Select(c => Tick(chosen.Contains(c)) + L.Main_ColumnInSetFormat(c.Title, group!)))
                 .ToList();
 
-            var choice = await this.dialogs.Choose(L.Main_Columns, options, done);
+            var title = setup != null ? L.Main_ColumnsForFolderFormat(VirtualFileSystem.GetName(setup.Path)) : L.Main_Columns;
+            var choice = await this.dialogs.Choose(title, options, done);
             if (choice == null || choice == done)
                 break;
 
             var index = options.IndexOf(choice);
-            if (index >= 0 && index < builtIn.Length)
+            if (index < 0)
+                break;
+
+            if (setup != null)
+                this.folderSetups.Save(index < builtIn.Length
+                    ? setup with { Columns = Toggled(builtIn.Where(panel.Columns.IsOn).Select(x => x.ToString()), builtIn[index].ToString(), builtIn.Select(x => x.ToString()).ToList()) }
+                    : setup with { CustomColumns = Toggled(chosen.Select(x => x.Key), custom[index - builtIn.Length].Key, null) });
+            else if (index < builtIn.Length)
                 this.columns.Toggle(builtIn[index]);
-            else if (index >= builtIn.Length)
+            else
                 this.fileColumns.Toggle(set!, custom[index - builtIn.Length]);
         }
         this.RequestCommandLineFocus();
     }
 
     static string Tick(bool on) => on ? "✓  " : "     ";
+
+    // the key added at the end or taken out; with an order given (the built-in columns), kept in that order
+    static List<string> Toggled(IEnumerable<string> keys, string key, IReadOnlyList<string>? order)
+    {
+        var list = keys.ToList();
+        if (!list.Remove(key))
+            list.Add(key);
+        return order == null ? list : order.Where(list.Contains).ToList();
+    }
+
+    /// <summary>
+    /// Primary+Shift+V, or the badge on a panel's path row: remember this folder's columns, sort and view mode - for
+    /// it alone or with its subfolders - or forget them, back to the global settings.
+    /// </summary>
+    [RelayCommand]
+    Task SetUpFolder() => this.FolderSetupMenu(this.ActivePanel);
+
+    async Task FolderSetupMenu(PanelViewModel panel)
+    {
+        if (panel.ActiveTab is not { } tab)
+            return;
+
+        var setup = tab.Setup;
+        var name = VirtualFileSystem.GetName(tab.Path);
+        var own = setup != null && FolderSetup.SameFolder(setup.Path, tab.Path);
+        var options = setup == null
+            ? new List<string> { L.FolderSetup_RememberHere, L.FolderSetup_RememberWithSubfolders }
+            : own
+                ? [setup.IncludeSubfolders ? L.FolderSetup_ThisFolderOnly : L.FolderSetup_AlsoSubfolders, L.FolderSetup_Forget]
+                : [L.FolderSetup_RememberHere, L.FolderSetup_ForgetInheritedFormat(VirtualFileSystem.GetName(setup.Path))];
+        var title = setup == null
+            ? L.FolderSetup_TitleFormat(name)
+            : own ? L.FolderSetup_TitleOwnFormat(name) : L.FolderSetup_TitleInheritedFormat(VirtualFileSystem.GetName(setup.Path));
+
+        var choice = await this.dialogs.Choose(title, options, L.Common_Cancel);
+        var index = choice == null ? -1 : options.IndexOf(choice);
+        this.RequestCommandLineFocus();
+        if (index < 0)
+            return;
+
+        if (setup == null)
+            this.folderSetups.Save(Capture(panel, tab, index == 1));
+        else if (own && index == 0)
+            this.folderSetups.Save(setup with { IncludeSubfolders = !setup.IncludeSubfolders });
+        else if (own || index == 1)
+            this.folderSetups.Remove(setup);
+        else
+            // a subfolder of a setup gets its own, starting from what it shows now
+            this.folderSetups.Save(setup with { Path = tab.Path, IncludeSubfolders = false });
+    }
+
+    // what the folder shows now - the global columns, the tab's sort, the panel's view mode
+    static FolderSetup Capture(PanelViewModel panel, PanelTabViewModel tab, bool subfolders) => new()
+    {
+        Path = tab.Path,
+        IncludeSubfolders = subfolders,
+        Columns = Enum.GetValues<PanelColumn>().Where(panel.Columns.IsOn).Select(x => x.ToString()).ToList(),
+        Sort = tab.SortColumn,
+        SortKey = tab.SortKey,
+        Descending = tab.SortDescending,
+        ViewMode = panel.ViewMode.ToString()
+    };
 
     [RelayCommand]
     void QuickFilter()

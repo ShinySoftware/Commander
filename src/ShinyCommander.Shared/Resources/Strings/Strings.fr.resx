@@ -2211,4 +2211,76 @@ Réessayez.</value>
   <data name="Settings_ColumnSetEmpty" xml:space="preserve">
     <value>Aucune colonne</value>
   </data>
+  <data name="Preview_Media" xml:space="preserve">
+    <value>Audio et vidéo</value>
+  </data>
+  <data name="Preview_MediaFailed" xml:space="preserve">
+    <value>Ce format ne peut pas être lu ici</value>
+  </data>
+  <data name="Preview_Word" xml:space="preserve">
+    <value>Documents Word</value>
+  </data>
+  <data name="Preview_Excel" xml:space="preserve">
+    <value>Classeurs Excel</value>
+  </data>
+  <data name="Preview_PowerPoint" xml:space="preserve">
+    <value>Présentations PowerPoint</value>
+  </data>
+  <data name="Key_OpenAsArchive" xml:space="preserve">
+    <value>Entrer dans un fichier zip (.docx, .xlsx, .apk) comme dans une archive</value>
+  </data>
+  <data name="Cmd_SetUpFolder" xml:space="preserve">
+    <value>Réglages du dossier…</value>
+  </data>
+  <data name="Key_SetUpFolder" xml:space="preserve">
+    <value>Mémoriser les colonnes, le tri et l'affichage de ce dossier, ou les oublier</value>
+  </data>
+  <data name="FolderSetup_Title" xml:space="preserve">
+    <value>Réglages de « {0} »</value>
+  </data>
+  <data name="FolderSetup_TitleOwn" xml:space="preserve">
+    <value>« {0} » a ses propres réglages</value>
+  </data>
+  <data name="FolderSetup_TitleInherited" xml:space="preserve">
+    <value>Réglages hérités de « {0} »</value>
+  </data>
+  <data name="FolderSetup_RememberHere" xml:space="preserve">
+    <value>Mémoriser pour ce dossier</value>
+  </data>
+  <data name="FolderSetup_RememberWithSubfolders" xml:space="preserve">
+    <value>Mémoriser pour ce dossier et ses sous-dossiers</value>
+  </data>
+  <data name="FolderSetup_AlsoSubfolders" xml:space="preserve">
+    <value>L'utiliser aussi pour ses sous-dossiers</value>
+  </data>
+  <data name="FolderSetup_ThisFolderOnly" xml:space="preserve">
+    <value>Ne l'utiliser que pour ce dossier</value>
+  </data>
+  <data name="FolderSetup_Forget" xml:space="preserve">
+    <value>L'oublier - retour aux réglages globaux</value>
+  </data>
+  <data name="FolderSetup_ForgetInherited" xml:space="preserve">
+    <value>Oublier les réglages de « {0} »</value>
+  </data>
+  <data name="FolderSetup_Badge" xml:space="preserve">
+    <value>Réglages du dossier</value>
+  </data>
+  <data name="FolderSetup_Subfolders" xml:space="preserve">
+    <value>et ses sous-dossiers</value>
+  </data>
+  <data name="Main_ColumnsForFolder" xml:space="preserve">
+    <value>Colonnes de « {0} »</value>
+  </data>
+  <data name="Settings_FolderSetups" xml:space="preserve">
+    <value>Réglages par dossier</value>
+  </data>
+  <data name="Settings_FolderSetupsDesc" xml:space="preserve">
+    <value>Dossiers avec leurs propres colonnes, tri et affichage - les autres utilisent les réglages globaux. Réglages du dossier (Primary+Shift+V) en mémorise un ; touchez-en un ici pour l'oublier.</value>
+  </data>
+  <data name="Settings_ForgetFolderSetup" xml:space="preserve">
+    <value>Oublier les réglages de « {0} » ?</value>
+  </data>
+  <data name="Settings_Forget" xml:space="preserve">
+    <value>Oublier</value>
+  </data>
 </root>

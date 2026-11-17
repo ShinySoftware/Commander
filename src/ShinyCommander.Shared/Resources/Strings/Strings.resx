@@ -2451,4 +2451,82 @@ Try again.</value>
   <data name="Settings_ColumnSetEmpty" xml:space="preserve">
     <value>No columns</value>
   </data>
+  <data name="Preview_Media" xml:space="preserve">
+    <value>Audio and video</value>
+  </data>
+  <data name="Preview_MediaFailed" xml:space="preserve">
+    <value>This format can't be played here</value>
+  </data>
+  <data name="Preview_Word" xml:space="preserve">
+    <value>Word documents</value>
+  </data>
+  <data name="Preview_Excel" xml:space="preserve">
+    <value>Excel workbooks</value>
+  </data>
+  <data name="Preview_PowerPoint" xml:space="preserve">
+    <value>PowerPoint presentations</value>
+  </data>
+  <data name="Key_OpenAsArchive" xml:space="preserve">
+    <value>Go inside a zip-based file - a .docx, .xlsx or .apk - as an archive</value>
+  </data>
+  <data name="Cmd_SetUpFolder" xml:space="preserve">
+    <value>Folder Setup…</value>
+  </data>
+  <data name="Key_SetUpFolder" xml:space="preserve">
+    <value>Remember this folder's columns, sort and view mode, or forget them</value>
+  </data>
+  <data name="FolderSetup_Title" xml:space="preserve">
+    <value>Set up “{0}”</value>
+    <comment>{0} = folder name</comment>
+  </data>
+  <data name="FolderSetup_TitleOwn" xml:space="preserve">
+    <value>“{0}” has its own setup</value>
+    <comment>{0} = folder name</comment>
+  </data>
+  <data name="FolderSetup_TitleInherited" xml:space="preserve">
+    <value>Set up from “{0}”</value>
+    <comment>{0} = the parent folder the setup was saved on</comment>
+  </data>
+  <data name="FolderSetup_RememberHere" xml:space="preserve">
+    <value>Remember for this folder</value>
+  </data>
+  <data name="FolderSetup_RememberWithSubfolders" xml:space="preserve">
+    <value>Remember for this folder and its subfolders</value>
+  </data>
+  <data name="FolderSetup_AlsoSubfolders" xml:space="preserve">
+    <value>Use it for its subfolders too</value>
+  </data>
+  <data name="FolderSetup_ThisFolderOnly" xml:space="preserve">
+    <value>Use it for this folder only</value>
+  </data>
+  <data name="FolderSetup_Forget" xml:space="preserve">
+    <value>Forget it - back to the global settings</value>
+  </data>
+  <data name="FolderSetup_ForgetInherited" xml:space="preserve">
+    <value>Forget the setup of “{0}”</value>
+    <comment>{0} = folder name</comment>
+  </data>
+  <data name="FolderSetup_Badge" xml:space="preserve">
+    <value>Folder setup</value>
+  </data>
+  <data name="FolderSetup_Subfolders" xml:space="preserve">
+    <value>and its subfolders</value>
+  </data>
+  <data name="Main_ColumnsForFolder" xml:space="preserve">
+    <value>Columns for “{0}”</value>
+    <comment>{0} = folder name</comment>
+  </data>
+  <data name="Settings_FolderSetups" xml:space="preserve">
+    <value>Folder setups</value>
+  </data>
+  <data name="Settings_FolderSetupsDesc" xml:space="preserve">
+    <value>Folders with their own columns, sort and view mode - every other folder uses the global settings. Folder Setup (Primary+Shift+V) in a folder saves one; tap one here to forget it.</value>
+  </data>
+  <data name="Settings_ForgetFolderSetup" xml:space="preserve">
+    <value>Forget the setup of “{0}”?</value>
+    <comment>{0} = folder name</comment>
+  </data>
+  <data name="Settings_Forget" xml:space="preserve">
+    <value>Forget</value>
+  </data>
 </root>

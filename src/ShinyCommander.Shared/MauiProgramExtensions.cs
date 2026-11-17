@@ -24,6 +24,14 @@ public static class MauiProgramExtensions
                 .PreventEventExceptions()
             );
 
+        // preview plugins: audio / video (GTK has its own backend) and the Office viewers (SkiaSharp; none on GTK)
+#if LINUX_GTK
+        builder.UseShinyMediaElementGtk();
+#else
+        builder.UseShinyMediaElement();
+        Shiny.Maui.Controls.Office.MauiAppBuilderExtensions.UseShinyOffice(builder);
+#endif
+
         builder.Services.AddShinyStores();
         // UI text: Resources/Strings/Strings*.resx -> StringsLocalized (Shiny.Extensions.Localization.Generator)
         builder.Services.AddLocalization();
@@ -54,7 +62,14 @@ public static class MauiProgramExtensions
             .AddFilePreviewer<MarkdownFilePreviewer>()
             .AddFilePreviewer<HtmlFilePreviewer>()
             .AddFilePreviewer<PdfFilePreviewer>()
-            .AddFilePreviewer<SqliteFilePreviewer>();
+            .AddFilePreviewer<SqliteFilePreviewer>()
+            .AddFilePreviewer<MediaFilePreviewer>();
+#if !LINUX_GTK
+        builder.Services
+            .AddFilePreviewer<WordFilePreviewer>()
+            .AddFilePreviewer<ExcelFilePreviewer>()
+            .AddFilePreviewer<PowerPointFilePreviewer>();
+#endif
 
         builder.Services.AddSingleton<FileColumns>();
         builder.Services.AddBuiltInFileColumns();

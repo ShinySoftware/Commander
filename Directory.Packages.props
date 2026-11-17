@@ -17,6 +17,9 @@
         <PackageVersion Include="Shiny.Maui.Controls.Markdown" Version="$(ShinyControlsVersion)" />
         <PackageVersion Include="Shiny.Maui.Controls.Desktop" Version="$(ShinyControlsVersion)" />
         <PackageVersion Include="Shiny.Maui.Controls.Diagram" Version="$(ShinyControlsVersion)" />
+        <PackageVersion Include="Shiny.Maui.Controls.MediaElement" Version="$(ShinyControlsVersion)" />
+        <PackageVersion Include="Shiny.Maui.Controls.MediaElement.Linux" Version="$(ShinyControlsVersion)" />
+        <PackageVersion Include="Shiny.Maui.Controls.Office" Version="$(ShinyControlsVersion)" />
         <PackageVersion Include="Shiny.Maui.Shell" Version="7.0.3" />
         <PackageVersion Include="Shiny.Mediator.Maui" Version="6.12.0" />
         <PackageVersion Include="Shiny.Extensions.DependencyInjection" Version="6.0.1" />

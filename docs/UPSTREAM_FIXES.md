@@ -19,6 +19,7 @@ Each item lists where the bug is, how to reproduce it, the fix, how to know it's
 | 9 | ExifLibNet | IFD entries written in insertion order, not ascending tag order | Medium |
 | 10 | ExifLibNet | `Properties.Set(tag, string)` adds instead of replacing | Low |
 | 11 | ExifLibNet | TIFF saves are unreadable; PNG metadata isn't written | Medium - why only JPEG is editable |
+| 13 | Shiny.Maui.Controls.Office | `SpreadsheetView` takes ~3 s to show and ~1.5 s to remove on AppKit, even for a 3-row sheet | Medium - the Excel preview stalls the cursor |
 | 12 | TagLibSharp | A constant bitrate MP3's "Info" header is ignored, and the file is timed by its first frame | Medium - low-bitrate MP3s showed half their length |
 
 ---
@@ -201,6 +202,27 @@ EXIF as an `eXIf` chunk before the first `IDAT` (PNG 1.5 extension), and read it
 **Then here:** add `tif`, `tiff` and `png` to `ImageMetadata.Editable` (with a header check per format) - today
 `ImageMetadata.CanEdit` takes JPEG only for this reason. HEIC/WebP would need a different library either way.
 
+## Shiny.Maui.Controls.Office
+
+### 13. `SpreadsheetView` is slow to attach and detach on AppKit
+
+**Where:** adding a `SpreadsheetView` to the visual tree on the macOS AppKit head adds ~1,300 native views
+(MacOSContainerView, MauiNSTextField, BorderNSView, MacOSGraphicsView) and blocks the main thread ~3 s; removing it
+blocks ~1.5 s. It's the same with `ShowShell`, `ShowToolbar`, `ShowFormulaBar`, `ShowTitleBar`, `ShowStatusBar`,
+`ShowBackstage` and `ShowCommentsPane` all false, and the same when one instance is reused with only `Workbook`
+changed - so the hidden chrome is still built, or the grid itself is made of views. Opening the workbook takes ~40 ms
+and building the control ~150 ms; it's the native tree. `DocumentView` lays out in ~70 ms by comparison.
+
+**Reproduce:** the preview panel on a 3-row `.xlsx` (`PreviewPaneTests.Word_excel_and_powerpoint_open_read_only_in_their_viewers`),
+or any page that adds a `SpreadsheetView` at runtime; `UiTestHooks`' `diag` counts native views (920 without it,
+2,214 with it).
+
+**Fix:** don't build (or don't add) the parts that are switched off; draw headers and cells on the canvas rather than
+as views.
+
+**Remove here:** nothing to remove - `ExcelFilePreviewer` (`Services/Previewers/OfficeFilePreviewers.cs`) carries a
+comment pointing here. Check the timing again after the bump.
+
 ## TagLibSharp
 
 [mono/taglib-sharp](https://github.com/mono/taglib-sharp), 2.3.0 (LGPL-2.1, used unmodified) - the custom columns'
@@ -231,7 +253,8 @@ stays as the check.
 2. **#3 DataGrid** and **#4 Diagram probes** - each a small change in Shiny with a workaround in this repo to delete.
 3. **#6 Shell generator**, **#5 / #7 docs**.
 4. **ExifLibNet #8-#11** - decide fork vs. own writer first; #8-#10 are a few lines each, #11 is the real work.
-5. **TagLibSharp #12** - a one-line change upstream; the workaround here is small and well covered.
+5. **Office #13** - measure first; the preview is usable, just slow to appear.
+6. **TagLibSharp #12** - a one-line change upstream; the workaround here is small and well covered.
 
 After each Shiny release: bump `ShinyControlsVersion` in `Directory.Packages.props`, remove the workaround listed
 above, and run just the tests named in that item.

@@ -81,6 +81,7 @@ public partial class ColumnLayout : ObservableObject
     readonly HashSet<PanelColumn> dropped = [];
     readonly HashSet<IFileColumn> droppedCustom = [];
     IReadOnlyList<IFileColumn> custom = [];
+    IReadOnlySet<PanelColumn>? @override;
     double width;
 
     public ColumnLayout(ColumnSet columns)
@@ -115,10 +116,26 @@ public partial class ColumnLayout : ObservableObject
         }
     }
 
+    /// <summary>A folder setup's built-in columns, in place of the user's global choice; null for the global one.</summary>
+    public IReadOnlySet<PanelColumn>? Override
+    {
+        get => this.@override;
+        set
+        {
+            if (this.@override == value || this.@override != null && value != null && this.@override.SetEquals(value))
+                return;
+            this.@override = value;
+            this.Recalculate(true);
+        }
+    }
+
+    /// <summary>On - before narrowing to what fits.</summary>
+    public bool IsOn(PanelColumn column) => this.@override?.Contains(column) ?? this.columns.IsVisible(column);
+
     /// <summary>The custom columns that fit, left to right.</summary>
     public IReadOnlyList<IFileColumn> CustomShown { get; private set; } = [];
 
-    bool Shows(PanelColumn c) => this.columns.IsVisible(c) && !this.dropped.Contains(c);
+    bool Shows(PanelColumn c) => this.IsOn(c) && !this.dropped.Contains(c);
 
     public bool ShowExtension => this.Shows(PanelColumn.Extension);
     public bool ShowSize => this.Shows(PanelColumn.Size);
@@ -156,7 +173,7 @@ public partial class ColumnLayout : ObservableObject
             order.Add((PanelColumn.Modified, null, DateColumnWidth));
             order.Add((PanelColumn.Extension, null, ExtColumnWidth));
             order.Add((PanelColumn.Size, null, SizeColumnWidth));
-            var visible = order.Where(x => x.Column is not { } c || this.columns.IsVisible(c)).ToList();
+            var visible = order.Where(x => x.Column is not { } c || this.IsOn(c)).ToList();
 
             var used = Fixed + visible.Sum(x => x.Width);
             foreach (var (column, customColumn, w) in visible)

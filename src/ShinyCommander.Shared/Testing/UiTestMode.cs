@@ -16,6 +16,9 @@ public static class UiTestMode
 {
     public static bool IsEnabled { get; } = Environment.GetEnvironmentVariable("SHINYCOMMANDER_UITEST") == "1";
 
+    /// <summary>Files Enter / double-click would have opened in their app, oldest first.</summary>
+    public static List<string> Opened { get; } = [];
+
     public static void Configure(MauiAppBuilder builder)
     {
         if (!IsEnabled)
@@ -36,6 +39,8 @@ public static class UiTestMode
         builder.Services.AddSingleton<ITrashService, UiTestTrash>();
         // never the developer's real keychain
         builder.Services.AddSingleton<ISecretStore, MemorySecretStore>();
+        // nor their apps: Enter on a file is recorded (the snapshot's "opened"), not handed to Excel
+        ShinyCommander.Core.Platform.ShellLauncher.Intercept = path => Opened.Add(path);
     }
 
     /// <summary>A trash that never touches the developer's real one: "trashed" items move into SHINYCOMMANDER_TRASH.</summary>

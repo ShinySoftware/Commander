@@ -6,6 +6,9 @@ namespace ShinyCommander.UITests.Driver;
 /// <summary>What the app's <c>state</c> tool returns (Shared/Testing/UiTestHooks.cs) - the whole observable app.</summary>
 public sealed record AppState
 {
+    /// <summary>Files Enter / double-click opened in their app - recorded, not opened, in test mode.</summary>
+    public List<string> Opened { get; init; } = [];
+
     public string? Page { get; init; }
     public string ActiveSide { get; init; } = "";
     public bool StackPanels { get; init; }
@@ -71,6 +74,13 @@ public sealed record PanelState
     public string? QuickFilter { get; init; }
     public bool IsBranchView { get; init; }
     public string? Sort { get; init; }
+
+    /// <summary>The folder setup it shows (the folder it was saved on), or null for the global settings.</summary>
+    public string? Setup { get; init; }
+    public bool SetupSubfolders { get; init; }
+
+    /// <summary>The built-in columns on in this panel - a folder setup's, or the global ones.</summary>
+    public List<string> PanelColumns { get; init; } = [];
 
     /// <summary>The folder's column set (photos, music...), or null.</summary>
     public string? ColumnSet { get; init; }

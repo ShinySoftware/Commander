@@ -73,6 +73,15 @@
                         </shiny:TableSection.ItemTemplate>
                     </shiny:TableSection>
 
+                    <shiny:TableSection Title="{l:Tr Settings_FolderSetups}" FooterText="{l:Tr Settings_FolderSetupsDesc}" ItemsSource="{Binding FolderSetupItems}">
+                        <shiny:TableSection.ItemTemplate>
+                            <DataTemplate x:DataType="vm:FolderSetupItem">
+                                <shiny:CommandCell Title="{Binding Title}" Description="{Binding Description}" Command="{Binding Forget}" CommandParameter="{Binding .}"
+                                                   AutomationId="{Binding Title, StringFormat='SettingsFolderSetup_{0}'}" />
+                            </DataTemplate>
+                        </shiny:TableSection.ItemTemplate>
+                    </shiny:TableSection>
+
                     <shiny:TableSection Title="{l:Tr Settings_Operations}">
                         <shiny:SwitchCell Title="{l:Tr Settings_ConfirmDelete}" On="{Binding ConfirmDelete, Mode=TwoWay}" />
                         <shiny:SwitchCell Title="{l:Tr Settings_UseTrash}" Description="{l:Tr Settings_UseTrashDesc}" On="{Binding UseTrash, Mode=TwoWay}" />

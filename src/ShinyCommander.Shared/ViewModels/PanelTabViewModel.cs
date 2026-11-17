@@ -10,7 +10,11 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     readonly AppSettings settings;
     readonly ColumnLayout columns;
     readonly FileColumns fileColumns;
+    readonly FolderSetups folderSetups;
     readonly Stack<string> back = new();
+    // the tab's own sort while a folder setup's is showing - back when it leaves the folder, and what's saved with the tab
+    (SortColumn Sort, string? Key, bool Descending)? ownSort;
+    bool applyingSetup;
     readonly Stack<string> forward = new();
     List<FileItemViewModel> all = [];
     FileSystemWatcher? watcher;
@@ -18,14 +22,16 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     CancellationTokenSource? metadataCts;
     Timer? refreshDebounce;
 
-    public PanelTabViewModel(VirtualFileSystem vfs, AppSettings settings, ColumnLayout columns, FileColumns fileColumns, string path)
+    public PanelTabViewModel(VirtualFileSystem vfs, AppSettings settings, ColumnLayout columns, FileColumns fileColumns, FolderSetups folderSetups, string path)
     {
         this.vfs = vfs;
         this.settings = settings;
         this.columns = columns;
         this.fileColumns = fileColumns;
+        this.folderSetups = folderSetups;
         this.Path = path;
         fileColumns.Changed += this.OnFileColumnsChanged;
+        folderSetups.Changed += this.OnFolderSetupsChanged;
     }
 
     public event EventHandler? CursorMoved;
@@ -135,6 +141,29 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     /// <summary>The set's columns, shown right of the built-in ones.</summary>
     public IReadOnlyList<IFileColumn> CustomColumns { get; private set; } = [];
 
+    /// <summary>The folder's own columns, sort and view mode (FolderSetups) - null for the global settings.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasSetup))]
+    public partial FolderSetup? Setup { get; set; }
+
+    public bool HasSetup => this.Setup != null;
+
+    /// <summary>The sort to save with the tab: its own, not a folder setup's.</summary>
+    public (SortColumn Sort, string? Key, bool Descending) OwnSort => this.ownSort ?? (this.SortColumn, this.SortKey, this.SortDescending);
+
+    /// <summary>The tab's saved sort, on startup - kept aside if the folder has a setup of its own.</summary>
+    public void RestoreSort(SortColumn sort, string? key, bool descending)
+    {
+        if (this.Setup != null)
+        {
+            this.ownSort = (sort, key, descending);
+            return;
+        }
+        this.SortKey = key;
+        this.SortColumn = sort;
+        this.SortDescending = descending;
+    }
+
     /// <summary>The custom columns' metadata is still being read.</summary>
     [ObservableProperty]
     public partial bool IsReadingMetadata { get; set; }
@@ -222,6 +251,10 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
 
     void SortChanged()
     {
+        // sorting in a folder with a setup changes the setup, not the tab
+        if (this.Setup is { } setup && !this.applyingSetup)
+            this.folderSetups.Save(setup with { Sort = this.SortColumn, SortKey = this.SortKey, Descending = this.SortDescending });
+
         foreach (var name in new[] { nameof(this.NameHeader), nameof(this.ExtHeader), nameof(this.SizeHeader), nameof(this.DateHeader), nameof(this.CreatedHeader), nameof(this.AttrHeader) })
             this.OnPropertyChanged(name);
         this.ApplyView(this.CursorItem?.Entry.Name);
@@ -404,6 +437,7 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
             this.OnPropertyChanged(nameof(this.Title));
             this.OnPropertyChanged(nameof(this.IsReadOnlyArchive));
             this.OnPropertyChanged(nameof(this.ArchiveBadge));
+            this.UpdateSetup();
             this.UpdateColumnSet();
             this.ApplyView(focusName);
             this.LoadMetadata();
@@ -680,8 +714,54 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     {
         // an archive's or a server's files would have to be downloaded to read
         this.ColumnSet = this.IsArchive || this.IsRemote ? null : this.fileColumns.Detect(this.all.Select(x => x.Entry).ToList());
-        this.CustomColumns = this.ColumnSet == null ? [] : this.fileColumns.ColumnsOf(this.ColumnSet);
+        this.CustomColumns = this.Setup?.CustomColumns is { } keys
+            ? keys.Select(this.fileColumns.Find).OfType<IFileColumn>().ToList()
+            : this.ColumnSet == null ? [] : this.fileColumns.ColumnsOf(this.ColumnSet);
         this.OnPropertyChanged(nameof(this.CustomColumns));
+    }
+
+    /// <summary>
+    /// The folder's setup, if it has one (or a folder above it saved with its subfolders): its sort replaces the tab's
+    /// until the tab leaves for a folder without one. The panel applies its columns and view mode.
+    /// </summary>
+    void UpdateSetup()
+    {
+        var setup = this.IsBranchView ? null : this.folderSetups.Find(this.Path);
+        if (setup == null && this.Setup == null)
+            return;
+
+        if (this.Setup == null)
+            this.ownSort = (this.SortColumn, this.SortKey, this.SortDescending);
+        this.Setup = setup;
+
+        this.applyingSetup = true;
+        try
+        {
+            var (sort, key, descending) = setup != null ? (setup.Sort, setup.SortKey, setup.Descending) : this.ownSort ?? (SortColumn.Name, null, false);
+            this.SortKey = key;
+            this.SortDescending = descending;
+            this.SortColumn = sort;
+            if (setup == null)
+                this.ownSort = null;
+        }
+        finally
+        {
+            this.applyingSetup = false;
+        }
+    }
+
+    // a setup saved, changed (from this tab or another) or forgotten
+    void OnFolderSetupsChanged(object? sender, EventArgs e)
+    {
+        var before = this.Setup;
+        this.UpdateSetup();
+        // a change of columns: the column set's own, or the setup's pick
+        if (before?.CustomColumns is not null || this.Setup?.CustomColumns is not null)
+        {
+            this.UpdateColumnSet();
+            this.ApplyView(this.CursorItem?.Entry.Name);
+            this.LoadMetadata();
+        }
     }
 
     // a set turned on or off, or its columns changed in Settings
@@ -766,6 +846,7 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     public void Dispose()
     {
         this.fileColumns.Changed -= this.OnFileColumnsChanged;
+        this.folderSetups.Changed -= this.OnFolderSetupsChanged;
         this.metadataCts?.Cancel();
         this.loadCts?.Cancel();
         this.watcher?.Dispose();

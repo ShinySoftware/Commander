@@ -250,8 +250,14 @@
                                            Clicked="OnPathLabelTapped" />
                     </Grid>
                 </Border>
-                <shiny:PillView Grid.Column="4" Text="{Binding ActiveTab.ArchiveBadge}" IsVisible="{Binding ActiveTab.IsArchive}" Type="Warning" FontSize="10" VerticalOptions="Center" Margin="4,0" />
-                <shiny:PillView Grid.Column="4" Text="{Binding ActiveTab.ArchiveBadge}" IsVisible="{Binding ActiveTab.IsRemote}" Type="Info" FontSize="10" VerticalOptions="Center" Margin="4,0" AutomationId="RemoteBadge" />
+                <HorizontalStackLayout Grid.Column="4" VerticalOptions="Center">
+                    <shiny:PillView Text="{Binding ActiveTab.ArchiveBadge}" IsVisible="{Binding ActiveTab.IsArchive}" Type="Warning" FontSize="10" VerticalOptions="Center" Margin="4,0" />
+                    <shiny:PillView Text="{Binding ActiveTab.ArchiveBadge}" IsVisible="{Binding ActiveTab.IsRemote}" Type="Info" FontSize="10" VerticalOptions="Center" Margin="4,0" AutomationId="RemoteBadge" />
+                    <!-- this folder has its own columns / sort / view mode (FolderSetups) - tap for the menu -->
+                    <shiny:PillView Text="{l:Tr FolderSetup_Badge}" IsVisible="{Binding ActiveTab.HasSetup}" Type="Success" FontSize="10" VerticalOptions="Center" Margin="4,0" AutomationId="FolderSetupBadge">
+                        <shiny:PillView.GestureRecognizers><TapGestureRecognizer Command="{Binding RequestFolderSetupCommand}" /></shiny:PillView.GestureRecognizers>
+                    </shiny:PillView>
+                </HorizontalStackLayout>
                 <!-- the customizable part (PaneToolbar): right-click it, or Settings, to choose what goes here -->
                 <HorizontalStackLayout Grid.Column="5" Grid.ColumnSpan="2" x:Name="ToolbarStrip" Spacing="0" BindableLayout.ItemsSource="{Binding ToolbarItems}">
                     <BindableLayout.ItemTemplate>

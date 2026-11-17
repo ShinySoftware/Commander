@@ -23,20 +23,23 @@ public partial class PanelViewModel : ObservableObject
     readonly VirtualFileSystem vfs;
     readonly AppSettings settings;
     readonly FileColumns fileColumns;
+    readonly FolderSetups folderSetups;
+    bool applyingSetup;
 
-    public PanelViewModel(PanelSide side, VirtualFileSystem vfs, AppSettings settings, ColumnSet columns, FileColumns fileColumns, PaneToolbar toolbar)
+    public PanelViewModel(PanelSide side, VirtualFileSystem vfs, AppSettings settings, ColumnSet columns, FileColumns fileColumns, FolderSetups folderSetups, PaneToolbar toolbar)
     {
         this.Side = side;
         this.vfs = vfs;
         this.settings = settings;
         this.fileColumns = fileColumns;
+        this.folderSetups = folderSetups;
         this.Columns = new ColumnLayout(columns);
         this.Columns.PropertyChanged += (_, _) => this.UpdateCustomHeaders();
         this.Tree = new FolderTreeViewModel(settings);
         this.ShowTree = side == PanelSide.Left ? settings.LeftShowTree : settings.RightShowTree;
         var savedWidth = side == PanelSide.Left ? settings.LeftTreeWidth : settings.RightTreeWidth;
         this.TreeWidth = savedWidth >= 120 ? savedWidth : 240;
-        this.ViewMode = Enum.TryParse<PanelViewMode>(side == PanelSide.Left ? settings.LeftViewMode : settings.RightViewMode, out var mode) ? mode : PanelViewMode.Details;
+        this.ViewMode = this.GlobalViewMode;
         this.RefreshDrives();
 
         this.ToolbarItems = PaneToolbarItem.For(side, toolbar.Items);
@@ -54,6 +57,28 @@ public partial class PanelViewModel : ObservableObject
     /// <summary>The headers of the custom columns that fit, right of the built-in ones.</summary>
     [ObservableProperty]
     public partial IReadOnlyList<ColumnHeader> CustomHeaders { get; set; } = [];
+
+    /// <summary>A Folder Setup menu asked for from this panel's badge.</summary>
+    public event EventHandler? FolderSetupRequested;
+
+    [RelayCommand]
+    void RequestFolderSetup() => this.FolderSetupRequested?.Invoke(this, EventArgs.Empty);
+
+    /// <summary>The active tab's folder setup - its built-in columns and view mode - or the global ones.</summary>
+    void ApplyFolderSetup()
+    {
+        var setup = this.ActiveTab?.Setup;
+        this.Columns.Override = setup?.Columns.Select(x => Enum.TryParse<PanelColumn>(x, out var c) ? (PanelColumn?)c : null).OfType<PanelColumn>().ToHashSet();
+        this.applyingSetup = true;
+        try
+        {
+            this.ViewMode = setup != null && Enum.TryParse<PanelViewMode>(setup.ViewMode, out var mode) ? mode : this.GlobalViewMode;
+        }
+        finally
+        {
+            this.applyingSetup = false;
+        }
+    }
 
     // the active tab's folder decides the custom columns
     void UpdateCustomColumns()
@@ -121,8 +146,23 @@ public partial class PanelViewModel : ObservableObject
             this.settings.RightShowTree = value;
     }
 
+    // the panel's own view mode, for folders without a setup
+    PanelViewMode GlobalViewMode => Enum.TryParse<PanelViewMode>(this.Side == PanelSide.Left ? this.settings.LeftViewMode : this.settings.RightViewMode, out var mode) ? mode : PanelViewMode.Details;
+
     partial void OnViewModeChanged(PanelViewMode value)
     {
+        if (this.applyingSetup)
+        {
+            this.RequestScroll();
+            return;
+        }
+        // in a folder with a setup the change is the setup's
+        if (this.ActiveTab?.Setup is { } setup)
+        {
+            this.folderSetups.Save(setup with { ViewMode = value.ToString() });
+            this.RequestScroll();
+            return;
+        }
         if (this.Side == PanelSide.Left)
             this.settings.LeftViewMode = value.ToString();
         else
@@ -197,6 +237,7 @@ public partial class PanelViewModel : ObservableObject
             newValue.SetPanelActive(this.IsActive);
             newValue.IsSelected = true;
             this.UpdateCustomColumns();
+            this.ApplyFolderSetup();
             this.UpdateLocation();
             this.ScrollRequested?.Invoke(this, newValue.CursorIndex);
         }
@@ -225,6 +266,10 @@ public partial class PanelViewModel : ObservableObject
         else if (e.PropertyName == nameof(PanelTabViewModel.CustomColumns))
         {
             this.UpdateCustomColumns();
+        }
+        else if (e.PropertyName == nameof(PanelTabViewModel.Setup))
+        {
+            this.ApplyFolderSetup();
         }
     }
 
@@ -287,7 +332,7 @@ public partial class PanelViewModel : ObservableObject
     /// <param name="index">Where the tab goes; the end when null.</param>
     public async Task<PanelTabViewModel> AddTabAsync(string path, bool activate = true, string? focusName = null, bool locked = false, int? index = null)
     {
-        var tab = new PanelTabViewModel(this.vfs, this.settings, this.Columns, this.fileColumns, VirtualFileSystem.Normalize(path));
+        var tab = new PanelTabViewModel(this.vfs, this.settings, this.Columns, this.fileColumns, this.folderSetups, VirtualFileSystem.Normalize(path));
         tab.OpenInNewTabRequested += this.OnOpenInNewTabRequested;
         // nothing goes in front of the first tab
         this.Tabs.Insert(Math.Clamp(index ?? this.Tabs.Count, Math.Min(1, this.Tabs.Count), this.Tabs.Count), tab);

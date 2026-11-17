@@ -1,8 +1,21 @@
 namespace ShinyCommander.ViewModels;
 
 [ShellMap<SettingsPage>("Settings")]
-public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, UpdateService updates, INavigator navigator, IAppDialogs dialogs, FilePreviewers previewers, PreviewPaneViewModel preview, FileColumns fileColumns) : ObservableObject
+public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, UpdateService updates, INavigator navigator, IAppDialogs dialogs, FilePreviewers previewers, PreviewPaneViewModel preview, FileColumns fileColumns, FolderSetups folderSetups) : ObservableObject
 {
+    /// <summary>The folders with their own columns, sort and view mode; tapping one offers to forget it.</summary>
+    public ObservableCollection<FolderSetupItem> FolderSetupItems => this.folderSetupItems ??= new(folderSetups.All.Select(x => new FolderSetupItem(x, fileColumns, this.ForgetFolderSetupCommand)));
+    ObservableCollection<FolderSetupItem>? folderSetupItems;
+
+    [RelayCommand]
+    async Task ForgetFolderSetup(FolderSetupItem item)
+    {
+        if (!await dialogs.Confirm(L.Settings_ForgetFolderSetupFormat(item.Title), item.Path, L.Settings_Forget, L.Common_Cancel))
+            return;
+        folderSetups.Remove(item.Setup);
+        this.FolderSetupItems.Remove(item);
+    }
+
     /// <summary>"Right" or "Bottom" - moves the open panel at once.</summary>
     public string PreviewPosition
     {
@@ -202,6 +215,35 @@ public sealed class ColumnSetToggle(FileColumns columns, FileColumnSet columnSet
         {
             columns.SetEnabled(columnSet, value);
             this.OnPropertyChanged();
+        }
+    }
+}
+
+public sealed class FolderSetupItem(FolderSetup setup, FileColumns columns, System.Windows.Input.ICommand forget)
+{
+    public System.Windows.Input.ICommand Forget => forget;
+    public FolderSetup Setup => setup;
+    public string Path => setup.Path;
+    public string Title => VirtualFileSystem.GetName(setup.Path) is { Length: > 0 } name ? name : setup.Path;
+
+    /// <summary>"Thumbnails · Duration ▼ · and its subfolders" under the folder's path.</summary>
+    public string Description
+    {
+        get
+        {
+            var view = setup.ViewMode == nameof(PanelViewMode.Thumbnails) ? L.Cmd_ThumbnailView : L.Cmd_DetailsView;
+            var sort = (setup.Sort switch
+            {
+                SortColumn.Custom => columns.Find(setup.SortKey)?.Title ?? L.Column_Name,
+                SortColumn.Extension => L.Column_Ext,
+                SortColumn.Size => L.Column_Size,
+                SortColumn.Modified => L.Column_Date,
+                SortColumn.Created => L.Column_Created,
+                SortColumn.Attributes => L.Column_Attr,
+                _ => L.Column_Name
+            }) + (setup.Descending ? " ▼" : " ▲");
+            var parts = new[] { view, sort, setup.IncludeSubfolders ? L.FolderSetup_Subfolders : null }.Where(x => x != null);
+            return setup.Path + "\n" + String.Join("  ·  ", parts);
         }
     }
 }

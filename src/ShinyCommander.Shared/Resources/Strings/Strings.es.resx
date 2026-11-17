@@ -2211,4 +2211,76 @@ Inténtalo de nuevo.</value>
   <data name="Settings_ColumnSetEmpty" xml:space="preserve">
     <value>Sin columnas</value>
   </data>
+  <data name="Preview_Media" xml:space="preserve">
+    <value>Audio y vídeo</value>
+  </data>
+  <data name="Preview_MediaFailed" xml:space="preserve">
+    <value>Este formato no se puede reproducir aquí</value>
+  </data>
+  <data name="Preview_Word" xml:space="preserve">
+    <value>Documentos de Word</value>
+  </data>
+  <data name="Preview_Excel" xml:space="preserve">
+    <value>Libros de Excel</value>
+  </data>
+  <data name="Preview_PowerPoint" xml:space="preserve">
+    <value>Presentaciones de PowerPoint</value>
+  </data>
+  <data name="Key_OpenAsArchive" xml:space="preserve">
+    <value>Entrar en un archivo zip (.docx, .xlsx, .apk) como en un archivo comprimido</value>
+  </data>
+  <data name="Cmd_SetUpFolder" xml:space="preserve">
+    <value>Ajustes de carpeta…</value>
+  </data>
+  <data name="Key_SetUpFolder" xml:space="preserve">
+    <value>Recordar las columnas, el orden y la vista de esta carpeta, u olvidarlos</value>
+  </data>
+  <data name="FolderSetup_Title" xml:space="preserve">
+    <value>Ajustes de «{0}»</value>
+  </data>
+  <data name="FolderSetup_TitleOwn" xml:space="preserve">
+    <value>«{0}» tiene sus propios ajustes</value>
+  </data>
+  <data name="FolderSetup_TitleInherited" xml:space="preserve">
+    <value>Ajustes heredados de «{0}»</value>
+  </data>
+  <data name="FolderSetup_RememberHere" xml:space="preserve">
+    <value>Recordar para esta carpeta</value>
+  </data>
+  <data name="FolderSetup_RememberWithSubfolders" xml:space="preserve">
+    <value>Recordar para esta carpeta y sus subcarpetas</value>
+  </data>
+  <data name="FolderSetup_AlsoSubfolders" xml:space="preserve">
+    <value>Usarlos también en sus subcarpetas</value>
+  </data>
+  <data name="FolderSetup_ThisFolderOnly" xml:space="preserve">
+    <value>Usarlos solo en esta carpeta</value>
+  </data>
+  <data name="FolderSetup_Forget" xml:space="preserve">
+    <value>Olvidarlos - volver a los ajustes globales</value>
+  </data>
+  <data name="FolderSetup_ForgetInherited" xml:space="preserve">
+    <value>Olvidar los ajustes de «{0}»</value>
+  </data>
+  <data name="FolderSetup_Badge" xml:space="preserve">
+    <value>Ajustes de carpeta</value>
+  </data>
+  <data name="FolderSetup_Subfolders" xml:space="preserve">
+    <value>y sus subcarpetas</value>
+  </data>
+  <data name="Main_ColumnsForFolder" xml:space="preserve">
+    <value>Columnas de «{0}»</value>
+  </data>
+  <data name="Settings_FolderSetups" xml:space="preserve">
+    <value>Ajustes por carpeta</value>
+  </data>
+  <data name="Settings_FolderSetupsDesc" xml:space="preserve">
+    <value>Carpetas con sus propias columnas, orden y vista; las demás usan los ajustes globales. Ajustes de carpeta (Primary+Shift+V) guarda una; toca una aquí para olvidarla.</value>
+  </data>
+  <data name="Settings_ForgetFolderSetup" xml:space="preserve">
+    <value>¿Olvidar los ajustes de «{0}»?</value>
+  </data>
+  <data name="Settings_Forget" xml:space="preserve">
+    <value>Olvidar</value>
+  </data>
 </root>

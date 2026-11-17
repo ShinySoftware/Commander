@@ -30,8 +30,8 @@ RIBBON = [
  ]),
  ("View","view",ICON,[
    ("Panel",[("Reread","refresh","RefreshCommand","L","Primary+R"),("Hidden Files","eye","ToggleHiddenCommand","S","Primary+H"),("Branch View","expand","BranchViewCommand","S","Primary+B"),("Quick Filter","filter","QuickFilterCommand","S","Primary+F")]),
-   ("Show",[("Thumbnails","image","ThumbnailViewCommand","L","Primary+Shift+F1"),("Details","menu","DetailsViewCommand","S","Primary+F2"),("Columns…","sort","ChooseColumnsCommand","S","Primary+Shift+K"),("Folder Tree","folder-open","ToggleTreeCommand","S","Primary+F8")]),
-   ("Layout",[("Quick View","zoom-in","QuickViewCommand","L","Ctrl+Q"),("Stack Panels","collapse","TogglePanelLayoutCommand","S","Primary+Shift+L"),("Swap","repeat","SwapPanelsCommand","S","Primary+U"),("Target = Source","link","TargetEqualsSourceCommand","S","Primary+.")]),
+   ("Show",[("Thumbnails","image","ThumbnailViewCommand","L","Primary+Shift+F1"),("Details","menu","DetailsViewCommand","S","Primary+F2"),("Columns…","sort","ChooseColumnsCommand","S","Primary+Shift+K"),("Folder Setup…","bookmark","SetUpFolderCommand","S","Primary+Shift+V"),("Folder Tree","folder-open","ToggleTreeCommand","S","Primary+F8")]),
+   ("Layout",[("Preview","zoom-in","QuickViewCommand","L","Ctrl+Q"),("Stack Panels","collapse","TogglePanelLayoutCommand","S","Primary+Shift+L"),("Swap","repeat","SwapPanelsCommand","S","Primary+U"),("Target = Source","link","TargetEqualsSourceCommand","S","Primary+.")]),
    ("Tabs",[("New Tab","plus","NewTabCommand","S","Primary+T"),("Close Tab","close","CloseTabCommand","S","Primary+W"),("Next Tab","chevron-right","NextTabCommand","S","Ctrl+Tab")]),
  ]),
  ("Go","go",ICON,[

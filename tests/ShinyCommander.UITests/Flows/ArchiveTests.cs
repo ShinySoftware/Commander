@@ -29,6 +29,23 @@ public class ArchiveTests(AppFixture fixture) : UiTest(fixture)
     }
 
     [Fact]
+    public async Task Enter_opens_a_workbook_in_its_app_and_Primary_PageDown_goes_inside()
+    {
+        await this.Start(l => l.Zip("budget.xlsx", ("xl/workbook.xml", "<workbook/>"), ("[Content_Types].xml", "<Types/>")));
+        await this.App.Cursor("budget.xlsx");
+
+        // a zip, but a document first - handed to Excel / Numbers (recorded in test mode), not browsed
+        var s = await this.App.Key("Enter");
+        s.Left.Path.ShouldBe(this.LeftTree.Path);
+        s.Opened.ShouldBe([this.LeftTree["budget.xlsx"]]);
+
+        s = await this.App.Key("Primary+PageDown");
+        s.Left.Path.ShouldBe(this.LeftTree["budget.xlsx"]);
+        s.Left.IsArchive.ShouldBeTrue();
+        s.Left.Names.ShouldBe(["xl", "[Content_Types].xml"]);
+    }
+
+    [Fact]
     public async Task A_tar_gz_opens_like_a_folder_that_can_be_changed()
     {
         await this.Start(l => l.TarGz("site.tar.gz", ("index.html", "<h1/>"), ("css/site.css", "body{}")));

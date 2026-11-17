@@ -21,6 +21,19 @@ public class ArchiveFormatTests
     FileOperationService Ops => new(this.vfs);
 
     [Theory]
+    [InlineData("report.docx", true)]
+    [InlineData("Budget.XLSX", true)]
+    [InlineData("deck.pptx", true)]
+    [InlineData("book.epub", true)]
+    [InlineData("pack.zip", false)]
+    [InlineData("app.apk", false)]
+    public void Office_files_are_zips_that_open_as_documents(string name, bool document)
+    {
+        ArchiveFormats.IsSupported(name).ShouldBeTrue();
+        ArchiveFormats.IsDocument(name).ShouldBe(document);
+    }
+
+    [Theory]
     [InlineData("a.zip", ArchiveKind.Zip)]
     [InlineData("a.docx", ArchiveKind.Zip)]
     [InlineData("a.tar", ArchiveKind.Tar)]

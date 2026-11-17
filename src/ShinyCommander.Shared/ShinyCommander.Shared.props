@@ -40,6 +40,11 @@
         <PackageReference Include="Shiny.Maui.Controls.Desktop" />
         <!-- the database editor's schema diagram -->
         <PackageReference Include="Shiny.Maui.Controls.Diagram" />
+        <!-- preview plugins: audio and video (the Linux head has its own GTK backend), Word / Excel / PowerPoint -->
+        <PackageReference Include="Shiny.Maui.Controls.MediaElement" Condition="'$(TargetFramework)' != 'net10.0'" />
+        <PackageReference Include="Shiny.Maui.Controls.MediaElement.Linux" Condition="'$(TargetFramework)' == 'net10.0'" />
+        <!-- no SkiaSharp canvas on the GTK head - the Office previewers are left out there -->
+        <PackageReference Include="Shiny.Maui.Controls.Office" Condition="'$(TargetFramework)' != 'net10.0'" />
         <PackageReference Include="Shiny.Maui.Shell" />
         <PackageReference Include="Shiny.Mediator.Maui" />
         <PackageReference Include="Shiny.Extensions.DependencyInjection" />

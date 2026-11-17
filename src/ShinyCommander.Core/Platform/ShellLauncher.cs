@@ -8,8 +8,17 @@ public sealed record CommandResult(int ExitCode, string Output, TimeSpan Duratio
 /// <summary>Opens files with their default app, opens terminals and runs command-line commands.</summary>
 public static class ShellLauncher
 {
+    /// <summary>When set, files are handed to this instead of their app - UI tests record them rather than open Excel.</summary>
+    public static Action<string>? Intercept { get; set; }
+
     public static void OpenWithDefaultApp(string path)
     {
+        if (Intercept is { } intercept)
+        {
+            intercept(path);
+            return;
+        }
+
         if (OperatingSystem.IsWindows())
         {
             Process.Start(new ProcessStartInfo(path) { UseShellExecute = true, WorkingDirectory = Path.GetDirectoryName(path) ?? "" });
@@ -30,6 +39,12 @@ public static class ShellLauncher
     /// </summary>
     public static async Task<bool> TryOpenWithDefaultAppAsync(string path)
     {
+        if (Intercept is { } intercept)
+        {
+            intercept(path);
+            return true;
+        }
+
         if (OperatingSystem.IsWindows())
         {
             try

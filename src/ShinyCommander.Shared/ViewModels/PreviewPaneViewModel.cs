@@ -162,7 +162,8 @@ public partial class PreviewPaneViewModel : ObservableObject
         this.IconColor = ThemeColors.Get(color);
         this.Title = entry.Name;
 
-        if (entry.IsDirectory || entry.IsArchive)
+        // a .docx or .xlsx is a zip too - a previewer that takes it wins over the archive summary
+        if (entry.IsDirectory || entry.IsArchive && this.previewers.Candidates(entry.Name).Count == 0)
         {
             this.ShowSummary(entry.IsArchive ? L.QuickView_ArchiveFormat(ArchiveFormats.Describe(ArchiveFormats.GetKind(entry.Name)), SizeFormatter.Friendly(entry.Size)) : L.QuickView_Folder);
             if (entry.IsDirectory && !entry.IsInArchive && !entry.IsRemote)
@@ -233,7 +234,11 @@ public partial class PreviewPaneViewModel : ObservableObject
     {
         if (kind == null)
             this.Text = String.Empty;
+        var previous = this.PluginView;
         this.PluginView = view;
+        // stop its player, close its document - before the temp copy it may be reading goes
+        if (previous != view && previous is IDisposable disposable)
+            disposable.Dispose();
         this.PreviewerKey = previewerKey;
         this.Kind = kind;
 
