@@ -41,7 +41,8 @@ public sealed class WordFilePreviewer() : OfficeFilePreviewer("word", () => L.Pr
         var document = await WordDocument.OpenAsync(path, null, false, ct).ConfigureAwait(false);
         return await MainThread.InvokeOnMainThreadAsync<View>(() =>
         {
-            var view = new DocumentView { Document = document, AutomationId = "PreviewWord" };
+            // a margin like the other previews - the first heading otherwise sits against the pane's header
+            var view = new DocumentView { Document = document, Padding = new Thickness(14, 10), AutomationId = "PreviewWord" };
             return new PreviewHost(view, () =>
             {
                 view.Dispose();

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ShinyCommander — the dual-pane file manager</title>
-    <meta name="description" content="A keyboard-first, dual-pane file manager for macOS, Windows and Linux. Folder tabs you can lock, archives that work like folders, SFTP, FTP, WebDAV, S3 and Azure in a panel, and the full Total Commander keymap.">
+    <meta name="description" content="A keyboard-first, dual-pane file manager for macOS, Windows and Linux. Folder tabs you can lock, archives that work like folders, SFTP, FTP, WebDAV, S3 and Azure in a panel, previews of photos, music, video and Office files, columns that read what's inside a file, and the full Total Commander keymap.">
     <meta name="theme-color" content="#1a1440">
     <meta property="og:title" content="ShinyCommander — the dual-pane file manager">
     <meta property="og:description" content="Keyboard-first, dual-pane file management for macOS, Windows and Linux - local disks, archives, servers and cloud storage.">
@@ -39,6 +39,7 @@
             <a href="#features">Features</a>
             <a href="#archives">Archives</a>
             <a href="#remote">Remote</a>
+            <a href="#columns">Columns</a>
             <a href="#keyboard">Keyboard</a>
             <a href="#gallery">Gallery</a>
             <a class="nav-cta" href="#download">Download</a>
@@ -51,7 +52,7 @@
         <p class="lede">
             A modern, keyboard-first file manager in the spirit of Total Commander. Lock your favourite folders into
             tabs, open zip, 7z and tar archives like folders, work on servers and cloud storage side by side with your
-            disk, and keep both hands on the keyboard.
+            disk, preview anything from a song to a spreadsheet, and keep both hands on the keyboard.
         </p>
         <div class="hero-actions">
             <a class="button primary" href="#download">
@@ -187,16 +188,47 @@
                 <figure class="shot" data-zoom><img src="screenshots/photo-metadata.png" alt="A photo beside its title, description, author, copyright and date taken" loading="lazy" width="1280" height="780"></figure>
             </article>
 
-            <article class="showcase flip">
+            <article class="showcase flip" id="preview">
                 <div class="showcase-copy">
-                    <h3>A preview beside both panels</h3>
-                    <p>Open the preview panel and whatever is under the cursor shows up - images, rendered Markdown, web pages, PDFs and SQLite tables, inside archives too. Dock it right or below, and turn off any previewer you don't want.</p>
+                    <span class="chip">New</span>
+                    <h3>A preview for everything under the cursor</h3>
+                    <p>Press <kbd>Ctrl</kbd><kbd>Q</kbd> and a third pane opens beside (or under) both panels. Move the cursor and it follows - photos, songs, videos, Word documents, spreadsheets, slide decks, PDFs, web pages, Markdown and SQLite tables, even inside archives and on servers.</p>
                     <ul class="ticks">
-                        <li>The lister (F3) adds hex view and walks the folder with N / P</li>
-                        <li>Thumbnails, details and a folder tree, chosen per panel</li>
+                        <li><strong>Play audio and video</strong> right there - title and artist from the tags, nothing starts until you press play</li>
+                        <li><strong>Read Word, Excel and PowerPoint files</strong> without opening Office - read-only, so a stray key never changes a thing</li>
+                        <li>Web pages render with their scripts off; links open in your browser</li>
+                        <li>Dock it right or below, drag it to size, and switch off any previewer you don't want</li>
                     </ul>
                 </div>
-                <figure class="shot focus" style="--x: 50%; --y: 19%" data-zoom><img src="screenshots/quick-view.png" alt="The preview panel rendering a Markdown file" loading="lazy" width="1440" height="900"></figure>
+                <figure class="shot focus" style="--x: 100%; --y: 19%" data-zoom><img src="screenshots/office-preview.png" alt="The preview panel showing a Word document beside both file panels" loading="lazy" width="1440" height="900"></figure>
+            </article>
+
+            <article class="showcase" id="columns">
+                <div class="showcase-copy">
+                    <span class="chip">New</span>
+                    <h3>Columns that read what's inside</h3>
+                    <p>Walk into a music folder and Duration, Artist, Album and Track appear. A photo folder gets Dimensions, Date taken and Camera; documents get Pages and Author. The columns come from the files themselves, read in the background while you work.</p>
+                    <ul class="ticks">
+                        <li><strong>Sort by any of them</strong> - the longest song, the biggest photo, the newest shot</li>
+                        <li>Photos, video, music, documents, text and code, archives and apps - pick each set's columns in Settings</li>
+                        <li>Lens, aperture, ISO, codecs, bitrate, word counts, line counts and more, one click away</li>
+                    </ul>
+                </div>
+                <figure class="shot focus" style="--x: 100%; --y: 19%" data-zoom><img src="screenshots/custom-columns.png" alt="A music folder with Duration, Artist, Album and Track columns above a photo folder with Dimensions" loading="lazy" width="1440" height="900"></figure>
+            </article>
+
+            <article class="showcase flip" id="folder-setups">
+                <div class="showcase-copy">
+                    <span class="chip">New</span>
+                    <h3>Folders that remember how you like them</h3>
+                    <p>Global settings work for almost every folder. For the few that need something else, <kbd>⌘</kbd><kbd>⇧</kbd><kbd>V</kbd> remembers that folder's columns, sort and view - your wallpapers as thumbnails, your music sorted by duration - and leaves everything else alone.</p>
+                    <ul class="ticks">
+                        <li><strong>Just this folder, or everything below it</strong> - the nearest remembered folder wins</li>
+                        <li>Change the view there and the setup follows; a badge on the path shows it's in use</li>
+                        <li>Every setup listed in Settings, one tap to forget</li>
+                    </ul>
+                </div>
+                <figure class="shot focus" style="--x: 100%; --y: 19%" data-zoom><img src="screenshots/folder-setup.png" alt="A wallpaper folder remembered as thumbnails, with the Folder setup badge on its path" loading="lazy" width="1440" height="900"></figure>
             </article>
         </div>
     </section>
@@ -210,7 +242,7 @@
                 <div class="card">
                     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="8" height="16" rx="2"/><rect x="13" y="4" width="8" height="16" rx="2"/></svg>
                     <h4>Dual panels</h4>
-                    <p>Side by side or stacked, with drive chips, a free-space meter, sortable columns and live refresh. Music, photo and video folders add their own columns: duration, artist, dimensions, camera. And any folder can remember its own columns, sort and view.</p>
+                    <p>Side by side or stacked, with drive chips, a free-space meter, sortable columns and live refresh.</p>
                 </div>
                 <div class="card">
                     <svg viewBox="0 0 24 24"><path d="M7 3h10l4 4v14H3V3h4z"/><path d="M8 13h8M8 17h5"/></svg>
@@ -246,6 +278,11 @@
                     <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 15v-2M12 15v-4M16 15v-3"/></svg>
                     <h4>Folder sizes</h4>
                     <p><kbd>Alt</kbd><kbd>Shift</kbd><kbd>Enter</kbd> or the ribbon sizes the marked folders, the one under the cursor, or every folder at once.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><path d="M14 3h7v7M10 14 21 3M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg>
+                    <h4>The right app, every time</h4>
+                    <p>Double-click or <kbd>Enter</kbd> opens a file in its own app - Word files in Word, spreadsheets in Excel - and asks which app when nothing claims it. <kbd>⌘</kbd><kbd>PgDn</kbd> still looks inside a .docx like an archive.</p>
                 </div>
                 <div class="card">
                     <svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/></svg>
@@ -301,6 +338,8 @@
                 <div class="key"><kbd>Ctrl</kbd><kbd>Tab</kbd><span>Next tab</span></div>
                 <div class="key"><kbd>⌘</kbd><kbd>M</kbd><span>Multi-rename</span></div>
                 <div class="key"><kbd>Ctrl</kbd><kbd>Q</kbd><span>Preview panel</span></div>
+                <div class="key"><kbd>⌘</kbd><kbd>⇧</kbd><kbd>K</kbd><span>Columns</span></div>
+                <div class="key"><kbd>⌘</kbd><kbd>⇧</kbd><kbd>V</kbd><span>Folder setup</span></div>
                 <div class="key"><kbd>⌘</kbd><kbd>J</kbd><span>Jobs</span></div>
                 <div class="key"><kbd>⌘</kbd><kbd>D</kbd><span>Hotlist</span></div>
                 <div class="key"><kbd>⌘</kbd><kbd>K</kbd><span>Connect</span></div>
@@ -320,6 +359,9 @@
             <div class="gallery">
                 <figure class="shot" data-zoom><img src="screenshots/dark.png" alt="Dark mode" loading="lazy" width="1440" height="900"><figcaption>Dark mode</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/thumbnails.png" alt="Thumbnails view" loading="lazy" width="1440" height="900"><figcaption>Thumbnails</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/media-preview.png" alt="A song in the preview panel with its title, artist and player" loading="lazy" width="1440" height="900"><figcaption>Music in the preview</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/slides-preview.png" alt="A PowerPoint slide in the preview panel" loading="lazy" width="1440" height="900"><figcaption>Slides in the preview</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/quick-view.png" alt="The README rendered in the preview panel" loading="lazy" width="1440" height="900"><figcaption>Markdown in the preview</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/viewer.png" alt="The lister showing rendered Markdown" loading="lazy" width="1440" height="900"><figcaption>Lister (F3)</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/find.png" alt="Find files" loading="lazy" width="1440" height="900"><figcaption>Find files</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/multi-rename.png" alt="Multi-rename with a live preview" loading="lazy" width="1440" height="900"><figcaption>Multi-rename</figcaption></figure>
@@ -355,7 +397,7 @@
                     <ul>
                         <li><a href="https://github.com/dotnet/maui">.NET MAUI</a><span>the shared UI</span></li>
                         <li><a href="https://github.com/dotnet/maui-labs">maui-labs</a><span>native AppKit on macOS, GTK4 on Linux</span></li>
-                        <li><a href="https://github.com/shinyorg/controls">Shiny Controls</a><span>ribbon, data grids, keyboard shortcuts, dialogs, Markdown, diagrams</span></li>
+                        <li><a href="https://github.com/shinyorg/controls">Shiny Controls</a><span>ribbon, data grids, keyboard shortcuts, dialogs, Markdown, diagrams, the media player and the Word, Excel and PowerPoint viewers</span></li>
                     </ul>
                 </div>
                 <div class="stack-group">
@@ -373,6 +415,7 @@
                         <li><a href="https://github.com/adamhathcock/sharpcompress">SharpCompress</a><span>7z, rar and compressed tars</span></li>
                         <li><a href="https://github.com/dotnet/runtime">System.IO.Compression · System.Formats.Tar</a><span>zip and tar</span></li>
                         <li><a href="https://github.com/oozcitak/exiflibrary">ExifLibNet</a><span>lossless EXIF edits</span></li>
+                        <li><a href="https://github.com/mono/taglib-sharp">TagLibSharp</a><span>durations, dimensions and tags for the columns</span></li>
                         <li><a href="https://github.com/dotnet/efcore">Microsoft.Data.Sqlite</a><span>the SQLite editor</span></li>
                     </ul>
                 </div>

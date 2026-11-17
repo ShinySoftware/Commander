@@ -158,6 +158,108 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
     }
 
     /// <summary>
+    /// Custom columns, a folder setup and the media / Office previews, on sample files made in the (ignored) artifacts
+    /// folder: tagged songs (ffmpeg), the system's own wallpapers, and Word / Excel / PowerPoint files (OfficeSamples).
+    /// </summary>
+    [Fact]
+    public async Task Capture_feature_screenshots()
+    {
+        Assert.SkipUnless(Enabled, "set SC_README_SCREENSHOTS=1 (run.sh --readme-screenshots)");
+        Assert.SkipUnless(File.Exists(Ffmpeg), "needs ffmpeg for the sample songs");
+
+        var samples = Path.Combine(TestConfig.RepoRoot, "tests", "ShinyCommander.UITests", "artifacts", "samples");
+        var (music, photos, documents) = MakeSamples(samples);
+        await this.Fixture.Client.ResizeAsync(1440, 900);
+        await this.App.Reset(music, photos);
+        await this.App.WaitFor(x => x.Left.ColumnSet == "music" && x.Right.ColumnSet == "photos" && !x.Left.IsReadingMetadata && !x.Right.IsReadingMetadata, "both column sets", TimeSpan.FromSeconds(30));
+
+        // stacked, each panel has the window's width - room for the whole column set
+        await this.App.Command("TogglePanelLayout");
+        await this.Ui.Tap("ColumnHeader_duration");
+        await this.App.Cursor("03 Two Panes.mp3", "left");
+        await this.Shot("custom-columns");
+        await this.App.Command("TogglePanelLayout");
+
+        // the photos folder remembered as thumbnails - the badge on its path row
+        await this.App.Key("Tab");
+        await this.App.Answer("Remember for this folder");
+        await this.App.Command("SetUpFolder");
+        await this.App.Command("ThumbnailView");
+        await this.App.Cursor("iMac Blue.heic", "right");
+        await this.Shot("folder-setup");
+        await this.App.Answer("Forget it");
+        await this.App.Command("SetUpFolder");
+        await this.App.Key("Tab");
+
+        // the preview panel: a song, then Word, PowerPoint and the README's Markdown
+        await this.App.Command("QuickView");
+        await this.App.Cursor("01 Morning.mp3", "left");
+        await this.App.WaitFor(x => x.Preview.Previewer == "media", "the song in the preview");
+        await this.Shot("media-preview");
+
+        await this.App.Navigate(documents, "left");
+        await this.App.Cursor("Quarterly report.docx", "left");
+        await this.App.WaitFor(x => x.Preview.Previewer == "word", "the report in the preview");
+        await this.Shot("office-preview");
+        await this.App.Cursor("Launch.pptx", "left");
+        await this.App.WaitFor(x => x.Preview.Previewer == "powerpoint", "the deck in the preview");
+        await this.Shot("slides-preview");
+
+        await this.App.Navigate(TestConfig.RepoRoot, "left");
+        await this.App.Navigate(Path.Combine(TestConfig.RepoRoot, "src", "ShinyCommander.Shared", "Views"), "right");
+        await this.App.Cursor("README.md", "left");
+        await this.App.WaitFor(x => x.Preview.Previewer == "markdown", "the README in the preview");
+        await this.Shot("quick-view");
+        await this.App.Command("QuickView");
+    }
+
+    const string Ffmpeg = "/opt/homebrew/bin/ffmpeg";
+
+    static (string Music, string Photos, string Documents) MakeSamples(string root)
+    {
+        var music = Directory.CreateDirectory(Path.Combine(root, "Music", "Open Panels")).FullName;
+        var photos = Directory.CreateDirectory(Path.Combine(root, "Pictures", "Wallpapers")).FullName;
+        var documents = Directory.CreateDirectory(Path.Combine(root, "Documents")).FullName;
+
+        var songs = new (string File, string Title, int Track, int Seconds)[]
+        {
+            ("01 Morning.mp3", "Morning", 1, 187), ("02 Quick View.mp3", "Quick View", 2, 95), ("03 Two Panes.mp3", "Two Panes", 3, 242),
+            ("04 F5 Copy.mp3", "F5 Copy", 4, 311), ("05 Branch View.mp3", "Branch View", 5, 204), ("06 Long Night.mp3", "Long Night", 6, 428)
+        };
+        foreach (var song in songs.Where(x => !File.Exists(Path.Combine(music, x.File))))
+        {
+            using var p = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(Ffmpeg,
+            [
+                "-v", "error", "-y", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-t", song.Seconds.ToString(), "-c:a", "libmp3lame", "-b:a", "64k",
+                "-metadata", $"title={song.Title}", "-metadata", "artist=The Shinies", "-metadata", "album=Open Panels", "-metadata", "genre=Synthpop",
+                "-metadata", $"track={song.Track}", "-metadata", "date=2026", Path.Combine(music, song.File)
+            ]))!;
+            p.WaitForExit();
+        }
+
+        foreach (var name in new[] { "iMac Blue", "iMac Green", "iMac Orange", "iMac Pink", "Mac Purple", "Radial Sky Blue" })
+        {
+            var target = Path.Combine(photos, name + ".heic");
+            if (!File.Exists(target) && File.Exists($"/System/Library/Desktop Pictures/{name}.heic"))
+                File.Copy($"/System/Library/Desktop Pictures/{name}.heic", target);
+        }
+        if (File.Exists("/System/Library/Wallpapers/.default/DefaultAerial.jpg") && !File.Exists(Path.Combine(photos, "Aerial.jpg")))
+            File.Copy("/System/Library/Wallpapers/.default/DefaultAerial.jpg", Path.Combine(photos, "Aerial.jpg"));
+
+        File.WriteAllBytes(Path.Combine(documents, "Quarterly report.docx"), OfficeSamples.Docx("""
+            <h1>Quarterly report</h1>
+            <p>Revenue grew <b>12%</b> on the quarter, led by the new <i>preview panel</i> and remote folders.</p>
+            <h2>Highlights</h2>
+            <ul><li>Two panels, one preview</li><li>Columns that read what's inside a file</li><li>Folders that remember how they're shown</li></ul>
+            <h2>Next quarter</h2>
+            <p>Windows and Linux builds of every preview, and faster spreadsheets.</p>
+            """));
+        File.WriteAllBytes(Path.Combine(documents, "Budget.xlsx"), OfficeSamples.Xlsx("Budget", [["Item", "Q1", "Q2", "Q3"], ["Rent", 1200, 1200, 1250], ["Travel", 340, 610, 480], ["Software", 220, 220, 260]]));
+        File.WriteAllBytes(Path.Combine(documents, "Launch.pptx"), OfficeSamples.Pptx(("ShinyCommander", "Two panels, one preview"), ("What's new", "Custom columns, folder setups, Office previews")));
+        return (music, photos, documents);
+    }
+
+    /// <summary>
     /// The remote file system pictures: an S3 bucket in a panel, Connections and the connection editor. Needs an
     /// S3-compatible server holding a "website" bucket - <c>SC_README_S3=http://127.0.0.1:5001</c> (moto, see
     /// docs/testing.md) - and shows whatever Bonjour finds in the network list.

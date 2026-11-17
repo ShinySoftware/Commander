@@ -91,7 +91,7 @@ public static class UiTestHooks
             return Task.FromResult((object)true);
         });
         Map(ext, "preview_js", "Runs JavaScript in the preview panel's web view (HTML / PDF previews) and returns the result: { script }", PreviewJs);
-        Map(ext, "click_at", "A real mouse click (macOS): mouse down/up NSEvents through the window at page point { x, y, secondary = false } - AppKit hit-testing and all. Returns the native view under it (hit) and the MAUI elements behind it (element)", ClickAt);
+        Map(ext, "click_at", "A real mouse click (macOS): mouse down/up NSEvents through the window at page point { x, y, secondary = false, clicks = 1 } - AppKit hit-testing and all. Returns the native view under it (hit) and the MAUI elements behind it (element)", ClickAt);
         Map(ext, "real_dialogs", "Show the real dialogs instead of answering from the queue: { on = true }", RealDialogs);
         ext.MapTool("state_now", "The state without waiting for the app to settle (while a real dialog is open)", "POST", "state_now",
             async _ => HttpResponse.Json(await MainThread.InvokeOnMainThreadAsync(() => new { result = (object)true, state = Snapshot(MainViewModel.Current!) })));
@@ -356,11 +356,18 @@ public static class UiTestHooks
         // first, then deliver the down. The up is stamped after the down: a click gesture recognizer (what a MAUI tap is on
         // AppKit) ignores an up that predates its down
         var secondary = args.TryGetProperty("secondary", out var sec) && sec.GetBoolean();
-        var now = NSProcessInfoUptime();
-        var down = AppKit.NSEvent.MouseEvent(secondary ? AppKit.NSEventType.RightMouseDown : AppKit.NSEventType.LeftMouseDown, point, 0, now, ns.WindowNumber, null, 0, 1, 1f);
-        var up = AppKit.NSEvent.MouseEvent(secondary ? AppKit.NSEventType.RightMouseUp : AppKit.NSEventType.LeftMouseUp, point, 0, now + 0.05, ns.WindowNumber, null, 0, 1, 0f);
-        AppKit.NSApplication.SharedApplication.PostEvent(up, false);
-        ns.SendEvent(down);
+        // clicks = 2 is a double-click: a second down/up pair with AppKit's click count at 2
+        var clicks = args.TryGetProperty("clicks", out var c) ? c.GetInt32() : 1;
+        for (var i = 1; i <= clicks; i++)
+        {
+            var now = NSProcessInfoUptime();
+            var down = AppKit.NSEvent.MouseEvent(secondary ? AppKit.NSEventType.RightMouseDown : AppKit.NSEventType.LeftMouseDown, point, 0, now, ns.WindowNumber, null, 0, i, 1f);
+            var up = AppKit.NSEvent.MouseEvent(secondary ? AppKit.NSEventType.RightMouseUp : AppKit.NSEventType.LeftMouseUp, point, 0, now + 0.05, ns.WindowNumber, null, 0, i, 0f);
+            AppKit.NSApplication.SharedApplication.PostEvent(up, false);
+            ns.SendEvent(down);
+            if (i < clicks)
+                await Task.Delay(120);
+        }
         await Task.Delay(500); // a dialog animates out
         return new { hit = String.Join(" < ", chain), element = HitElement(hit) };
 #else

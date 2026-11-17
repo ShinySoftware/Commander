@@ -11,11 +11,23 @@ public static class ShellLauncher
     /// <summary>When set, files are handed to this instead of their app - UI tests record them rather than open Excel.</summary>
     public static Action<string>? Intercept { get; set; }
 
+    /// <summary>
+    /// The platform's own launcher, when the head has one (NSWorkspace on macOS). Since macOS 14 an app comes to the
+    /// front only when the active app hands it over - the `open` tool is a background process, so what it opened stayed
+    /// behind the window. Asked first; the processes below are the fallback.
+    /// </summary>
+    public static INativeLauncher? Native { get; set; }
+
     public static void OpenWithDefaultApp(string path)
     {
         if (Intercept is { } intercept)
         {
             intercept(path);
+            return;
+        }
+        if (Native is { } native)
+        {
+            _ = native.OpenAsync(path);
             return;
         }
 
@@ -44,6 +56,8 @@ public static class ShellLauncher
             intercept(path);
             return true;
         }
+        if (Native is { } native)
+            return await native.OpenAsync(path).ConfigureAwait(false);
 
         if (OperatingSystem.IsWindows())
         {
@@ -77,6 +91,16 @@ public static class ShellLauncher
 
     public static void OpenWith(string application, string path)
     {
+        if (Intercept is { } intercept)
+        {
+            intercept(path);
+            return;
+        }
+        if (Native is { } native && application.EndsWith(".app", StringComparison.OrdinalIgnoreCase))
+        {
+            _ = native.OpenWithAsync(application, path);
+            return;
+        }
         if (OperatingSystem.IsMacOS() && application.EndsWith(".app", StringComparison.OrdinalIgnoreCase))
             Start("open", "-a", application, path);
         else
@@ -195,4 +219,14 @@ public static class ShellLauncher
             psi.ArgumentList.Add(a);
         Process.Start(psi)?.Dispose();
     }
+}
+
+/// <summary>Opens files and links through the platform's own API - ShellLauncher.Native.</summary>
+public interface INativeLauncher
+{
+    /// <summary>A file in its default app, or a link in the browser; false when no app takes it.</summary>
+    Task<bool> OpenAsync(string pathOrUri);
+
+    /// <summary>A file in the given application (an .app bundle).</summary>
+    Task<bool> OpenWithAsync(string application, string path);
 }

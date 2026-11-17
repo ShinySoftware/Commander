@@ -11,11 +11,12 @@ and **Linux** (GTK4 via maui-labs), and dressed in [Shiny Controls](https://gith
 | | |
 |---|---|
 | ![Tab menu](docs/screenshots/tab-menu.png)<br>**Folder tabs** - lock, rename, colour and give each tab an icon | ![Breadcrumbs](docs/screenshots/breadcrumbs.png)<br>**Breadcrumbs** - every crumb drops down the folders inside it |
-| ![Archives](docs/screenshots/archive.png)<br>**Archives as folders** - zip, 7z and tar, changed in place | ![Preview panel](docs/screenshots/quick-view.png)<br>**Preview panel** - the file under the cursor, rendered beside or under both panels |
+| ![Archives](docs/screenshots/archive.png)<br>**Archives as folders** - zip, 7z and tar, changed in place | ![Preview panel](docs/screenshots/office-preview.png)<br>**Preview panel** - the file under the cursor, from photos and songs to Word, Excel and PowerPoint |
+| ![Custom columns](docs/screenshots/custom-columns.png)<br>**Custom columns** - duration, artist, dimensions, camera, read from the files | ![Folder setup](docs/screenshots/folder-setup.png)<br>**Folder setups** - a folder remembers its own columns, sort and view |
 | ![Dark mode](docs/screenshots/dark.png)<br>**Dark mode** - follows the system, or pick one in Settings | ![Thumbnails](docs/screenshots/thumbnails.png)<br>**Thumbnails** per panel |
 | ![Lister](docs/screenshots/viewer.png)<br>**Lister (F3)** - text, hex, images and rendered Markdown | ![Find files](docs/screenshots/find.png)<br>**Find files (Alt+F7)** |
 | ![Multi-rename](docs/screenshots/multi-rename.png)<br>**Multi-rename** with a live preview | ![Settings](docs/screenshots/settings.png)<br>**Settings** |
-| ![Pane toolbar](docs/screenshots/customize-toolbar.png)<br>**Pane toolbar** - choose the buttons beside each path | |
+| ![Pane toolbar](docs/screenshots/customize-toolbar.png)<br>**Pane toolbar** - choose the buttons beside each path | ![Media preview](docs/screenshots/media-preview.png)<br>**Music and video** in the preview panel |
 
 <sub>Regenerate with `tests/ShinyCommander.UITests/run.sh --readme-screenshots`. The product website in
 [`website/`](website) uses the same pictures.</sub>

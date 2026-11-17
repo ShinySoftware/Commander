@@ -58,6 +58,43 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
         await this.App.WaitFor(s => s.Left.Path == this.LeftTree.Path, $"the click on up (hit: {this.App.LastResult.GetProperty("element").GetString()})", TimeSpan.FromSeconds(5));
     }
 
+    // a real double-click, AppKit's click count and all: a folder opens, a file goes to its app (recorded in test mode)
+    [Fact]
+    public async Task A_double_click_opens_a_folder_and_hands_a_file_to_its_app()
+    {
+        await this.Start(l => l.File("notes.txt", "hello").Dir("inside"), r => r.File("other.txt", "there"));
+
+        var file = (await this.Ui.ByText("notes", within: "LeftPanel")).WindowBounds!;
+        await this.App.ClickAt(file.X + file.Width / 2, file.Y + file.Height / 2, clicks: 2);
+        await this.App.WaitFor(s => s.Opened.Contains(this.LeftTree["notes.txt"]), $"the file handed to its app (hit: {this.App.LastResult.GetProperty("element").GetString()})", TimeSpan.FromSeconds(5));
+
+        // the same with the preview panel open - the first click shows the file in it
+        await this.App.Key("Ctrl+Q");
+        await this.App.Cursor("inside");
+        file = (await this.Ui.ByText("notes", within: "LeftPanel")).WindowBounds!;
+        await this.App.ClickAt(file.X + file.Width / 2, file.Y + file.Height / 2, clicks: 2);
+        await this.App.WaitFor(s => s.Opened.Count == 2, $"the file handed to its app with the preview open (hit: {this.App.LastResult.GetProperty("element").GetString()})", TimeSpan.FromSeconds(5));
+        await this.App.Key("Ctrl+Q");
+
+        // on the row's drawn columns (size, date) and on its icon - not only the name
+        var panel = (await this.Ui.ById("LeftPanel")).WindowBounds!;
+        file = (await this.Ui.ByText("notes", within: "LeftPanel")).WindowBounds!;
+        await this.App.ClickAt(panel.X + panel.Width - 60, file.Y + file.Height / 2, clicks: 2);
+        await this.App.WaitFor(s => s.Opened.Count == 3, $"a double-click on the size column (hit: {this.App.LastResult.GetProperty("element").GetString()})", TimeSpan.FromSeconds(5));
+        await this.App.ClickAt(file.X - 14, file.Y + file.Height / 2, clicks: 2);
+        await this.App.WaitFor(s => s.Opened.Count == 4, $"a double-click on the icon (hit: {this.App.LastResult.GetProperty("element").GetString()})", TimeSpan.FromSeconds(5));
+
+        // in the other panel - the first click also makes it the active one
+        var other = (await this.Ui.ByText("other", within: "RightPanel")).WindowBounds!;
+        await this.App.ClickAt(other.X + other.Width / 2, other.Y + other.Height / 2, clicks: 2);
+        await this.App.WaitFor(s => s.Opened.Count == 5 && s.Opened.Contains(this.RightTree["other.txt"]), $"the inactive panel's file handed to its app (hit: {this.App.LastResult.GetProperty("element").GetString()})", TimeSpan.FromSeconds(5));
+        await this.App.Key("Tab");
+
+        var folder = (await this.Ui.ByText("inside", within: "LeftPanel")).WindowBounds!;
+        await this.App.ClickAt(folder.X + folder.Width / 2, folder.Y + folder.Height / 2, clicks: 2);
+        await this.App.WaitFor(s => s.Left.Path == this.LeftTree["inside"], "the folder opened", TimeSpan.FromSeconds(5));
+    }
+
     [Fact]
     public async Task A_mouse_click_on_a_pane_toolbar_button_runs_it()
     {

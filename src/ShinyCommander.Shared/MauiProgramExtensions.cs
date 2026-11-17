@@ -29,6 +29,10 @@ public static class MauiProgramExtensions
         builder.UseShinyMediaElementGtk();
 #else
         builder.UseShinyMediaElement();
+        // files open (and come to the front) through NSWorkspace, not the `open` tool
+#if MACOS_APPKIT
+        ShinyCommander.Core.Platform.ShellLauncher.Native = new MacWorkspaceLauncher();
+#endif
         Shiny.Maui.Controls.Office.MauiAppBuilderExtensions.UseShinyOffice(builder);
 #endif
 

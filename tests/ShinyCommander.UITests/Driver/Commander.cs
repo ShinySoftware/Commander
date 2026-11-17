@@ -115,7 +115,7 @@ public sealed class Commander(AgentClient client)
     }
 
     /// <summary>A real mouse click at a page point (macOS): mouse down/up go through the window's event routing, unlike a DevFlow tap. <see cref="LastResult"/> has <c>hit</c>, the native view chain under the point, and <c>element</c>, the MAUI elements behind it.</summary>
-    public Task<AppState> ClickAt(double x, double y, bool secondary = false) => this.Call("click_at", new { x, y, secondary });
+    public Task<AppState> ClickAt(double x, double y, bool secondary = false, int clicks = 1) => this.Call("click_at", new { x, y, secondary, clicks });
 
     /// <summary>What a click at a page point would hit, without clicking (a popup's menu would hold the main thread).</summary>
     public Task<AppState> HitAt(double x, double y) => this.Call("click_at", new { x, y, hitOnly = true });
