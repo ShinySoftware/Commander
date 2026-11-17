@@ -43,6 +43,19 @@
                         <shiny:ButtonCell Title="{l:Tr Settings_CustomizeToolbar}" ButtonTextColor="{StaticResource Accent}" Command="{Binding CustomizeToolbarCommand}" />
                     </shiny:TableSection>
 
+                    <shiny:TableSection x:Name="PreviewSection" Title="{l:Tr Settings_PreviewPosition}" shiny:RadioCell.SelectedValue="{Binding PreviewPosition, Mode=TwoWay}">
+                        <shiny:RadioCell Title="{l:Tr Settings_PreviewRight}" Value="Right" />
+                        <shiny:RadioCell Title="{l:Tr Settings_PreviewBottom}" Value="Bottom" />
+                    </shiny:TableSection>
+
+                    <shiny:TableSection Title="{l:Tr Settings_Previewers}" FooterText="{l:Tr Settings_PreviewersDesc}" ItemsSource="{Binding Previewers}">
+                        <shiny:TableSection.ItemTemplate>
+                            <DataTemplate x:DataType="vm:PreviewerToggle">
+                                <shiny:SwitchCell Title="{Binding Title}" On="{Binding IsEnabled, Mode=TwoWay}" AutomationId="{Binding Key, StringFormat='SettingsPreviewer_{0}'}" />
+                            </DataTemplate>
+                        </shiny:TableSection.ItemTemplate>
+                    </shiny:TableSection>
+
                     <shiny:TableSection Title="{l:Tr Settings_Columns}">
                         <shiny:SwitchCell Title="{l:Tr Settings_ColExtension}" On="{Binding ShowExtColumn, Mode=TwoWay}" />
                         <shiny:SwitchCell Title="{l:Tr Settings_ColSize}" On="{Binding ShowSizeColumn, Mode=TwoWay}" />

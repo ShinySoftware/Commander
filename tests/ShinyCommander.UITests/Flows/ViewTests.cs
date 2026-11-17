@@ -2,7 +2,7 @@ using ShinyCommander.UITests.Driver;
 
 namespace ShinyCommander.UITests.Flows;
 
-/// <summary>Thumbnails, columns, quick view, stacked layout, per-panel trees, hidden files, quick filter and sorting.</summary>
+/// <summary>Thumbnails, columns, stacked layout, per-panel trees, hidden files, quick filter and sorting.</summary>
 public class ViewTests(AppFixture fixture) : UiTest(fixture)
 {
     [Fact]
@@ -51,61 +51,6 @@ public class ViewTests(AppFixture fixture) : UiTest(fixture)
         var s = await this.App.Key("Right");
         this.App.LastKeyHandled.ShouldBeFalse();
         s.Left.Cursor.ShouldBe(0);
-    }
-
-    [Fact]
-    public async Task Ctrl_Q_previews_the_cursor_file_in_the_other_panel_and_follows_the_cursor()
-    {
-        await this.Start(l => l.File("one.txt", "first file").File("two.md", "# second"));
-        await this.App.Cursor("one.txt");
-
-        var s = await this.App.Key("Ctrl+Q");
-        s.Right.IsQuickView.ShouldBeTrue();
-        s.Left.IsQuickView.ShouldBeFalse();
-        s = await this.App.WaitFor(x => x.Right.QuickView.Text.Contains("first file"), "the text preview");
-        s.Right.QuickView.Title.ShouldBe("one.txt");
-        s.Right.QuickView.Kind.ShouldBe("Text");
-
-        s = await this.App.Key("Down");
-        s = await this.App.WaitFor(x => x.Right.QuickView.Title == "two.md" && x.Right.QuickView.Kind == "Markdown", "the preview to follow the cursor");
-        s.Right.QuickView.Text.ShouldContain("# second");
-    }
-
-    [Fact]
-    public async Task Quick_view_previews_images()
-    {
-        await this.Start(l => l.Bytes("dot.png", TestTree.Png1x1));
-        await this.App.Cursor("dot.png");
-
-        await this.App.Key("Ctrl+Q");
-        var s = await this.App.WaitFor(x => x.Right.QuickView.HasImage, "the image preview");
-        s.Right.QuickView.Kind.ShouldBe("Image");
-    }
-
-    [Fact]
-    public async Task Quick_view_summarizes_folders()
-    {
-        await this.Start(l => l.Dir("box").File("box/a.txt", "12345").File("box/b.txt", "1"));
-        await this.App.Cursor("box");
-
-        await this.App.Key("Ctrl+Q");
-        var s = await this.App.WaitFor(x => x.Right.QuickView.Info.Contains("2 file(s)"), "the folder summary");
-        s.Right.QuickView.Kind.ShouldBeNull();
-    }
-
-    [Fact]
-    public async Task Ctrl_Q_again_or_tabbing_into_the_preview_ends_quick_view()
-    {
-        await this.Start(l => l.File("a.txt"));
-        await this.App.Cursor("a.txt");
-
-        await this.App.Key("Ctrl+Q");
-        (await this.App.Key("Ctrl+Q")).Right.IsQuickView.ShouldBeFalse();
-
-        await this.App.Key("Ctrl+Q");
-        var s = await this.App.Key("Tab");
-        s.Right.IsQuickView.ShouldBeFalse();
-        s.ActiveSide.ShouldBe("right");
     }
 
     [Fact]

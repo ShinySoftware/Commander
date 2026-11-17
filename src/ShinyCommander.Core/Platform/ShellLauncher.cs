@@ -24,6 +24,42 @@ public static class ShellLauncher
         }
     }
 
+    /// <summary>
+    /// Opens the file with the app its type is registered to; false when there is none, for the caller to offer a
+    /// choice. Windows asks "How do you want to open this file?" itself, so it's always true there.
+    /// </summary>
+    public static async Task<bool> TryOpenWithDefaultAppAsync(string path)
+    {
+        if (OperatingSystem.IsWindows())
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(path) { UseShellExecute = true, WorkingDirectory = Path.GetDirectoryName(path) ?? "" })?.Dispose();
+            }
+            catch (System.ComponentModel.Win32Exception ex) when (ex.NativeErrorCode == NoAssociation)
+            {
+                Start("rundll32.exe", "shell32.dll,OpenAs_RunDLL " + path);
+            }
+            return true;
+        }
+
+        if (OperatingSystem.IsMacOS())
+        {
+            // open hands the file to Launch Services and exits at once - non-zero when no app claims the type
+            using var process = Process.Start(new ProcessStartInfo("open") { ArgumentList = { path }, UseShellExecute = false, RedirectStandardError = true });
+            if (process == null)
+                return false;
+            await process.WaitForExitAsync().ConfigureAwait(false);
+            return process.ExitCode == 0;
+        }
+
+        // xdg-open can run the app in the foreground - don't wait on it
+        Start("xdg-open", path);
+        return true;
+    }
+
+    const int NoAssociation = 1155; // ERROR_NO_ASSOCIATION
+
     public static void OpenWith(string application, string path)
     {
         if (OperatingSystem.IsMacOS() && application.EndsWith(".app", StringComparison.OrdinalIgnoreCase))

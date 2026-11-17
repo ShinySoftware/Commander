@@ -1000,10 +1000,21 @@
         </Grid>
         <!-- RIBBON:END -->
 
-        <!-- the two panels - side by side or stacked (Primary+Shift+L); the page re-arranges this grid -->
-        <Grid x:Name="PanelsGrid" Grid.Row="1" ColumnDefinitions="*,*" ColumnSpacing="6" RowSpacing="6" Padding="6,6,6,4">
-            <views:FilePanelView x:Name="LeftPanel" Grid.Column="0" BindingContext="{Binding Left}" />
-            <views:FilePanelView x:Name="RightPanel" Grid.Column="1" BindingContext="{Binding Right}" />
+        <!-- the panels and, when open, the preview docked right or under them; the page re-arranges both grids -->
+        <Grid x:Name="WorkArea" Grid.Row="1" Padding="6,6,6,4">
+            <!-- the two panels - side by side or stacked (Primary+Shift+L) -->
+            <Grid x:Name="PanelsGrid" ColumnDefinitions="*,*" ColumnSpacing="6" RowSpacing="6">
+                <views:FilePanelView x:Name="LeftPanel" Grid.Column="0" BindingContext="{Binding Left}" />
+                <views:FilePanelView x:Name="RightPanel" Grid.Column="1" BindingContext="{Binding Right}" />
+            </Grid>
+            <!-- drag to resize the preview against the panels -->
+            <Grid x:Name="PreviewSplitter" IsVisible="False" BackgroundColor="Transparent" AutomationId="PreviewSplitter">
+                <Grid.GestureRecognizers>
+                    <PanGestureRecognizer PanUpdated="OnPreviewSplitterPan" />
+                </Grid.GestureRecognizers>
+                <BoxView x:Name="PreviewGrip" WidthRequest="3" HeightRequest="28" CornerRadius="1.5" HorizontalOptions="Center" VerticalOptions="Center" Color="{AppThemeBinding Light={StaticResource BorderLight}, Dark={StaticResource BorderDark}}" />
+            </Grid>
+            <views:PreviewPaneView x:Name="PreviewPane" IsVisible="False" BindingContext="{Binding Preview}" />
         </Grid>
 
         <!-- console output of command-line commands -->

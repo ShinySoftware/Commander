@@ -132,10 +132,6 @@ public partial class FilePanelView : ContentView
                 this.UpdateThumbnailSpan(this.ThumbList.Width);
                 break;
 
-            case nameof(PanelViewModel.IsQuickView):
-                this.UpdateListSources();
-                break;
-
             case nameof(PanelViewModel.ToolbarItems):
                 // changed from the Customize page, while this page is covered: on AppKit the path row doesn't
                 // re-measure for the new buttons until something asks it to, so ask once the page is back
@@ -176,7 +172,7 @@ public partial class FilePanelView : ContentView
             try
             {
                 var count = this.panel?.ActiveTab?.Items.Count ?? 0;
-                if (index >= count || this.panel == null || this.panel.IsQuickView)
+                if (index >= count || this.panel == null)
                     return;
 
                 var list = this.panel.IsThumbnails ? this.ThumbList : this.FileList;
@@ -215,8 +211,8 @@ public partial class FilePanelView : ContentView
     {
         this.visibleRange = (-1, -1, null);
         var items = this.panel?.ActiveTab?.Items;
-        var details = this.panel is { ShowDetailsList: true } ? items : null;
-        var thumbs = this.panel is { ShowThumbnailList: true } ? items : null;
+        var details = this.panel is { IsDetails: true } ? items : null;
+        var thumbs = this.panel is { IsThumbnails: true } ? items : null;
         if (!ReferenceEquals(this.FileList.ItemsSource, details))
             this.FileList.ItemsSource = details;
         if (!ReferenceEquals(this.ThumbList.ItemsSource, thumbs))

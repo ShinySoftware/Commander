@@ -84,14 +84,15 @@ public sealed partial class SqliteDatabase : IDisposable
         }
     }
 
-    public static SqliteDatabase Open(string path)
+    /// <param name="readOnly">The preview panel's look - it must never change the file, or hold a write lock on it.</param>
+    public static SqliteDatabase Open(string path, bool readOnly = false)
     {
         // no pooling: a pooled connection keeps the file open after Dispose, which blocks deleting or moving it and
         // hides the last write from the archive/server write-back
         var cs = new SqliteConnectionStringBuilder
         {
             DataSource = path,
-            Mode = SqliteOpenMode.ReadWrite,
+            Mode = readOnly ? SqliteOpenMode.ReadOnly : SqliteOpenMode.ReadWrite,
             Pooling = false
         }.ToString();
         var connection = new SqliteConnection(cs);

@@ -31,6 +31,20 @@ public class SqliteDatabaseTests
     }
 
     [Fact]
+    public void Opened_read_only_it_reads_but_never_writes()
+    {
+        using var dir = new TempDir();
+        var path = Create(dir, People);
+        using (var db = SqliteDatabase.Open(path, readOnly: true))
+        {
+            db.Execute("SELECT name FROM people ORDER BY id").Rows.Select(x => x[0]).ShouldBe(["Ann", "Bob", "Cy"]);
+            Should.Throw<SqliteException>(() => db.Execute("DELETE FROM people"));
+        }
+        using var check = SqliteDatabase.Open(path);
+        check.Count("people").ShouldBe(3);
+    }
+
+    [Fact]
     public void Lists_tables_and_views_with_their_columns()
     {
         using var dir = new TempDir();

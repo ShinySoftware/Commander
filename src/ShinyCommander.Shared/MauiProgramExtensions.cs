@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Shiny.Mediator;
 using ShinyCommander.Services.Editors;
+using ShinyCommander.Services.Previewers;
 
 namespace ShinyCommander;
 
@@ -45,6 +46,15 @@ public static class MauiProgramExtensions
             .AddFileEditor<ImageMetadataFileEditor>()
             .AddFileEditor<SqliteFileEditor>()
             .AddFileEditor<TextFileEditor>();
+        // the preview panel: a previewer per file type, asked in order - text / hex for whatever none of them takes
+        builder.Services.AddSingleton<FilePreviewers>();
+        builder.Services.AddSingleton<PreviewPaneViewModel>();
+        builder.Services
+            .AddFilePreviewer<ImageFilePreviewer>()
+            .AddFilePreviewer<MarkdownFilePreviewer>()
+            .AddFilePreviewer<HtmlFilePreviewer>()
+            .AddFilePreviewer<PdfFilePreviewer>()
+            .AddFilePreviewer<SqliteFilePreviewer>();
         // for UpdateService's hourly check
         builder.Services.AddSingleton(TimeProvider.System);
         builder.Services.AddSingleton(sp => sp.GetRequiredService<IDispatcherProvider>().GetForCurrentThread()!);

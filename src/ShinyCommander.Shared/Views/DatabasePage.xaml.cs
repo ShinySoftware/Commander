@@ -123,7 +123,7 @@ public partial class DatabasePage : ContentPage
 
         var vm = this.vm;
         var editable = vm.CanEditRows;
-        var grid = NewGrid();
+        var grid = SqliteGrid.New();
         grid.PageSize = DatabaseViewModel.PageSize;
         grid.SortMode = DataGridSortMode.Single;
         grid.EmptyText = L.Database_NoRows;
@@ -137,9 +137,9 @@ public partial class DatabasePage : ContentPage
         for (var i = 0; i < vm.Columns.Count; i++)
         {
             var index = i;
-            var column = Column(index, vm.Columns[i].Name);
+            var column = SqliteGrid.Column(index, vm.Columns[i].Name);
             column.ValueGetter = row => SqliteDatabase.Format(((SqliteRow)row).Values[index]);
-            column.CellTemplate = CellText(column.ValueGetter);
+            column.CellTemplate = SqliteGrid.CellText(column.ValueGetter);
             column.ValueSetter = (_, value) => this.edits[index] = value?.ToString();
             column.Editable = editable;
             grid.Columns.Add(column);
@@ -187,54 +187,19 @@ public partial class DatabasePage : ContentPage
             return;
         }
 
-        var grid = NewGrid();
+        var grid = SqliteGrid.New();
         grid.ReadOnly = true;
         grid.SortMode = DataGridSortMode.Single;
         grid.EmptyText = L.Database_NoRows;
         for (var i = 0; i < result.Columns.Count; i++)
         {
             var index = i;
-            var column = Column(index, result.Columns[i]);
+            var column = SqliteGrid.Column(index, result.Columns[i]);
             column.ValueGetter = row => SqliteDatabase.Format(((object?[])row)[index]);
-            column.CellTemplate = CellText(column.ValueGetter);
+            column.CellTemplate = SqliteGrid.CellText(column.ValueGetter);
             grid.Columns.Add(column);
         }
         grid.ItemsSource = result.Rows.ToList();
         this.QueryHost.Content = grid;
     }
-
-    // the grid's own cell binds "Data.<PropertyName>" and never asks ValueGetter, so a row that is an array of values
-    // shows nothing - this is that cell (dense padding, theme text colour) reading through the getter instead
-    static DataTemplate CellText(Func<object, object?> getter) => new(() =>
-    {
-        var label = new Label
-        {
-            Padding = new Thickness(10, 6),
-            VerticalTextAlignment = TextAlignment.Center,
-            LineBreakMode = LineBreakMode.TailTruncation,
-            FontSize = 12
-        };
-        label.SetDynamicResource(Label.TextColorProperty, "Shiny.Color.OnSurfaceVariant");
-        label.SetDynamicResource(Label.FontFamilyProperty, "MonoFont");
-        label.BindingContextChanged += (_, _) => label.Text = label.BindingContext is { } row ? getter(row) as string : null;
-        return label;
-    });
-
-    static DataGrid NewGrid() => new()
-    {
-        Dense = true,
-        Striped = true,
-        HorizontalScroll = true,
-        AllowColumnResize = true,
-        DefaultColumnWidth = 160
-    };
-
-    // ids are positional: a query can return two columns with the same name ("a.id, b.id")
-    static DataGridColumn Column(int index, string title) => new()
-    {
-        Title = title,
-        PropertyName = "c" + index,
-        Filterable = false,
-        MinWidth = 60
-    };
 }

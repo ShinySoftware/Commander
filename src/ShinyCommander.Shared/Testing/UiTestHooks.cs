@@ -83,6 +83,14 @@ public static class UiTestHooks
             await main.Right.RefreshShowTabsAsync();
             return (object)true;
         });
+        Map(ext, "previewer", "A preview plugin on or off, as its Settings switch does it, until reset: { key, on = true }", (main, a) =>
+        {
+            var previewers = Service<FilePreviewers>();
+            var previewer = previewers.All.Single(x => x.Key == Str(a, "key"));
+            previewers.SetEnabled(previewer, !(a.TryGetProperty("on", out var on) && on.ValueKind == JsonValueKind.False));
+            return Task.FromResult((object)true);
+        });
+        Map(ext, "preview_js", "Runs JavaScript in the preview panel's web view (HTML / PDF previews) and returns the result: { script }", PreviewJs);
         Map(ext, "click_at", "A real mouse click (macOS): mouse down/up NSEvents through the window at page point { x, y, secondary = false } - AppKit hit-testing and all. Returns the native view under it (hit) and the MAUI elements behind it (element)", ClickAt);
         Map(ext, "real_dialogs", "Show the real dialogs instead of answering from the queue: { on = true }", RealDialogs);
         ext.MapTool("state_now", "The state without waiting for the app to settle (while a real dialog is open)", "POST", "state_now",
@@ -115,6 +123,21 @@ public static class UiTestHooks
 
     static T Service<T>() where T : notnull => IPlatformApplication.Current!.Services.GetRequiredService<T>();
 
+    // straight to WKWebView: MAUI's EvaluateJavaScriptAsync wraps the script in eval(), which the HTML preview's
+    // script-src 'none' policy refuses
+    static async Task<object> PreviewJs(MainViewModel main, JsonElement args)
+    {
+        var script = Str(args, "script") ?? "document.body.innerText";
+#if MACOS_APPKIT
+        if (main.Preview.PluginView?.Handler?.PlatformView is WebKit.WKWebView web)
+        {
+            var result = await web.EvaluateJavaScriptAsync(script);
+            return result?.ToString() ?? "(null)";
+        }
+#endif
+        return main.Preview.PluginView is WebView view ? (object)(await view.EvaluateJavaScriptAsync(script) ?? "(null)") : "(no web view)";
+    }
+
     static string? Str(JsonElement e, string name) => e.ValueKind == JsonValueKind.Object && e.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
 
     static PanelViewModel Panel(MainViewModel main, JsonElement args) => Str(args, "side")?.ToLowerInvariant() switch
@@ -135,8 +158,7 @@ public static class UiTestHooks
                 || main.IsCommandRunning
                 || main.Left.ActiveTab?.IsLoading == true
                 || main.Right.ActiveTab?.IsLoading == true
-                || main.Left.QuickView.IsLoading
-                || main.Right.QuickView.IsLoading;
+                || main.Preview.IsLoading;
             if (!busy)
                 break;
             await Task.Delay(25);
@@ -439,9 +461,11 @@ public static class UiTestHooks
         main.IsPathEditing = false;
         main.IsFilterEditing = false;
 
+        main.Preview.IsOpen = false;
+        main.Preview.Position = PreviewPosition.Right;
+        Service<AppSettings>().DisabledPreviewers = null;
         foreach (var (panel, path) in new[] { (main.Left, Str(args, "left")), (main.Right, Str(args, "right")) })
         {
-            panel.IsQuickView = false;
             panel.ShowTree = false;
             panel.TreeWidth = 240;
             panel.ShowQuickFilter = false;
@@ -506,6 +530,18 @@ public static class UiTestHooks
             columns = Enum.GetValues<PanelColumn>().Where(columns.IsVisible).Select(x => x.ToString()).ToList(),
             left = PanelState(main.Left),
             right = PanelState(main.Right),
+            preview = new
+            {
+                isOpen = main.Preview.IsOpen,
+                position = main.Preview.Position.ToString(),
+                size = main.Preview.Size,
+                title = main.Preview.Title,
+                kind = main.Preview.Kind?.ToString(),
+                previewer = main.Preview.PreviewerKey,
+                viewType = main.Preview.PluginView?.GetType().Name,
+                info = main.Preview.Info,
+                text = main.Preview.Text.Length > 500 ? main.Preview.Text[..500] : main.Preview.Text
+            },
             dialogs = dialogs.Log,
             pendingAnswers = dialogs.PendingAnswers,
             focus = NativeFocus(),
@@ -621,7 +657,6 @@ public static class UiTestHooks
             treePath = p.TreePath,
             treeWidth = p.TreeWidth,
             showQuickFilter = p.ShowQuickFilter,
-            isQuickView = p.IsQuickView,
             thumbnailSpan = p.ThumbnailSpan,
             tabs = p.Tabs.Select(t => t.Path).ToList(),
             lockedTabs = p.Tabs.Select(t => t.IsLocked).ToList(),
@@ -630,14 +665,6 @@ public static class UiTestHooks
             tabIcons = p.Tabs.Select(t => t.IconKey).ToList(),
             showTabs = p.ShowTabs,
             activeTab = tab == null ? -1 : p.Tabs.IndexOf(tab),
-            quickView = new
-            {
-                title = p.QuickView.Title,
-                kind = p.QuickView.Kind?.ToString(),
-                info = p.QuickView.Info,
-                text = p.QuickView.Text.Length > 500 ? p.QuickView.Text[..500] : p.QuickView.Text,
-                hasImage = p.QuickView.Image != null
-            },
             cursor = tab?.CursorIndex ?? -1,
             cursorName = tab?.CursorItem?.Entry.Name,
             markedCount = tab?.MarkedCount ?? 0,

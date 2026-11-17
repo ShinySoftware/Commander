@@ -110,7 +110,7 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
         await this.App.Navigate(views, "right");
         await this.App.Cursor("README.md", "left");
 
-        // quick view: the other panel renders the file under the cursor
+        // the preview panel renders the file under the cursor
         await this.App.Command("QuickView");
         await this.Shot("quick-view");
         await this.App.Command("QuickView");

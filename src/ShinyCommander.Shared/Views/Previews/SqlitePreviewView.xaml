@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:conv="clr-namespace:ShinyCommander.Converters"
+             x:Class="ShinyCommander.Views.SqlitePreviewView">
+
+    <ContentView.Resources>
+        <conv:BoolToThemeColorConverter x:Key="BoolColor" />
+    </ContentView.Resources>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- tables and views; a fixed height - a horizontal ScrollView left to size itself is 0 tall on AppKit -->
+        <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never" HeightRequest="34" Padding="6,0">
+            <HorizontalStackLayout x:Name="ObjectList" Spacing="4" VerticalOptions="Center">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="vm:DatabaseObjectItem">
+                        <!-- a converter, not a DataTrigger: the AppKit backend doesn't restore trigger setters on exit -->
+                        <Border Style="{StaticResource Chip}" AutomationId="{Binding Name, StringFormat='PreviewDbObject_{0}'}"
+                                BackgroundColor="{Binding IsSelected, Converter={StaticResource BoolColor}, ConverterParameter='CursorInactive|Transparent'}">
+                            <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnObjectTapped" /></Border.GestureRecognizers>
+                            <HorizontalStackLayout Spacing="4">
+                                <shiny:MotionIconView Icon="{Binding Icon}" Trigger="Hover,Press" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="13" HeightRequest="13" VerticalOptions="Center" />
+                                <Label Text="{Binding Name}" FontSize="12" VerticalTextAlignment="Center" />
+                            </HorizontalStackLayout>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </HorizontalStackLayout>
+        </ScrollView>
+        <BoxView Style="{StaticResource Hairline}" />
+
+        <!-- the grid is built in code - its columns are the table's -->
+        <ContentView x:Name="GridHost" Grid.Row="1" />
+
+        <Label x:Name="RowsLabel" Grid.Row="2" Style="{StaticResource Subtle}" FontSize="11" Padding="10,4" LineBreakMode="TailTruncation" />
+    </Grid>
+</ContentView>

@@ -219,7 +219,7 @@
     <value>Árbol de carpetas</value>
   </data>
   <data name="Cmd_QuickView" xml:space="preserve">
-    <value>Vista rápida</value>
+    <value>Vista previa</value>
   </data>
   <data name="Cmd_TogglePanelLayout" xml:space="preserve">
     <value>Apilar paneles</value>
@@ -454,7 +454,7 @@
     <value>Elegir columnas</value>
   </data>
   <data name="Key_QuickView" xml:space="preserve">
-    <value>Vista rápida en el otro panel</value>
+    <value>Mostrar u ocultar el panel de vista previa</value>
   </data>
   <data name="Key_Jobs" xml:space="preserve">
     <value>Tareas en segundo plano - progreso, detener, ir a</value>
@@ -1523,9 +1523,6 @@ Salir las detiene a medias. Lo que ya se copió, movió o eliminó se queda así
   <data name="Tree_Home" xml:space="preserve">
     <value>Inicio</value>
   </data>
-  <data name="QuickView_Title" xml:space="preserve">
-    <value>Vista rápida</value>
-  </data>
   <data name="QuickView_NothingToPreview" xml:space="preserve">
     <value>Nada que previsualizar</value>
   </data>
@@ -2015,5 +2012,62 @@ Inténtalo de nuevo.</value>
   </data>
   <data name="ImageMeta_ExportUnsupported" xml:space="preserve">
     <value>La imagen no se guardó: el ImageEditor de Shiny aún no puede exportar una imagen editada en esta plataforma. La foto no ha cambiado.</value>
+  </data>
+  <data name="Preview_Title" xml:space="preserve">
+    <value>Vista previa</value>
+  </data>
+  <data name="Preview_Images" xml:space="preserve">
+    <value>Imágenes</value>
+  </data>
+  <data name="Preview_Markdown" xml:space="preserve">
+    <value>Markdown</value>
+  </data>
+  <data name="Preview_Html" xml:space="preserve">
+    <value>Páginas web (HTML)</value>
+  </data>
+  <data name="Preview_Pdf" xml:space="preserve">
+    <value>Documentos PDF</value>
+  </data>
+  <data name="Preview_Sqlite" xml:space="preserve">
+    <value>Bases de datos SQLite</value>
+  </data>
+  <data name="Preview_NoTables" xml:space="preserve">
+    <value>Sin tablas ni vistas</value>
+  </data>
+  <data name="Preview_Rows" xml:space="preserve">
+    <value>{0} fila(s)</value>
+  </data>
+  <data name="Preview_RowsTruncated" xml:space="preserve">
+    <value>Primeras {0} de {1} filas  •  F4 abre la base de datos</value>
+  </data>
+  <data name="Preview_Dock" xml:space="preserve">
+    <value>Acoplar la vista previa a la derecha o debajo de los paneles</value>
+  </data>
+  <data name="Preview_Close" xml:space="preserve">
+    <value>Cerrar la vista previa</value>
+  </data>
+  <data name="Settings_PreviewPosition" xml:space="preserve">
+    <value>Panel de vista previa</value>
+  </data>
+  <data name="Settings_PreviewRight" xml:space="preserve">
+    <value>A la derecha de los paneles</value>
+  </data>
+  <data name="Settings_PreviewBottom" xml:space="preserve">
+    <value>Debajo de los paneles</value>
+  </data>
+  <data name="Settings_Previewers" xml:space="preserve">
+    <value>Vistas previas por tipo</value>
+  </data>
+  <data name="Settings_PreviewersDesc" xml:space="preserve">
+    <value>Un tipo de archivo con la vista previa desactivada se muestra como texto o hexadecimal.</value>
+  </data>
+  <data name="OpenWith_Title" xml:space="preserve">
+    <value>Abrir «{0}» con</value>
+  </data>
+  <data name="OpenWith_Message" xml:space="preserve">
+    <value>Ninguna app abre este tipo de archivo. Escribe el programa con el que abrirlo:</value>
+  </data>
+  <data name="OpenWith_Open" xml:space="preserve">
+    <value>Abrir</value>
   </data>
 </root>

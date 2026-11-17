@@ -29,7 +29,6 @@ public partial class PanelViewModel : ObservableObject
         this.vfs = vfs;
         this.settings = settings;
         this.Columns = new ColumnLayout(columns);
-        this.QuickView = new QuickViewViewModel(vfs);
         this.Tree = new FolderTreeViewModel(settings);
         this.ShowTree = side == PanelSide.Left ? settings.LeftShowTree : settings.RightShowTree;
         var savedWidth = side == PanelSide.Left ? settings.LeftTreeWidth : settings.RightTreeWidth;
@@ -48,7 +47,6 @@ public partial class PanelViewModel : ObservableObject
     public partial IReadOnlyList<PaneToolbarItem> ToolbarItems { get; set; }
     /// <summary>This panel's columns - the user's choice, narrowed to what fits the panel.</summary>
     public ColumnLayout Columns { get; }
-    public QuickViewViewModel QuickView { get; }
 
     /// <summary>This panel's folder tree (rows for a virtualized list).</summary>
     public FolderTreeViewModel Tree { get; }
@@ -73,7 +71,7 @@ public partial class PanelViewModel : ObservableObject
     public partial bool ShowTree { get; set; }
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsThumbnails), nameof(IsDetails), nameof(ShowDetailsList), nameof(ShowThumbnailList))]
+    [NotifyPropertyChangedFor(nameof(IsThumbnails), nameof(IsDetails))]
     public partial PanelViewMode ViewMode { get; set; }
 
     public bool IsThumbnails => this.ViewMode == PanelViewMode.Thumbnails;
@@ -83,14 +81,6 @@ public partial class PanelViewModel : ObservableObject
     public int ThumbnailSpan { get; set; } = 4;
 
     public double ThumbnailSize => Math.Clamp(this.settings.ThumbnailSize <= 0 ? 112 : this.settings.ThumbnailSize, 64, 256);
-
-    /// <summary>Showing a preview of the other panel's cursor instead of its own files.</summary>
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(ShowDetailsList), nameof(ShowThumbnailList))]
-    public partial bool IsQuickView { get; set; }
-
-    public bool ShowDetailsList => this.IsDetails && !this.IsQuickView;
-    public bool ShowThumbnailList => this.IsThumbnails && !this.IsQuickView;
 
     partial void OnShowTreeChanged(bool value)
     {
@@ -107,15 +97,6 @@ public partial class PanelViewModel : ObservableObject
         else
             this.settings.RightViewMode = value.ToString();
         this.RequestScroll();
-    }
-
-    partial void OnIsQuickViewChanged(bool value)
-    {
-        if (!value)
-        {
-            this.QuickView.Clear();
-            this.RequestScroll();
-        }
     }
 
     /// <summary>Raised when the UI should scroll the cursor into view.</summary>

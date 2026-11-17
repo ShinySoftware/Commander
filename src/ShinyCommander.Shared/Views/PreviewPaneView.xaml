@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:l="clr-namespace:ShinyCommander"
+             x:Class="ShinyCommander.Views.PreviewPaneView"
+             x:DataType="vm:PreviewPaneViewModel">
+
+    <!-- the preview panel (Ctrl+Q): whatever is under the active panel's cursor -->
+    <Border Style="{StaticResource Card}" Padding="0" AutomationId="PreviewPane">
+        <Grid RowDefinitions="Auto,*,Auto">
+            <Grid Padding="10,2,4,2" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="8" Style="{StaticResource Toolbar}">
+                <shiny:MotionIconView Icon="{Binding MotionIcon}" Color="{Binding IconColor}" Trigger="Appear" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                <Label Grid.Column="1" Text="{Binding Title}" FontAttributes="Bold" FontSize="13" VerticalTextAlignment="Center" LineBreakMode="MiddleTruncation" AutomationId="PreviewTitle" />
+                <Border Grid.Column="2" Style="{StaticResource Chip}" AutomationId="PreviewDock" ToolTipProperties.Text="{l:Tr Preview_Dock}">
+                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding DockCommand}" /></Border.GestureRecognizers>
+                    <shiny:MotionIconView Icon="{Binding DockIcon}" Trigger="Hover,Press" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="14" HeightRequest="14" VerticalOptions="Center" />
+                </Border>
+                <shiny:ShinyButton Grid.Column="3" Text="✕" Command="{Binding CloseCommand}" Appearance="Text" FontSize="12" ContentPadding="6,2" AutomationId="PreviewClose" ToolTipProperties.Text="{l:Tr Preview_Close, Suffix=' (Ctrl+Q)'}" />
+            </Grid>
+
+            <Grid Grid.Row="1">
+                <ContentView Content="{Binding PluginView}" IsVisible="{Binding IsPlugin}" />
+                <ScrollView IsVisible="{Binding IsText}" Orientation="Both">
+                    <Label Text="{Binding Text}" FontFamily="{DynamicResource MonoFont}" FontSize="12" Margin="10" />
+                </ScrollView>
+                <VerticalStackLayout IsVisible="{Binding IsSummary}" Spacing="12" HorizontalOptions="Center" VerticalOptions="Center" Padding="20">
+                    <shiny:MotionIconView Icon="{Binding MotionIcon}" Color="{Binding IconColor}" Trigger="Appear,Hover" StrokeWidth="1.5" WidthRequest="72" HeightRequest="72" HorizontalOptions="Center" />
+                    <Label Text="{Binding Info}" Style="{StaticResource Subtle}" HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+                <shiny:MotionIconView Icon="loader" IsPlaying="{Binding IsLoading}" IsVisible="{Binding IsLoading}" Color="{StaticResource Accent}" WidthRequest="32" HeightRequest="32" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Grid>
+
+            <Label Grid.Row="2" Text="{Binding Info}" IsVisible="{Binding HasContent}" Style="{StaticResource Subtle}" FontSize="11" Padding="10,4" LineBreakMode="TailTruncation" />
+        </Grid>
+    </Border>
+</ContentView>

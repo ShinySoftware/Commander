@@ -43,7 +43,8 @@ public partial class MainViewModel : ObservableObject,
         JobQueue jobs,
         QuitGuard quitGuard,
         RemoteConnections connections,
-        FileEditors editors
+        FileEditors editors,
+        PreviewPaneViewModel preview
     )
     {
         this.connections = connections;
@@ -96,6 +97,12 @@ public partial class MainViewModel : ObservableObject,
         this.Right.TabsChanged += (_, _) => this.SaveState();
         this.Left.ScrollRequested += this.OnPanelCursorMoved;
         this.Right.ScrollRequested += this.OnPanelCursorMoved;
+        this.Preview = preview;
+        this.Preview.PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName == nameof(PreviewPaneViewModel.IsOpen))
+                this.UpdatePreview();
+        };
         this.StackPanels = settings.StackPanels;
         this.RibbonTab = settings.RibbonTab is { Length: > 0 } ribbonTab ? ribbonTab : "files";
 
@@ -121,6 +128,9 @@ public partial class MainViewModel : ObservableObject,
 
     public PanelViewModel Left { get; }
     public PanelViewModel Right { get; }
+
+    /// <summary>The preview panel (Ctrl+Q) - follows the active panel's cursor.</summary>
+    public PreviewPaneViewModel Preview { get; }
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(InactivePanel))]
@@ -303,10 +313,7 @@ public partial class MainViewModel : ObservableObject,
         this.ActivePanel = panel;
         panel.IsActive = true;
 
-        // the preview belongs to the side you're not working in - focusing it ends quick view
-        if (panel.IsQuickView)
-            panel.IsQuickView = false;
-        this.UpdateQuickView();
+        this.UpdatePreview();
 
         this.UpdatePrompt();
         this.SaveState();
@@ -315,13 +322,13 @@ public partial class MainViewModel : ObservableObject,
     void OnPanelCursorMoved(object? sender, int index)
     {
         if (sender == this.ActivePanel)
-            this.UpdateQuickView();
+            this.UpdatePreview();
     }
 
-    void UpdateQuickView()
+    void UpdatePreview()
     {
-        if (this.ActivePanel is { } active && this.InactivePanel.IsQuickView)
-            _ = this.InactivePanel.QuickView.ShowAsync(active.ActiveTab?.CursorItem?.Entry);
+        if (this.Preview.IsOpen && this.ActivePanel is { } active)
+            _ = this.Preview.ShowAsync(active.ActiveTab?.CursorItem?.Entry);
     }
 
     // Mediator events --------------------------------------------------------------------------
@@ -506,13 +513,23 @@ public partial class MainViewModel : ObservableObject,
             }
             else
             {
-                ShellLauncher.OpenWithDefaultApp(await this.LocalCopy(item.Entry));
+                var path = await this.LocalCopy(item.Entry);
+                if (!await ShellLauncher.TryOpenWithDefaultAppAsync(path))
+                    await this.OpenWithChosenApp(path);
             }
         }
         catch (Exception ex)
         {
             await this.dialogs.Alert(L.Main_CannotOpen, ex.Message);
         }
+    }
+
+    // nothing is registered for the file's type - ask which app to use
+    async Task OpenWithChosenApp(string path)
+    {
+        var app = await AppChooser.ChooseAsync(this.dialogs, Path.GetFileName(path));
+        if (app != null)
+            ShellLauncher.OpenWith(app, path);
     }
 
     public void ClickItem(PanelViewModel panel, FileItemViewModel item, bool doubleTap)
@@ -669,14 +686,9 @@ public partial class MainViewModel : ObservableObject,
         this.CursorRightCommand.NotifyCanExecuteChanged();
     }
 
-    /// <summary>Ctrl+Q - the other panel previews the file under the cursor.</summary>
+    /// <summary>Ctrl+Q - opens or closes the preview panel.</summary>
     [RelayCommand]
-    void QuickView()
-    {
-        var target = this.InactivePanel;
-        target.IsQuickView = !target.IsQuickView;
-        this.UpdateQuickView();
-    }
+    void QuickView() => this.Preview.IsOpen = !this.Preview.IsOpen;
 
     /// <summary>Pick which detail columns the panels show; the list stays open until Done.</summary>
     [RelayCommand]

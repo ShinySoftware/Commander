@@ -104,6 +104,16 @@ public sealed class Commander(AgentClient client)
     /// <summary>Folder tabs on or off, as the Settings switch does it (reset turns them back on).</summary>
     public Task<AppState> ShowTabs(bool on = true) => this.Call("show_tabs", new { on });
 
+    /// <summary>A preview plugin (IFilePreviewer.Key) on or off, as its Settings switch does it (reset turns them all back on).</summary>
+    public Task<AppState> Previewer(string key, bool on = true) => this.Call("previewer", new { key, on });
+
+    /// <summary>Runs JavaScript in the preview panel's web view; the result is a string in <see cref="LastResult"/>.</summary>
+    public async Task<string?> PreviewJs(string script)
+    {
+        await this.Call("preview_js", new { script });
+        return this.LastResult.ValueKind == JsonValueKind.String ? this.LastResult.GetString() : this.LastResult.ToString();
+    }
+
     /// <summary>A real mouse click at a page point (macOS): mouse down/up go through the window's event routing, unlike a DevFlow tap. <see cref="LastResult"/> has <c>hit</c>, the native view chain under the point, and <c>element</c>, the MAUI elements behind it.</summary>
     public Task<AppState> ClickAt(double x, double y, bool secondary = false) => this.Call("click_at", new { x, y, secondary });
 

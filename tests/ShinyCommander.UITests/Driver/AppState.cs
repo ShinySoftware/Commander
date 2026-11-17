@@ -19,6 +19,7 @@ public sealed record AppState
     public List<string> Columns { get; init; } = [];
     public PanelState Left { get; init; } = new();
     public PanelState Right { get; init; } = new();
+    public PreviewState Preview { get; init; } = new();
     public List<DialogRecord> Dialogs { get; init; } = [];
     public int PendingAnswers { get; init; }
 
@@ -51,7 +52,6 @@ public sealed record PanelState
     public string? TreePath { get; init; }
     public double TreeWidth { get; init; }
     public bool ShowQuickFilter { get; init; }
-    public bool IsQuickView { get; init; }
     public int ThumbnailSpan { get; init; }
     public List<string> Tabs { get; init; } = [];
     public List<bool> LockedTabs { get; init; } = [];
@@ -60,7 +60,6 @@ public sealed record PanelState
     public List<string?> TabIcons { get; init; } = [];
     public bool ShowTabs { get; init; }
     public int ActiveTab { get; init; }
-    public QuickViewState QuickView { get; init; } = new();
     public int Cursor { get; init; }
     public string? CursorName { get; init; }
     public int MarkedCount { get; init; }
@@ -86,13 +85,21 @@ public sealed record PanelState
         ?? throw new ShouldAssertException($"'{name}' is not listed in {this.Path} (has: {String.Join(", ", this.Names)})");
 }
 
-public sealed record QuickViewState
+public sealed record PreviewState
 {
+    public bool IsOpen { get; init; }
+    public string Position { get; init; } = "";
+    public double Size { get; init; }
     public string Title { get; init; } = "";
+
+    /// <summary>The built-in view ("Text" / "Hex"), or null while a previewer or the summary shows.</summary>
     public string? Kind { get; init; }
+
+    /// <summary>The IFilePreviewer.Key showing the file ("image", "markdown", "html", "pdf", "sqlite").</summary>
+    public string? Previewer { get; init; }
+    public string? ViewType { get; init; }
     public string Info { get; init; } = "";
     public string Text { get; init; } = "";
-    public bool HasImage { get; init; }
 }
 
 public sealed record ItemState

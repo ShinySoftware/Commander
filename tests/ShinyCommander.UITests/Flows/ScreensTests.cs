@@ -33,6 +33,19 @@ public class ScreensTests(AppFixture fixture) : UiTest(fixture)
         t.Bytes("pixel.png", TestTree.Png1x1);
         t.Zip("bundle.zip", ("a.txt", "A"), ("docs/b.txt", "B"));
         t.TarGz("site.tar.gz", ("index.html", "<h1/>"));
+        t.File("page.html", "<html><head><style>body{font-family:-apple-system;padding:12px} h1{color:#2F6FDE}</style></head><body><h1>Release notes</h1><p>A <b>dual pane</b> file manager.</p><ul><li>Preview panel</li><li>PDF, HTML, SQLite</li></ul><script>document.body.innerHTML='scripts ran'</script></body></html>");
+        // a real PDF where the machine can make one (cupsfilter renders text)
+        if (File.Exists("/usr/sbin/cupsfilter"))
+        {
+            using var p = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("/bin/sh", ["-c", $"/usr/sbin/cupsfilter '{t["notes.txt"]}' > '{t["doc.pdf"]}' 2>/dev/null"]))!;
+            p.WaitForExit();
+        }
+        using (var p = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("/usr/bin/sqlite3", [t["app.db"]]) { RedirectStandardInput = true })!)
+        {
+            p.StandardInput.Write("CREATE TABLE people (id INTEGER PRIMARY KEY, name TEXT, city TEXT); INSERT INTO people (name, city) VALUES ('Ann','Toronto'),('Bob','Montreal'),('Cy','Halifax'); CREATE VIEW cities AS SELECT DISTINCT city FROM people;");
+            p.StandardInput.Close();
+            p.WaitForExit();
+        }
         t.File("a very long file name that will not fit in the name column at all.txt");
         for (var i = 1; i <= 25; i++)
             t.File($"file{i:00}.log", new string('x', i * 100));
@@ -59,11 +72,28 @@ public class ScreensTests(AppFixture fixture) : UiTest(fixture)
         await this.App.Key("Primary+F2");
 
         await this.App.Key("Ctrl+Q");
-        await this.Shot("04-quickview-text");
+        await this.Shot("04-preview-text");
         await this.App.Cursor("readme.md");
-        await this.Shot("05-quickview-markdown");
+        await this.Shot("05-preview-markdown");
         await this.App.Cursor("Documents");
-        await this.Shot("06-quickview-folder");
+        await this.Shot("06-preview-folder");
+        await this.App.Cursor("page.html");
+        await this.App.WaitFor(x => x.Preview.Previewer == "html", "the html previewer");
+        await this.Shot("06-preview-html");
+        if (File.Exists(this.LeftTree["doc.pdf"]))
+        {
+            await this.App.Cursor("doc.pdf");
+            await this.App.WaitFor(x => x.Preview.Previewer == "pdf", "the pdf previewer");
+            await this.Shot("06-preview-pdf");
+        }
+        await this.App.Cursor("app.db");
+        await this.App.WaitFor(x => x.Preview.Previewer == "sqlite", "the sqlite previewer");
+        await this.Shot("06-preview-sqlite");
+        await this.Ui.Tap("PreviewDock");
+        await this.App.Cursor("pixel.png");
+        await this.App.WaitFor(x => x.Preview.Previewer == "image", "the image previewer");
+        await this.Shot("06-preview-image-bottom");
+        await this.Ui.Tap("PreviewDock");
         await this.App.Key("Ctrl+Q");
 
         await this.App.Key("Primary+F8");

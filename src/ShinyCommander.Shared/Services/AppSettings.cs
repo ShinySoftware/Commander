@@ -48,6 +48,14 @@ public partial class AppSettings
     /// <summary>Panels stacked top/bottom instead of side by side.</summary>
     [Bind] public partial bool StackPanels { get; set; }
 
+    /// <summary>The preview panel (Ctrl+Q): open, docked "Right" or "Bottom", and its width / height (0 until dragged).</summary>
+    [Bind] public partial bool PreviewOpen { get; set; }
+    [Bind] public partial string? PreviewPosition { get; set; }
+    [Bind] public partial int PreviewSize { get; set; }
+
+    /// <summary>Preview plugins turned off in Settings (IFilePreviewer.Key), comma separated.</summary>
+    [Bind] public partial string? DisabledPreviewers { get; set; }
+
     /// <summary>Per-panel folder tree.</summary>
     [Bind] public partial bool LeftShowTree { get; set; }
     [Bind] public partial bool RightShowTree { get; set; }

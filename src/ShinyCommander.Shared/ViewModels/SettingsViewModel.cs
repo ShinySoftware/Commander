@@ -1,8 +1,24 @@
 namespace ShinyCommander.ViewModels;
 
 [ShellMap<SettingsPage>("Settings")]
-public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, UpdateService updates, INavigator navigator, IAppDialogs dialogs) : ObservableObject
+public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, UpdateService updates, INavigator navigator, IAppDialogs dialogs, FilePreviewers previewers, PreviewPaneViewModel preview) : ObservableObject
 {
+    /// <summary>"Right" or "Bottom" - moves the open panel at once.</summary>
+    public string PreviewPosition
+    {
+        get => preview.Position.ToString();
+        set
+        {
+            if (!Enum.TryParse<PreviewPosition>(value, out var position))
+                return;
+            preview.Position = position;
+            this.OnPropertyChanged();
+        }
+    }
+
+    /// <summary>One switch per preview plugin; a type whose previewer is off shows as text / hex.</summary>
+    public IReadOnlyList<PreviewerToggle> Previewers { get; } = previewers.All.Select(x => new PreviewerToggle(previewers, x)).ToList();
+
     public bool ShowExtColumn { get => columns.ShowExtension; set { columns.Set(PanelColumn.Extension, value); this.OnPropertyChanged(); } }
     public bool ShowSizeColumn { get => columns.ShowSize; set { columns.Set(PanelColumn.Size, value); this.OnPropertyChanged(); } }
     public bool ShowDateColumn { get => columns.ShowModified; set { columns.Set(PanelColumn.Modified, value); this.OnPropertyChanged(); } }
@@ -118,4 +134,20 @@ public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, 
 
     [RelayCommand]
     Task Close() => navigator.GoBack();
+}
+
+public sealed class PreviewerToggle(FilePreviewers previewers, IFilePreviewer previewer) : ObservableObject
+{
+    public string Title => previewer.Title;
+    public string Key => previewer.Key;
+
+    public bool IsEnabled
+    {
+        get => previewers.IsEnabled(previewer);
+        set
+        {
+            previewers.SetEnabled(previewer, value);
+            this.OnPropertyChanged();
+        }
+    }
 }

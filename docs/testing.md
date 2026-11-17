@@ -67,7 +67,7 @@ doesn't fight your own build or the copy of the app you're using.
 - **Settling.** Every tool waits until the app has settled before it returns the full state:
   - both listings are loaded;
   - no operation or shell command is running;
-  - the quick view has loaded.
+  - the preview panel has loaded.
 
   Tests assert on that `AppState` (paths, items, cursor, marks, view modes, dialogs, focus) rather than sleeping.
 - **Dialogs.** In test mode `IAppDialogs` is `UiTestDialogs`.
@@ -87,7 +87,7 @@ doesn't fight your own build or the copy of the app you're using.
 - **Known state per test.** `Start(left, right)` fills the test's two folders and calls `reset`. That:
   - closes pages and any open dialog;
   - closes extra tabs;
-  - puts both panels back in details view, with no tree, quick view or filter;
+  - puts both panels back in details view, with no tree, preview panel or filter;
   - restores the default columns;
   - clears marks, the command line and the dialog log;
   - points the panels at the two folders.
@@ -115,11 +115,12 @@ run.sh   build + run, filters, flags
 | `SelectionTests` | Insert, Space (with folder size), Shift+↓, select/unselect all, invert, select group by mask, same extension, the status line counts |
 | `FileOperationTests` | F5 (cursor, marked, nothing, cancelled, conflict skip/overwrite/keep both, new name), F6 (move, rename when both panels are on the same folder), F7 (nested), F8 (confirm, decline, recursive), F2 (refusing an existing name), Shift+F4 + editor |
 | `ArchiveTests` | Browsing zip and tar.gz, the read-only badge, copying out of tar.gz, refusing a delete in a read-only archive, copying into a zip, Alt+F5 to tar.gz and its suggested name, Alt+F9 one folder per archive |
-| `ViewTests` | Thumbnails per panel with grid cursor moves, Left/Right left to the command line in details, Ctrl+Q quick view (text, markdown, image, folder; follows the cursor; ends on Tab), stacked layout geometry, per-panel trees, the column chooser, hidden files, quick filter, sorting, branch view |
+| `ViewTests` | Thumbnails per panel with grid cursor moves, Left/Right left to the command line in details, stacked layout geometry, per-panel trees, the column chooser, hidden files, quick filter, sorting, branch view |
 | `TabsAndToolsTests` | Tabs (open on folder, close, cycle, last can't close), lister (disk and archive), help, find, multi-rename, sync dirs, hotlist |
 | `RealUiTests` | Both panels' trees open at once, each following its own folder and resizing with its splitter; clicking and double-clicking rows, the function key bar, every ribbon tab and button, the path box, the per-panel tree, thumbnail tiles, the real prompt/confirm/choice dialogs, keyboard focus (native first responder: the dialog field on open, the command line after a dialog or page), the Settings page |
 | `LayoutTests` | Content that exists but can't be *seen*: the console text, choice dialog options, names with a tree open, the path label. `Ui.WhyHidden` clips an element against every ancestor |
-| `LeakTests` | Round trips (lister, help, tabs, navigation, thumbnails, quick view, dialogs, reset) leave no native views behind |
+| `PreviewPaneTests` | The preview panel (Ctrl+Q): docked right of both panels or under them, follows the active panel, a previewer per type (image, Markdown, HTML with scripts off, PDF, SQLite), a previewer turned off falls back to text, Settings moves it, folder summaries |
+| `LeakTests` | Round trips (lister, help, tabs, navigation, thumbnails, preview panel, dialogs, reset) leave no native views behind |
 | `ScrollTests` | A 2000-file folder stays virtualized; scroll steps, Down and PageDown keep the UI thread busy for less than a set budget (net of the test's own call overhead) |
 | `ScreensTests` (opt-in) | Screenshots of 23 screens and modes for a visual review |
 | `RemoteTests` (opt-in) | A WebDAV server in a panel: F7 makes a folder on it, F5 uploads into it; screenshots of the panel, Connections and the connection editor into `artifacts/screens/remote-*.png`. Needs `SC_UITEST_WEBDAV=host:port:user:password` (see below) |
