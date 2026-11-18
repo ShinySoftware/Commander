@@ -254,8 +254,9 @@ h2 {
     transition: transform .25s ease;
 }
 .shot:hover { transform: translateY(-3px); }
-/* a feature's picture, zoomed to the half of the window it's about (--x / --y: where that half starts, as a share of
-   the screenshot); the lightbox still opens the whole thing */
+/* a feature's picture, zoomed to the half of the window it's about. --x / --y shift it by a share of the zoomed
+   picture, which is twice the frame: 50% shows the right half (100% would shift it out of the frame altogether).
+   The lightbox still opens the whole thing */
 .shot.focus { aspect-ratio: 16 / 10; }
 .shot.focus img {
     width: var(--zoom, 200%);
