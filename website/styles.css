@@ -531,6 +531,8 @@ kbd {
 .small-brand { font-size: 15px; color: #F4F2FF; }
 .made-by { display: flex; align-items: center; gap: 14px; margin-top: 24px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, .1); }
 .made-by img { height: 64px; width: auto; }
+.made-by-link { display: inline-block; border-radius: 10px; transition: transform .2s ease, filter .2s ease; }
+.made-by-link:hover { transform: translateY(-2px); filter: drop-shadow(0 10px 24px rgba(139, 92, 246, .45)); }
 .small-brand img { border-radius: 6px; }
 
 /* lightbox */
