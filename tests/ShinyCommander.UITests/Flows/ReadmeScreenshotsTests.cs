@@ -39,6 +39,24 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
         await this.Ui.Tap(side + "TabMenuBackdrop");
     }
 
+    // the tab strip may still be settling from the styling just done - a right-click that missed gets a second go
+    async Task LockTab(string tab)
+    {
+        await this.RightClick(tab, "LeftTabs");
+        try
+        {
+            await this.Ui.Click("Lock tab", within: "LeftTabMenu");
+        }
+        catch (ShouldAssertException)
+        {
+            if (await this.Ui.Exists(x => x.AutomationId == "LeftTabMenuBackdrop"))
+                await this.Ui.Tap("LeftTabMenuBackdrop");
+            await Task.Delay(500);
+            await this.RightClick(tab, "LeftTabs");
+            await this.Ui.Click("Lock tab", within: "LeftTabMenu");
+        }
+    }
+
     async Task Back()
     {
         await this.Ui.Tap("PageBack");
@@ -53,6 +71,9 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
         var root = TestConfig.RepoRoot;
         var views = Path.Combine(root, "src", "ShinyCommander.Shared", "Views");
         await this.Fixture.Client.ResizeAsync(1440, 900);
+        // light, whatever the Mac is set to - dark mode has its own picture below
+        await this.Fixture.Client.SetThemeAsync(Microsoft.Maui.DevFlow.Driver.DevFlowTheme.Light);
+        await Task.Delay(1000); // the theme change rebuilds the rows and tabs
         await this.App.Reset(root, views);
 
         // tabs: the repo itself (the first tab) blue, starred; docs locked and tests beside it; the Core project on the right
@@ -64,8 +85,7 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
             await this.App.Navigate(Path.Combine(root, folder), "left");
             await this.StyleTab("Left", folder, color);
         }
-        await this.RightClick("docs", "LeftTabs");
-        await this.Ui.Click("Lock tab", within: "LeftTabMenu");
+        await this.LockTab("docs");
         await this.Ui.Click(repoName, within: "LeftTabs");
 
         await this.Ui.Tap("RightNewTab");
@@ -79,6 +99,12 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
         await this.App.Mark("FilePanelView.xaml", "FilePanelView.xaml.cs", "MainPage.xaml", "MainPage.xaml.cs");
         await this.App.Cursor("README.md", "left");
         await this.Shot("main");
+
+        // F2 edits the name on the row, its extension left out of the selection
+        await this.App.Key("F2");
+        await this.Ui.InlineName();
+        await this.Shot("rename");
+        await this.App.Key("Escape");
 
         // a tab's menu: lock, name, colour, icon (the first tab has no lock - it's always there)
         await this.RightClick("docs", "LeftTabs");
@@ -130,6 +156,9 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
         await this.Back();
 
         await this.App.Command("Settings");
+        // the page applies the theme setting - "follow the system" in a test run - so light again for the picture
+        await this.App.WaitFor(x => x.Page == "SettingsPage", "the settings page");
+        await this.Fixture.Client.SetThemeAsync(Microsoft.Maui.DevFlow.Driver.DevFlowTheme.Light);
         await this.Shot("settings", "SettingsPage");
         await this.Back();
 
@@ -170,6 +199,8 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
         var samples = Path.Combine(TestConfig.RepoRoot, "tests", "ShinyCommander.UITests", "artifacts", "samples");
         var (music, photos, documents) = MakeSamples(samples);
         await this.Fixture.Client.ResizeAsync(1440, 900);
+        await this.Fixture.Client.SetThemeAsync(Microsoft.Maui.DevFlow.Driver.DevFlowTheme.Light);
+        await Task.Delay(1000);
         await this.App.Reset(music, photos);
         await this.App.WaitFor(x => x.Left.ColumnSet == "music" && x.Right.ColumnSet == "photos" && !x.Left.IsReadingMetadata && !x.Right.IsReadingMetadata, "both column sets", TimeSpan.FromSeconds(30));
 
@@ -179,6 +210,18 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
         await this.App.Cursor("03 Two Panes.mp3", "left");
         await this.Shot("custom-columns");
         await this.App.Command("TogglePanelLayout");
+
+        // the Columns screen: Created and Camera on for every folder, Camera moved up beside Size
+        await this.App.Command("ChooseColumns");
+        await this.App.WaitFor(x => x.Page == "ColumnsPage", "the Columns screen");
+        await this.Ui.Tap("ColumnAdd_Created");
+        await this.Ui.Tap("ColumnAdd_camera");
+        await this.Ui.Tap("ColumnLeft_camera");
+        await this.Ui.Tap("ColumnLeft_camera");
+        await this.Ui.Tap("ColumnLeft_camera");
+        await this.Shot("columns", "ColumnsPage");
+        await this.Ui.Tap("ColumnsReset");
+        await this.Back();
 
         // the photos folder remembered as thumbnails - the badge on its path row
         await this.App.Key("Tab");
@@ -209,7 +252,10 @@ public class ReadmeScreenshotsTests(AppFixture fixture) : UiTest(fixture)
         await this.App.Navigate(Path.Combine(TestConfig.RepoRoot, "src", "ShinyCommander.Shared", "Views"), "right");
         await this.App.Cursor("README.md", "left");
         await this.App.WaitFor(x => x.Preview.Previewer == "markdown", "the README in the preview");
+        // the View tab: Details and Preview drawn pressed in, as they're on
+        await this.Ui.Tap("ribbon-tab-view");
         await this.Shot("quick-view");
+        await this.Ui.Tap("ribbon-tab-files");
         await this.App.Command("QuickView");
     }
 

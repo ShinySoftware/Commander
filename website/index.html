@@ -207,7 +207,7 @@
                 <div class="showcase-copy">
                     <span class="chip">New</span>
                     <h3>Columns that read what's inside</h3>
-                    <p>Walk into a music folder and Duration, Artist, Album and Track appear. A photo folder gets Dimensions, Date taken and Camera; documents get Pages and Author. The columns come from the files themselves, read in the background while you work.</p>
+                    <p>Walk into a music folder and Duration, Artist, Album and Track appear. A photo folder gets Dimensions, Date taken and Camera; documents get Pages and Author. The columns come from the files themselves, read in the background - only the files on screen, more as you scroll.</p>
                     <ul class="ticks">
                         <li><strong>Sort by any of them</strong> - the longest song, the biggest photo, the newest shot</li>
                         <li>Photos, video, music, documents, text and code, archives and apps - pick each set's columns in Settings</li>
@@ -217,7 +217,21 @@
                 <figure class="shot focus" style="--x: 100%; --y: 19%" data-zoom><img src="screenshots/custom-columns.png" alt="A music folder with Duration, Artist, Album and Track columns above a photo folder with Dimensions" loading="lazy" width="1440" height="900"></figure>
             </article>
 
-            <article class="showcase flip" id="folder-setups">
+            <article class="showcase flip" id="columns-screen">
+                <div class="showcase-copy">
+                    <span class="chip">New</span>
+                    <h3>Your columns, in your order</h3>
+                    <p>One screen for every column beside Name. Add Camera, Duration or Pages to every folder - each one fills in only for the files it applies to - and move any column, built-in or not, to where you want it. The headers and rows follow straight away.</p>
+                    <ul class="ticks">
+                        <li><strong>Built-in and custom columns, side by side</strong> - Size before Camera, Date created at the end, whatever reads best</li>
+                        <li>In a remembered folder it edits that folder's columns, with every folder's a click away</li>
+                        <li>A narrow panel drops the least useful columns first, so Name stays readable</li>
+                    </ul>
+                </div>
+                <figure class="shot" data-zoom><img src="screenshots/columns.png" alt="The Columns screen: the shown columns in order with move and remove buttons, beside every column you can add" loading="lazy" width="1440" height="900"></figure>
+            </article>
+
+            <article class="showcase" id="folder-setups">
                 <div class="showcase-copy">
                     <span class="chip">New</span>
                     <h3>Folders that remember how you like them</h3>
@@ -268,6 +282,16 @@
                     <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="m7 10 3 2-3 2M12 15h5"/></svg>
                     <h4>Command line</h4>
                     <p>Type anywhere: <code>cd</code> moves the panel, anything else runs in your shell with output in a console.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="2"/><path d="M8 11v2M12 5v14M10 5h4M10 19h4"/></svg>
+                    <h4>Rename in place</h4>
+                    <p><kbd>F2</kbd> edits the name right on its row or tile, the extension left out of the selection. <kbd>Enter</kbd> keeps it, <kbd>Esc</kbd> backs out - and a tab renames the same way.</p>
+                </div>
+                <div class="card">
+                    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="8" height="14" rx="2"/><rect x="13" y="5" width="8" height="14" rx="2"/><path d="M5.5 9h3M15.5 9h3"/></svg>
+                    <h4>A ribbon that shows what's on</h4>
+                    <p>Folder Tree, Hidden Files, Thumbnails, Preview and the rest stay pressed while they're on - for the panel you're in.</p>
                 </div>
                 <div class="card">
                     <svg viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 14l2 2 4-4"/></svg>
@@ -361,7 +385,9 @@
                 <figure class="shot" data-zoom><img src="screenshots/thumbnails.png" alt="Thumbnails view" loading="lazy" width="1440" height="900"><figcaption>Thumbnails</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/media-preview.png" alt="A song in the preview panel with its title, artist and player" loading="lazy" width="1440" height="900"><figcaption>Music in the preview</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/slides-preview.png" alt="A PowerPoint slide in the preview panel" loading="lazy" width="1440" height="900"><figcaption>Slides in the preview</figcaption></figure>
-                <figure class="shot" data-zoom><img src="screenshots/quick-view.png" alt="The README rendered in the preview panel" loading="lazy" width="1440" height="900"><figcaption>Markdown in the preview</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/quick-view.png" alt="The README rendered in the preview panel, with Details and Preview pressed on the View ribbon" loading="lazy" width="1440" height="900"><figcaption>Markdown in the preview</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/columns.png" alt="The Columns screen" loading="lazy" width="1440" height="900"><figcaption>The Columns screen</figcaption></figure>
+                <figure class="shot" data-zoom><img src="screenshots/rename.png" alt="A file name being edited in place on its row" loading="lazy" width="1440" height="900"><figcaption>Rename in place (F2)</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/viewer.png" alt="The lister showing rendered Markdown" loading="lazy" width="1440" height="900"><figcaption>Lister (F3)</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/find.png" alt="Find files" loading="lazy" width="1440" height="900"><figcaption>Find files</figcaption></figure>
                 <figure class="shot" data-zoom><img src="screenshots/multi-rename.png" alt="Multi-rename with a live preview" loading="lazy" width="1440" height="900"><figcaption>Multi-rename</figcaption></figure>
