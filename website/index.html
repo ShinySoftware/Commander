@@ -23,6 +23,7 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<div class="progress" aria-hidden="true"></div>
 
 <!-- the hero, on the icon's indigo night -->
 <header class="hero">
@@ -30,47 +31,68 @@
     <div class="glow glow-purple"></div>
     <div class="glow glow-green"></div>
 
-    <nav class="nav wrap">
-        <a class="brand" href="#">
-            <img src="appicon.png" alt="" width="34" height="34">
-            <span>ShinyCommander</span>
-        </a>
-        <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#archives">Archives</a>
-            <a href="#remote">Remote</a>
-            <a href="#columns">Columns</a>
-            <a href="#keyboard">Keyboard</a>
-            <a href="#gallery">Gallery</a>
-            <a class="nav-cta" href="#download">Download</a>
+    <nav class="nav">
+        <div class="nav-inner wrap">
+            <a class="brand" href="#">
+                <img src="appicon.png" alt="" width="34" height="34">
+                <span>ShinyCommander</span>
+            </a>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#archives">Archives</a>
+                <a href="#remote">Remote</a>
+                <a href="#columns">Columns</a>
+                <a href="#keyboard">Keyboard</a>
+                <a href="#gallery">Gallery</a>
+                <a class="nav-cta" href="#download">Download</a>
+            </div>
         </div>
     </nav>
 
-    <div class="hero-copy wrap">
-        <p class="eyebrow">Free &amp; open source · macOS · Windows · Linux</p>
-        <h1>Two panels.<br><span class="gradient-text">Every file, at your fingertips.</span></h1>
-        <p class="lede">
-            A modern, keyboard-first file manager in the spirit of Total Commander. Lock your favourite folders into
-            tabs, open zip, 7z and tar archives like folders, work on servers and cloud storage side by side with your
-            disk, preview anything from a song to a spreadsheet, and keep both hands on the keyboard.
-        </p>
-        <div class="hero-actions">
-            <a class="button primary" href="#download">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16"/></svg>
-                Download
-            </a>
-            <a class="button ghost" href="https://github.com/ShinySoftware/Commander">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
-                View on GitHub
-            </a>
+    <div class="hero-grid wrap">
+        <div class="hero-copy">
+            <p class="eyebrow"><span class="pulse"></span>Free &amp; open source · macOS · Windows · Linux</p>
+            <h1>Two panels.<br><span class="gradient-text">Every file, at your fingertips.</span></h1>
+            <p class="lede">
+                A modern, keyboard-first file manager in the spirit of Total Commander. Folder tabs you can lock,
+                archives that open like folders, servers and cloud storage beside your disk, and a preview for
+                everything - with both hands on the keyboard.
+            </p>
+            <div class="hero-actions">
+                <a class="button primary" href="#download">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 19h16"/></svg>
+                    Download
+                </a>
+                <a class="button ghost" href="https://github.com/ShinySoftware/Commander">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>
+                    View on GitHub
+                </a>
+            </div>
+        </div>
+
+        <!-- the app itself, first thing on the page: it tilts toward the pointer, with a few of its tricks floating beside it -->
+        <div class="hero-shot">
+            <figure class="window" data-zoom>
+                <img src="screenshots/main.png" alt="ShinyCommander showing two panels with coloured folder tabs, breadcrumbs and marked files" width="1440" height="900" fetchpriority="high">
+            </figure>
+            <div class="float float-copy"><kbd>F5</kbd><span>Copy to the other panel</span></div>
+            <div class="float float-archive">
+                <svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M12 10v5M10 12h4"/></svg>
+                <span><strong>docs.7z</strong> opens like a folder</span>
+            </div>
+            <div class="float float-remote">
+                <svg viewBox="0 0 24 24"><path d="M7 18a4 4 0 0 1-.6-8A6 6 0 0 1 18 9a4.5 4.5 0 0 1-.5 9z"/></svg>
+                <span>SFTP · WebDAV · S3 · Azure</span>
+            </div>
         </div>
     </div>
 
-    <div class="hero-shot wrap">
-        <figure class="window">
-            <div class="window-bar"><i></i><i></i><i></i></div>
-            <img src="screenshots/main.png" alt="ShinyCommander showing two panels with coloured folder tabs, breadcrumbs and marked files" width="1440" height="900">
-        </figure>
+    <!-- everything it opens, scrolling past -->
+    <div class="marquee" aria-hidden="true">
+        <div class="marquee-track">
+            <span>zip</span><span>7z</span><span>tar.gz</span><span>rar</span><span>SFTP</span><span>FTP</span><span>WebDAV</span><span>Amazon S3</span><span>Azure Blob</span><span>SMB shares</span><span>Photos</span><span>Music</span><span>Video</span><span>Word</span><span>Excel</span><span>PowerPoint</span><span>PDF</span><span>Markdown</span><span>SQLite</span>
+            <span>zip</span><span>7z</span><span>tar.gz</span><span>rar</span><span>SFTP</span><span>FTP</span><span>WebDAV</span><span>Amazon S3</span><span>Azure Blob</span><span>SMB shares</span><span>Photos</span><span>Music</span><span>Video</span><span>Word</span><span>Excel</span><span>PowerPoint</span><span>PDF</span><span>Markdown</span><span>SQLite</span>
+        </div>
     </div>
 </header>
 
