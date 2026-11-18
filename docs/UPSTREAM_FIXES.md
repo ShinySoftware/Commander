@@ -20,6 +20,9 @@ Each item lists where the bug is, how to reproduce it, the fix, how to know it's
 | 10 | ExifLibNet | `Properties.Set(tag, string)` adds instead of replacing | Low |
 | 11 | ExifLibNet | TIFF saves are unreadable; PNG metadata isn't written | Medium - why only JPEG is editable |
 | 13 | Shiny.Maui.Controls.Office | `SpreadsheetView` takes ~3 s to show and ~1.5 s to remove on AppKit, even for a 3-row sheet | Medium - the Excel preview stalls the cursor |
+| 14 | Shiny.Maui.Controls - Ribbon | No pressed (mouse down) state; a checked button loses its hover | Low - feedback only |
+| 15 | maui-labs - macOS head | `PointerGestureRecognizer` never raises `PointerPressed` / `PointerReleased` | Low - worked around |
+| 16 | maui-labs - macOS head | Arranging an `Entry` that's being edited raises `Completed` | Medium - ended in-place renames, worked around |
 | 12 | TagLibSharp | A constant bitrate MP3's "Info" header is ignored, and the file is timed by its first frame | Medium - low-bitrate MP3s showed half their length |
 
 ---
@@ -202,6 +205,63 @@ EXIF as an `eXIf` chunk before the first `IDAT` (PNG 1.5 extension), and read it
 **Then here:** add `tif`, `tiff` and `png` to `ImageMetadata.Editable` (with a header check per format) - today
 `ImageMetadata.CanEdit` takes JPEG only for this reason. HEIC/WebP would need a different library either way.
 
+### 14. Ribbon: no pressed state, and checked hides hover
+
+**Where:** `src/Shiny.Maui.Controls/Ribbon/RibbonItemView.cs` (controls repo, now on the net11 branch). `Attach` wires a
+tap and `PointerEntered` / `PointerExited` only, and `Refresh` picks one fill: `SecondaryContainer` when checked,
+else `SurfaceContainerHighest` when hovered. So a button never looks held down, and hovering a checked toggle
+(Folder Tree with the tree showing) shows no change at all.
+
+**Fix:** in `RibbonItemView`
+- a `facePressed` / `chevronPressed` flag beside the hover ones, set from `PointerPressed`, cleared on
+  `PointerReleased`, on `PointerExited`, and after `InvokeFace` / `OpenMenu` (heads that send no release).
+- `Refresh` resolves four fills instead of two: pressed (any) → a new `SurfaceContainerHighest`-over-`OnSurface`
+  pressed tone (Material's 10% state layer, or a new `ShinyThemeKeys.Color.RibbonPressed` token), checked + hovered →
+  a stronger `SecondaryContainer`, checked → `SecondaryContainer` + the ring as today, hovered → as today.
+- the chevron cell of a split button gets the same pressed fill.
+- the Blazor ribbon (`Shiny.Blazor.Controls`) gets the matching `:active` and `.checked:hover` rules so both hosts
+  agree.
+
+Fold it into the net11 work, not a 2.5.x patch: it touches the theme tokens, which are changing there anyway.
+
+**Done when:** a `RibbonItemView` test raises pressed/released on a toggle's recognizer and reads back the four
+fills; the sample's ribbon page shows a held and a checked-hovered button on Windows and Linux.
+
+**Remove here:** nothing has to go - Windows / Linux (the Shiny ribbon, `RibbonToggleButton`s bound to MainViewModel's
+toggle properties) just pick up the states. The macOS ribbon is our own (`Views/RibbonButtonState.cs`) for as long as
+the Shiny ribbon's body doesn't draw on AppKit; when it does, retire `AppKitRibbon` from `tools/ribbon.py` along with
+`RibbonButtonState`.
+
+## maui-labs
+
+### 15. macOS: no PointerPressed / PointerReleased
+
+**Where:** `platforms/MacOS/src/MacOS/Handlers/GestureManager.cs` - `MacOSPointerTrackingArea` sends only
+`SendPointerEntered`, `SendPointerExited` and `SendPointerMoved`.
+
+**Fix:** handle `MouseDown` / `MouseUp` on the tracking view and call `SendPointerPressed` / `SendPointerReleased`
+(same reflection pattern), without swallowing the event so tap recognizers still fire.
+
+**Remove here:** the `#if MACOS_APPKIT` `NSEvent` monitor in `Views/RibbonButtonState.cs` (`WatchMouse` / `IsUnder`);
+its `PointerPressed` / `PointerReleased` handlers then do the job. Fixes #14's pressed state on macOS too, once the Shiny
+ribbon draws there.
+
+### 16. macOS: arranging an Entry being edited raises Completed
+
+**Where:** `platforms/MacOS/src/MacOS/Handlers/EntryHandler.cs` (`OnEditingEnded`, line ~90). A layout pass that moves
+an `NSTextField` while it's being edited (`MacOSViewHandler.UpdateGeometry` → `setFrame:`) makes AppKit end the edit;
+the handler passes `textDidEndEditing` straight on as `IEntry.Completed`, though the field still has the keyboard.
+
+**Repro:** an `Entry` added to a row of a `CollectionView` (or a `HorizontalStackLayout`) and focused; let anything
+re-arrange the row within the next few hundred ms - `Completed` fires with the text untouched, intermittently.
+
+**Fix:** in `OnEditingEnded`, read `NSTextMovement` from the notification: raise `Completed` for Return, and for
+"other" only when the field no longer has the keyboard (`Window.FirstResponder` isn't the field or its field editor).
+Begin editing again when the frame change ended it.
+
+**Remove here:** `FilePanelView.StillEditing` and its use in `OnInlineEditRequested`; the in-place rename tests in
+`FileOperationTests` / `TabsAndToolsTests` stay as the check (they failed about one run in two without it).
+
 ## Shiny.Maui.Controls.Office
 
 ### 13. `SpreadsheetView` is slow to attach and detach on AppKit
@@ -254,7 +314,8 @@ stays as the check.
 3. **#6 Shell generator**, **#5 / #7 docs**.
 4. **ExifLibNet #8-#11** - decide fork vs. own writer first; #8-#10 are a few lines each, #11 is the real work.
 5. **Office #13** - measure first; the preview is usable, just slow to appear.
-6. **TagLibSharp #12** - a one-line change upstream; the workaround here is small and well covered.
+6. **Ribbon #14** - with the controls repo's net11 update; **maui-labs #15** whenever that head is next touched; **#16** first of the two - it's a real bug, not only a missing feature.
+7. **TagLibSharp #12** - a one-line change upstream; the workaround here is small and well covered.
 
 After each Shiny release: bump `ShinyControlsVersion` in `Directory.Packages.props`, remove the workaround listed
 above, and run just the tests named in that item.

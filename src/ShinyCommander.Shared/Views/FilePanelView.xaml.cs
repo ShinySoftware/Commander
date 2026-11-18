@@ -72,6 +72,7 @@ public partial class FilePanelView : ContentView
         if (this.panel != null)
         {
             this.panel.ScrollRequested -= this.OnScrollRequested;
+            this.panel.InlineEditRequested -= this.OnInlineEditRequested;
             this.panel.PropertyChanged -= this.OnPanelPropertyChanged;
             this.panel.Tabs.CollectionChanged -= this.OnTabsChanged;
         }
@@ -101,6 +102,7 @@ public partial class FilePanelView : ContentView
             SetId(this.UpButton, side + "Up");
 
             this.panel.ScrollRequested += this.OnScrollRequested;
+            this.panel.InlineEditRequested += this.OnInlineEditRequested;
             this.panel.PropertyChanged += this.OnPanelPropertyChanged;
             this.panel.Tabs.CollectionChanged += this.OnTabsChanged;
         }
@@ -224,6 +226,102 @@ public partial class FilePanelView : ContentView
     {
         if (element.AutomationId == null)
             element.AutomationId = id;
+    }
+
+    // --- inline rename ---------------------------------------------------------------------------
+
+    // an editor over the row's, tile's or tab's name label, in the label's own cell - so it scrolls with it. Only the
+    // one being edited gets an Entry: one per row would cost every row a native text field
+    void OnInlineEditRequested(object? sender, InlineEdit edit)
+    {
+        var area = edit.Target is PanelTabViewModel ? (Element)this.TabStrip : this.panel?.IsThumbnails == true ? this.ThumbList : this.FileList;
+        var label = area.GetVisualTreeDescendants().OfType<Label>().FirstOrDefault(x => x.ClassId == "InlineName" && x.BindingContext == edit.Target && x.Parent is Layout);
+        if (label?.Parent is not Layout host)
+            return;
+
+        var tile = host is Grid { RowDefinitions.Count: > 1 };
+        var entry = new Entry
+        {
+            Text = edit.Text,
+            FontSize = label.FontSize,
+            VerticalOptions = LayoutOptions.Center,
+            HorizontalTextAlignment = tile ? TextAlignment.Center : TextAlignment.Start,
+            AutomationId = (this.panel?.Side.ToString() ?? "") + "InlineName"
+        };
+        if (edit.Target is PanelTabViewModel)
+            entry.WidthRequest = Math.Max(140, label.Width + 40);
+        if (host is Grid)
+        {
+            Grid.SetRow(entry, Grid.GetRow(label));
+            Grid.SetColumn(entry, Grid.GetColumn(label));
+            host.Children.Add(entry);
+        }
+        else
+        {
+            host.Children.Insert(host.Children.IndexOf(label), entry);
+        }
+        label.IsVisible = false;
+        edit.IsShown = true;
+
+        // Enter, and clicking away (AppKit raises Completed when the field loses the keyboard), keep the name;
+        // Escape (MainViewModel) cancels. A row reused for another item while scrolled keeps it too
+        void OnLeft(object? s, EventArgs e)
+        {
+            if (!StillEditing(entry))
+                edit.Commit(entry.Text);
+        }
+        entry.Completed += OnLeft;
+        entry.Unfocused += OnLeft;
+        void OnRecycled(object? s, EventArgs e)
+        {
+            if (host.BindingContext != edit.Target)
+                edit.Commit(entry.Text);
+        }
+        host.BindingContextChanged += OnRecycled;
+        edit.Ended += (_, _) =>
+        {
+            host.BindingContextChanged -= OnRecycled;
+            host.Children.Remove(entry);
+            label.IsVisible = true;
+        };
+
+        this.Dispatcher.Dispatch(() =>
+        {
+            if (edit.IsEnded)
+                return;
+            entry.Focus();
+#if MACOS_APPKIT
+            // on the field editor itself: the handler applies CursorPosition / SelectionLength by ending and restarting
+            // the edit, which AppKit reports as Completed - and that would commit the name straight away
+            if (entry.Handler?.PlatformView is AppKit.NSTextField field && field.CurrentEditor is { } editor)
+                editor.SelectedRange = new Foundation.NSRange(0, edit.SelectionLength);
+#else
+            entry.CursorPosition = 0;
+            entry.SelectionLength = edit.SelectionLength;
+#endif
+        });
+    }
+
+    // AppKit ends a field's edit when a layout pass moves it (the list or tab strip re-arranging), and the handler reports
+    // that as Completed - with the field still holding the keyboard. Only Return, or the keyboard gone elsewhere (a
+    // click away), ends an in-place edit. Remove once maui-labs stops raising Completed from arrange (UPSTREAM_FIXES #16)
+    static bool StillEditing(Entry entry)
+    {
+#if MACOS_APPKIT
+        if (entry.Handler?.PlatformView is not AppKit.NSTextField field || field.Window is not { } window)
+            return false;
+
+        var current = AppKit.NSApplication.SharedApplication.CurrentEvent;
+        var isReturn = current is { Type: AppKit.NSEventType.KeyDown, KeyCode: 36 or 76 };
+        var isClick = current?.Type == AppKit.NSEventType.LeftMouseDown;
+        // the field, or the window's field editor still sitting inside it
+        var view = window.FirstResponder as AppKit.NSView;
+        while (view != null && view != field)
+            view = view.Superview;
+        return view != null && !isReturn && !isClick;
+#else
+        return false;
+#endif
     }
 
     (int First, int Last, object? Source) visibleRange = (-1, -1, null);

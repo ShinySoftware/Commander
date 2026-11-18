@@ -48,6 +48,21 @@ RIBBON = [
  ]),
 ]
 
+# toggles: drawn pressed while the bool (on MainViewModel) is true. The Shiny ribbon's RibbonToggleButton binds it
+# two-way and runs no command - it flips the bool itself, so the setter does the command's work. The AppKit ribbon
+# keeps the command and reads the bool through RibbonButtonState.IsChecked.
+STATE = {
+ "ToggleJobsCommand": "ShowJobs",
+ "ToggleHiddenCommand": "ShowHidden",
+ "BranchViewCommand": "IsBranchView",
+ "QuickFilterCommand": "ShowQuickFilter",
+ "ThumbnailViewCommand": "IsThumbnails",
+ "DetailsViewCommand": "IsDetails",
+ "ToggleTreeCommand": "ShowTree",
+ "QuickViewCommand": "Preview.IsOpen",
+ "TogglePanelLayoutCommand": "StackPanels",
+}
+
 def esc(s): return s.replace("&","&amp;").replace('"',"&quot;")
 
 # --------------------------------------------------------------- localization keys
@@ -63,11 +78,12 @@ def tr_tip(key, sc):
 def shiny_item(text, icon, cmd, size, sc, color):
     sz = 'Large' if size=='L' else 'Small'
     px = 30 if size=='L' else 18
-    return f'''                    <shiny:RibbonButton Text="{tr(cmd_key(cmd))}" Size="{sz}" Command="{{Binding {cmd}}}" Shortcut="{esc(sc)}" Tooltip="{tr_tip(cmd_key(cmd), sc)}">
+    kind, action = ("RibbonToggleButton", f'IsChecked="{{Binding {STATE[cmd]}}}"') if cmd in STATE else ("RibbonButton", f'Command="{{Binding {cmd}}}"')
+    return f'''                    <shiny:{kind} Text="{tr(cmd_key(cmd))}" Size="{sz}" {action} Shortcut="{esc(sc)}" Tooltip="{tr_tip(cmd_key(cmd), sc)}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="{icon}" Color="{color}" Trigger="Appear" StrokeWidth="2" WidthRequest="{px}" HeightRequest="{px}" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
-                    </shiny:RibbonButton>'''
+                    </shiny:{kind}>'''
 
 def shiny_ribbon():
     o=['''        <shiny:Ribbon x:Name="MainRibbon"
@@ -96,22 +112,36 @@ def shiny_ribbon():
     return "\n".join(o)
 
 # ---------------------------------------------------------------- AppKit ribbon (plain layouts)
+# the click target: a clear Label over the whole button. On the AppKit head a real click on a MotionIconView (or a
+# Border) never reaches a tap recognizer - a click on a button's icon did nothing - while a Label's always does. The
+# Border keeps one too, for its padding and for UI automation (DevFlow taps the element with the AutomationId); AppKit
+# hands a click to the innermost recognizer only, so nothing runs twice
+def ak_hit(cmd): return f'<Label Text=" "><Label.GestureRecognizers><TapGestureRecognizer Command="{{Binding {cmd}}}" /></Label.GestureRecognizers></Label>'
+
+def ak_checked(cmd): return f' views:RibbonButtonState.IsChecked="{{Binding {STATE[cmd]}}}"' if cmd in STATE else ""
+
 def ak_large(text, icon, cmd, sc, color):
-    return f'''                            <Border Style="{{StaticResource RibbonLarge}}" AutomationId="ribbon-{cmd[:-7]}" ToolTipProperties.Text="{tr_tip(cmd_key(cmd), sc)}">
+    return f'''                            <Border Style="{{StaticResource RibbonLarge}}" AutomationId="ribbon-{cmd[:-7]}"{ak_checked(cmd)} ToolTipProperties.Text="{tr_tip(cmd_key(cmd), sc)}">
                                 <Border.GestureRecognizers><TapGestureRecognizer Command="{{Binding {cmd}}}" /></Border.GestureRecognizers>
-                                <VerticalStackLayout Spacing="3">
-                                    <shiny:MotionIconView Icon="{icon}" Color="{color}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
-                                    <Label Text="{tr(cmd_key(cmd))}" Style="{{StaticResource RibbonText}}" HorizontalTextAlignment="Center" />
-                                </VerticalStackLayout>
+                                <Grid>
+                                    <VerticalStackLayout Spacing="3">
+                                        <shiny:MotionIconView Icon="{icon}" Color="{color}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                        <Label Text="{tr(cmd_key(cmd))}" Style="{{StaticResource RibbonText}}" HorizontalTextAlignment="Center" />
+                                    </VerticalStackLayout>
+                                    {ak_hit(cmd)}
+                                </Grid>
                             </Border>'''
 
 def ak_small(text, icon, cmd, sc, color):
-    return f'''                                <Border Style="{{StaticResource RibbonSmall}}" AutomationId="ribbon-{cmd[:-7]}" ToolTipProperties.Text="{tr_tip(cmd_key(cmd), sc)}">
+    return f'''                                <Border Style="{{StaticResource RibbonSmall}}" AutomationId="ribbon-{cmd[:-7]}"{ak_checked(cmd)} ToolTipProperties.Text="{tr_tip(cmd_key(cmd), sc)}">
                                     <Border.GestureRecognizers><TapGestureRecognizer Command="{{Binding {cmd}}}" /></Border.GestureRecognizers>
-                                    <HorizontalStackLayout Spacing="6">
-                                        <shiny:MotionIconView Icon="{icon}" Color="{color}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
-                                        <Label Text="{tr(cmd_key(cmd))}" Style="{{StaticResource RibbonText}}" VerticalTextAlignment="Center" />
-                                    </HorizontalStackLayout>
+                                    <Grid>
+                                        <HorizontalStackLayout Spacing="6">
+                                            <shiny:MotionIconView Icon="{icon}" Color="{color}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                            <Label Text="{tr(cmd_key(cmd))}" Style="{{StaticResource RibbonText}}" VerticalTextAlignment="Center" />
+                                        </HorizontalStackLayout>
+                                        {ak_hit(cmd)}
+                                    </Grid>
                                 </Border>'''
 
 def appkit_ribbon():

@@ -177,10 +177,14 @@ public partial class MainPage : ContentPage
         this.OnFocusCommandLine(this, EventArgs.Empty);
     }
 
-    // TC keeps typing going to the command line; arrow/enter/F-keys are claimed by shortcuts first
+    // TC keeps typing going to the command line; arrow/enter/F-keys are claimed by shortcuts first. Not while a name is
+    // edited in place: taking the keyboard from its editor would end the edit (AppKit completes a field that loses it)
     void OnFocusCommandLine(object? sender, EventArgs e)
         => this.Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
         {
+            if (this.ViewModel?.IsInlineEditing == true)
+                return;
+
             this.CommandEntry.Focus();
             // put the caret at the end
             this.CommandEntry.CursorPosition = this.CommandEntry.Text?.Length ?? 0;

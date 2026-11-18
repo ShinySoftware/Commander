@@ -182,8 +182,9 @@ public class TabsAndToolsTests(AppFixture fixture) : UiTest(fixture)
     {
         await this.Start();
 
-        await this.App.Answer("Work");
         await this.TabMenu("left", "Rename tab…");
+        await this.Ui.InlineName();
+        await this.App.InlineName("Work");
         await this.App.WaitFor(x => x.Left.TabTitles.SequenceEqual(["Work"]), "the tab to take its new name");
 
         // colours and icons apply as they're picked, and the menu stays open for more
@@ -196,8 +197,9 @@ public class TabsAndToolsTests(AppFixture fixture) : UiTest(fixture)
         (await this.Ui.Exists(x => x.AutomationId == "LeftTabMenu")).ShouldBeFalse();
 
         // an empty name goes back to the folder's, None / Automatic take the colour and icon off
-        await this.App.Answer("");
         await this.TabMenu("Work", "Rename tab…");
+        await this.Ui.InlineName();
+        await this.App.InlineName("");
         await this.App.WaitFor(x => x.Left.TabTitles.SequenceEqual(["left"]), "the folder's name back");
         await this.OpenTabMenu("left");
         await this.Ui.Tap("TabColor:None");

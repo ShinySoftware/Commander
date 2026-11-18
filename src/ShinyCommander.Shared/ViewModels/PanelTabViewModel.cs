@@ -714,9 +714,10 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     {
         // an archive's or a server's files would have to be downloaded to read
         this.ColumnSet = this.IsArchive || this.IsRemote ? null : this.fileColumns.Detect(this.all.Select(x => x.Entry).ToList());
+        // a folder setup's pick is the whole story; otherwise the folder's set, then the ones on everywhere
         this.CustomColumns = this.Setup?.CustomColumns is { } keys
             ? keys.Select(this.fileColumns.Find).OfType<IFileColumn>().ToList()
-            : this.ColumnSet == null ? [] : this.fileColumns.ColumnsOf(this.ColumnSet);
+            : (this.ColumnSet == null ? [] : this.fileColumns.ColumnsOf(this.ColumnSet)).Union(this.fileColumns.Always).ToList();
         this.OnPropertyChanged(nameof(this.CustomColumns));
     }
 

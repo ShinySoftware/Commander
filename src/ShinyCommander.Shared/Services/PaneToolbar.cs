@@ -8,7 +8,7 @@ namespace ShinyCommander.Services;
 public sealed class PaneToolbar
 {
     /// <summary>What a fresh install shows - the two buttons the pane always had.</summary>
-    public static readonly IReadOnlyList<string> DefaultKeys = ["ThumbnailView", "ToggleTree"];
+    public static readonly IReadOnlyList<string> DefaultKeys = ["ThumbnailView", "ToggleTree", "QuickView"];
 
     readonly AppSettings settings;
 

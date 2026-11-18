@@ -75,7 +75,7 @@ public class LeakTests(AppFixture fixture) : UiTest(fixture)
     {
         await this.App.RealDialogs();
         await this.App.Cursor("f01.txt");
-        await this.App.Key("F2");
+        await this.App.Key("F7");
         await this.Ui.ClickInDialog("Cancel");
     });
 

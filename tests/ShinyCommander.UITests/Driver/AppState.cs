@@ -19,6 +19,9 @@ public sealed record AppState
     public bool ShowJobs { get; init; }
     public List<JobRecord> Jobs { get; init; } = [];
     public string? RibbonTab { get; init; }
+
+    /// <summary>The ribbon's toggle buttons drawn pressed in, by AutomationId (ribbon-ToggleTree...).</summary>
+    public List<string> RibbonPressed { get; init; } = [];
     public List<string> Columns { get; init; } = [];
     public PanelState Left { get; init; } = new();
     public PanelState Right { get; init; } = new();

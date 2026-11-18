@@ -127,7 +127,7 @@ public class ScreensTests(AppFixture fixture) : UiTest(fixture)
 
         await this.App.RealDialogs();
         await this.App.Cursor("notes.txt");
-        await this.App.Key("F2");
+        await this.App.Key("F7");
         await this.Shot("13-dialog-prompt");
         await this.Ui.ClickInDialog("Cancel");
         await this.App.Key("F8");

@@ -105,6 +105,9 @@ public sealed class Ui(AgentClient client)
             throw new ShouldAssertException($"Could not fill {entry.Type} {entry.AutomationId ?? entry.Id}");
     }
 
+    /// <summary>The in-place name editor (F2 on a row or tile, "Rename tab…") of a panel.</summary>
+    public Task<ElementInfo> InlineName(string side = "Left") => this.ById(side + "InlineName");
+
     /// <summary>Sends a key to an element (e.g. Enter to complete an entry).</summary>
     public async Task Press(ElementInfo element, string key)
     {

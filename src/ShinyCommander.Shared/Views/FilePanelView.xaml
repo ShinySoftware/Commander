@@ -85,6 +85,7 @@
                                             </shiny:MotionIconView.GestureRecognizers>
                                         </shiny:MotionIconView>
                                         <Label Text="{Binding Title}"
+                                               ClassId="InlineName"
                                                FontSize="13"
                                                MaxLines="1"
                                                VerticalTextAlignment="Center"
@@ -183,9 +184,28 @@
                         <TapGestureRecognizer Tapped="OnToolbarRightTapped" Buttons="Secondary" />
                     </BoxView.GestureRecognizers>
                 </BoxView>
-                <shiny:ShinyButton x:Name="BackButton" Command="{Binding GoBackCommand}" LeftMotionIcon="arrow-left" Appearance="Text" ContentPadding="6,0" IconSize="14" />
-                <shiny:ShinyButton x:Name="ForwardButton" Grid.Column="1" Command="{Binding GoForwardCommand}" LeftMotionIcon="arrow-right" Appearance="Text" ContentPadding="6,0" IconSize="14" />
-                <shiny:ShinyButton x:Name="UpButton" Grid.Column="2" Command="{Binding GoUpCommand}" LeftMotionIcon="arrow-up" Appearance="Text" ContentPadding="6,0" IconSize="14" />
+                <!-- Border + clear Label, not ShinyButton: see the pane toolbar's template below -->
+                <Border x:Name="BackButton" Style="{StaticResource PaneToolButton}">
+                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoBackCommand}" /></Border.GestureRecognizers>
+                    <Grid WidthRequest="27">
+                        <shiny:MotionIconView Icon="arrow-left" Color="{StaticResource Accent}" Trigger="Hover,Press" StrokeWidth="2" WidthRequest="14" HeightRequest="14" />
+                        <Label Text=" "><Label.GestureRecognizers><TapGestureRecognizer Command="{Binding GoBackCommand}" /></Label.GestureRecognizers></Label>
+                    </Grid>
+                </Border>
+                <Border x:Name="ForwardButton" Grid.Column="1" Style="{StaticResource PaneToolButton}">
+                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoForwardCommand}" /></Border.GestureRecognizers>
+                    <Grid WidthRequest="27">
+                        <shiny:MotionIconView Icon="arrow-right" Color="{StaticResource Accent}" Trigger="Hover,Press" StrokeWidth="2" WidthRequest="14" HeightRequest="14" />
+                        <Label Text=" "><Label.GestureRecognizers><TapGestureRecognizer Command="{Binding GoForwardCommand}" /></Label.GestureRecognizers></Label>
+                    </Grid>
+                </Border>
+                <Border x:Name="UpButton" Grid.Column="2" Style="{StaticResource PaneToolButton}">
+                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding GoUpCommand}" /></Border.GestureRecognizers>
+                    <Grid WidthRequest="27">
+                        <shiny:MotionIconView Icon="arrow-up" Color="{StaticResource Accent}" Trigger="Hover,Press" StrokeWidth="2" WidthRequest="14" HeightRequest="14" />
+                        <Label Text=" "><Label.GestureRecognizers><TapGestureRecognizer Command="{Binding GoUpCommand}" /></Label.GestureRecognizers></Label>
+                    </Grid>
+                </Border>
                 <Entry x:Name="PathEntry"
                        Grid.Column="3"
                        Text="{Binding PathText}"
@@ -262,13 +282,30 @@
                 <HorizontalStackLayout Grid.Column="5" Grid.ColumnSpan="2" x:Name="ToolbarStrip" Spacing="0" BindableLayout.ItemsSource="{Binding ToolbarItems}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="vm:PaneToolbarItem">
-                            <shiny:ShinyButton LeftMotionIcon="{Binding Command.Icon}"
-                                               AutomationId="{Binding AutomationId}"
-                                               ToolTipProperties.Text="{Binding Command.Tooltip}"
-                                               Appearance="Text"
-                                               ContentPadding="6,0"
-                                               IconSize="15"
-                                               Clicked="OnToolbarItemClicked" />
+                            <!-- not a ShinyButton: on the AppKit head real clicks on it - and on a Border, BoxView or MotionIconView
+                                 here - never reach their tap recognizer; a Label's do. So a clear Label over the whole button
+                                 takes the click (A_mouse_click_on_a_pane_toolbar_button_runs_it). The Border's own is for its padding and UI
+                                 automation; AppKit gives a click to the innermost recognizer only -->
+                            <Border Style="{StaticResource PaneToolButton}"
+                                    AutomationId="{Binding AutomationId}"
+                                    ToolTipProperties.Text="{Binding Command.Tooltip}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Tapped="OnToolbarItemClicked" />
+                                </Border.GestureRecognizers>
+                                <Grid WidthRequest="29">
+                                    <shiny:MotionIconView Icon="{Binding Command.Icon}"
+                                                          Color="{StaticResource Accent}"
+                                                          Trigger="Hover,Press"
+                                                          StrokeWidth="2"
+                                                          WidthRequest="15"
+                                                          HeightRequest="15" />
+                                    <Label Text=" ">
+                                        <Label.GestureRecognizers>
+                                            <TapGestureRecognizer Tapped="OnToolbarItemClicked" />
+                                        </Label.GestureRecognizers>
+                                    </Label>
+                                </Grid>
+                            </Border>
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </HorizontalStackLayout>
@@ -412,7 +449,7 @@
                                                               HeightRequest="16"
                                                               HorizontalOptions="Start"
                                                               VerticalOptions="Center" />
-                                        <Label Grid.Column="1" Text="{Binding Name}" Style="{StaticResource RowLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
+                                        <Label Grid.Column="1" ClassId="InlineName" Text="{Binding Name}" Style="{StaticResource RowLabel}" TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
                                         <views:FileDetailsView Grid.Column="2" Item="{Binding .}" HeightRequest="24" />
                                     </Grid>
                                 </DataTemplate>
@@ -452,7 +489,7 @@
                                                               HeightRequest="54"
                                                               HorizontalOptions="Center"
                                                               VerticalOptions="Center" />
-                                        <Label Grid.Row="1" Text="{Binding FullName}" FontSize="11" MaxLines="2" LineBreakMode="WordWrap" HorizontalTextAlignment="Center" VerticalTextAlignment="Start"
+                                        <Label Grid.Row="1" ClassId="InlineName" Text="{Binding FullName}" FontSize="11" MaxLines="2" LineBreakMode="WordWrap" HorizontalTextAlignment="Center" VerticalTextAlignment="Start"
                                                TextColor="{Binding RowState, Converter={StaticResource RowText}}" FontAttributes="{Binding RowState, Converter={StaticResource RowFont}}" />
                                     </Grid>
                                 </Border>

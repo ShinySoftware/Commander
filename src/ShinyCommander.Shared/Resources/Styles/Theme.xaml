@@ -3,6 +3,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
                     xmlns:shiny="http://shiny.net/maui/controls"
                     xmlns:conv="clr-namespace:ShinyCommander.Converters"
+                    xmlns:views="clr-namespace:ShinyCommander.Views"
                     xmlns:mdt="clr-namespace:Shiny.Maui.Controls.Markdown;assembly=Shiny.Maui.Controls.Markdown">
 
     <!-- palette: a modern take on Total Commander's classic blue cursor / red marks -->
@@ -24,6 +25,17 @@
     <Color x:Key="MarkedLight">#D11A2A</Color>
     <Color x:Key="MarkedDark">#FF6B72</Color>
     <Color x:Key="MarkedOnCursor">#FFD3D6</Color>
+    <!-- ribbon buttons (Views/RibbonButtonState): hover, held down, and a toggle that's on -->
+    <Color x:Key="RibbonHoverLight">#EAF0FC</Color>
+    <Color x:Key="RibbonHoverDark">#26324A</Color>
+    <Color x:Key="RibbonPressedLight">#C4D6F5</Color>
+    <Color x:Key="RibbonPressedDark">#34476A</Color>
+    <Color x:Key="RibbonCheckedLight">#DCE7FA</Color>
+    <Color x:Key="RibbonCheckedDark">#2A3A55</Color>
+    <Color x:Key="RibbonCheckedHoverLight">#CFDEF8</Color>
+    <Color x:Key="RibbonCheckedHoverDark">#31435F</Color>
+    <Color x:Key="RibbonCheckedRingLight">#8FB0EC</Color>
+    <Color x:Key="RibbonCheckedRingDark">#4F6FA8</Color>
 
     <x:String x:Key="MonoFont">Menlo</x:String>
     <conv:MarkdownHeadingConverter x:Key="MarkdownHeadings" />
@@ -137,26 +149,28 @@
         <Setter Property="HeightRequest" Value="32" />
         <Setter Property="VerticalOptions" Value="End" />
     </Style>
+    <!-- hover / held down / toggled on come from RibbonButtonState; the 1px stroke is the toggle's ring, transparent
+         otherwise, and the padding is a pixel less to make room for it -->
     <Style x:Key="RibbonLarge" TargetType="Border">
         <Setter Property="StrokeShape" Value="RoundRectangle 6" />
-        <Setter Property="StrokeThickness" Value="0" />
-        <Setter Property="Padding" Value="8,4" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Stroke" Value="Transparent" />
+        <Setter Property="Padding" Value="7,3" />
         <Setter Property="MinimumWidthRequest" Value="58" />
         <Setter Property="VerticalOptions" Value="Center" />
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="VisualStateManager.VisualStateGroups">
-            <VisualStateGroupList>
-                <VisualStateGroup x:Name="CommonStates">
-                    <VisualState x:Name="Normal"><VisualState.Setters><Setter Property="BackgroundColor" Value="Transparent" /></VisualState.Setters></VisualState>
-                    <VisualState x:Name="PointerOver"><VisualState.Setters><Setter Property="BackgroundColor" Value="{AppThemeBinding Light=#EAF0FC, Dark=#26324A}" /></VisualState.Setters></VisualState>
-                </VisualStateGroup>
-            </VisualStateGroupList>
-        </Setter>
+        <Setter Property="views:RibbonButtonState.IsAttached" Value="True" />
     </Style>
     <Style x:Key="RibbonSmall" TargetType="Border" BasedOn="{StaticResource RibbonLarge}">
-        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="Padding" Value="5,1" />
         <Setter Property="MinimumWidthRequest" Value="0" />
         <Setter Property="HeightRequest" Value="22" />
+    </Style>
+    <!-- an icon button on a pane's path row (PaneToolbar) - the ribbon's hover / held-down looks -->
+    <Style x:Key="PaneToolButton" TargetType="Border" BasedOn="{StaticResource RibbonLarge}">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MinimumWidthRequest" Value="0" />
+        <Setter Property="HeightRequest" Value="26" />
     </Style>
     <Style x:Key="RibbonText" TargetType="Label">
         <Setter Property="FontSize" Value="12" />

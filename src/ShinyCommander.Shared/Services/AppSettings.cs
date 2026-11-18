@@ -77,6 +77,9 @@ public partial class AppSettings
     /// <summary>Each column set's chosen columns (FileColumns) - "photos=dimensions,taken|music=duration"; unlisted sets use their defaults.</summary>
     [Bind] public partial string? ColumnSets { get; set; }
 
+    /// <summary>Custom columns on in every folder (IFileColumn.Key), comma separated - files they don't apply to leave them blank.</summary>
+    [Bind] public partial string? AlwaysColumns { get; set; }
+
     /// <summary>Column sets turned off in Settings (FileColumnSet.Key), comma separated.</summary>
     [Bind] public partial string? DisabledColumnSets { get; set; }
 

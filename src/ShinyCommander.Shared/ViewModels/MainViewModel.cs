@@ -165,6 +165,39 @@ public partial class MainViewModel : ObservableObject,
     [ObservableProperty]
     public partial bool IsFilterEditing { get; set; }
 
+    /// <summary>A name being edited in place (F2, "Rename tab…") - Enter, Escape and the arrows belong to its editor.</summary>
+    [ObservableProperty]
+    public partial bool IsInlineEditing { get; set; }
+
+    InlineEdit? inlineEdit;
+
+    public void CancelInlineEdit() => this.inlineEdit?.Cancel();
+
+    public void CommitInlineEdit(string text) => this.inlineEdit?.Commit(text);
+
+    // edits the name in place when the panel can show an editor for it: the new name, null when cancelled or when
+    // there's no editor (shown false - the caller asks with a prompt instead)
+    async Task<(bool Shown, string? Text)> EditInline(PanelViewModel panel, InlineEdit edit)
+    {
+        this.inlineEdit?.Cancel();
+        // a listing that was just reread may not have bound its rows to the new items yet - give it a moment
+        for (var i = 0; i < 5 && !panel.BeginInlineEdit(edit); i++)
+            await Task.Delay(60);
+        if (!edit.IsShown)
+            return (false, null);
+
+        this.inlineEdit = edit;
+        this.IsInlineEditing = true;
+        var text = await edit.Result;
+        if (this.inlineEdit == edit)
+        {
+            this.inlineEdit = null;
+            this.IsInlineEditing = false;
+            this.FocusCommandLineRequested?.Invoke(this, EventArgs.Empty);
+        }
+        return (true, text);
+    }
+
     // --- background jobs ----------------------------------------------------------------------
     /// <summary>Copy/move/delete/pack/unpack run here - the panels stay usable meanwhile.</summary>
     public JobQueue Jobs { get; }
@@ -195,6 +228,82 @@ public partial class MainViewModel : ObservableObject,
 
     partial void OnRibbonTabChanged(string value) => this.settings.RibbonTab = value;
 
+    // --- ribbon toggles -------------------------------------------------------------------------
+    // What the ribbon draws pressed, for the active panel. The Shiny ribbon's toggle buttons bind these two-way, so
+    // each setter does what its command (keys, pane toolbar) does; the AppKit ribbon only reads them.
+
+    public bool ShowTree
+    {
+        get => this.ActivePanel?.ShowTree == true;
+        set => this.ActivePanel.ShowTree = value;
+    }
+
+    public bool ShowHidden
+    {
+        get => this.settings.ShowHidden;
+        set
+        {
+            if (value != this.settings.ShowHidden)
+                this.ToggleHiddenCommand.Execute(null);
+        }
+    }
+
+    public bool IsBranchView
+    {
+        get => this.Tab?.IsBranchView == true;
+        set
+        {
+            if (value != this.IsBranchView)
+                this.BranchViewCommand.Execute(null);
+        }
+    }
+
+    public bool ShowQuickFilter
+    {
+        get => this.ActivePanel?.ShowQuickFilter == true;
+        set
+        {
+            if (value == this.ShowQuickFilter)
+                return;
+
+            if (value)
+                this.QuickFilter();
+            else
+                this.CloseQuickFilter();
+        }
+    }
+
+    public bool IsThumbnails
+    {
+        get => this.ActivePanel?.IsThumbnails == true;
+        set
+        {
+            if (value != this.IsThumbnails)
+                this.ThumbnailView();
+        }
+    }
+
+    /// <summary>One of the two views rather than an on/off - pressing it while it's on leaves it on.</summary>
+    public bool IsDetails
+    {
+        get => this.ActivePanel?.IsDetails == true;
+        set
+        {
+            if (value)
+                this.DetailsView();
+            else
+                this.mainThread.BeginInvokeOnMainThread(() => this.OnPropertyChanged(nameof(this.IsDetails)));
+        }
+    }
+
+    partial void OnActivePanelChanged(PanelViewModel value) => this.OnRibbonStatesChanged();
+
+    void OnRibbonStatesChanged()
+    {
+        foreach (var name in new[] { nameof(this.ShowTree), nameof(this.IsBranchView), nameof(this.ShowQuickFilter), nameof(this.IsThumbnails), nameof(this.IsDetails) })
+            this.OnPropertyChanged(name);
+    }
+
     public int PanelFontSize => Math.Max(10, this.settings.PanelFontSize);
 
     /// <summary>The page hooks this to move keyboard focus into the command line.</summary>
@@ -204,6 +313,11 @@ public partial class MainViewModel : ObservableObject,
 
     partial void OnIsPathEditingChanged(bool value) => this.RefreshKeyStates();
     partial void OnIsFilterEditingChanged(bool value) => this.RefreshKeyStates();
+    partial void OnIsInlineEditingChanged(bool value)
+    {
+        this.RefreshKeyStates();
+        this.SelectAllCommand.NotifyCanExecuteChanged();
+    }
 
     void RefreshKeyStates()
     {
@@ -228,6 +342,7 @@ public partial class MainViewModel : ObservableObject,
                 if (listingChanged || tab is { IsArchive: true } || tab?.IsBranchView == true)
                     _ = tab?.RefreshAsync();
             }
+            this.OnPropertyChanged(nameof(this.ShowHidden));
             // Settings may have turned tabs on or off
             await this.Left.RefreshShowTabsAsync();
             await this.Right.RefreshShowTabsAsync();
@@ -297,6 +412,9 @@ public partial class MainViewModel : ObservableObject,
             this.UpdatePrompt();
             this.SaveState();
         }
+        // a new folder or tab drops branch view; the rest are the panel's own toggles
+        if (sender == this.ActivePanel && e.PropertyName is nameof(PanelViewModel.Path) or nameof(PanelViewModel.ActiveTab) or nameof(PanelViewModel.ShowTree) or nameof(PanelViewModel.ShowQuickFilter) or nameof(PanelViewModel.ViewMode))
+            this.OnRibbonStatesChanged();
     }
 
     void UpdatePrompt() => this.CommandPrompt = (this.Tab?.Path ?? String.Empty) + (OperatingSystem.IsWindows() ? ">" : " $");
@@ -371,8 +489,8 @@ public partial class MainViewModel : ObservableObject,
     // keyboard navigation (CanExecute == false hands the key back to the focused text box)
     // ===========================================================================================
 
-    bool CanNavigate() => !this.IsPathEditing;
-    bool CommandLineEmpty() => !this.IsPathEditing && !this.IsFilterEditing && String.IsNullOrEmpty(this.CommandText);
+    bool CanNavigate() => !this.IsPathEditing && !this.IsInlineEditing;
+    bool CommandLineEmpty() => !this.IsPathEditing && !this.IsFilterEditing && !this.IsInlineEditing && String.IsNullOrEmpty(this.CommandText);
 
     // thumbnail view is a grid: Up/Down step a whole row, Left/Right one tile
     int RowStep => this.ActivePanel is { IsThumbnails: true } p ? Math.Max(1, p.ThumbnailSpan) : 1;
@@ -471,7 +589,11 @@ public partial class MainViewModel : ObservableObject,
     [RelayCommand]
     void Escape()
     {
-        if (this.ActivePanel.ShowQuickFilter)
+        if (this.inlineEdit is { } edit)
+        {
+            edit.Cancel();
+        }
+        else if (this.ActivePanel.ShowQuickFilter)
         {
             this.CloseQuickFilter();
         }
@@ -486,7 +608,6 @@ public partial class MainViewModel : ObservableObject,
         else if (this.ShowJobs)
         {
             // jobs keep running - Esc only hides the pane; each job has its own Stop
-            this.jobsPaneToggles++;
             this.ShowJobs = false;
         }
     }
@@ -607,7 +728,13 @@ public partial class MainViewModel : ObservableObject,
     /// <summary>"Rename tab…" in a tab's menu: empty goes back to the folder's own name, cancel leaves it be.</summary>
     public async Task RenameTab(PanelViewModel panel, PanelTabViewModel tab)
     {
-        var alias = await this.dialogs.Prompt(L.Tab_Rename, L.Tab_RenameMessage, tab.Alias, placeholder: tab.Path);
+        // in place on the tab where it can be; left as it was, nothing changes
+        var (shown, alias) = await this.EditInline(panel, new InlineEdit(tab, tab.Title, tab.Title.Length));
+        if (shown && alias?.Trim() == tab.Title)
+            return;
+
+        if (!shown)
+            alias = await this.dialogs.Prompt(L.Tab_Rename, L.Tab_RenameMessage, tab.Alias, placeholder: tab.Path);
         if (alias != null)
             panel.EditTab(tab, x => x.Alias = String.IsNullOrWhiteSpace(alias) ? null : alias.Trim());
     }
@@ -658,6 +785,7 @@ public partial class MainViewModel : ObservableObject,
     async Task ToggleHidden()
     {
         this.settings.ShowHidden = !this.settings.ShowHidden;
+        this.OnPropertyChanged(nameof(this.ShowHidden));
         await (this.Left.ActiveTab?.RefreshAsync() ?? Task.CompletedTask);
         await (this.Right.ActiveTab?.RefreshAsync() ?? Task.CompletedTask);
         await this.dialogs.Toast(this.settings.ShowHidden ? L.Main_ShowingHidden : L.Main_HidingHidden);
@@ -671,11 +799,14 @@ public partial class MainViewModel : ObservableObject,
 
         if (tab.IsRemote && !tab.IsBranchView)
         {
+            // the ribbon's toggle already shows it pressed - put it back up
+            this.mainThread.BeginInvokeOnMainThread(() => this.OnPropertyChanged(nameof(this.IsBranchView)));
             await this.dialogs.Toast(L.Remote_NoBranchView, ToastKind.Warning);
             return;
         }
 
         tab.IsBranchView = !tab.IsBranchView;
+        this.OnPropertyChanged(nameof(this.IsBranchView));
         await tab.RefreshAsync();
     }
 
@@ -724,18 +855,15 @@ public partial class MainViewModel : ObservableObject,
         while (true)
         {
             var tab = panel.ActiveTab;
-            var set = tab?.ColumnSet;
             var setup = tab?.Setup;
             var builtIn = Enum.GetValues<PanelColumn>();
             IReadOnlyList<IFileColumn> chosen = tab?.CustomColumns ?? [];
-            // a folder setup can take any custom column; the global choice is per column set
-            IReadOnlyList<IFileColumn> custom = setup != null
-                ? (set == null ? this.fileColumns.All : this.fileColumns.CandidatesFor(set)).Union(chosen).ToList()
-                : set == null ? [] : this.fileColumns.CandidatesFor(set);
-            var group = setup != null ? VirtualFileSystem.GetName(setup.Path) : set?.Title;
+            // every custom column, always: a folder setup keeps its own pick, otherwise one turned on shows in every
+            // folder (blank for files it doesn't apply to)
+            var custom = this.fileColumns.All;
             var options = builtIn
                 .Select(c => Tick(panel.Columns.IsOn(c)) + ColumnSet.Label(c))
-                .Concat(custom.Select(c => Tick(chosen.Contains(c)) + L.Main_ColumnInSetFormat(c.Title, group!)))
+                .Concat(custom.Select(c => Tick(chosen.Contains(c)) + (setup != null ? L.Main_ColumnInSetFormat(c.Title, VirtualFileSystem.GetName(setup.Path)) : c.Title)))
                 .ToList();
 
             var title = setup != null ? L.Main_ColumnsForFolderFormat(VirtualFileSystem.GetName(setup.Path)) : L.Main_Columns;
@@ -754,7 +882,7 @@ public partial class MainViewModel : ObservableObject,
             else if (index < builtIn.Length)
                 this.columns.Toggle(builtIn[index]);
             else
-                this.fileColumns.Toggle(set!, custom[index - builtIn.Length]);
+                this.fileColumns.SetAlways(custom[index - builtIn.Length], !chosen.Contains(custom[index - builtIn.Length]));
         }
         this.RequestCommandLineFocus();
     }
@@ -913,8 +1041,11 @@ public partial class MainViewModel : ObservableObject,
     // marking
     // ===========================================================================================
 
-    [RelayCommand]
+    // while a name is edited in place, Primary+A selects its text
+    [RelayCommand(CanExecute = nameof(NotInlineEditing))]
     void SelectAll() => this.Tab?.MarkAll(true);
+
+    bool NotInlineEditing() => !this.IsInlineEditing;
 
     [RelayCommand]
     void DeselectAll() => this.Tab?.MarkAll(false);
@@ -1203,11 +1334,16 @@ public partial class MainViewModel : ObservableObject,
     async Task Rename()
     {
         var tab = this.Tab;
-        if (tab?.CursorItem is not { Entry.IsParentLink: false } item)
+        if (tab?.CursorItem is not { Entry.IsParentLink: false } item || this.IsInlineEditing)
             return;
 
-        var name = await this.dialogs.Prompt(L.Cmd_Rename, L.Main_RenameMessageFormat(item.Entry.Name), item.Entry.Name);
-        if (String.IsNullOrWhiteSpace(name) || name == item.Entry.Name)
+        // in place on the row or tile, the name selected without its extension (a folder's whole name), like Finder
+        var current = item.Entry.Name;
+        var stem = item.IsDirectory || Path.GetFileNameWithoutExtension(current) is not { Length: > 0 } s ? current.Length : s.Length;
+        var (shown, name) = await this.EditInline(this.ActivePanel, new InlineEdit(item, current, stem));
+        if (!shown)
+            name = await this.dialogs.Prompt(L.Cmd_Rename, L.Main_RenameMessageFormat(current), current);
+        if (String.IsNullOrWhiteSpace(name) || name == current)
             return;
 
         await this.Try(L.Cmd_Rename, async () =>
@@ -1442,8 +1578,10 @@ public partial class MainViewModel : ObservableObject,
             }
         });
 
-    // bumped whenever you show/hide the pane yourself - the auto-open never overrides that
+    // bumped whenever the pane shows/hides - the auto-open never overrides you having shown or hidden it meanwhile
     int jobsPaneToggles;
+
+    partial void OnShowJobsChanged(bool value) => this.jobsPaneToggles++;
 
     // a quick job is over before the pane would be any use - only one still going after a moment opens it
     async void OnJobStarted(object? sender, JobViewModel job)
@@ -1455,11 +1593,7 @@ public partial class MainViewModel : ObservableObject,
     }
 
     [RelayCommand]
-    void ToggleJobs()
-    {
-        this.jobsPaneToggles++;
-        this.ShowJobs = !this.ShowJobs;
-    }
+    void ToggleJobs() => this.ShowJobs = !this.ShowJobs;
 
     [RelayCommand]
     void StopJob(JobViewModel? job) => job?.Stop();

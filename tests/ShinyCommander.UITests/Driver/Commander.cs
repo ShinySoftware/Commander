@@ -66,6 +66,15 @@ public sealed class Commander(AgentClient client)
     /// <summary>Activates the panel and puts its cursor on <paramref name="name"/> (what clicking a row does).</summary>
     public Task<AppState> Cursor(string name, string? side = null) => this.Call("cursor", new { side, name });
 
+    /// <summary>Types into the in-place name editor (F2, Rename tab…), then presses Enter unless told not to.</summary>
+    public Task<AppState> InlineName(string text, bool enter = true) => this.Call("inline_name", new { text, enter });
+
+    /// <summary>Opens a file in its app for real (test mode otherwise only records it); <see cref="LastResult"/> has <c>opened</c>.</summary>
+    public Task<AppState> OpenReal(string path) => this.Call("open_real", new { path });
+
+    /// <summary>Motion (line) file icons on or off until reset - the Settings switch.</summary>
+    public Task<AppState> MotionIcons(bool on = true) => this.Call("motion_icons", new { on });
+
     public Task<AppState> Mark(params string[] names) => this.Call("mark", new { names });
 
     /// <summary>Runs a MainViewModel command (name without "Command"; "panel.X" for the active panel's) - for ribbon-only actions.</summary>

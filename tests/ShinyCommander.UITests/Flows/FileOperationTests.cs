@@ -189,15 +189,50 @@ public class FileOperationTests(AppFixture fixture) : UiTest(fixture)
     }
 
     [Fact]
-    public async Task F2_renames_and_keeps_the_cursor_on_the_new_name()
+    public async Task F2_renames_in_place_and_keeps_the_cursor_on_the_new_name()
     {
         await this.Start(l => l.File("old.txt", "content"));
         await this.App.Cursor("old.txt");
-        await this.App.Answer("new.txt");
 
         var s = await this.App.Key("F2");
+        s.Dialogs.ShouldBeEmpty("F2 edits the name on the row, not in a prompt");
+        await this.Ui.InlineName();
+        await this.App.InlineName("new.txt");
+
+        s = await this.App.WaitFor(_ => this.LeftTree.Exists("new.txt"), "the rename");
         this.LeftTree.Read("new.txt").ShouldBe("content");
         s.Left.CursorName.ShouldBe("new.txt");
+        (await this.Ui.Exists(x => x.AutomationId == "LeftInlineName")).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task Escape_leaves_an_in_place_rename_without_renaming()
+    {
+        await this.Start(l => l.File("old.txt"));
+        await this.App.Cursor("old.txt");
+
+        await this.App.Key("F2");
+        await this.Ui.InlineName();
+        await this.App.InlineName("other.txt", enter: false);
+        await this.App.Key("Escape");
+
+        await this.App.WaitFor(x => x.Focus == "CommandLine", "the keyboard back in the command line", TimeSpan.FromSeconds(3));
+        (await this.Ui.Exists(x => x.AutomationId == "LeftInlineName")).ShouldBeFalse();
+        this.LeftTree.Names().ShouldBe(["old.txt"]);
+    }
+
+    [Fact]
+    public async Task F2_in_thumbnail_view_renames_on_the_tile()
+    {
+        await this.Start(l => l.File("old.txt"));
+        await this.App.Key("Primary+Shift+F1");
+        await this.App.Cursor("old.txt");
+
+        await this.App.Key("F2");
+        await this.Ui.InlineName();
+        await this.App.InlineName("tile.txt");
+        await this.App.WaitFor(_ => this.LeftTree.Exists("tile.txt"), "the rename");
+        await this.App.Key("Primary+F2");
     }
 
     [Fact]
@@ -205,9 +240,11 @@ public class FileOperationTests(AppFixture fixture) : UiTest(fixture)
     {
         await this.Start(l => l.File("a.txt", "A").File("b.txt", "B"));
         await this.App.Cursor("a.txt");
-        await this.App.Answer("b.txt");
 
-        var s = await this.App.Key("F2");
+        await this.App.Key("F2");
+        await this.Ui.InlineName();
+        await this.App.InlineName("b.txt");
+        var s = await this.App.WaitFor(x => x.Dialogs.Any(d => d.Kind == "alert"), "the refusal");
         this.LeftTree.Read("b.txt").ShouldBe("B");
         this.LeftTree.Read("a.txt").ShouldBe("A");
         s.Dialogs.ShouldContain(d => d.Kind == "alert" && d.Title == "Rename");

@@ -173,6 +173,15 @@ public partial class PanelViewModel : ObservableObject
     /// <summary>Raised when the UI should scroll the cursor into view.</summary>
     public event EventHandler<int>? ScrollRequested;
 
+    /// <summary>Asks the view to edit a row's, tile's or tab's name in place; it sets <see cref="InlineEdit.IsShown"/> when it can.</summary>
+    public event EventHandler<InlineEdit>? InlineEditRequested;
+
+    public bool BeginInlineEdit(InlineEdit edit)
+    {
+        this.InlineEditRequested?.Invoke(this, edit);
+        return edit.IsShown;
+    }
+
     /// <summary>Raised when the panel wants keyboard focus to return to the main page (e.g. after quick filter).</summary>
     public event EventHandler? Activated;
 

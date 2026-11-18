@@ -85,22 +85,42 @@ public class CustomColumnTests(AppFixture fixture) : UiTest(fixture)
     }
 
     [Fact]
-    public async Task The_column_chooser_adds_a_set_column_and_settings_turns_the_set_off()
+    public async Task The_column_chooser_turns_a_column_on_in_every_folder()
+    {
+        await this.Start(Music, r => r.Bytes("data.bin", [1, 2, 3]));
+        await this.App.WaitFor(x => x.Left.ColumnSet == "music", "the music column set");
+
+        // every custom column is offered, even ones no set has; on, it shows in any folder
+        await this.App.Answer("Sample rate", "Done");
+        await this.App.Command("ChooseColumns");
+        var s = await this.App.WaitFor(x => x.Left.CustomColumns!.Contains("samplerate") && !x.Left.IsReadingMetadata, "the sample rate column");
+        s.Left.Items.Single(x => x.Name == "short.wav").Custom![^1].ShouldBe("8 kHz");
+
+        // a folder with no set has it too - blank for a file it doesn't apply to
+        await this.App.Key("Tab");
+        s = await this.App.WaitFor(x => x.Right.CustomColumns!.Contains("samplerate") && !x.Right.IsReadingMetadata, "the column in the other folder");
+        s.Right.ColumnSet.ShouldBeNull();
+        var data = s.Right.Items.Single(x => x.Name == "data.bin");
+        data.Custom![s.Right.CustomColumns!.IndexOf("samplerate")].ShouldBeEmpty();
+
+        // off again, it's gone everywhere
+        await this.App.Answer("Sample rate", "Done");
+        await this.App.Command("ChooseColumns");
+        s = await this.App.WaitFor(x => !x.Right.CustomColumns!.Contains("samplerate") && !x.Left.CustomColumns!.Contains("samplerate"), "the column off everywhere");
+        await this.App.Key("Tab");
+    }
+
+    [Fact]
+    public async Task Settings_turns_a_column_set_off()
     {
         await this.Start(Music);
         await this.App.WaitFor(x => x.Left.ColumnSet == "music", "the music column set");
-
-        await this.App.Answer("Sample rate (Music)", "Done");
-        await this.App.Command("ChooseColumns");
-        var s = await this.App.WaitFor(x => x.Left.CustomColumns!.Contains("samplerate") && !x.Left.IsReadingMetadata, "the sample rate column");
-        s.Left.CustomColumns![^1].ShouldBe("samplerate");
-        s.Left.Items.Single(x => x.Name == "short.wav").Custom![^1].ShouldBe("8 kHz");
 
         await this.App.Command("Settings");
         await this.App.WaitFor(x => x.Page == "SettingsPage", "the settings page");
         await this.Ui.Tap("SettingsColumnSet_music");
         await this.App.Key("Escape");
-        s = await this.App.WaitFor(x => x.Page == "MainPage" && x.Left.ColumnSet == null, "the music set off");
+        var s = await this.App.WaitFor(x => x.Page == "MainPage" && x.Left.ColumnSet == null, "the music set off");
         s.Left.CustomHeaders.ShouldBeEmpty();
     }
 

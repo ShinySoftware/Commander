@@ -30,6 +30,37 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
         s.Left.Names.ShouldBe(["deep.txt"]);
     }
 
+    [Theory]
+    [InlineData(false, false)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(true, true)]
+    public async Task Double_clicking_an_image_opens_it_in_its_app(bool thumbnails, bool preview)
+    {
+        await this.Start(l => l.Bytes("photo.png", TestTree.Png1x1).File("notes.txt"));
+        if (thumbnails)
+            await this.App.Key("Primary+Shift+F1");
+        // the preview swaps in the picture on the first click - the second must still count
+        if (preview)
+            await this.App.Command("QuickView");
+        try
+        {
+            // a real AppKit double-click on the row / tile, not the recognizer invoked directly
+            // on the tile's picture (where you'd click), or the row's name
+            var label = await this.Ui.ByText(thumbnails ? "photo.png" : "photo", within: "LeftPanel");
+            var r = label.WindowBounds!;
+            var y = thumbnails ? r.Y - 50 : r.Y + r.Height / 2;
+            var hit = await this.App.HitAt(r.X + r.Width / 2, y);
+            await this.App.ClickAt(r.X + r.Width / 2, y, clicks: 2);
+            await this.App.WaitFor(x => x.Opened.Contains(this.LeftTree["photo.png"]), $"the image handed to its app", TimeSpan.FromSeconds(5));
+        }
+        finally
+        {
+            if (thumbnails)
+                await this.App.Key("Primary+F2");
+        }
+    }
+
     [Fact]
     public async Task The_path_row_arrows_go_up_back_and_forward()
     {
@@ -105,6 +136,75 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
         await this.App.WaitFor(s => s.Left.ViewMode == "Thumbnails", $"the click on the view mode button (hit: {this.App.LastResult.GetProperty("element").GetString()})", TimeSpan.FromSeconds(5));
     }
 
+    [Theory]
+    [InlineData("Left")]
+    [InlineData("Right")]
+    public async Task A_mouse_click_on_a_panes_preview_button_opens_the_preview(string side)
+    {
+        await this.Start(l => l.File("a.txt", "A"), r => r.File("b.txt", "B"));
+        try
+        {
+            var (x, y) = await this.Ui.Center(await this.Ui.ById(side + "ToolbarQuickView"));
+            var hit = (await this.App.HitAt(x, y)).ToString();
+            var element = this.App.LastResult.GetProperty("element").GetString();
+            await this.App.ClickAt(x, y);
+            await this.App.WaitFor(s => s.Preview.IsOpen, $"the preview to open (hit: {element})", TimeSpan.FromSeconds(5));
+        }
+        finally
+        {
+            await this.App.Command("QuickView");
+        }
+    }
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task A_mouse_click_on_the_ribbons_preview_button_opens_the_preview(bool onIcon)
+    {
+        await this.Start(l => l.File("a.txt", "A"));
+        await this.Ui.Tap("ribbon-tab-view");
+        try
+        {
+            // a large button: icon on top, label under it
+            var b = (await this.Ui.ById("ribbon-QuickView")).WindowBounds!;
+            var (x, y) = (b.X + b.Width / 2, onIcon ? b.Y + 18 : b.Y + b.Height - 10);
+            await this.App.HitAt(x, y);
+            var element = this.App.LastResult.GetProperty("element").GetString();
+            await this.App.ClickAt(x, y);
+            await this.App.WaitFor(s => s.Preview.IsOpen, $"the preview to open (hit: {element})", TimeSpan.FromSeconds(5));
+        }
+        finally
+        {
+            await this.App.Command("QuickView");
+        }
+    }
+
+    [Theory]
+    [InlineData("ribbon-Copy", "files")]
+    [InlineData("ribbon-ToggleTree", "view")]
+    public async Task A_mouse_click_on_a_ribbon_buttons_icon_runs_it(string button, string tab)
+    {
+        await this.Start(l => l.File("a.txt", "A"));
+        await this.App.Cursor("a.txt");
+        await this.Ui.Tap($"ribbon-tab-{tab}");
+        var tree = (await this.App.State()).Left.ShowTree;
+        await this.App.Answer("<cancel>");
+
+        // the icon is what you aim at - left third of a small button, the top of a large one
+        var b = (await this.Ui.ById(button)).WindowBounds!;
+        var (x, y) = button == "ribbon-Copy" ? (b.X + b.Width / 2, b.Y + 18) : (b.X + 12, b.Y + b.Height / 2);
+        await this.App.HitAt(x, y);
+        var element = this.App.LastResult.GetProperty("element").GetString();
+        await this.App.ClickAt(x, y);
+        if (button == "ribbon-Copy")
+            await this.App.WaitFor(s => s.Dialogs.Count > 0, $"the copy prompt (hit: {element})", TimeSpan.FromSeconds(5));
+        else
+        {
+            await this.App.WaitFor(s => s.Left.ShowTree != tree, $"the tree to toggle (hit: {element})", TimeSpan.FromSeconds(5));
+            await this.App.Command("ToggleTree");
+        }
+    }
+
     [Fact]
     public async Task The_function_key_bar_runs_its_command()
     {
@@ -151,6 +251,37 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
 
         await this.Ui.Tap("ribbon-TogglePanelLayout");
         (await this.App.State()).StackPanels.ShouldBeTrue();
+    }
+
+    [Fact]
+    public async Task Ribbon_toggles_are_pressed_while_on_for_the_active_panel()
+    {
+        await this.Start(l => l.File("a.txt"));
+        await this.Ui.Tap("ribbon-tab-view");
+        var tree = (await this.App.State()).Left.ShowTree;
+
+        await this.Ui.Tap("ribbon-ToggleTree");
+        var s = await this.App.WaitFor(x => x.Left.ShowTree != tree, "the tree to toggle");
+        s.RibbonPressed.Contains("ribbon-ToggleTree").ShouldBe(!tree);
+        s.RibbonPressed.ShouldContain("ribbon-DetailsView");
+        s.RibbonPressed.ShouldNotContain("ribbon-ThumbnailView");
+
+        // the other panel has its own tree - the button follows the active one
+        await this.App.Key("Tab");
+        s = await this.App.WaitFor(x => x.ActiveSide == "right", "the right panel to be active");
+        s.RibbonPressed.Contains("ribbon-ToggleTree").ShouldBe(s.Right.ShowTree);
+        await this.App.Key("Tab");
+
+        await this.Ui.Tap("ribbon-ThumbnailView");
+        s = await this.App.WaitFor(x => x.RibbonPressed.Contains("ribbon-ThumbnailView"), "Thumbnails to be pressed");
+        s.RibbonPressed.ShouldNotContain("ribbon-DetailsView");
+
+        await this.Ui.Tap("ribbon-DetailsView");
+        await this.App.WaitFor(x => x.RibbonPressed.Contains("ribbon-DetailsView") && !x.RibbonPressed.Contains("ribbon-ThumbnailView"), "Details to be pressed again");
+
+        // put the tree back as it was - the test app is shared
+        await this.Ui.Tap("ribbon-ToggleTree");
+        await this.App.WaitFor(x => x.Left.ShowTree == tree, "the tree to toggle back");
     }
 
     [Fact]
@@ -338,12 +469,12 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
         await this.App.Cursor("a.txt");
         await this.App.RealDialogs();
 
-        await this.App.Key("F2");
+        await this.App.Key("F7");
         await this.DialogEntry();
         try
         {
             // native first responder, not MAUI's IsFocused (which the AppKit backend doesn't keep current)
-            await this.App.WaitFor(x => x.Focus == "dialog", "the rename prompt's text box to take the keyboard", TimeSpan.FromSeconds(3));
+            await this.App.WaitFor(x => x.Focus == "dialog", "the new folder prompt's text box to take the keyboard", TimeSpan.FromSeconds(3));
         }
         finally
         {
@@ -358,7 +489,7 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
         await this.App.Cursor("a.txt");
         await this.App.RealDialogs();
 
-        await this.App.Key("F2");
+        await this.App.Key("F7");
         await this.DialogEntry();
         await this.Ui.ClickInDialog("Cancel");
 
@@ -391,7 +522,7 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
         await this.App.Cursor("a.txt");
         await this.App.RealDialogs();
 
-        await this.App.Key("F2");
+        await this.App.Key("F7");
         await this.DialogEntry();
         await this.Ui.ClickInDialog("Cancel");
         await this.App.WaitFor(x => x.Focus == "CommandLine", "focus back in the command line", TimeSpan.FromSeconds(3));

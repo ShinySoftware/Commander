@@ -37,6 +37,8 @@ public static class UiTestHooks
         Map(ext, "type", "Replace the command line text: { text }", TypeText);
         Map(ext, "navigate", "Navigate a panel: { side = active, path }", Navigate);
         Map(ext, "cursor", "Activate a panel and put its cursor on an item: { side = active, name }", Cursor);
+        Map(ext, "open_real", "Open a file in its app the way a double-click does, past test mode's recording (really opens it): { path }", OpenReal);
+        Map(ext, "inline_name", "Type into the in-place name editor (F2, Rename tab…): { text, enter = true }", InlineName);
         Map(ext, "mark", "Mark items by name in the active panel: { names: [] }", Mark);
         Map(ext, "command", "Execute a MainViewModel command by name (without the Command suffix): { name, parameter }", Command);
         Map(ext, "answer", "Queue dialog answers: { answers: [] }", Answer);
@@ -81,6 +83,13 @@ public static class UiTestHooks
             Service<AppSettings>().HideTabs = a.TryGetProperty("on", out var on) && on.ValueKind == JsonValueKind.False;
             await main.Left.RefreshShowTabsAsync();
             await main.Right.RefreshShowTabsAsync();
+            return (object)true;
+        });
+        Map(ext, "motion_icons", "Motion (line) file icons on or off, as the Settings switch does it, until reset: { on = true }", async (main, a) =>
+        {
+            Service<AppSettings>().MotionFileIcons = !(a.TryGetProperty("on", out var on) && on.ValueKind == JsonValueKind.False);
+            await (main.Left.ActiveTab?.RefreshAsync() ?? Task.CompletedTask);
+            await (main.Right.ActiveTab?.RefreshAsync() ?? Task.CompletedTask);
             return (object)true;
         });
         Map(ext, "previewer", "A preview plugin on or off, as its Settings switch does it, until reset: { key, on = true }", (main, a) =>
@@ -225,6 +234,29 @@ public static class UiTestHooks
         var panel = Panel(main, args);
         await panel.NavigateAsync(Str(args, "path") ?? throw new ArgumentException("path is required"));
         return true;
+    }
+
+    // test mode records what a double-click opens instead of opening it - this one goes all the way, through the
+    // platform launcher, to check that last step
+    static async Task<object> OpenReal(MainViewModel main, JsonElement args)
+    {
+        var path = Str(args, "path") ?? throw new ArgumentException("path is required");
+        if (ShinyCommander.Core.Platform.ShellLauncher.Native is not { } native)
+            throw new InvalidOperationException("no native launcher on this platform");
+        return new { opened = await native.OpenAsync(path) };
+    }
+
+    // what typing does - DevFlow's fill ends editing on the native field, which commits an in-place edit before Enter.
+    // Enter commits the way Return does; a synthetic Completed would look like AppKit's spurious one and be ignored
+    static Task<object> InlineName(MainViewModel main, JsonElement args)
+    {
+        var root = Application.Current?.Windows.FirstOrDefault()?.Page as IVisualTreeElement ?? throw new InvalidOperationException("no page");
+        var entry = Descendants(root).OfType<Entry>().FirstOrDefault(x => x.AutomationId?.EndsWith("InlineName", StringComparison.Ordinal) == true)
+            ?? throw new InvalidOperationException("no name is being edited in place");
+        entry.Text = Str(args, "text") ?? String.Empty;
+        if (!(args.TryGetProperty("enter", out var enter) && enter.ValueKind == JsonValueKind.False))
+            main.CommitInlineEdit(entry.Text);
+        return Task.FromResult<object>(true);
     }
 
     static Task<object> Cursor(MainViewModel main, JsonElement args)
@@ -423,6 +455,12 @@ public static class UiTestHooks
         }
     }
 
+    // the AppKit ribbon's buttons drawn pressed in (toggles that are on), by AutomationId
+    static List<string> RibbonPressed()
+        => Application.Current?.Windows.FirstOrDefault()?.Page is IVisualTreeElement root
+            ? Descendants(root).OfType<Border>().Where(RibbonButtonState.GetIsChecked).Select(x => x.AutomationId).ToList()
+            : [];
+
     static IEnumerable<IVisualTreeElement> Descendants(IVisualTreeElement element)
     {
         foreach (var child in element.GetVisualChildren())
@@ -461,6 +499,7 @@ public static class UiTestHooks
             columns.Set(c, c != PanelColumn.Created);
 
         Service<UiTestDialogs>().Reset();
+        main.CancelInlineEdit();
         main.CommandText = String.Empty;
         main.ShowOutput = false;
         await main.Jobs.StopAllAndWait(TimeSpan.FromSeconds(5));
@@ -475,6 +514,8 @@ public static class UiTestHooks
         Service<AppSettings>().DisabledPreviewers = null;
         Service<AppSettings>().ColumnSets = null;
         Service<AppSettings>().DisabledColumnSets = null;
+        Service<AppSettings>().AlwaysColumns = null;
+        Service<AppSettings>().MotionFileIcons = false;
         UiTestMode.Opened.Clear();
         Service<FolderSetups>().Clear();
         foreach (var (panel, path) in new[] { (main.Left, Str(args, "left")), (main.Right, Str(args, "right")) })
@@ -541,6 +582,7 @@ public static class UiTestHooks
                 errors = j.Errors
             }).ToList(),
             ribbonTab = main.RibbonTab,
+            ribbonPressed = RibbonPressed(),
             columns = Enum.GetValues<PanelColumn>().Where(columns.IsVisible).Select(x => x.ToString()).ToList(),
             left = PanelState(main.Left),
             right = PanelState(main.Right),
