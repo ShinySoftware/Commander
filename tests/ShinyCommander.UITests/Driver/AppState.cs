@@ -91,6 +91,9 @@ public sealed record PanelState
 
     /// <summary>The custom column headers that fit, with the sort arrow.</summary>
     public List<string> CustomHeaders { get; init; } = [];
+
+    /// <summary>Every detail column's header, left to right, by key: PanelColumn names and custom column keys.</summary>
+    public List<string> Headers { get; init; } = [];
     public bool IsReadingMetadata { get; init; }
     public bool CanGoBack { get; init; }
     public List<ItemState> Items { get; init; } = [];

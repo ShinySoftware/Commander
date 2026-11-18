@@ -843,60 +843,9 @@ public partial class MainViewModel : ObservableObject,
     [RelayCommand]
     void QuickView() => this.Preview.IsOpen = !this.Preview.IsOpen;
 
-    /// <summary>
-    /// Pick which detail columns the panels show - and, in a folder with a column set (photos, music...), which of its
-    /// columns; the list stays open until Done.
-    /// </summary>
+    /// <summary>The Columns screen: which detail columns show and in what order - every folder's, or this folder's setup.</summary>
     [RelayCommand]
-    async Task ChooseColumns()
-    {
-        var done = L.Common_Done;
-        var panel = this.ActivePanel;
-        while (true)
-        {
-            var tab = panel.ActiveTab;
-            var setup = tab?.Setup;
-            var builtIn = Enum.GetValues<PanelColumn>();
-            IReadOnlyList<IFileColumn> chosen = tab?.CustomColumns ?? [];
-            // every custom column, always: a folder setup keeps its own pick, otherwise one turned on shows in every
-            // folder (blank for files it doesn't apply to)
-            var custom = this.fileColumns.All;
-            var options = builtIn
-                .Select(c => Tick(panel.Columns.IsOn(c)) + ColumnSet.Label(c))
-                .Concat(custom.Select(c => Tick(chosen.Contains(c)) + (setup != null ? L.Main_ColumnInSetFormat(c.Title, VirtualFileSystem.GetName(setup.Path)) : c.Title)))
-                .ToList();
-
-            var title = setup != null ? L.Main_ColumnsForFolderFormat(VirtualFileSystem.GetName(setup.Path)) : L.Main_Columns;
-            var choice = await this.dialogs.Choose(title, options, done);
-            if (choice == null || choice == done)
-                break;
-
-            var index = options.IndexOf(choice);
-            if (index < 0)
-                break;
-
-            if (setup != null)
-                this.folderSetups.Save(index < builtIn.Length
-                    ? setup with { Columns = Toggled(builtIn.Where(panel.Columns.IsOn).Select(x => x.ToString()), builtIn[index].ToString(), builtIn.Select(x => x.ToString()).ToList()) }
-                    : setup with { CustomColumns = Toggled(chosen.Select(x => x.Key), custom[index - builtIn.Length].Key, null) });
-            else if (index < builtIn.Length)
-                this.columns.Toggle(builtIn[index]);
-            else
-                this.fileColumns.SetAlways(custom[index - builtIn.Length], !chosen.Contains(custom[index - builtIn.Length]));
-        }
-        this.RequestCommandLineFocus();
-    }
-
-    static string Tick(bool on) => on ? "✓  " : "     ";
-
-    // the key added at the end or taken out; with an order given (the built-in columns), kept in that order
-    static List<string> Toggled(IEnumerable<string> keys, string key, IReadOnlyList<string>? order)
-    {
-        var list = keys.ToList();
-        if (!list.Remove(key))
-            list.Add(key);
-        return order == null ? list : order.Where(list.Contains).ToList();
-    }
+    Task ChooseColumns() => this.navigator.NavigateTo<ColumnsViewModel>(vm => vm.Setup = this.Tab?.Setup);
 
     /// <summary>
     /// Primary+Shift+V, or the badge on a panel's path row: remember this folder's columns, sort and view mode - for

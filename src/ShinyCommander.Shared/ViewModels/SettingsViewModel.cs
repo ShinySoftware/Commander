@@ -1,7 +1,7 @@
 namespace ShinyCommander.ViewModels;
 
 [ShellMap<SettingsPage>("Settings")]
-public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, UpdateService updates, INavigator navigator, IAppDialogs dialogs, FilePreviewers previewers, PreviewPaneViewModel preview, FileColumns fileColumns, FolderSetups folderSetups) : ObservableObject
+public partial class SettingsViewModel(AppSettings settings, UpdateService updates, INavigator navigator, IAppDialogs dialogs, FilePreviewers previewers, PreviewPaneViewModel preview, FileColumns fileColumns, FolderSetups folderSetups) : ObservableObject
 {
     /// <summary>The folders with their own columns, sort and view mode; tapping one offers to forget it.</summary>
     public ObservableCollection<FolderSetupItem> FolderSetupItems => this.folderSetupItems ??= new(folderSetups.All.Select(x => new FolderSetupItem(x, fileColumns, this.ForgetFolderSetupCommand)));
@@ -63,11 +63,9 @@ public partial class SettingsViewModel(AppSettings settings, ColumnSet columns, 
         }
     }
 
-    public bool ShowExtColumn { get => columns.ShowExtension; set { columns.Set(PanelColumn.Extension, value); this.OnPropertyChanged(); } }
-    public bool ShowSizeColumn { get => columns.ShowSize; set { columns.Set(PanelColumn.Size, value); this.OnPropertyChanged(); } }
-    public bool ShowDateColumn { get => columns.ShowModified; set { columns.Set(PanelColumn.Modified, value); this.OnPropertyChanged(); } }
-    public bool ShowCreatedColumn { get => columns.ShowCreated; set { columns.Set(PanelColumn.Created, value); this.OnPropertyChanged(); } }
-    public bool ShowAttrColumn { get => columns.ShowAttributes; set { columns.Set(PanelColumn.Attributes, value); this.OnPropertyChanged(); } }
+    /// <summary>Which detail columns show, and their order - the Columns screen.</summary>
+    [RelayCommand]
+    Task ChooseColumns() => navigator.NavigateTo<ColumnsViewModel>();
 
     public bool ShowHidden { get => settings.ShowHidden; set { settings.ShowHidden = value; this.OnPropertyChanged(); } }
     public bool ShowTabs { get => !settings.HideTabs; set { settings.HideTabs = !value; this.OnPropertyChanged(); } }

@@ -6,7 +6,7 @@ using Font = Microsoft.Maui.Graphics.Font;
 namespace ShinyCommander.Views;
 
 /// <summary>
-/// A file row's detail columns (Ext, Size, Date, Created, Attr and the folder's custom ones) drawn into one view instead of five labels. Rows are
+/// A file row's detail columns (Ext, Size, Date, Created, Attr and custom ones, in the chosen order) drawn into one view instead of five labels. Rows are
 /// created and bound as the list scrolls, and on the AppKit head every label is a native text field with its own
 /// bindings - drawing the columns halves the native views per row and drops most of its bindings.
 /// </summary>
@@ -105,14 +105,23 @@ public class FileDetailsView : GraphicsView, IDrawable
             x += (float)width;
         }
 
-        Column(c.ShowExtension, ColumnLayout.ExtColumnWidth, item.Extension, plain, 12, HorizontalAlignment.Left);
-        Column(c.ShowSize, ColumnLayout.SizeColumnWidth, item.SizeText, plain, 12, HorizontalAlignment.Right, 8);
-        Column(c.ShowModified, ColumnLayout.DateColumnWidth, item.DateText, plain, 12, HorizontalAlignment.Left);
-        Column(c.ShowCreated, ColumnLayout.DateColumnWidth, item.CreatedText, plain, 12, HorizontalAlignment.Left);
-        Column(c.ShowAttributes, ColumnLayout.AttrColumnWidth, item.AttributeText, mono, 12, HorizontalAlignment.Left);
-        foreach (var custom in c.CustomShown)
-            Column(true, custom.Width, item.CustomText(custom), plain, 12, custom.AlignRight ? HorizontalAlignment.Right : HorizontalAlignment.Left, custom.AlignRight ? 8 : 6);
+        foreach (var column in c.Shown)
+        {
+            var right = column.AlignRight;
+            Column(true, column.Width, Text(item, column), column.BuiltIn == PanelColumn.Attributes ? mono : plain, 12,
+                right ? HorizontalAlignment.Right : HorizontalAlignment.Left, right ? 8 : column.Custom != null ? 6 : 0);
+        }
     }
+
+    static string Text(FileItemViewModel item, DetailColumn column) => column.BuiltIn switch
+    {
+        PanelColumn.Extension => item.Extension,
+        PanelColumn.Size => item.SizeText,
+        PanelColumn.Modified => item.DateText,
+        PanelColumn.Created => item.CreatedText,
+        PanelColumn.Attributes => item.AttributeText,
+        _ => item.CustomText(column.Custom!)
+    };
 
     // a line cloud like the motion icons: three bumps on a flat base, 14 x 9, centred on the row
     static void DrawCloud(ICanvas canvas, float midY)

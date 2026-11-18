@@ -20,6 +20,11 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     FileSystemWatcher? watcher;
     CancellationTokenSource? loadCts;
     CancellationTokenSource? metadataCts;
+
+    // the rows the list shows (ShowRows) and the ones the metadata read last covered - see LoadMetadata
+    (int First, int Last) shownRows = (-1, -1);
+    (int First, int Last) readRows = (-1, -1);
+    const int ReadAround = 40;
     Timer? refreshDebounce;
 
     public PanelTabViewModel(VirtualFileSystem vfs, AppSettings settings, ColumnLayout columns, FileColumns fileColumns, FolderSetups folderSetups, string path)
@@ -255,18 +260,16 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
         if (this.Setup is { } setup && !this.applyingSetup)
             this.folderSetups.Save(setup with { Sort = this.SortColumn, SortKey = this.SortKey, Descending = this.SortDescending });
 
-        foreach (var name in new[] { nameof(this.NameHeader), nameof(this.ExtHeader), nameof(this.SizeHeader), nameof(this.DateHeader), nameof(this.CreatedHeader), nameof(this.AttrHeader) })
-            this.OnPropertyChanged(name);
+        // the detail columns' headers are the panel's (PanelViewModel.UpdateHeaders)
+        this.OnPropertyChanged(nameof(this.NameHeader));
         this.ApplyView(this.CursorItem?.Entry.Name);
+        // sorting by a custom column needs every file's value, not just the rows on screen
+        if (this.SortedColumn != null)
+            this.LoadMetadata();
     }
 
     string Header(string text, SortColumn column) => this.SortColumn == column ? text + (this.SortDescending ? " ▼" : " ▲") : text;
     public string NameHeader => this.Header(L.Column_Name, SortColumn.Name);
-    public string ExtHeader => this.Header(L.Column_Ext, SortColumn.Extension);
-    public string SizeHeader => this.Header(L.Column_Size, SortColumn.Size);
-    public string DateHeader => this.Header(L.Column_Date, SortColumn.Modified);
-    public string AttrHeader => this.Header(L.Column_Attr, SortColumn.Attributes);
-    public string CreatedHeader => this.Header(L.Column_Created, SortColumn.Created);
 
     partial void OnCursorIndexChanged(int oldValue, int newValue)
     {
@@ -440,6 +443,8 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
             this.UpdateSetup();
             this.UpdateColumnSet();
             this.ApplyView(focusName);
+            // a new listing: the list hasn't said what it shows of it yet
+            this.shownRows = (-1, -1);
             this.LoadMetadata();
             this.Watch();
             return true;
@@ -774,9 +779,10 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
     });
 
     /// <summary>
-    /// Fills the rows' metadata for the custom columns: what's cached at once, the rest read in the background in list
-    /// order (the rows on screen first) and handed to the rows in batches. Cloud-only files aren't read - that would
-    /// download them.
+    /// Fills the rows' metadata for the custom columns: what's cached at once, the rest read in the background - only the
+    /// rows on screen and a few screens around them (more as the list scrolls, ShowRows), or every file when the list is
+    /// sorted by a custom column - and handed to the rows in batches. Cloud-only files aren't read - that would download
+    /// them.
     /// </summary>
     void LoadMetadata()
     {
@@ -786,12 +792,18 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
         if (kinds.Count == 0)
             return;
 
+        // before the list has said what it shows: around the cursor, which it scrolls to
+        var (first, last) = this.shownRows.First >= 0 ? this.shownRows : (this.CursorIndex - ReadAround, this.CursorIndex + ReadAround);
+        this.readRows = (first - ReadAround, last + ReadAround);
+        var everything = this.SortedColumn != null;
         var position = this.Items.Select((x, i) => (x, i)).ToDictionary(x => x.x, x => x.i);
+        bool Near(FileItemViewModel item) => position.TryGetValue(item, out var i) && i >= this.readRows.First && i <= this.readRows.Last;
+
         var pending = new List<FileItemViewModel>();
         foreach (var item in this.all.Where(x => kinds.Contains(FileKinds.Of(x.Entry))))
         {
             item.Metadata ??= this.fileColumns.Cached(item.Entry);
-            if (item.Metadata == null && !item.Entry.IsCloudOnly)
+            if (item.Metadata == null && !item.Entry.IsCloudOnly && (everything || Near(item)))
                 pending.Add(item);
         }
         if (pending.Count == 0)
@@ -801,6 +813,14 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
         var ordered = pending.OrderBy(x => position.GetValueOrDefault(x, Int32.MaxValue)).ToList();
         this.IsReadingMetadata = true;
         _ = Task.Run(() => this.ReadMetadata(ordered, cts));
+    }
+
+    /// <summary>The list scrolled: rows outside what the last read covered get theirs.</summary>
+    public void ShowRows(int first, int last)
+    {
+        this.shownRows = (first, last);
+        if (first < this.readRows.First || last > this.readRows.Last)
+            this.LoadMetadata();
     }
 
     void ReadMetadata(IReadOnlyList<FileItemViewModel> pending, CancellationTokenSource cts)

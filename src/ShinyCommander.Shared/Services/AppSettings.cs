@@ -77,7 +77,13 @@ public partial class AppSettings
     /// <summary>Each column set's chosen columns (FileColumns) - "photos=dimensions,taken|music=duration"; unlisted sets use their defaults.</summary>
     [Bind] public partial string? ColumnSets { get; set; }
 
-    /// <summary>Custom columns on in every folder (IFileColumn.Key), comma separated - files they don't apply to leave them blank.</summary>
+    /// <summary>
+    /// The detail columns every folder shows, in order (the Columns screen): PanelColumn names and IFileColumn keys,
+    /// comma separated. Null until first changed - the Hide*/ShowCreated flags and AlwaysColumns are what it starts from.
+    /// </summary>
+    [Bind] public partial string? ColumnOrder { get; set; }
+
+    /// <summary>Superseded by ColumnOrder - read once to start it.</summary>
     [Bind] public partial string? AlwaysColumns { get; set; }
 
     /// <summary>Column sets turned off in Settings (FileColumnSet.Key), comma separated.</summary>

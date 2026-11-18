@@ -57,11 +57,7 @@
                     </shiny:TableSection>
 
                     <shiny:TableSection Title="{l:Tr Settings_Columns}">
-                        <shiny:SwitchCell Title="{l:Tr Settings_ColExtension}" On="{Binding ShowExtColumn, Mode=TwoWay}" />
-                        <shiny:SwitchCell Title="{l:Tr Settings_ColSize}" On="{Binding ShowSizeColumn, Mode=TwoWay}" />
-                        <shiny:SwitchCell Title="{l:Tr Settings_ColModified}" On="{Binding ShowDateColumn, Mode=TwoWay}" />
-                        <shiny:SwitchCell Title="{l:Tr Settings_ColCreated}" On="{Binding ShowCreatedColumn, Mode=TwoWay}" />
-                        <shiny:SwitchCell Title="{l:Tr Settings_ColAttributes}" On="{Binding ShowAttrColumn, Mode=TwoWay}" />
+                        <shiny:ButtonCell Title="{l:Tr Settings_ChooseColumns}" ButtonTextColor="{StaticResource Accent}" Command="{Binding ChooseColumnsCommand}" AutomationId="SettingsChooseColumns" />
                         <shiny:ButtonCell Title="{l:Tr Settings_ColumnSetsEdit}" ButtonTextColor="{StaticResource Accent}" Command="{Binding EditColumnSetsCommand}" AutomationId="SettingsEditColumnSets" />
                     </shiny:TableSection>
 

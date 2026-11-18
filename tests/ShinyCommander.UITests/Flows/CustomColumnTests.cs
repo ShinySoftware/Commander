@@ -85,29 +85,70 @@ public class CustomColumnTests(AppFixture fixture) : UiTest(fixture)
     }
 
     [Fact]
-    public async Task The_column_chooser_turns_a_column_on_in_every_folder()
+    public async Task The_columns_screen_turns_a_column_on_in_every_folder_in_the_order_chosen()
     {
         await this.Start(Music, r => r.Bytes("data.bin", [1, 2, 3]));
         await this.App.WaitFor(x => x.Left.ColumnSet == "music", "the music column set");
 
         // every custom column is offered, even ones no set has; on, it shows in any folder
-        await this.App.Answer("Sample rate", "Done");
         await this.App.Command("ChooseColumns");
-        var s = await this.App.WaitFor(x => x.Left.CustomColumns!.Contains("samplerate") && !x.Left.IsReadingMetadata, "the sample rate column");
-        s.Left.Items.Single(x => x.Name == "short.wav").Custom![^1].ShouldBe("8 kHz");
+        await this.App.WaitFor(x => x.Page == "ColumnsPage", "the Columns screen");
+        await this.Ui.Tap("ColumnAdd_samplerate");
+        // moved left of Attributes, the headers follow
+        await this.Ui.Tap("ColumnLeft_samplerate");
+        await this.App.Key("Escape");
+        var s = await this.App.WaitFor(x => x.Page == "MainPage" && x.Left.CustomColumns!.Contains("samplerate") && !x.Left.IsReadingMetadata, "the sample rate column");
+        s.Left.Items.Single(x => x.Name == "short.wav").Custom![s.Left.CustomColumns!.IndexOf("samplerate")].ShouldBe("8 kHz");
 
-        // a folder with no set has it too - blank for a file it doesn't apply to
+        // a folder with no set has it too, where it was put - blank for a file it doesn't apply to. (Checked there: the
+        // music folder has more columns than fit, and the narrow panel drops some)
         await this.App.Key("Tab");
         s = await this.App.WaitFor(x => x.Right.CustomColumns!.Contains("samplerate") && !x.Right.IsReadingMetadata, "the column in the other folder");
         s.Right.ColumnSet.ShouldBeNull();
-        var data = s.Right.Items.Single(x => x.Name == "data.bin");
-        data.Custom![s.Right.CustomColumns!.IndexOf("samplerate")].ShouldBeEmpty();
+        s.Right.Headers.ShouldBe(["Extension", "Size", "Modified", "samplerate", "Attributes"]);
+        s.Right.Items.Single(x => x.Name == "data.bin").Custom![s.Right.CustomColumns!.IndexOf("samplerate")].ShouldBeEmpty();
 
         // off again, it's gone everywhere
-        await this.App.Answer("Sample rate", "Done");
         await this.App.Command("ChooseColumns");
-        s = await this.App.WaitFor(x => !x.Right.CustomColumns!.Contains("samplerate") && !x.Left.CustomColumns!.Contains("samplerate"), "the column off everywhere");
+        await this.App.WaitFor(x => x.Page == "ColumnsPage", "the Columns screen");
+        await this.Ui.Tap("ColumnRemove_samplerate");
+        await this.App.Key("Escape");
+        await this.App.WaitFor(x => x.Page == "MainPage" && !x.Right.CustomColumns!.Contains("samplerate") && !x.Left.CustomColumns!.Contains("samplerate"), "the column off everywhere");
         await this.App.Key("Tab");
+    }
+
+    [Fact]
+    public async Task Built_in_columns_take_the_order_chosen()
+    {
+        // a file of no kind: no column set adds its own columns at the end
+        await this.Start(l => l.Bytes("a.bin", [1]));
+        await this.App.Command("ChooseColumns");
+        await this.App.WaitFor(x => x.Page == "ColumnsPage", "the Columns screen");
+        await this.Ui.Tap("ColumnRight_Extension");
+        await this.Ui.Tap("ColumnRight_Extension");
+        await this.App.Key("Escape");
+        var s = await this.App.WaitFor(x => x.Page == "MainPage", "back on the main page");
+        s.Left.Headers.ShouldBe(["Size", "Modified", "Extension", "Attributes"]);
+    }
+
+    [Fact]
+    public async Task The_columns_screen_takes_real_mouse_clicks()
+    {
+        await this.Start(l => l.Bytes("a.bin", [1]));
+        await this.App.Command("ChooseColumns");
+        await this.App.WaitFor(x => x.Page == "ColumnsPage", "the Columns screen");
+
+        // a row of the available list adds it; a row's x takes it off - both through AppKit's hit testing
+        var add = (await this.Ui.ById("ColumnAdd_Created")).WindowBounds!;
+        await this.App.ClickAt(add.X + add.Width / 2, add.Y + add.Height / 2);
+        var hitAdd = this.App.LastResult.GetProperty("element").GetString();
+        await this.App.WaitFor(x => true, "-");
+        var remove = (await this.Ui.ById("ColumnRemove_Size", TimeSpan.FromSeconds(3))).WindowBounds!;
+        await this.App.ClickAt(remove.X + remove.Width / 2, remove.Y + remove.Height / 2);
+        var hitRemove = this.App.LastResult.GetProperty("element").GetString();
+        await this.App.Key("Escape");
+        var s = await this.App.WaitFor(x => x.Page == "MainPage", "back on the main page");
+        s.Left.Headers.ShouldBe(["Extension", "Modified", "Attributes", "Created"], $"add hit {hitAdd}; remove hit {hitRemove}");
     }
 
     [Fact]

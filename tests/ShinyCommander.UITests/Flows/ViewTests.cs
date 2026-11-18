@@ -92,12 +92,15 @@ public class ViewTests(AppFixture fixture) : UiTest(fixture)
     public async Task Choosing_columns_hides_and_shows_them()
     {
         await this.Start(l => l.File("a.txt"));
-        await this.App.Answer("Attributes", "Date created", "Done");
 
-        var s = await this.App.Key("Primary+Shift+K");
+        await this.App.Key("Primary+Shift+K");
+        await this.App.WaitFor(x => x.Page == "ColumnsPage", "the Columns screen");
+        await this.Ui.Tap("ColumnRemove_Attributes");
+        await this.Ui.Tap("ColumnAdd_Created");
+        await this.App.Key("Escape");
+        var s = await this.App.WaitFor(x => x.Page == "MainPage", "back on the main page");
         s.Columns.ShouldNotContain("Attributes");
         s.Columns.ShouldContain("Created");
-        s.Dialogs.Count(d => d.Title == "Columns").ShouldBe(3);
     }
 
     [Fact]

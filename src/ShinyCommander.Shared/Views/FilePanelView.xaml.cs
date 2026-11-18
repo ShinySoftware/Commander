@@ -262,44 +262,71 @@ public partial class FilePanelView : ContentView
         }
         label.IsVisible = false;
         edit.IsShown = true;
+        this.Dispatcher.Dispatch(new InlineEditor(edit, entry, label, host).Focus);
+    }
 
-        // Enter, and clicking away (AppKit raises Completed when the field loses the keyboard), keep the name;
-        // Escape (MainViewModel) cancels. A row reused for another item while scrolled keeps it too
-        void OnLeft(object? s, EventArgs e)
-        {
-            if (!StillEditing(entry))
-                edit.Commit(entry.Text);
-        }
-        entry.Completed += OnLeft;
-        entry.Unfocused += OnLeft;
-        void OnRecycled(object? s, EventArgs e)
-        {
-            if (host.BindingContext != edit.Target)
-                edit.Commit(entry.Text);
-        }
-        host.BindingContextChanged += OnRecycled;
-        edit.Ended += (_, _) =>
-        {
-            host.BindingContextChanged -= OnRecycled;
-            host.Children.Remove(entry);
-            label.IsVisible = true;
-        };
+    /// <summary>
+    /// The editor put over one name: keeps the name on Enter or a click away (AppKit raises Completed when the field
+    /// loses the keyboard), and when the row it's in is reused for another item while scrolled; Escape (MainViewModel)
+    /// cancels. Whichever way it ends, it takes itself down and lets go of every event.
+    /// </summary>
+    sealed class InlineEditor
+    {
+        readonly InlineEdit edit;
+        readonly Entry entry;
+        readonly Label label;
+        readonly Layout host;
 
-        this.Dispatcher.Dispatch(() =>
+        public InlineEditor(InlineEdit edit, Entry entry, Label label, Layout host)
         {
-            if (edit.IsEnded)
+            this.edit = edit;
+            this.entry = entry;
+            this.label = label;
+            this.host = host;
+            entry.Completed += this.OnLeft;
+            entry.Unfocused += this.OnLeft;
+            host.BindingContextChanged += this.OnRecycled;
+            edit.Ended += this.OnEnded;
+        }
+
+        public void Focus()
+        {
+            if (this.edit.IsEnded)
                 return;
-            entry.Focus();
+
+            this.entry.Focus();
 #if MACOS_APPKIT
             // on the field editor itself: the handler applies CursorPosition / SelectionLength by ending and restarting
             // the edit, which AppKit reports as Completed - and that would commit the name straight away
-            if (entry.Handler?.PlatformView is AppKit.NSTextField field && field.CurrentEditor is { } editor)
-                editor.SelectedRange = new Foundation.NSRange(0, edit.SelectionLength);
+            if (this.entry.Handler?.PlatformView is AppKit.NSTextField field && field.CurrentEditor is { } editor)
+                editor.SelectedRange = new Foundation.NSRange(0, this.edit.SelectionLength);
 #else
-            entry.CursorPosition = 0;
-            entry.SelectionLength = edit.SelectionLength;
+            this.entry.CursorPosition = 0;
+            this.entry.SelectionLength = this.edit.SelectionLength;
 #endif
-        });
+        }
+
+        void OnLeft(object? sender, EventArgs e)
+        {
+            if (!StillEditing(this.entry))
+                this.edit.Commit(this.entry.Text);
+        }
+
+        void OnRecycled(object? sender, EventArgs e)
+        {
+            if (this.host.BindingContext != this.edit.Target)
+                this.edit.Commit(this.entry.Text);
+        }
+
+        void OnEnded(object? sender, EventArgs e)
+        {
+            this.entry.Completed -= this.OnLeft;
+            this.entry.Unfocused -= this.OnLeft;
+            this.host.BindingContextChanged -= this.OnRecycled;
+            this.edit.Ended -= this.OnEnded;
+            this.host.Children.Remove(this.entry);
+            this.label.IsVisible = true;
+        }
     }
 
     // AppKit ends a field's edit when a layout pass moves it (the list or tab strip re-arranging), and the handler reports
@@ -327,7 +354,11 @@ public partial class FilePanelView : ContentView
     (int First, int Last, object? Source) visibleRange = (-1, -1, null);
 
     void OnListScrolled(object? sender, ItemsViewScrolledEventArgs e)
-        => this.visibleRange = (e.FirstVisibleItemIndex, e.LastVisibleItemIndex, sender);
+    {
+        this.visibleRange = (e.FirstVisibleItemIndex, e.LastVisibleItemIndex, sender);
+        // custom columns read their files' metadata only around what's on screen
+        this.panel?.ActiveTab?.ShowRows(e.FirstVisibleItemIndex, e.LastVisibleItemIndex);
+    }
 
     void OnFileListSizeChanged(object? sender, EventArgs e)
     {

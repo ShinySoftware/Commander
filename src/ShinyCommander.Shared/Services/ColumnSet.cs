@@ -10,46 +10,60 @@ public enum PanelColumn
 }
 
 /// <summary>
-/// Which detail columns the panels show. Header and rows bind their ColumnDefinition widths here, so hiding a
-/// column collapses it to zero width everywhere at once without rebuilding a row.
+/// Which detail columns the panels show, and in what order (the Columns screen) - the built-in ones and any custom
+/// ones together. A folder's column set and a folder setup add to or replace this per folder (ColumnLayout).
 /// </summary>
 [Singleton]
 public partial class ColumnSet(AppSettings settings) : ObservableObject
 {
-    static readonly GridLength Hidden = new(0);
+    /// <summary>A fresh install's columns.</summary>
+    public static readonly IReadOnlyList<string> Default = [nameof(PanelColumn.Extension), nameof(PanelColumn.Size), nameof(PanelColumn.Modified), nameof(PanelColumn.Attributes)];
 
-    public bool ShowExtension => !settings.HideExtColumn;
-    public bool ShowSize => !settings.HideSizeColumn;
-    public bool ShowModified => !settings.HideDateColumn;
-    public bool ShowCreated => settings.ShowCreatedColumn;
-    public bool ShowAttributes => !settings.HideAttrColumn;
+    /// <summary>The shown columns, left to right: PanelColumn names and IFileColumn keys.</summary>
+    public IReadOnlyList<string> Order => settings.ColumnOrder is { } saved ? Split(saved) : this.Before();
 
-    public GridLength ExtWidth => this.ShowExtension ? new GridLength(56) : Hidden;
-    public GridLength SizeWidth => this.ShowSize ? new GridLength(92) : Hidden;
-    public GridLength ModifiedWidth => this.ShowModified ? new GridLength(122) : Hidden;
-    public GridLength CreatedWidth => this.ShowCreated ? new GridLength(122) : Hidden;
-    public GridLength AttrWidth => this.ShowAttributes ? new GridLength(84) : Hidden;
+    // what the choice was before it had an order: the built-in flags, then the custom columns turned on everywhere
+    IReadOnlyList<string> Before() => Enum.GetValues<PanelColumn>()
+        .Where(c => c switch
+        {
+            PanelColumn.Extension => !settings.HideExtColumn,
+            PanelColumn.Size => !settings.HideSizeColumn,
+            PanelColumn.Modified => !settings.HideDateColumn,
+            PanelColumn.Created => settings.ShowCreatedColumn,
+            _ => !settings.HideAttrColumn
+        })
+        .Select(x => x.ToString())
+        .Concat(Split(settings.AlwaysColumns))
+        .ToList();
 
-    public bool IsVisible(PanelColumn column) => column switch
+    public static IReadOnlyList<string> Split(string? keys) => (keys ?? String.Empty)
+        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+        .Distinct()
+        .ToList();
+
+    public void SetOrder(IEnumerable<string> keys)
     {
-        PanelColumn.Extension => this.ShowExtension,
-        PanelColumn.Size => this.ShowSize,
-        PanelColumn.Modified => this.ShowModified,
-        PanelColumn.Created => this.ShowCreated,
-        _ => this.ShowAttributes
-    };
+        settings.ColumnOrder = String.Join(',', keys.Distinct());
+        this.OnPropertyChanged(String.Empty); // every width/flag
+    }
 
+    public void Reset() => this.SetOrder(Default);
+
+    public bool ShowExtension => this.IsVisible(PanelColumn.Extension);
+    public bool ShowSize => this.IsVisible(PanelColumn.Size);
+    public bool ShowModified => this.IsVisible(PanelColumn.Modified);
+    public bool ShowCreated => this.IsVisible(PanelColumn.Created);
+    public bool ShowAttributes => this.IsVisible(PanelColumn.Attributes);
+
+    public bool IsVisible(PanelColumn column) => this.Order.Contains(column.ToString());
+
+    /// <summary>On (at the end of the built-in ones) or off.</summary>
     public void Set(PanelColumn column, bool visible)
     {
-        switch (column)
-        {
-            case PanelColumn.Extension: settings.HideExtColumn = !visible; break;
-            case PanelColumn.Size: settings.HideSizeColumn = !visible; break;
-            case PanelColumn.Modified: settings.HideDateColumn = !visible; break;
-            case PanelColumn.Created: settings.ShowCreatedColumn = visible; break;
-            default: settings.HideAttrColumn = !visible; break;
-        }
-        this.OnPropertyChanged(String.Empty); // every width/flag
+        var order = this.Order.Where(x => x != column.ToString()).ToList();
+        if (visible)
+            order.Insert(order.FindLastIndex(x => Enum.TryParse<PanelColumn>(x, out _)) + 1, column.ToString());
+        this.SetOrder(order);
     }
 
     public void Toggle(PanelColumn column) => this.Set(column, !this.IsVisible(column));
@@ -62,6 +76,31 @@ public partial class ColumnSet(AppSettings settings) : ObservableObject
         PanelColumn.Created => L.Column_DateCreated,
         _ => L.Column_Attributes
     };
+
+    /// <summary>The short header text.</summary>
+    public static string Header(PanelColumn column) => column switch
+    {
+        PanelColumn.Extension => L.Column_Ext,
+        PanelColumn.Size => L.Column_Size,
+        PanelColumn.Modified => L.Column_Date,
+        PanelColumn.Created => L.Column_Created,
+        _ => L.Column_Attr
+    };
+
+    public static double Width(PanelColumn column) => column switch
+    {
+        PanelColumn.Extension => ColumnLayout.ExtColumnWidth,
+        PanelColumn.Size => ColumnLayout.SizeColumnWidth,
+        PanelColumn.Attributes => ColumnLayout.AttrColumnWidth,
+        _ => ColumnLayout.DateColumnWidth
+    };
+}
+
+/// <summary>One detail column as a panel lays it out: a built-in one or a custom one.</summary>
+public sealed record DetailColumn(string Key, PanelColumn? BuiltIn, IFileColumn? Custom, double Width, bool AlignRight)
+{
+    public static DetailColumn For(PanelColumn column) => new(column.ToString(), column, null, ColumnSet.Width(column), column == PanelColumn.Size);
+    public static DetailColumn For(IFileColumn column) => new(column.Key, null, column, column.Width, column.AlignRight);
 }
 
 /// <summary>
@@ -75,13 +114,13 @@ public partial class ColumnLayout : ObservableObject
     public const double ExtColumnWidth = 56, SizeColumnWidth = 92, DateColumnWidth = 122, AttrColumnWidth = 84;
     const double MinNameWidth = 150;
     const double Fixed = 24 + 16; // icon column + row padding
-    static readonly GridLength Hidden = new(0);
 
     readonly ColumnSet columns;
     readonly HashSet<PanelColumn> dropped = [];
     readonly HashSet<IFileColumn> droppedCustom = [];
     IReadOnlyList<IFileColumn> custom = [];
     IReadOnlySet<PanelColumn>? @override;
+    IReadOnlyList<string>? order;
     double width;
 
     public ColumnLayout(ColumnSet columns)
@@ -116,6 +155,19 @@ public partial class ColumnLayout : ObservableObject
         }
     }
 
+    /// <summary>A folder setup's column order, in place of the user's global one; null for the global one.</summary>
+    public IReadOnlyList<string>? Order
+    {
+        get => this.order;
+        set
+        {
+            if (ReferenceEquals(this.order, value) || this.order != null && value != null && this.order.SequenceEqual(value))
+                return;
+            this.order = value;
+            this.Recalculate(true);
+        }
+    }
+
     /// <summary>A folder setup's built-in columns, in place of the user's global choice; null for the global one.</summary>
     public IReadOnlySet<PanelColumn>? Override
     {
@@ -132,8 +184,24 @@ public partial class ColumnLayout : ObservableObject
     /// <summary>On - before narrowing to what fits.</summary>
     public bool IsOn(PanelColumn column) => this.@override?.Contains(column) ?? this.columns.IsVisible(column);
 
+    /// <summary>The columns that fit, left to right.</summary>
+    public IReadOnlyList<DetailColumn> Shown { get; private set; } = [];
+
     /// <summary>The custom columns that fit, left to right.</summary>
-    public IReadOnlyList<IFileColumn> CustomShown { get; private set; } = [];
+    public IReadOnlyList<IFileColumn> CustomShown => this.Shown.Select(x => x.Custom).OfType<IFileColumn>().ToList();
+
+    // every column that's on, in the order chosen; ones on but not placed (a folder's column set) go at the end
+    IReadOnlyList<DetailColumn> Ordered()
+    {
+        var order = this.order ?? this.columns.Order;
+        var on = Enum.GetValues<PanelColumn>().Where(this.IsOn).Select(DetailColumn.For)
+            .Concat(this.custom.Select(DetailColumn.For))
+            .DistinctBy(x => x.Key)
+            .ToList();
+        return order.Select(k => on.FirstOrDefault(x => x.Key == k)).OfType<DetailColumn>()
+            .Concat(on.Where(x => !order.Contains(x.Key)))
+            .ToList();
+    }
 
     bool Shows(PanelColumn c) => this.IsOn(c) && !this.dropped.Contains(c);
 
@@ -143,17 +211,9 @@ public partial class ColumnLayout : ObservableObject
     public bool ShowCreated => this.Shows(PanelColumn.Created);
     public bool ShowAttributes => this.Shows(PanelColumn.Attributes);
 
-    public GridLength ExtWidth => this.ShowExtension ? new GridLength(56) : Hidden;
-    public GridLength SizeWidth => this.ShowSize ? new GridLength(92) : Hidden;
-    public GridLength ModifiedWidth => this.ShowModified ? new GridLength(122) : Hidden;
-    public GridLength CreatedWidth => this.ShowCreated ? new GridLength(122) : Hidden;
-    public GridLength AttrWidth => this.ShowAttributes ? new GridLength(84) : Hidden;
-    public GridLength CustomWidth => new(this.CustomShown.Sum(x => x.Width));
 
     /// <summary>Total width of the detail columns that show - the drawn details view in each row (FileDetailsView).</summary>
-    public double DetailsWidth =>
-        (this.ShowExtension ? ExtColumnWidth : 0) + (this.ShowSize ? SizeColumnWidth : 0) + (this.ShowModified ? DateColumnWidth : 0)
-        + (this.ShowCreated ? DateColumnWidth : 0) + (this.ShowAttributes ? AttrColumnWidth : 0) + this.CustomShown.Sum(x => x.Width);
+    public double DetailsWidth => this.Shown.Sum(x => x.Width);
 
     void Recalculate(bool changed)
     {
@@ -187,7 +247,7 @@ public partial class ColumnLayout : ObservableObject
                 used -= w;
             }
         }
-        this.CustomShown = this.custom.Where(x => !this.droppedCustom.Contains(x)).ToList();
+        this.Shown = this.Ordered().Where(x => x.BuiltIn is { } c ? !this.dropped.Contains(c) : !this.droppedCustom.Contains(x.Custom!)).ToList();
 
         if (changed || !before.SetEquals(this.dropped) || !beforeCustom.SetEquals(this.droppedCustom) || before.Count + beforeCustom.Count == 0)
             this.OnPropertyChanged(String.Empty);

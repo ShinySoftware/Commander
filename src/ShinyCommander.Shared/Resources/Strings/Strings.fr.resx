@@ -2283,4 +2283,43 @@ Réessayez.</value>
   <data name="Settings_Forget" xml:space="preserve">
     <value>Oublier</value>
   </data>
+  <data name="Columns_Title" xml:space="preserve">
+    <value>Colonnes</value>
+  </data>
+  <data name="Columns_Intro" xml:space="preserve">
+    <value>Les colonnes à côté du nom, de gauche à droite. Déplacez ou retirez-en une à gauche ; cliquez sur une colonne à droite pour l'ajouter. Une colonne ne se remplit que pour les fichiers concernés - Appareil pour les photos, Durée pour la musique et la vidéo.</value>
+  </data>
+  <data name="Columns_AutoSets" xml:space="preserve">
+    <value>Les dossiers surtout composés de photos, de musique, de documents… ajoutent aussi leurs propres colonnes à la fin - choisissez-les dans Réglages, Jeux de colonnes.</value>
+  </data>
+  <data name="Columns_Shown" xml:space="preserve">
+    <value>Affichées, dans l'ordre</value>
+  </data>
+  <data name="Columns_Available" xml:space="preserve">
+    <value>Disponibles</value>
+  </data>
+  <data name="Columns_NameFirst" xml:space="preserve">
+    <value>Nom - toujours en premier</value>
+  </data>
+  <data name="Columns_AllFolders" xml:space="preserve">
+    <value>Tous les dossiers</value>
+  </data>
+  <data name="Columns_ThisFolderFormat" xml:space="preserve">
+    <value>Ce dossier ({0})</value>
+  </data>
+  <data name="Columns_General" xml:space="preserve">
+    <value>Tous les fichiers</value>
+  </data>
+  <data name="Columns_Empty" xml:space="preserve">
+    <value>Seulement le nom - cliquez sur une colonne à droite pour l'ajouter.</value>
+  </data>
+  <data name="Columns_MoveLeft" xml:space="preserve">
+    <value>Déplacer à gauche</value>
+  </data>
+  <data name="Columns_MoveRight" xml:space="preserve">
+    <value>Déplacer à droite</value>
+  </data>
+  <data name="Settings_ChooseColumns" xml:space="preserve">
+    <value>Colonnes et leur ordre…</value>
+  </data>
 </root>

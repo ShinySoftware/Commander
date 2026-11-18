@@ -34,7 +34,7 @@ public partial class PanelViewModel : ObservableObject
         this.fileColumns = fileColumns;
         this.folderSetups = folderSetups;
         this.Columns = new ColumnLayout(columns);
-        this.Columns.PropertyChanged += (_, _) => this.UpdateCustomHeaders();
+        this.Columns.PropertyChanged += this.OnColumnsChanged;
         this.Tree = new FolderTreeViewModel(settings);
         this.ShowTree = side == PanelSide.Left ? settings.LeftShowTree : settings.RightShowTree;
         var savedWidth = side == PanelSide.Left ? settings.LeftTreeWidth : settings.RightTreeWidth;
@@ -56,7 +56,7 @@ public partial class PanelViewModel : ObservableObject
 
     /// <summary>The headers of the custom columns that fit, right of the built-in ones.</summary>
     [ObservableProperty]
-    public partial IReadOnlyList<ColumnHeader> CustomHeaders { get; set; } = [];
+    public partial IReadOnlyList<ColumnHeader> Headers { get; set; } = [];
 
     /// <summary>A Folder Setup menu asked for from this panel's badge.</summary>
     public event EventHandler? FolderSetupRequested;
@@ -69,6 +69,8 @@ public partial class PanelViewModel : ObservableObject
     {
         var setup = this.ActiveTab?.Setup;
         this.Columns.Override = setup?.Columns.Select(x => Enum.TryParse<PanelColumn>(x, out var c) ? (PanelColumn?)c : null).OfType<PanelColumn>().ToHashSet();
+        // a setup's Columns is its order too: the built-in ones and (saved from the Columns screen) the custom ones
+        this.Columns.Order = setup?.Columns;
         this.applyingSetup = true;
         try
         {
@@ -84,24 +86,31 @@ public partial class PanelViewModel : ObservableObject
     void UpdateCustomColumns()
     {
         this.Columns.Custom = this.ActiveTab?.CustomColumns ?? [];
-        this.UpdateCustomHeaders();
+        this.UpdateHeaders();
     }
 
-    void UpdateCustomHeaders()
+    void OnColumnsChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e) => this.UpdateHeaders();
+
+    // every detail column's header, in the columns' order - built-in and custom alike
+    void UpdateHeaders()
     {
         var tab = this.ActiveTab;
-        var headers = this.Columns.CustomShown
+        string Arrow(bool sorted) => sorted ? (tab!.SortDescending ? " ▼" : " ▲") : String.Empty;
+        var headers = this.Columns.Shown
             .Select(x => new ColumnHeader(
                 x.Key,
-                tab is { SortColumn: SortColumn.Custom } && tab.SortKey == x.Key ? x.Title + (tab.SortDescending ? " ▼" : " ▲") : x.Title,
+                x.BuiltIn is { } c
+                    ? ColumnSet.Header(c) + Arrow(tab != null && tab.SortColumn.ToString() == c.ToString())
+                    : x.Custom!.Title + Arrow(tab is { SortColumn: SortColumn.Custom } && tab.SortKey == x.Key),
                 x.Width,
                 x.AlignRight,
+                x.Custom != null,
                 this.SortCommand
             ))
             .ToList();
         // the layout says it changed on every resize - only rebuild the header labels when they're different
-        if (!headers.SequenceEqual(this.CustomHeaders))
-            this.CustomHeaders = headers;
+        if (!headers.SequenceEqual(this.Headers))
+            this.Headers = headers;
     }
 
     /// <summary>This panel's folder tree (rows for a virtualized list).</summary>
@@ -269,7 +278,7 @@ public partial class PanelViewModel : ObservableObject
         else if (e.PropertyName is nameof(PanelTabViewModel.SortColumn) or nameof(PanelTabViewModel.SortDescending) or nameof(PanelTabViewModel.SortKey))
         {
             // each tab's sort is saved with it
-            this.UpdateCustomHeaders();
+            this.UpdateHeaders();
             this.TabsChanged?.Invoke(this, EventArgs.Empty);
         }
         else if (e.PropertyName == nameof(PanelTabViewModel.CustomColumns))
@@ -508,14 +517,14 @@ public partial class PanelViewModel : ObservableObject
     void ToggleViewMode() => this.ViewMode = this.IsThumbnails ? PanelViewMode.Details : PanelViewMode.Thumbnails;
 }
 
-/// <summary>A custom column's header label: its title (with the sort arrow), width and alignment; a tap sorts by it.</summary>
-public sealed record ColumnHeader(string Key, string Text, double Width, bool AlignRight, IRelayCommand<string> Sort)
+/// <summary>A detail column's header label: its title (with the sort arrow), width and alignment; a tap sorts by it.</summary>
+public sealed record ColumnHeader(string Key, string Text, double Width, bool AlignRight, bool IsCustom, IRelayCommand<string> Sort)
 {
     public const string CustomPrefix = "custom:";
 
-    public string SortParameter => CustomPrefix + this.Key;
+    public string SortParameter => this.IsCustom ? CustomPrefix + this.Key : this.Key;
     public TextAlignment Alignment => this.AlignRight ? TextAlignment.End : TextAlignment.Start;
 
-    // the drawn rows pad the same way (FileDetailsView)
-    public Thickness Padding => this.AlignRight ? new Thickness(0, 0, 8, 0) : new Thickness(0, 0, 6, 0);
+    // the drawn rows pad the same way (FileDetailsView): a built-in column's text starts flush
+    public Thickness Padding => this.AlignRight ? new Thickness(0, 0, 8, 0) : new Thickness(0, 0, this.IsCustom ? 6 : 0, 0);
 }

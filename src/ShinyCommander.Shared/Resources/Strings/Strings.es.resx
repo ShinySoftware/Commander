@@ -2283,4 +2283,43 @@ Inténtalo de nuevo.</value>
   <data name="Settings_Forget" xml:space="preserve">
     <value>Olvidar</value>
   </data>
+  <data name="Columns_Title" xml:space="preserve">
+    <value>Columnas</value>
+  </data>
+  <data name="Columns_Intro" xml:space="preserve">
+    <value>Las columnas junto al nombre, de izquierda a derecha. Mueve o quita una a la izquierda; haz clic en una a la derecha para añadirla. Una columna solo se rellena para los archivos a los que se aplica: Cámara para fotos, Duración para música y vídeo.</value>
+  </data>
+  <data name="Columns_AutoSets" xml:space="preserve">
+    <value>Las carpetas con sobre todo fotos, música, documentos… también añaden sus propias columnas al final: elígelas en Configuración, Conjuntos de columnas.</value>
+  </data>
+  <data name="Columns_Shown" xml:space="preserve">
+    <value>Visibles, en orden</value>
+  </data>
+  <data name="Columns_Available" xml:space="preserve">
+    <value>Disponibles</value>
+  </data>
+  <data name="Columns_NameFirst" xml:space="preserve">
+    <value>Nombre: siempre primero</value>
+  </data>
+  <data name="Columns_AllFolders" xml:space="preserve">
+    <value>Todas las carpetas</value>
+  </data>
+  <data name="Columns_ThisFolderFormat" xml:space="preserve">
+    <value>Esta carpeta ({0})</value>
+  </data>
+  <data name="Columns_General" xml:space="preserve">
+    <value>Todos los archivos</value>
+  </data>
+  <data name="Columns_Empty" xml:space="preserve">
+    <value>Solo el nombre: haz clic en una columna a la derecha para añadirla.</value>
+  </data>
+  <data name="Columns_MoveLeft" xml:space="preserve">
+    <value>Mover a la izquierda</value>
+  </data>
+  <data name="Columns_MoveRight" xml:space="preserve">
+    <value>Mover a la derecha</value>
+  </data>
+  <data name="Settings_ChooseColumns" xml:space="preserve">
+    <value>Columnas y su orden…</value>
+  </data>
 </root>

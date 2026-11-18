@@ -55,9 +55,12 @@ public class FolderSetupTests(AppFixture fixture) : UiTest(fixture)
         await this.App.Navigate(this.LeftTree["photos"], "left");
         await this.RememberHere("Remember for this folder");
 
-        await this.App.Answer("Attributes", "Done");
-        var s = await this.App.Command("ChooseColumns");
-        s.Left.PanelColumns.ShouldNotContain("Attributes");
+        // the Columns screen opens on this folder's columns
+        await this.App.Command("ChooseColumns");
+        await this.App.WaitFor(x => x.Page == "ColumnsPage", "the Columns screen");
+        await this.Ui.Tap("ColumnRemove_Attributes");
+        await this.App.Key("Escape");
+        var s = await this.App.WaitFor(x => x.Page == "MainPage" && !x.Left.PanelColumns.Contains("Attributes"), "Attributes off in this folder");
         // the global choice is untouched
         s.Columns.ShouldContain("Attributes");
 

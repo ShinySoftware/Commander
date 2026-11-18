@@ -494,9 +494,8 @@ public static class UiTestHooks
         settings.FriendlySizes = false;
         settings.HideTabs = false;
 
-        var columns = Service<ColumnSet>();
-        foreach (var c in Enum.GetValues<PanelColumn>())
-            columns.Set(c, c != PanelColumn.Created);
+        Service<ColumnSet>().Reset();
+        Service<FileColumns>().NotifyChanged();
 
         Service<UiTestDialogs>().Reset();
         main.CancelInlineEdit();
@@ -739,7 +738,8 @@ public static class UiTestHooks
             panelColumns = Enum.GetValues<PanelColumn>().Where(p.Columns.IsOn).Select(x => x.ToString()).ToList(),
             columnSet = tab?.ColumnSet?.Key,
             customColumns = tab?.CustomColumns.Select(c => c.Key).ToList(),
-            customHeaders = p.CustomHeaders.Select(h => h.Text).ToList(),
+            customHeaders = p.Headers.Where(h => h.IsCustom).Select(h => h.Text).ToList(),
+            headers = p.Headers.Select(h => h.Key).ToList(),
             isReadingMetadata = tab?.IsReadingMetadata ?? false,
             canGoBack = tab?.CanGoBack ?? false,
             items = tab?.Items.Select(i => new

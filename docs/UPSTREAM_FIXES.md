@@ -23,6 +23,8 @@ Each item lists where the bug is, how to reproduce it, the fix, how to know it's
 | 14 | Shiny.Maui.Controls - Ribbon | No pressed (mouse down) state; a checked button loses its hover | Low - feedback only |
 | 15 | maui-labs - macOS head | `PointerGestureRecognizer` never raises `PointerPressed` / `PointerReleased` | Low - worked around |
 | 16 | maui-labs - macOS head | Arranging an `Entry` that's being edited raises `Completed` | Medium - ended in-place renames, worked around |
+| 17 | maui-labs - macOS head | Real mouse clicks never reach some tap recognizers (ShinyButton, MotionIconView, BoxView, Border, a Grid on a pushed page) | **High** - buttons that do nothing, worked around |
+| 18 | maui-labs - macOS head | A `WebView`'s page never shows - black box (a PDF only its toolbar) | **High** - HTML and PDF previews blank, worked around |
 | 12 | TagLibSharp | A constant bitrate MP3's "Info" header is ignored, and the file is timed by its first frame | Medium - low-bitrate MP3s showed half their length |
 
 ---
@@ -261,6 +263,39 @@ Begin editing again when the frame change ended it.
 
 **Remove here:** `FilePanelView.StillEditing` and its use in `OnInlineEditRequested`; the in-place rename tests in
 `FileOperationTests` / `TabsAndToolsTests` stay as the check (they failed about one run in two without it).
+
+### 17. macOS: real clicks miss tap recognizers
+
+**Where:** `platforms/MacOS/src/MacOS/Handlers/GestureManager.cs` - a MAUI tap becomes an `NSClickGestureRecognizer` on
+the view (and `InterceptChildHitTesting` on a `MacOSContainerView`). Real clicks - AppKit events, with the native hit
+test landing on the right view - never fire it for: a `ShinyButton` (its recognizer is on the ContentView), a
+`MotionIconView`, a `BoxView` or `Border` on the pane path row, and a `Grid` row in a `CollectionView` on a pushed page
+(the Columns screen). The same tap invoked directly (`SendTapped`, what DevFlow's tap does) works, so UI tests that tap
+never saw it. A `Label`'s recognizer gets every click; so do file-list rows on the main page.
+
+**Repro:** `RealUiTests.A_mouse_click_on_a_pane_toolbar_button_runs_it` with a `ShinyButton` toolbar item, or a ribbon
+button whose icon is clicked (`A_mouse_click_on_a_ribbon_buttons_icon_runs_it`) with the click target removed.
+
+**Fix:** find why the click recognizer doesn't begin - likely a sibling/child view's `mouseDown` or a container's hit
+interception winning; log `NSClickGestureRecognizer` state changes for a ShinyButton to see where the event goes.
+
+**Remove here:** the clear click-target Labels: the pane toolbar and arrows (`FilePanelView.xaml`), the ribbon
+(`tools/ribbon.py`, `ak_hit`), `Views/IconButton.cs` and the Columns screen's rows - back to ShinyButton / plain
+recognizers. Keep the `A_mouse_click_on_*` and `The_columns_screen_takes_real_mouse_clicks` tests as the check.
+
+### 18. macOS: a WebView's page never shows
+
+**Where:** `platforms/MacOS/src/MacOS/Handlers/MacOSViewHandler.cs`, `UpdateGeometry` - it sets a view's `Frame` with
+`AutoresizesSubviews` turned off. WKWebView draws its page in its own subviews, sized only by autoresizing, and it's
+created at `CGRect.Empty` (`WebViewHandler.CreatePlatformView`) - so they stay 0x0. The page loads (scripts run,
+`TakeSnapshot` renders it) but nothing appears: a black box, or for a PDF just WebKit's toolbar.
+
+**Repro:** any `WebView` with an `HtmlWebViewSource` on the macOS head; look at `WKWebView.Subviews[0].Frame`.
+
+**Fix:** leave `AutoresizesSubviews` on when setting the frame (the comment says it's off for the scale transform -
+restore the frame first, then the scale), or call `ResizeSubviewsWithOldSize` with the old size afterwards.
+
+**Remove here:** `SizeContent` and its frame observer in `Views/Previews/WebPreviewView.cs`.
 
 ## Shiny.Maui.Controls.Office
 

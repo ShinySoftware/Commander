@@ -122,28 +122,14 @@ public sealed class FileColumns
         this.Changed?.Invoke(this, EventArgs.Empty);
     }
 
-    /// <summary>Columns turned on for every folder ("Columns…"), on top of a folder's set; blank for files of other kinds.</summary>
-    public IReadOnlyList<IFileColumn> Always => (this.settings.AlwaysColumns ?? String.Empty)
-        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+    /// <summary>Custom columns on in every folder (the Columns screen), on top of a folder's set; blank for files of other kinds.</summary>
+    public IReadOnlyList<IFileColumn> Always => ColumnSet.Split(this.settings.ColumnOrder ?? this.settings.AlwaysColumns)
         .Select(this.Find)
         .OfType<IFileColumn>()
         .ToList();
 
-    /// <summary>Shown in every folder from now on - or, when <paramref name="on"/> is false, nowhere: taken out of the sets too.</summary>
-    public void SetAlways(IFileColumn column, bool on)
-    {
-        var keys = this.Always.Select(x => x.Key).Where(x => x != column.Key).ToList();
-        if (on)
-            keys.Add(column.Key);
-        this.settings.AlwaysColumns = keys.Count == 0 ? null : String.Join(',', keys);
-
-        if (!on)
-        {
-            foreach (var set in this.Sets.Where(x => this.ColumnsOf(x).Contains(column)).ToList())
-                this.Toggle(set, column);
-        }
-        this.Changed?.Invoke(this, EventArgs.Empty);
-    }
+    /// <summary>The column order changed (ColumnSet.SetOrder) - the tabs work out their custom columns again.</summary>
+    public void NotifyChanged() => this.Changed?.Invoke(this, EventArgs.Empty);
 
     /// <summary>The columns for the set's kinds, whether it shows them yet or not - the ones Settings offers.</summary>
     public IReadOnlyList<IFileColumn> CandidatesFor(FileColumnSet set) => this.All.Where(x => x.Kinds.Overlaps(set.Kinds)).ToList();

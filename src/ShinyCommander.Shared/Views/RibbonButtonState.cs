@@ -32,26 +32,39 @@ public static class RibbonButtonState
 
     static readonly List<WeakReference<Border>> buttons = [];
 
+    // the button's own pointer recognizer, so turning it off takes it out again
+    static readonly BindableProperty PointerProperty = BindableProperty.CreateAttached(
+        "Pointer", typeof(PointerGestureRecognizer), typeof(RibbonButtonState), null);
+
     static void OnIsAttachedChanged(BindableObject bindable, object oldValue, object newValue)
     {
-        if (bindable is not Border border || newValue is not true)
+        if (bindable is not Border border)
+            return;
+
+        if (border.GetValue(PointerProperty) is PointerGestureRecognizer old)
+        {
+            old.PointerEntered -= OnPointerEntered;
+            old.PointerExited -= OnPointerExited;
+            old.PointerPressed -= OnPointerPressed;
+            old.PointerReleased -= OnPointerReleased;
+            border.GestureRecognizers.Remove(old);
+            border.ClearValue(PointerProperty);
+        }
+        if (newValue is not true)
             return;
 
         var pointer = new PointerGestureRecognizer();
-        pointer.PointerEntered += (_, _) => border.SetValue(IsHoveredProperty, true);
-        pointer.PointerExited += (_, _) =>
-        {
-            border.SetValue(IsHoveredProperty, false);
-            border.SetValue(IsPressedProperty, false);
-        };
-        pointer.PointerPressed += (_, _) => border.SetValue(IsPressedProperty, true);
-        pointer.PointerReleased += (_, _) => border.SetValue(IsPressedProperty, false);
+        pointer.PointerEntered += OnPointerEntered;
+        pointer.PointerExited += OnPointerExited;
+        pointer.PointerPressed += OnPointerPressed;
+        pointer.PointerReleased += OnPointerReleased;
         border.GestureRecognizers.Add(pointer);
+        border.SetValue(PointerProperty, pointer);
 
         if (buttons.Count == 0)
         {
             if (Application.Current is { } app)
-                app.RequestedThemeChanged += (_, _) => ForEach(Apply);
+                app.RequestedThemeChanged += OnThemeChanged;
 #if MACOS_APPKIT
             WatchMouse();
 #endif
@@ -60,11 +73,34 @@ public static class RibbonButtonState
         Apply(border);
     }
 
+    // the recognizer raises these with the view it's on as the sender
+    static void OnPointerEntered(object? sender, PointerEventArgs e) => (sender as Border)?.SetValue(IsHoveredProperty, true);
+
+    static void OnPointerExited(object? sender, PointerEventArgs e)
+    {
+        if (sender is not Border border)
+            return;
+
+        border.SetValue(IsHoveredProperty, false);
+        border.SetValue(IsPressedProperty, false);
+    }
+
+    static void OnPointerPressed(object? sender, PointerEventArgs e) => (sender as Border)?.SetValue(IsPressedProperty, true);
+
+    static void OnPointerReleased(object? sender, PointerEventArgs e) => (sender as Border)?.SetValue(IsPressedProperty, false);
+
+    static void OnThemeChanged(object? sender, AppThemeChangedEventArgs e) => ForEach(Apply);
+
     static void ForEach(Action<Border> action)
     {
-        buttons.RemoveAll(w => !w.TryGetTarget(out _));
-        foreach (var border in buttons.Select(w => w.TryGetTarget(out var b) ? b : null).OfType<Border>().ToList())
+        foreach (var border in Live())
             action(border);
+    }
+
+    static List<Border> Live()
+    {
+        buttons.RemoveAll(w => !w.TryGetTarget(out _));
+        return buttons.Select(w => w.TryGetTarget(out var b) ? b : null).OfType<Border>().ToList();
     }
 
     static void Apply(Border border)
@@ -91,12 +127,15 @@ public static class RibbonButtonState
 #if MACOS_APPKIT
     // the press, on mouse down; any mouse up lets go of it. The event goes on untouched - the tap still fires
     static void WatchMouse()
-        => AppKit.NSEvent.AddLocalMonitorForEventsMatchingMask(AppKit.NSEventMask.LeftMouseDown | AppKit.NSEventMask.LeftMouseUp, e =>
-        {
-            var down = e.Type == AppKit.NSEventType.LeftMouseDown;
-            ForEach(border => border.SetValue(IsPressedProperty, down && IsUnder(border, e)));
-            return e;
-        });
+        => AppKit.NSEvent.AddLocalMonitorForEventsMatchingMask(AppKit.NSEventMask.LeftMouseDown | AppKit.NSEventMask.LeftMouseUp, OnMouse);
+
+    static AppKit.NSEvent OnMouse(AppKit.NSEvent e)
+    {
+        var down = e.Type == AppKit.NSEventType.LeftMouseDown;
+        foreach (var border in Live())
+            border.SetValue(IsPressedProperty, down && IsUnder(border, e));
+        return e;
+    }
 
     static bool IsUnder(Border border, AppKit.NSEvent e)
     {

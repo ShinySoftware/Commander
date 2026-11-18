@@ -2529,4 +2529,43 @@ Try again.</value>
   <data name="Settings_Forget" xml:space="preserve">
     <value>Forget</value>
   </data>
+  <data name="Columns_Title" xml:space="preserve">
+    <value>Columns</value>
+  </data>
+  <data name="Columns_Intro" xml:space="preserve">
+    <value>The columns beside Name, left to right. Move or remove one on the left; click one on the right to add it. A column only fills in for files it applies to - Camera for photos, Duration for music and video.</value>
+  </data>
+  <data name="Columns_AutoSets" xml:space="preserve">
+    <value>Folders that are mostly photos, music, documents… also add their own columns at the end - choose those in Settings, Column sets.</value>
+  </data>
+  <data name="Columns_Shown" xml:space="preserve">
+    <value>Shown, in order</value>
+  </data>
+  <data name="Columns_Available" xml:space="preserve">
+    <value>Available</value>
+  </data>
+  <data name="Columns_NameFirst" xml:space="preserve">
+    <value>Name - always first</value>
+  </data>
+  <data name="Columns_AllFolders" xml:space="preserve">
+    <value>All folders</value>
+  </data>
+  <data name="Columns_ThisFolderFormat" xml:space="preserve">
+    <value>This folder ({0})</value>
+  </data>
+  <data name="Columns_General" xml:space="preserve">
+    <value>Every file</value>
+  </data>
+  <data name="Columns_Empty" xml:space="preserve">
+    <value>Only Name - click a column on the right to add it.</value>
+  </data>
+  <data name="Columns_MoveLeft" xml:space="preserve">
+    <value>Move left</value>
+  </data>
+  <data name="Columns_MoveRight" xml:space="preserve">
+    <value>Move right</value>
+  </data>
+  <data name="Settings_ChooseColumns" xml:space="preserve">
+    <value>Columns and their order…</value>
+  </data>
 </root>

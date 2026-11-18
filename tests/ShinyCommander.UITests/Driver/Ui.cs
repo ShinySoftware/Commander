@@ -77,7 +77,19 @@ public sealed class Ui(AgentClient client)
             throw new ShouldAssertException($"Tapping {element.Type} '{element.Text ?? element.AutomationId}' failed: {result.Error}");
     }
 
-    public async Task Tap(string automationId) => await this.Tap(await this.ById(automationId));
+    public async Task Tap(string automationId)
+    {
+        try
+        {
+            await this.Tap(await this.ById(automationId));
+        }
+        catch (ShouldAssertException)
+        {
+            // a list that rebuilt its rows just then (the Columns screen after each change) - find it again
+            await Task.Delay(300);
+            await this.Tap(await this.ById(automationId));
+        }
+    }
 
     /// <summary>Taps the row/tile/button that shows <paramref name="text"/>.</summary>
     public async Task Click(string text, string? within = null) => await this.Tap(await this.Tappable(await this.ByText(text, within)));
