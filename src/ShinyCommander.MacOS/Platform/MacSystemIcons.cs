@@ -1,6 +1,7 @@
 using AppKit;
 using CoreGraphics;
 using Foundation;
+using ImageIO;
 using Shiny;
 using ShinyCommander.Services;
 using UniformTypeIdentifiers;
@@ -11,6 +12,7 @@ namespace ShinyCommander;
 /// Finder's icons. Files share one icon per extension (Launch Services' icon for the type, so it needs no file -
 /// archive entries get one too); folders share the plain folder icon unless they have one of their own: an app or
 /// other bundle, a custom icon, or one of the folders Finder decorates (Desktop, Downloads, Applications...).
+/// Pictures get their thumbnail from ImageIO - the embedded one when the file has it, else a subsampled decode.
 /// </summary>
 [Singleton]
 sealed class MacSystemIcons : ISystemIcons
@@ -39,6 +41,38 @@ sealed class MacSystemIcons : ISystemIcons
             this.cache[(key, size)] = source;
         }
         return source;
+    }
+
+    public ImageSource? GetThumbnail(string path, int size)
+    {
+        var pixels = (int)Math.Ceiling(size * (NSScreen.MainScreen?.BackingScaleFactor ?? 2));
+        // decoded when the image view asks for it, off the UI thread
+        return ImageSource.FromStream(_ => Task.Run(() => RenderThumbnail(path, pixels)));
+    }
+
+    static Stream RenderThumbnail(string path, int pixels)
+    {
+        using var url = NSUrl.FromFilename(path);
+        using var source = CGImageSource.FromUrl(url);
+        using var image = source?.CreateThumbnail(0, new CGImageThumbnailOptions
+        {
+            MaxPixelSize = pixels,
+            CreateThumbnailFromImageIfAbsent = true,
+            // upright, as the camera's orientation tag says
+            CreateThumbnailWithTransform = true,
+            ShouldCache = false
+        });
+        if (image == null)
+            return Stream.Null;
+
+        // ImageIO rather than NSBitmapImageRep, which AppKit only allows on the UI thread
+        using var data = new NSMutableData();
+        using var destination = CGImageDestination.Create(data, UTTypes.Png.Identifier, 1);
+        if (destination == null)
+            return Stream.Null;
+
+        destination.AddImage(image);
+        return destination.Close() ? new MemoryStream(data.ToArray()) : Stream.Null;
     }
 
     // "path:..." for a folder with an icon of its own, "dir" for any other, "ext:..." for a file

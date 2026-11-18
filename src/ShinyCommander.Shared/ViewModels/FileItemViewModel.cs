@@ -21,14 +21,14 @@ public partial class FileItemViewModel(FileEntry entry, bool friendlySizes) : Ob
     ImageSource? systemIcon;
     bool systemIconLoaded;
 
-    /// <summary>The system's icon for the row (SystemIcons) - null shows the motion icon instead.</summary>
+    /// <summary>The row's icon: a tiny picture for a local image, else the system's icon (SystemIcons) - null shows the motion icon instead.</summary>
     public ImageSource? SystemIcon
     {
         get
         {
             if (!this.systemIconLoaded)
             {
-                this.systemIcon = SystemIcons.Get(this.Entry, 16);
+                this.systemIcon = this.HasThumbnail ? SystemIcons.Thumbnail(this.Entry.FullPath, 16) : SystemIcons.Get(this.Entry, 16);
                 this.systemIconLoaded = true;
             }
             return this.systemIcon;
@@ -50,8 +50,8 @@ public partial class FileItemViewModel(FileEntry entry, bool friendlySizes) : Ob
     /// <summary>The full file name - thumbnails show it under the picture.</summary>
     public string FullName => this.Entry.Name;
 
-    // a cloud-only picture would download just to draw its thumbnail
-    public bool HasThumbnail => !this.Entry.IsDirectory && !this.Entry.IsInArchive && !this.Entry.IsCloudOnly && FileIcons.IsImage(this.Entry.Extension);
+    // a cloud-only picture would download just to draw its thumbnail; a remote one has no local file
+    public bool HasThumbnail => !this.Entry.IsDirectory && !this.Entry.IsInArchive && !this.Entry.IsRemote && !this.Entry.IsCloudOnly && FileIcons.IsImage(this.Entry.Extension);
 
     ImageSource? thumbnail;
     ImageSource? systemTile;

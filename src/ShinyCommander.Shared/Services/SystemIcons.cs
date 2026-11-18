@@ -12,6 +12,12 @@ public interface ISystemIcons
 
     /// <summary>An app (a .app bundle, an .exe, a launcher) - its icon is its own, so it shows even with animated icons on.</summary>
     bool IsApp(FileEntry entry);
+
+    /// <summary>
+    /// A local picture scaled down to <paramref name="size"/> points, decoded off the UI thread as the row binds -
+    /// or null to show the whole file (the image view decodes it full size).
+    /// </summary>
+    ImageSource? GetThumbnail(string path, int size) => null;
 }
 
 public static class SystemIcons
@@ -23,12 +29,7 @@ public static class SystemIcons
     /// <summary>The system icon to show for a file, or null to show its motion icon.</summary>
     public static ImageSource? Get(FileEntry entry, int size)
     {
-        if (!resolved && IPlatformApplication.Current?.Services is { } services)
-        {
-            provider = services.GetService<ISystemIcons>();
-            settings = services.GetService<AppSettings>();
-            resolved = true;
-        }
+        Resolve();
 
         // the ".." row keeps its arrow - no system has an icon for "up"
         if (provider == null || entry.IsParentLink)
@@ -46,6 +47,30 @@ public static class SystemIcons
         {
             // a file the system can't describe keeps its motion icon
             return null;
+        }
+    }
+
+    /// <summary>A local picture at icon size - the system's scaled-down copy where there is one, else the file itself.</summary>
+    public static ImageSource Thumbnail(string path, int size)
+    {
+        Resolve();
+        try
+        {
+            return provider?.GetThumbnail(path, size) ?? ImageSource.FromFile(path);
+        }
+        catch
+        {
+            return ImageSource.FromFile(path);
+        }
+    }
+
+    static void Resolve()
+    {
+        if (!resolved && IPlatformApplication.Current?.Services is { } services)
+        {
+            provider = services.GetService<ISystemIcons>();
+            settings = services.GetService<AppSettings>();
+            resolved = true;
         }
     }
 }
