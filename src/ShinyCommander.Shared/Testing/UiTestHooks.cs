@@ -302,14 +302,19 @@ public static class UiTestHooks
     static Task<object> HoldJob(MainViewModel main, JsonElement args)
     {
         var seconds = args.ValueKind == JsonValueKind.Object && args.TryGetProperty("seconds", out var s) ? s.GetInt32() : 30;
+        // reports like a real copy - 40 files, 3 GB, at a steady pace - so the speed and time left have something to show
+        const int files = 40;
+        const long total = 3L * 1024 * 1024 * 1024;
         main.Jobs.Start(HoldTitle, FileOperationKind.Copy, null, async (progress, ct) =>
         {
-            for (var i = 0; i < seconds * 10; i++)
+            var steps = seconds * 10;
+            for (var i = 0; i < steps; i++)
             {
                 await Task.Delay(100, ct);
-                progress.Report(new OperationProgress(FileOperationKind.Copy, "held", i, seconds * 10, 0, 1));
+                var done = i * files / steps;
+                progress.Report(new OperationProgress(FileOperationKind.Copy, $"held/file-{done + 1:00}.bin", total * i / steps, total, done, files));
             }
-            return new OperationResult(1, 0, []);
+            return new OperationResult(files, 0, []);
         });
         return Task.FromResult<object>(true);
     }

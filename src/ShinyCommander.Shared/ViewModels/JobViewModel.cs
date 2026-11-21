@@ -18,6 +18,7 @@ public partial class JobViewModel : ObservableObject
     readonly CancellationTokenSource cts = new();
     readonly TaskCompletionSource completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     readonly DateTime started = DateTime.Now;
+    readonly TransferMeter meter = new();
 
     public JobViewModel(string title, FileOperationKind kind, JobDestination? destination)
     {
@@ -44,7 +45,7 @@ public partial class JobViewModel : ObservableObject
     };
 
     [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(IsRunning), nameof(IsFinished), nameof(CanGoTo), nameof(IsSucceeded), nameof(IsProblem), nameof(StateLabel), nameof(StatePill), nameof(Subtitle))]
+    [NotifyPropertyChangedFor(nameof(IsRunning), nameof(IsFinished), nameof(CanGoTo), nameof(IsSucceeded), nameof(IsProblem), nameof(StateLabel), nameof(StatePill), nameof(Subtitle), nameof(HasCurrentItem))]
     public partial JobState State { get; private set; }
 
     [ObservableProperty]
@@ -53,6 +54,11 @@ public partial class JobViewModel : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(Subtitle))]
     public partial string Detail { get; set; } = L.Job_Preparing;
+
+    /// <summary>The file being worked on right now - its own line under the figures while the job runs.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCurrentItem))]
+    public partial string CurrentItem { get; private set; } = String.Empty;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(HasErrors))]
@@ -63,6 +69,7 @@ public partial class JobViewModel : ObservableObject
     public bool IsSucceeded => this.State == JobState.Completed;
     public bool IsProblem => this.State is JobState.Failed or JobState.CompletedWithErrors;
     public bool HasErrors => this.Errors.Count > 0;
+    public bool HasCurrentItem => this.IsRunning && this.CurrentItem.Length > 0;
     public bool CanGoTo => this.Destination != null && this.State is JobState.Completed or JobState.CompletedWithErrors;
 
     public OperationResult? Result { get; private set; }
@@ -108,13 +115,40 @@ public partial class JobViewModel : ObservableObject
             this.cts.Cancel();
     }
 
+    /// <summary>"12 of 40 copied  •  1.2 GB of 3.4 GB (35%)  •  48 MB/s  •  1m 20s left" - speed and time left once there's enough to measure them.</summary>
     public void Report(OperationProgress p)
     {
         this.Progress = p.Fraction;
-        this.Detail = p.BytesTotal > 0
-            ? $"{p.CurrentItem}  •  {SizeFormatter.Friendly(p.BytesDone)} / {SizeFormatter.Friendly(p.BytesTotal)}  •  {p.ItemsDone}/{p.ItemsTotal}"
-            : $"{p.CurrentItem}  •  {p.ItemsDone}/{p.ItemsTotal}";
+        if (p.CurrentItem.Length > 0)
+            this.CurrentItem = p.CurrentItem;
+
+        var parts = new List<string>
+        {
+            this.Kind switch
+            {
+                FileOperationKind.Copy => L.Job_CopiedOfFormat(p.ItemsDone, p.ItemsTotal),
+                FileOperationKind.Move => L.Job_MovedOfFormat(p.ItemsDone, p.ItemsTotal),
+                _ => L.Job_OfFormat(p.ItemsDone, p.ItemsTotal)
+            }
+        };
+
+        if (p.BytesTotal > 0)
+        {
+            this.meter.Add(p.BytesDone, Environment.TickCount64);
+            parts.Add($"{L.Job_OfFormat(SizeFormatter.Friendly(p.BytesDone), SizeFormatter.Friendly(p.BytesTotal))} ({p.Fraction:P0})");
+
+            if (this.meter.BytesPerSecond is double rate)
+                parts.Add($"{SizeFormatter.Friendly((long)rate)}/s");
+
+            if (this.meter.Remaining(p.BytesDone, p.BytesTotal) is { } left)
+                parts.Add(L.Job_TimeLeftFormat(TimeLeft(left)));
+        }
+        this.Detail = String.Join("  •  ", parts);
     }
+
+    static string TimeLeft(TimeSpan t) => t.TotalMinutes < 1
+        ? $"{Math.Ceiling(t.TotalSeconds):0}s"
+        : t.TotalHours < 1 ? $"{(int)t.TotalMinutes}m {t.Seconds}s" : $"{(int)t.TotalHours}h {t.Minutes}m";
 
     internal void Finish(OperationResult result)
     {

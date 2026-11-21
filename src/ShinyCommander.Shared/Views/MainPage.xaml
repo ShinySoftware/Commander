@@ -1231,13 +1231,14 @@
                     <VerticalStackLayout BindableLayout.ItemsSource="{Binding Jobs.Jobs}" Padding="8,4" Spacing="2">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:JobViewModel">
-                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="2" Padding="2,4">
-                                    <shiny:MotionIconView Grid.RowSpan="3" Icon="{Binding Icon}" IsPlaying="{Binding IsRunning}" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" />
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto" RowDefinitions="Auto,Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="2" Padding="2,4">
+                                    <shiny:MotionIconView Grid.RowSpan="4" Icon="{Binding Icon}" IsPlaying="{Binding IsRunning}" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" />
                                     <Label Grid.Column="1" Text="{Binding Title}" FontAttributes="Bold" LineBreakMode="MiddleTruncation" />
                                     <shiny:ProgressBar Grid.Column="1" Grid.Row="1" Value="{Binding Progress}" Maximum="1" TrackHeight="6" UseGradient="True" PulseEnabled="True" IsVisible="{Binding IsRunning}" />
                                     <Label Grid.Column="1" Grid.Row="2" Text="{Binding Subtitle}" Style="{StaticResource Subtle}" LineBreakMode="MiddleTruncation" />
-                                    <shiny:PillView Grid.Column="2" Grid.RowSpan="3" Text="{Binding StateLabel}" Type="{Binding StatePill}" FontSize="10" VerticalOptions="Center" />
-                                    <HorizontalStackLayout Grid.Column="3" Grid.RowSpan="3" Spacing="2" VerticalOptions="Center">
+                                    <Label Grid.Column="1" Grid.Row="3" Text="{Binding CurrentItem}" IsVisible="{Binding HasCurrentItem}" Style="{StaticResource Subtle}" FontSize="11" LineBreakMode="MiddleTruncation" />
+                                    <shiny:PillView Grid.Column="2" Grid.RowSpan="4" Text="{Binding StateLabel}" Type="{Binding StatePill}" FontSize="10" VerticalOptions="Center" />
+                                    <HorizontalStackLayout Grid.Column="3" Grid.RowSpan="4" Spacing="2" VerticalOptions="Center">
                                         <shiny:ShinyButton Text="{l:Tr Common_Stop}" IsVisible="{Binding IsRunning}" Appearance="Tonal" FontSize="12" ContentPadding="8,2"
                                                            Command="{Binding StopJobCommand, Source={RelativeSource AncestorType={x:Type vm:MainViewModel}}, x:DataType=vm:MainViewModel}" CommandParameter="{Binding .}" />
                                         <shiny:ShinyButton Text="{l:Tr Jobs_GoTo}" IsVisible="{Binding CanGoTo}" Appearance="Tonal" FontSize="12" ContentPadding="8,2"

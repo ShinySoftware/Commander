@@ -73,6 +73,23 @@ public class JobTests(AppFixture fixture) : UiTest(fixture)
     }
 
     [Fact]
+    public async Task A_running_copy_shows_how_many_are_copied_its_speed_and_the_time_left()
+    {
+        await this.Start();
+        var s = await this.App.HoldJob();
+        if (!s.ShowJobs)
+            await this.App.Key("Primary+J");
+
+        await Task.Delay(2500, TestContext.Current.CancellationToken); // the speed needs a second or two to measure
+        s = await this.App.State();
+
+        var job = s.Jobs.ShouldHaveSingleItem();
+        job.Subtitle.ShouldMatch(@"^\d+ of 40 copied  •  .+ of 3 GB \(\d+%\)  •  .+/s  •  .+ left$");
+
+        await this.App.Job("stop");
+    }
+
+    [Fact]
     public async Task Clear_completed_keeps_the_jobs_still_running()
     {
         await this.Start(l => l.File("a.txt"));

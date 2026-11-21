@@ -831,6 +831,18 @@ Existing: {3} bytes  {4}</value>
   <data name="Job_SummaryErrors" xml:space="preserve">
     <value>{0} error(s), {1} item(s) in {2}</value>
   </data>
+  <data name="Job_CopiedOf" xml:space="preserve">
+    <value>{0} of {1} copied</value>
+  </data>
+  <data name="Job_MovedOf" xml:space="preserve">
+    <value>{0} of {1} moved</value>
+  </data>
+  <data name="Job_Of" xml:space="preserve">
+    <value>{0} of {1}</value>
+  </data>
+  <data name="Job_TimeLeft" xml:space="preserve">
+    <value>{0} left</value>
+  </data>
   <data name="Job_Preparing" xml:space="preserve">
     <value>Preparing…</value>
   </data>
