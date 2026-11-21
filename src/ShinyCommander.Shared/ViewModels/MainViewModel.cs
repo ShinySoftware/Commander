@@ -28,6 +28,7 @@ public partial class MainViewModel : ObservableObject,
     readonly ArchiveWriteBack writeBack = new();
     readonly FileColumns fileColumns;
     readonly FolderSetups folderSetups;
+    readonly IFileClipboard? fileClipboard;
     CancellationTokenSource? commandCts;
     bool initialized;
 
@@ -48,9 +49,11 @@ public partial class MainViewModel : ObservableObject,
         FileEditors editors,
         PreviewPaneViewModel preview,
         FileColumns fileColumns,
-        FolderSetups folderSetups
+        FolderSetups folderSetups,
+        IFileClipboard? fileClipboard = null
     )
     {
+        this.fileClipboard = fileClipboard;
         this.fileColumns = fileColumns;
         this.folderSetups = folderSetups;
         this.connections = connections;
@@ -1349,6 +1352,36 @@ public partial class MainViewModel : ObservableObject,
             return result;
         });
         tab.MarkAll(false);
+    }
+
+    // Primary+V with files on the clipboard (copied in Finder or Explorer) copies them into the active panel - with
+    // text there instead, or the command line in use, the key stays with the command line
+    bool CanPasteFiles() => this.CommandLineEmpty() && this.fileClipboard?.HasFiles == true;
+
+    [RelayCommand(CanExecute = nameof(CanPasteFiles))]
+    async Task PasteFiles()
+    {
+        var tab = this.Tab;
+        if (tab == null || this.fileClipboard == null)
+            return;
+
+        var paths = await this.fileClipboard.GetFilesAsync();
+        var sources = paths
+            .Select(x => Directory.Exists(x) ? (FileSystemInfo)new DirectoryInfo(x) : new FileInfo(x))
+            .Where(x => x.Exists)
+            .Select(FileEntry.FromInfo)
+            .ToList();
+        if (sources.Count == 0)
+            return;
+
+        var targetDir = tab.Path;
+        var title = L.Op_CopyTitleFormat(What(sources));
+        this.RunOperation(title, FileOperationKind.Copy, new JobDestination(targetDir, sources.Count == 1 ? sources[0].Name : null), async (progress, ct) =>
+        {
+            var result = await this.ops.CopyAsync(sources, new OperationTarget(targetDir), this.ResolveConflict, progress, ct);
+            await this.Changed(targetDir);
+            return result;
+        });
     }
 
     /// <summary>"'a.txt'" for one item, "3 items" for more - what a title or question is about.</summary>

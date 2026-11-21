@@ -426,6 +426,9 @@
   <data name="Key_CopyPaths" xml:space="preserve">
     <value>Copier les chemins complets dans le presse-papiers</value>
   </data>
+  <data name="Key_PasteFiles" xml:space="preserve">
+    <value>Coller les fichiers copiés dans une autre app</value>
+  </data>
   <data name="Key_NameToCommandLine" xml:space="preserve">
     <value>Nom vers la ligne de commande</value>
   </data>

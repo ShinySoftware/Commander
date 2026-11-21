@@ -63,6 +63,7 @@
         <shiny:KeyboardShortcut Gesture="Alt+F5" Command="{Binding PackCommand}" Description="{l:Tr Key_Pack}" Category="{l:Tr Cat_Files}" />
         <shiny:KeyboardShortcut Gesture="Alt+F9" Command="{Binding UnpackCommand}" Description="{l:Tr Key_Unpack}" Category="{l:Tr Cat_Files}" />
         <shiny:KeyboardShortcut Gesture="Primary+Shift+C" Command="{Binding CopyPathsToClipboardCommand}" Description="{l:Tr Key_CopyPaths}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Primary+V" Command="{Binding PasteFilesCommand}" Description="{l:Tr Key_PasteFiles}" Category="{l:Tr Cat_Files}" />
         <shiny:KeyboardShortcut Gesture="Primary+Enter" Command="{Binding CopyNameToCommandLineCommand}" Description="{l:Tr Key_NameToCommandLine}" Category="{l:Tr Cat_Files}" />
         <shiny:KeyboardShortcut Gesture="Primary+Shift+Enter" Command="{Binding CopyPathToCommandLineCommand}" Description="{l:Tr Key_PathToCommandLine}" Category="{l:Tr Cat_Files}" />
         <shiny:KeyboardShortcut Gesture="Primary+R" Command="{Binding RefreshCommand}" Description="{l:Tr Key_Refresh}" Category="{l:Tr Cat_View}" />

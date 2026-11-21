@@ -426,6 +426,9 @@
   <data name="Key_CopyPaths" xml:space="preserve">
     <value>Copy full paths to clipboard</value>
   </data>
+  <data name="Key_PasteFiles" xml:space="preserve">
+    <value>Paste files copied in another app</value>
+  </data>
   <data name="Key_NameToCommandLine" xml:space="preserve">
     <value>Name to command line</value>
   </data>

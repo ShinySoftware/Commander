@@ -426,6 +426,9 @@
   <data name="Key_CopyPaths" xml:space="preserve">
     <value>Copiar las rutas completas al portapapeles</value>
   </data>
+  <data name="Key_PasteFiles" xml:space="preserve">
+    <value>Pegar los archivos copiados en otra app</value>
+  </data>
   <data name="Key_NameToCommandLine" xml:space="preserve">
     <value>Nombre a la línea de comandos</value>
   </data>

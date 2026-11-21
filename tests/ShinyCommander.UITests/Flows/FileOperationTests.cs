@@ -1,3 +1,4 @@
+using System.Text.Json;
 using ShinyCommander.UITests.Driver;
 
 namespace ShinyCommander.UITests.Flows;
@@ -42,6 +43,45 @@ public class FileOperationTests(AppFixture fixture) : UiTest(fixture)
         var s = await this.App.Key("F5"); // cursor on ".."
         s.Dialogs.ShouldBeEmpty();
         this.RightTree.Names().ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Primary_V_pastes_files_copied_in_Finder_into_the_active_panel()
+    {
+        await this.Start(right: r => r.File("a.txt", "hello").Dir("sub").File("sub/b.txt", "B"));
+        await Pasteboard(files: [this.RightTree["a.txt"], this.RightTree["sub"]]);
+
+        var s = await this.App.Key("Primary+V");
+
+        this.App.LastKeyHandled.ShouldBeTrue();
+        this.LeftTree.Read("a.txt").ShouldBe("hello");
+        this.LeftTree.Read("sub/b.txt").ShouldBe("B");
+        this.RightTree.Exists("a.txt").ShouldBeTrue();
+        s.Left.Names.ShouldContain("a.txt");
+        s.CommandText.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Primary_V_with_text_on_the_clipboard_is_left_to_the_command_line()
+    {
+        await this.Start(l => l.File("a.txt"));
+        await Pasteboard(text: "echo hi");
+
+        await this.App.Key("Primary+V");
+
+        this.App.LastKeyHandled.ShouldBeFalse("text on the clipboard pastes into the command line");
+        this.LeftTree.Names().ShouldBe(["a.txt"]);
+    }
+
+    // what Finder's ⌘C leaves on the general pasteboard: file URLs (or plain text)
+    static async Task Pasteboard(string[]? files = null, string? text = null)
+    {
+        var items = files != null
+            ? $"[{String.Join(", ", files.Select(x => $"$.NSURL.fileURLWithPath({JsonSerializer.Serialize(x)})"))}]"
+            : $"[$({JsonSerializer.Serialize(text)})]";
+        var script = $"ObjC.import('AppKit'); var pb = $.NSPasteboard.generalPasteboard; pb.clearContents; pb.writeObjects($({items}));";
+        var result = await Proc.Run("osascript", ["-l", "JavaScript", "-e", script]);
+        result.Ok.ShouldBeTrue(result.Combined);
     }
 
     [Fact]
