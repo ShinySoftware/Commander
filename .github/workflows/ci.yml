@@ -63,6 +63,11 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      # The runner image also carries a newer SDK (11.0.100), which dotnet would otherwise pick - and it can't
+      # install this 10.0 workload set (its emscripten manifests clash). Hold the commands below to DOTNET_VERSION.
+      - name: Pin SDK
+        run: dotnet new globaljson --sdk-version 10.0.400 --roll-forward latestPatch
+
       - name: Workloads
         run: dotnet workload install maui-windows --version "$env:WORKLOAD_VERSION"
 
@@ -84,6 +89,11 @@ jobs:
       - uses: actions/setup-dotnet@v6
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      # The runner image also carries a newer SDK (11.0.100), which dotnet would otherwise pick - and it can't
+      # install this 10.0 workload set (its emscripten manifests clash). Hold the commands below to DOTNET_VERSION.
+      - name: Pin SDK
+        run: dotnet new globaljson --sdk-version 10.0.400 --roll-forward latestPatch
 
       - name: Workloads
         run: dotnet workload install macos maui --version "$WORKLOAD_VERSION"
