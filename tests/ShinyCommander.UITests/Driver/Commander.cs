@@ -132,6 +132,21 @@ public sealed class Commander(AgentClient client)
     public Task<AppState> Reset(string left, string right) => this.Call("reset", new { left, right });
 
     /// <summary>Real (Shiny) dialogs from here on, for this test - driven with DevFlow taps/fills. Reset turns it off.</summary>
+    /// <summary>The shared folders and their addresses on loopback; <paramref name="close"/> stops them all and closes the Sharing window.</summary>
+    public async Task<JsonElement> Sharing(bool close = false)
+    {
+        await this.Call("sharing", new { close });
+        return this.LastResult;
+    }
+
+    /// <summary>The Sharing window drawn natively (macOS), or null.</summary>
+    public async Task<byte[]?> SharingPng()
+    {
+        await this.Call("sharing_png");
+        var text = this.LastResult.ValueKind == JsonValueKind.String ? this.LastResult.GetString() : null;
+        return String.IsNullOrEmpty(text) ? null : Convert.FromBase64String(text);
+    }
+
     public Task<AppState> RealDialogs(bool on = true) => this.Call("real_dialogs", new { on });
 
     /// <summary>The state right now, without waiting for the app to settle (e.g. while a real dialog is open).</summary>

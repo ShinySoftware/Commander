@@ -58,5 +58,7 @@
     <ItemGroup>
         <ProjectReference Include="$(CommanderSharedDir)..\ShinyCommander.Core\ShinyCommander.Core.csproj" />
         <ProjectReference Include="$(CommanderSharedDir)..\ShinyCommander.Remote\ShinyCommander.Remote.csproj" />
+        <!-- serving folders over HTTP / WebDAV, with the browser page built in -->
+        <ProjectReference Include="$(CommanderSharedDir)..\ShinyCommander.Share\ShinyCommander.Share.csproj" />
     </ItemGroup>
 </Project>

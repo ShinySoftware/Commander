@@ -50,9 +50,11 @@ public partial class MainViewModel : ObservableObject,
         PreviewPaneViewModel preview,
         FileColumns fileColumns,
         FolderSetups folderSetups,
+        SharingService sharing,
         IFileClipboard? fileClipboard = null
     )
     {
+        this.Sharing = sharing;
         this.fileClipboard = fileClipboard;
         this.fileColumns = fileColumns;
         this.folderSetups = folderSetups;
@@ -204,6 +206,9 @@ public partial class MainViewModel : ObservableObject,
     // --- background jobs ----------------------------------------------------------------------
     /// <summary>Copy/move/delete/pack/unpack run here - the panels stay usable meanwhile.</summary>
     public JobQueue Jobs { get; }
+
+    /// <summary>Folders served over HTTP / WebDAV - the status bar chip and the Sharing window.</summary>
+    public SharingService Sharing { get; }
 
     /// <summary>True until every job (and its refresh/toast) has finished.</summary>
     public bool IsOperationRunning => this.Jobs.IsBusy;
@@ -1520,6 +1525,101 @@ public partial class MainViewModel : ObservableObject,
         });
         tab.MarkAll(false);
     }
+
+    // ===========================================================================================
+    // sharing: the OS share sheet, serving a folder, the Sharing window
+    // ===========================================================================================
+
+    /// <summary>
+    /// The marked files (or the one under the cursor) to the operating system's share sheet. Files on this machine go as
+    /// they are; a folder is zipped first and a file in an archive or on a server copied out first, as a background job.
+    /// </summary>
+    [RelayCommand]
+    async Task Share()
+    {
+        var tab = this.Tab;
+        var sources = tab?.SelectedEntries ?? [];
+        if (tab == null || sources.Count == 0)
+            return;
+
+        if (!FileShareSheet.IsSupported)
+        {
+            await this.dialogs.Toast(L.Share_NotSupported, ToastKind.Warning);
+            return;
+        }
+
+        var title = sources.Count == 1 ? sources[0].Name : L.Op_ItemsFormat(sources.Count);
+        if (sources.All(FileShareSheet.IsPlainFile))
+        {
+            await this.ShareSheet(sources.Select(x => x.FullPath).ToList(), title);
+            return;
+        }
+
+        this.RunOperation(L.Share_PreparingFormat(What(sources)), FileOperationKind.Pack, null, async (progress, ct) =>
+        {
+            var temp = FileShareSheet.NewTempFolder();
+            var files = new List<string>();
+            var result = OperationResult.Empty;
+            foreach (var entry in sources)
+            {
+                ct.ThrowIfCancellationRequested();
+                if (FileShareSheet.IsPlainFile(entry))
+                {
+                    files.Add(entry.FullPath);
+                }
+                else if (entry.IsDirectory)
+                {
+                    var zip = Path.Combine(temp, entry.Name + ".zip");
+                    result = await this.ops.PackAsync([entry], zip, null, progress, ct);
+                    files.Add(zip);
+                }
+                else
+                {
+                    result = await this.ops.CopyAsync([entry], new OperationTarget(temp), null, progress, ct);
+                    files.Add(Path.Combine(temp, entry.Name));
+                }
+            }
+
+            var ready = files.Where(File.Exists).ToList();
+            if (ready.Count > 0)
+                await this.ShareSheet(ready, title);
+            return result;
+        });
+    }
+
+    async Task ShareSheet(IReadOnlyList<string> files, string title)
+    {
+        try
+        {
+            await FileShareSheet.ShareAsync(files, title);
+        }
+        catch (Exception ex)
+        {
+            await this.mainThread.InvokeOnMainThreadAsync(() => this.dialogs.Toast(L.Share_FailedFormat(ex.Message), ToastKind.Error));
+        }
+    }
+
+    /// <summary>
+    /// Serves the folder under the cursor (or the panel's folder) over HTTP and WebDAV: the Sharing window opens with the
+    /// Serve Folder form filled in.
+    /// </summary>
+    [RelayCommand]
+    async Task ServeFolder()
+    {
+        var item = this.Tab?.CursorItem;
+        var path = item is { IsDirectory: true, Entry.IsParentLink: false } ? item.Entry.FullPath : this.ActivePanel.Path;
+        var location = this.vfs.Resolve(path);
+        if (location is not { IsArchive: false, IsRemote: false } || !Directory.Exists(location.Path))
+        {
+            await this.dialogs.Toast(L.Sharing_OnlyLocal, ToastKind.Warning);
+            return;
+        }
+        (Application.Current as App)?.ShowSharing(location.Path);
+    }
+
+    /// <summary>The Sharing window - what is shared, who is connected, what is moving.</summary>
+    [RelayCommand]
+    void ToggleSharing() => (Application.Current as App)?.ShowSharing(null);
 
     /// <summary>Hands the work to the background job queue and returns straight away.</summary>
     void RunOperation(

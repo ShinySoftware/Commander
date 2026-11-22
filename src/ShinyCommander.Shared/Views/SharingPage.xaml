@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:shiny="http://shiny.net/maui/controls"
+             xmlns:vm="clr-namespace:ShinyCommander.ViewModels"
+             xmlns:views="clr-namespace:ShinyCommander.Views"
+             xmlns:l="clr-namespace:ShinyCommander"
+             x:Class="ShinyCommander.Views.SharingPage"
+             x:DataType="vm:SharingViewModel"
+             Title="{l:Tr Sharing_Title}"
+             BackgroundColor="{AppThemeBinding Light={StaticResource WindowLight}, Dark={StaticResource WindowDark}}">
+
+    <ContentPage.Resources>
+        <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource Subtle}">
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="VerticalOptions" Value="Center" />
+            <Setter Property="HorizontalTextAlignment" Value="End" />
+        </Style>
+        <Style x:Key="FieldRow" TargetType="Grid">
+            <Setter Property="ColumnDefinitions" Value="170,*" />
+            <Setter Property="ColumnSpacing" Value="14" />
+            <Setter Property="MinimumHeightRequest" Value="34" />
+        </Style>
+        <Style x:Key="Url" TargetType="Label">
+            <Setter Property="FontFamily" Value="{DynamicResource MonoFont}" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="LineBreakMode" Value="MiddleTruncation" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="SmallButton" TargetType="shiny:ShinyButton">
+            <Setter Property="Appearance" Value="Tonal" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="IconSize" Value="13" />
+            <Setter Property="ContentPadding" Value="8,2" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+        <Style x:Key="TextButton" TargetType="shiny:ShinyButton">
+            <Setter Property="Appearance" Value="Text" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="IconSize" Value="13" />
+            <Setter Property="ContentPadding" Value="6,2" />
+            <Setter Property="VerticalOptions" Value="Center" />
+        </Style>
+    </ContentPage.Resources>
+
+    <shiny:KeyboardShortcuts.Shortcuts>
+        <shiny:KeyboardShortcut Gesture="Escape" Command="{Binding CancelFormCommand}" Description="{l:Tr Common_Close}" />
+    </shiny:KeyboardShortcuts.Shortcuts>
+
+    <Grid RowDefinitions="Auto,*">
+        <!-- header: status, and what can be done to the whole server -->
+        <Grid Style="{StaticResource Toolbar}" Padding="12,6" HeightRequest="46" ColumnDefinitions="Auto,Auto,*,Auto,Auto,Auto" ColumnSpacing="10">
+            <shiny:MotionIconView Icon="activity" Color="{StaticResource Accent}" IsPlaying="{Binding HasTransfers}" WidthRequest="18" HeightRequest="18" VerticalOptions="Center" />
+            <VerticalStackLayout Grid.Column="1" VerticalOptions="Center" Spacing="0">
+                <Label Text="{l:Tr Sharing_Title}" FontAttributes="Bold" FontSize="14" />
+                <Label Text="{Binding StatusText}" Style="{StaticResource Subtle}" FontSize="11" AutomationId="SharingStatus" />
+            </VerticalStackLayout>
+            <shiny:PillView Grid.Column="2" Text="{Binding Copied}" IsVisible="{Binding HasCopied}" Type="Success" FontSize="10" HorizontalOptions="Start" VerticalOptions="Center" Margin="8,0" />
+            <shiny:ShinyButton Grid.Column="3" Text="{l:Tr Sharing_ShareFolder}" LeftMotionIcon="plus" Command="{Binding NewShareHereCommand}" Style="{StaticResource TextButton}" AutomationId="SharingNew" />
+            <shiny:ShinyButton Grid.Column="4" Text="{l:Tr Sharing_Settings}" LeftMotionIcon="settings" Command="{Binding ToggleSettingsCommand}" Style="{StaticResource TextButton}" AutomationId="SharingSettings" />
+            <shiny:ShinyButton Grid.Column="5" Text="{l:Tr Sharing_StopAll}" LeftMotionIcon="stop" Command="{Binding StopAllCommand}" IsVisible="{Binding HasShares}" Style="{StaticResource TextButton}" AutomationId="SharingStopAll" />
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <!-- fills the width and centres the column: on AppKit a Center-aligned column leaves controls outside the
+                 scroll view's document view, deaf to clicks -->
+            <Grid ColumnDefinitions="*,780,*">
+                <VerticalStackLayout Grid.Column="1" Padding="0,14,0,24" Spacing="12">
+
+                    <!-- the first run: the firewall may ask before anyone else gets in -->
+                    <Border Style="{StaticResource Card}" Padding="14,10" IsVisible="{Binding ShowFirewallHint}">
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                            <shiny:MotionIconView Icon="info" Color="{StaticResource Accent}" WidthRequest="18" HeightRequest="18" VerticalOptions="Start" />
+                            <Label Grid.Column="1" Text="{Binding FirewallHint}" FontSize="12" />
+                            <shiny:ShinyButton Grid.Column="2" Text="{l:Tr Sharing_GotIt}" Command="{Binding DismissFirewallHintCommand}" Style="{StaticResource SmallButton}" />
+                        </Grid>
+                    </Border>
+
+                    <Label Text="{Binding Error}" IsVisible="{Binding HasError}" TextColor="{AppThemeBinding Light={StaticResource MarkedLight}, Dark={StaticResource MarkedDark}}" FontSize="12" />
+
+                    <!-- ============================================================ the form: share a folder / edit a share -->
+                    <Border Style="{StaticResource Card}" Padding="16,12" IsVisible="{Binding ShowForm}" AutomationId="SharingForm">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{Binding FormTitle}" Style="{StaticResource SectionTitle}" FontSize="11" Margin="0,0,0,4" />
+
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Text="{l:Tr Sharing_FormFolder}" Style="{StaticResource FieldLabel}" />
+                                <Entry Grid.Column="1" Text="{Binding FormPath}" FontFamily="{DynamicResource MonoFont}" IsReadOnly="{Binding IsFormEditing}" AutomationId="SharingFormPath" />
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Text="{l:Tr Sharing_FormAccess}" Style="{StaticResource FieldLabel}" />
+                                <Picker Grid.Column="1" ItemsSource="{Binding AccessChoices}" SelectedIndex="{Binding FormAccess, Mode=TwoWay}" FontSize="13" AutomationId="SharingFormAccess" />
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}" IsVisible="{Binding FormCanModify}">
+                                <Label Text="{l:Tr Sharing_FormModify}" Style="{StaticResource FieldLabel}" />
+                                <Switch Grid.Column="1" IsToggled="{Binding FormAllowModify}" HorizontalOptions="Start" OnColor="{StaticResource Accent}" />
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Text="{l:Tr Sharing_FormUseKey}" Style="{StaticResource FieldLabel}" />
+                                <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                                    <Switch IsToggled="{Binding FormUseKey}" OnColor="{StaticResource Accent}" VerticalOptions="Center" AutomationId="SharingFormUseKey" />
+                                    <Entry Text="{Binding FormKey}" IsVisible="{Binding FormUseKey}" FontFamily="{DynamicResource MonoFont}" WidthRequest="200" VerticalOptions="Center" AutomationId="SharingFormKey" />
+                                    <shiny:ShinyButton Text="{l:Tr Sharing_FormNewKey}" Command="{Binding NewKeyCommand}" IsVisible="{Binding FormUseKey}" Style="{StaticResource TextButton}" />
+                                </HorizontalStackLayout>
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Text="{l:Tr Sharing_FormExpiry}" Style="{StaticResource FieldLabel}" />
+                                <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                                    <Picker ItemsSource="{Binding ExpiryChoices}" SelectedIndex="{Binding FormExpiry, Mode=TwoWay}" FontSize="13" WidthRequest="160" VerticalOptions="Center" />
+                                    <Label Text="{l:Tr Sharing_FormMaxDownloads}" Style="{StaticResource Subtle}" FontSize="13" VerticalOptions="Center" />
+                                    <Entry Text="{Binding FormMaxDownloads}" Placeholder="{l:Tr Sharing_FormNoLimit}" Keyboard="Numeric" WidthRequest="90" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Text="{l:Tr Sharing_FormBandwidth}" Style="{StaticResource FieldLabel}" />
+                                <Picker Grid.Column="1" ItemsSource="{Binding BandwidthChoices}" SelectedIndex="{Binding FormBandwidth, Mode=TwoWay}" FontSize="13" WidthRequest="160" HorizontalOptions="Start" />
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Text="{l:Tr Sharing_FormAdvertise}" Style="{StaticResource FieldLabel}" />
+                                <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                                    <Switch IsToggled="{Binding FormAdvertise}" OnColor="{StaticResource Accent}" VerticalOptions="Center" />
+                                    <Label Text="{l:Tr Sharing_FormAdvertiseDesc}" Style="{StaticResource Subtle}" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Text="{l:Tr Sharing_FormHidden}" Style="{StaticResource FieldLabel}" />
+                                <Switch Grid.Column="1" IsToggled="{Binding FormShowHidden}" HorizontalOptions="Start" OnColor="{StaticResource Accent}" />
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}" IsVisible="{Binding HasFormError}">
+                                <Label Grid.Column="1" Text="{Binding FormError}" TextColor="{AppThemeBinding Light={StaticResource MarkedLight}, Dark={StaticResource MarkedDark}}" FontSize="12" />
+                            </Grid>
+                            <HorizontalStackLayout Spacing="8" HorizontalOptions="End" Margin="0,6,0,0">
+                                <shiny:ShinyButton Text="{l:Tr Common_Cancel}" Command="{Binding CancelFormCommand}" Appearance="Tonal" FontSize="13" />
+                                <shiny:ShinyButton Text="{Binding FormSaveText}" Command="{Binding SaveFormCommand}" Appearance="Filled" FontSize="13" AutomationId="SharingFormSave" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- ============================================================ settings -->
+                    <Border Style="{StaticResource Card}" Padding="16,12" IsVisible="{Binding ShowSettings}">
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text="{l:Tr Sharing_SettingsTitle}" Style="{StaticResource SectionTitle}" FontSize="11" Margin="0,0,0,4" />
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Text="{l:Tr Sharing_SettingsPort}" Style="{StaticResource FieldLabel}" />
+                                <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                                    <Entry Text="{Binding SettingsPort}" Keyboard="Numeric" WidthRequest="90" VerticalOptions="Center" />
+                                    <Label Text="{l:Tr Sharing_SettingsPortDesc}" Style="{StaticResource Subtle}" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Text="{l:Tr Sharing_SettingsKeepAwake}" Style="{StaticResource FieldLabel}" />
+                                <Picker Grid.Column="1" ItemsSource="{Binding KeepAwakeChoices}" SelectedIndex="{Binding SettingsKeepAwake, Mode=TwoWay}" FontSize="13" WidthRequest="260" HorizontalOptions="Start" />
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Text="{l:Tr Sharing_SettingsNotify}" Style="{StaticResource FieldLabel}" />
+                                <Switch Grid.Column="1" IsToggled="{Binding SettingsNotifyUploads}" HorizontalOptions="Start" OnColor="{StaticResource Accent}" />
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Text="{l:Tr Sharing_SettingsToken}" Style="{StaticResource FieldLabel}" />
+                                <Entry Grid.Column="1" Text="{Binding SettingsTunnelToken}" IsPassword="True" Placeholder="{l:Tr Sharing_SettingsTokenPlaceholder}" />
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Grid.Column="1" Text="{l:Tr Sharing_SettingsTokenDesc}" Style="{StaticResource Subtle}" FontSize="11" />
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}">
+                                <Label Text="{l:Tr Sharing_SettingsForwarded}" Style="{StaticResource FieldLabel}" />
+                                <HorizontalStackLayout Grid.Column="1" Spacing="10">
+                                    <Switch IsToggled="{Binding SettingsTrustForwarded}" OnColor="{StaticResource Accent}" VerticalOptions="Center" />
+                                    <Label Text="{l:Tr Sharing_SettingsForwardedDesc}" Style="{StaticResource Subtle}" VerticalOptions="Center" />
+                                </HorizontalStackLayout>
+                            </Grid>
+                            <Grid Style="{StaticResource FieldRow}" IsVisible="{Binding HasSettingsError}">
+                                <Label Grid.Column="1" Text="{Binding SettingsError}" TextColor="{AppThemeBinding Light={StaticResource MarkedLight}, Dark={StaticResource MarkedDark}}" FontSize="12" />
+                            </Grid>
+                            <HorizontalStackLayout Spacing="8" HorizontalOptions="End" Margin="0,6,0,0">
+                                <shiny:ShinyButton Text="{l:Tr Common_Cancel}" Command="{Binding ToggleSettingsCommand}" Appearance="Tonal" FontSize="13" />
+                                <shiny:ShinyButton Text="{l:Tr Common_Save}" Command="{Binding SaveSettingsCommand}" Appearance="Filled" FontSize="13" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- ============================================================ where the server can be reached -->
+                    <Border Style="{StaticResource Card}" Padding="16,12">
+                        <VerticalStackLayout Spacing="8">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <Label Text="{l:Tr Sharing_ThisNetwork}" Style="{StaticResource SectionTitle}" FontSize="11" VerticalOptions="Center" />
+                                <shiny:ShinyButton Grid.Column="1" Text="{l:Tr Sharing_Start}" LeftMotionIcon="play" Command="{Binding StartServerCommand}" IsVisible="{Binding IsStopped}" Style="{StaticResource SmallButton}" />
+                            </Grid>
+                            <Label Text="{l:Tr Sharing_NothingShared}" Style="{StaticResource Subtle}" IsVisible="{Binding IsStopped}" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding LanUrls}" Spacing="2" IsVisible="{Binding IsRunning}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="x:String">
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                            <Label Text="{Binding .}" Style="{StaticResource Url}" />
+                                            <shiny:ShinyButton Grid.Column="1" Text="{l:Tr Sharing_Copy}" LeftMotionIcon="copy" Style="{StaticResource TextButton}"
+                                                               Command="{Binding CopyCommand, Source={RelativeSource AncestorType={x:Type vm:SharingViewModel}}, x:DataType=vm:SharingViewModel}" CommandParameter="{Binding .}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+
+                            <BoxView Style="{StaticResource Hairline}" Margin="0,4" />
+
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <VerticalStackLayout Spacing="2">
+                                    <Label Text="{l:Tr Sharing_PublicAddress}" Style="{StaticResource SectionTitle}" FontSize="11" />
+                                    <Label Text="{Binding TunnelText}" Style="{StaticResource Subtle}" />
+                                </VerticalStackLayout>
+                                <HorizontalStackLayout Grid.Column="1" Spacing="6" VerticalOptions="Center">
+                                    <ActivityIndicator IsRunning="{Binding TunnelBusy}" IsVisible="{Binding TunnelBusy}" WidthRequest="14" HeightRequest="14" Color="{StaticResource Accent}" />
+                                    <shiny:ShinyButton Text="{Binding TunnelButtonText}" LeftMotionIcon="link" Command="{Binding ToggleTunnelCommand}" Style="{StaticResource SmallButton}" AutomationId="SharingTunnel" />
+                                </HorizontalStackLayout>
+                            </Grid>
+                            <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="6" IsVisible="{Binding HasTunnelUrl}">
+                                <Label Text="{Binding TunnelUrl}" Style="{StaticResource Url}" TextColor="{StaticResource Accent}" />
+                                <shiny:ShinyButton Grid.Column="1" Text="{l:Tr Sharing_Copy}" LeftMotionIcon="copy" Command="{Binding CopyCommand}" CommandParameter="{Binding TunnelUrl}" Style="{StaticResource TextButton}" />
+                                <shiny:ShinyButton Grid.Column="2" Text="{l:Tr Sharing_Open}" LeftMotionIcon="external-link" Command="{Binding OpenCommand}" CommandParameter="{Binding TunnelUrl}" Style="{StaticResource TextButton}" />
+                            </Grid>
+                            <Label Text="{Binding TunnelError}" IsVisible="{Binding HasTunnelError}" TextColor="{AppThemeBinding Light={StaticResource MarkedLight}, Dark={StaticResource MarkedDark}}" FontSize="12" />
+                            <Label Text="{l:Tr Sharing_TunnelKeyless}" IsVisible="{Binding TunnelHasKeylessShares}" Style="{StaticResource Subtle}" FontSize="11" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- ============================================================ shares -->
+                    <Label Text="{l:Tr Sharing_Shares}" Style="{StaticResource SectionTitle}" Margin="4,6,0,0" />
+                    <Border Style="{StaticResource Card}" Padding="16,14" IsVisible="{Binding NoShares}">
+                        <Label Text="{l:Tr Sharing_NoShares}" Style="{StaticResource Subtle}" FontSize="13" />
+                    </Border>
+                    <VerticalStackLayout BindableLayout.ItemsSource="{Binding Shares}" Spacing="10">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ShareItemViewModel">
+                                <Border Style="{StaticResource Card}" Padding="16,12">
+                                    <VerticalStackLayout Spacing="6">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                            <shiny:MotionIconView Icon="folder-open" Color="{StaticResource Accent}" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" />
+                                            <VerticalStackLayout Grid.Column="1" Spacing="0">
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" FontSize="14" LineBreakMode="TailTruncation" />
+                                                <Label Text="{Binding Path}" Style="{StaticResource Subtle}" FontSize="11" LineBreakMode="HeadTruncation" />
+                                            </VerticalStackLayout>
+                                            <HorizontalStackLayout Grid.Column="2" Spacing="2" VerticalOptions="Center">
+                                                <shiny:ShinyButton Text="{l:Tr Sharing_Edit}" LeftMotionIcon="edit" Style="{StaticResource TextButton}"
+                                                                   Command="{Binding EditShareCommand, Source={RelativeSource AncestorType={x:Type vm:SharingViewModel}}, x:DataType=vm:SharingViewModel}" CommandParameter="{Binding .}" />
+                                                <shiny:ShinyButton Text="{l:Tr Sharing_StopSharing}" LeftMotionIcon="stop" Style="{StaticResource SmallButton}"
+                                                                   Command="{Binding StopShareCommand, Source={RelativeSource AncestorType={x:Type vm:SharingViewModel}}, x:DataType=vm:SharingViewModel}" CommandParameter="{Binding .}" />
+                                            </HorizontalStackLayout>
+                                        </Grid>
+
+                                        <HorizontalStackLayout Spacing="6">
+                                            <shiny:PillView Text="{Binding AccessText}" Type="Info" FontSize="10" />
+                                            <shiny:PillView Text="{l:Tr Sharing_PillKey}" IsVisible="{Binding HasKey}" Type="Success" FontSize="10" />
+                                            <shiny:PillView Text="{l:Tr Sharing_PillNoKey}" IsVisible="{Binding NoKey}" Type="Warning" FontSize="10" />
+                                            <shiny:PillView Text="{Binding ExpiryText}" IsVisible="{Binding HasExpiry}" Type="Warning" FontSize="10" />
+                                            <shiny:PillView Text="{Binding LimitText}" IsVisible="{Binding HasLimit}" Type="Info" FontSize="10" />
+                                            <shiny:PillView Text="{l:Tr Sharing_PillAdvertised}" IsVisible="{Binding Advertised}" Type="Info" FontSize="10" />
+                                            <shiny:PillView Text="{l:Tr Sharing_PillPublic}" IsVisible="{Binding UsesTunnel}" Type="Success" FontSize="10" />
+                                        </HorizontalStackLayout>
+
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="14" Margin="0,4,0,0">
+                                            <VerticalStackLayout Spacing="4">
+                                                <Grid ColumnDefinitions="64,*,Auto,Auto" ColumnSpacing="6">
+                                                    <Label Text="{l:Tr Sharing_Link}" Style="{StaticResource Subtle}" VerticalOptions="Center" />
+                                                    <Label Grid.Column="1" Text="{Binding PageUrl}" Style="{StaticResource Url}" TextColor="{StaticResource Accent}" />
+                                                    <shiny:ShinyButton Grid.Column="2" Text="{l:Tr Sharing_Copy}" LeftMotionIcon="copy" Style="{StaticResource TextButton}" ToolTipProperties.Text="{l:Tr Sharing_CopyLinkTip}"
+                                                                       Command="{Binding CopyLinkCommand, Source={RelativeSource AncestorType={x:Type vm:SharingViewModel}}, x:DataType=vm:SharingViewModel}" CommandParameter="{Binding .}" />
+                                                    <shiny:ShinyButton Grid.Column="3" Text="{l:Tr Sharing_Open}" LeftMotionIcon="external-link" Style="{StaticResource TextButton}"
+                                                                       Command="{Binding OpenShareCommand, Source={RelativeSource AncestorType={x:Type vm:SharingViewModel}}, x:DataType=vm:SharingViewModel}" CommandParameter="{Binding .}" />
+                                                </Grid>
+                                                <Grid ColumnDefinitions="64,*,Auto" ColumnSpacing="6">
+                                                    <Label Text="WebDAV" Style="{StaticResource Subtle}" VerticalOptions="Center" />
+                                                    <Label Grid.Column="1" Text="{Binding DavUrl}" Style="{StaticResource Url}" />
+                                                    <shiny:ShinyButton Grid.Column="2" Text="{l:Tr Sharing_Copy}" LeftMotionIcon="copy" Style="{StaticResource TextButton}" ToolTipProperties.Text="{l:Tr Sharing_CopyDavTip}"
+                                                                       Command="{Binding CopyDavCommand, Source={RelativeSource AncestorType={x:Type vm:SharingViewModel}}, x:DataType=vm:SharingViewModel}" CommandParameter="{Binding .}" />
+                                                </Grid>
+                                                <Grid ColumnDefinitions="64,*,Auto" ColumnSpacing="6" IsVisible="{Binding HasKey}">
+                                                    <Label Text="{l:Tr Sharing_Key}" Style="{StaticResource Subtle}" VerticalOptions="Center" />
+                                                    <Label Grid.Column="1" Text="{Binding Key}" Style="{StaticResource Url}" FontAttributes="Bold" />
+                                                    <shiny:ShinyButton Grid.Column="2" Text="{l:Tr Sharing_Copy}" LeftMotionIcon="copy" Style="{StaticResource TextButton}"
+                                                                       Command="{Binding CopyKeyCommand, Source={RelativeSource AncestorType={x:Type vm:SharingViewModel}}, x:DataType=vm:SharingViewModel}" CommandParameter="{Binding .}" />
+                                                </Grid>
+                                                <Label Text="{l:Tr Sharing_LocalOnly}" IsVisible="{Binding TunnelBlocked}" Style="{StaticResource Subtle}" FontSize="11" />
+                                                <Label Text="{Binding Stats}" Style="{StaticResource Subtle}" FontSize="11" Margin="0,2,0,0" />
+                                            </VerticalStackLayout>
+                                            <VerticalStackLayout Grid.Column="1" Spacing="4" HorizontalOptions="End">
+                                                <views:QrCodeView Text="{Binding LinkWithKey}" IsVisible="{Binding ShowQr}" WidthRequest="150" HeightRequest="150" />
+                                                <shiny:ShinyButton Text="{l:Tr Sharing_QrCode}" Style="{StaticResource TextButton}" HorizontalOptions="Center"
+                                                                   Command="{Binding ToggleQrCommand, Source={RelativeSource AncestorType={x:Type vm:SharingViewModel}}, x:DataType=vm:SharingViewModel}" CommandParameter="{Binding .}" />
+                                            </VerticalStackLayout>
+                                        </Grid>
+                                    </VerticalStackLayout>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+
+                    <!-- ============================================================ transfers -->
+                    <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10" Margin="4,6,0,0">
+                        <Label Text="{l:Tr Sharing_Transfers}" Style="{StaticResource SectionTitle}" VerticalOptions="Center" />
+                        <Label Grid.Column="1" Text="{Binding SpeedText}" Style="{StaticResource Subtle}" VerticalOptions="Center" AutomationId="SharingSpeed" />
+                    </Grid>
+                    <Border Style="{StaticResource Card}" Padding="0">
+                        <VerticalStackLayout>
+                            <Grid Padding="14,8" Style="{StaticResource Toolbar}">
+                                <Label Text="{Binding TotalsText}" Style="{StaticResource Subtle}" />
+                            </Grid>
+                            <Label Text="{l:Tr Sharing_NoTransfers}" Style="{StaticResource Subtle}" Padding="14,10" IsVisible="{Binding NoTransfers}" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Transfers}" Padding="10,4" Spacing="2">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:TransferItemViewModel">
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="2" Padding="4,5">
+                                            <shiny:MotionIconView Grid.RowSpan="3" Icon="{Binding Icon}" IsPlaying="{Binding IsRunning}" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="20" HeightRequest="20" VerticalOptions="Center" />
+                                            <Grid Grid.Column="1" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                <Label Text="{Binding Name}" FontAttributes="Bold" LineBreakMode="MiddleTruncation" />
+                                                <Label Grid.Column="1" Text="{Binding Where}" Style="{StaticResource Subtle}" FontSize="11" VerticalOptions="Center" />
+                                            </Grid>
+                                            <shiny:ProgressBar Grid.Column="1" Grid.Row="1" Value="{Binding Progress}" Maximum="1" TrackHeight="6" UseGradient="True" PulseEnabled="True" IsVisible="{Binding IsRunning}" />
+                                            <Label Grid.Column="1" Grid.Row="2" Text="{Binding Detail}" Style="{StaticResource Subtle}" LineBreakMode="TailTruncation" />
+                                            <shiny:PillView Grid.Column="2" Grid.RowSpan="3" Text="{Binding StateText}" Type="{Binding StatePill}" FontSize="10" VerticalOptions="Center" />
+                                            <shiny:ShinyButton Grid.Column="3" Grid.RowSpan="3" Text="{l:Tr Common_Stop}" IsVisible="{Binding IsRunning}" Style="{StaticResource SmallButton}"
+                                                               Command="{Binding StopTransferCommand, Source={RelativeSource AncestorType={x:Type vm:SharingViewModel}}, x:DataType=vm:SharingViewModel}" CommandParameter="{Binding .}" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- ============================================================ who is connecting -->
+                    <Label Text="{l:Tr Sharing_Clients}" Style="{StaticResource SectionTitle}" Margin="4,6,0,0" />
+                    <Border Style="{StaticResource Card}" Padding="0">
+                        <VerticalStackLayout Padding="10,4">
+                            <Label Text="{l:Tr Sharing_NoClients}" Style="{StaticResource Subtle}" Padding="4,6" IsVisible="{Binding NoClients}" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Clients}" Spacing="0">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ClientItem">
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="10" Padding="4,4">
+                                            <shiny:MotionIconView Icon="user" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                            <HorizontalStackLayout Grid.Column="1" Spacing="8" VerticalOptions="Center">
+                                                <Label Text="{Binding Ip}" FontFamily="{DynamicResource MonoFont}" FontSize="12" VerticalOptions="Center" />
+                                                <shiny:PillView Text="{l:Tr Sharing_ViaTunnel}" IsVisible="{Binding IsTunneled}" Type="Info" FontSize="10" VerticalOptions="Center" />
+                                                <shiny:PillView Text="{l:Tr Sharing_Blocked}" IsVisible="{Binding IsBlocked}" Type="Critical" FontSize="10" VerticalOptions="Center" />
+                                            </HorizontalStackLayout>
+                                            <Label Grid.Column="2" Text="{Binding Detail}" Style="{StaticResource Subtle}" VerticalOptions="Center" />
+                                            <Grid Grid.Column="3">
+                                                <shiny:ShinyButton Text="{l:Tr Sharing_Block}" IsVisible="{Binding CanBlock}" Style="{StaticResource TextButton}"
+                                                                   Command="{Binding BlockCommand, Source={RelativeSource AncestorType={x:Type vm:SharingViewModel}}, x:DataType=vm:SharingViewModel}" CommandParameter="{Binding Ip}" />
+                                                <shiny:ShinyButton Text="{l:Tr Sharing_Unblock}" IsVisible="{Binding IsBlocked}" Style="{StaticResource TextButton}"
+                                                                   Command="{Binding UnblockCommand, Source={RelativeSource AncestorType={x:Type vm:SharingViewModel}}, x:DataType=vm:SharingViewModel}" CommandParameter="{Binding Ip}" />
+                                            </Grid>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- ============================================================ activity -->
+                    <Grid ColumnDefinitions="*,Auto" Margin="4,6,0,0">
+                        <Label Text="{l:Tr Sharing_Activity}" Style="{StaticResource SectionTitle}" VerticalOptions="Center" />
+                        <shiny:ShinyButton Grid.Column="1" Text="{l:Tr Sharing_Clear}" Command="{Binding ClearHistoryCommand}" IsVisible="{Binding HasActivity}" Style="{StaticResource TextButton}" />
+                    </Grid>
+                    <Border Style="{StaticResource Card}" Padding="0">
+                        <VerticalStackLayout Padding="14,6">
+                            <Label Text="{l:Tr Sharing_NoActivity}" Style="{StaticResource Subtle}" Padding="0,4" IsVisible="{Binding NoActivity}" />
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Activity}" Spacing="1">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ActivityItem">
+                                        <Grid ColumnDefinitions="70,150,*" ColumnSpacing="10" Padding="0,2">
+                                            <Label Text="{Binding Time}" Style="{StaticResource Subtle}" FontFamily="{DynamicResource MonoFont}" />
+                                            <Label Grid.Column="1" Text="{Binding Who}" Style="{StaticResource Subtle}" FontFamily="{DynamicResource MonoFont}" LineBreakMode="TailTruncation" />
+                                            <Label Grid.Column="2" Text="{Binding What}" FontSize="12" LineBreakMode="MiddleTruncation" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+                </VerticalStackLayout>
+            </Grid>
+        </ScrollView>
+    </Grid>
+</ContentPage>

@@ -46,6 +46,8 @@ public static class UiTestHooks
         Map(ext, "hold_job", "Start a background job that runs until stopped (or { seconds = 30 }) - Settle doesn't wait for it", HoldJob);
         Map(ext, "job", "Act on a job in the jobs pane, newest first: { index = 0, action = stop|goto|dismiss|errors|clear }", JobAction);
         Map(ext, "close_window", "Press the main window's close button (macOS) - the quit guard may stop it", CloseWindow);
+        Map(ext, "sharing_png", "The Sharing window drawn by AppKit, as base64 PNG (DevFlow can't capture a page whose figures are moving)", SharingPng);
+        Map(ext, "sharing", "The shared folders: { port, running, shares: [{ name, id, link, dav, key }] }; { close = true } stops every share and closes the Sharing window", Sharing);
         Map(ext, "culture", "Switch the UI language live: { name = \"fr\" } - text already on screen stays; new pages and dialogs use it. Reset goes back to en", SetCulture);
         Map(ext, "connection", "Save a remote connection (in-memory settings, memory keychain): { protocol, name, host, port, user, secret, start, keyFile, region, endpoint } - returns its start path; { remove = name } deletes one", (_, a) =>
         {
@@ -476,10 +478,58 @@ public static class UiTestHooks
         }
     }
 
+    static Task<object> SharingPng(MainViewModel main, JsonElement args)
+    {
+#if MACOS_APPKIT
+        if ((Application.Current as App)?.SharingWindow?.Handler?.PlatformView is AppKit.NSWindow window && window.ContentView is { } view)
+        {
+            var rep = view.BitmapImageRepForCachingDisplayInRect(view.Bounds);
+            if (rep != null)
+            {
+                view.CacheDisplay(view.Bounds, rep);
+                var png = rep.RepresentationUsingTypeProperties(AppKit.NSBitmapImageFileType.Png);
+                return Task.FromResult<object>(Convert.ToBase64String(png.ToArray()));
+            }
+        }
+#endif
+        return Task.FromResult<object>("");
+    }
+
+    static async Task<object> Sharing(MainViewModel main, JsonElement args)
+    {
+        var sharing = Service<SharingService>();
+        if (args.TryGetProperty("close", out var close) && close.GetBoolean())
+        {
+            await sharing.StopAllAsync();
+            (Application.Current as App)?.CloseSharing();
+        }
+
+        var server = sharing.Server;
+        var baseUrl = $"http://127.0.0.1:{server.Port}";
+        return new
+        {
+            port = server.Port,
+            running = server.IsRunning,
+            shares = server.Shares.Select(x => new
+            {
+                name = x.Name,
+                id = x.Id,
+                link = ShinyCommander.Share.ShareServer.PageUrl(x, baseUrl, true),
+                dav = ShinyCommander.Share.ShareServer.DavUrl(x, baseUrl),
+                key = x.Options.Key
+            }).ToList()
+        };
+    }
+
     static async Task<object> Reset(MainViewModel main, JsonElement args)
     {
         diagnostics = false;
         await DismissDialogs();
+        // no shares, no Sharing window, carried into the next test
+        if (Service<SharingService>().IsSharing)
+            await Service<SharingService>().StopAllAsync();
+        Service<SharingService>().Monitor.ClearHistory();
+        (Application.Current as App)?.CloseSharing();
         // back to the main page
         var nav = Shell.Current?.Navigation;
         if (nav != null)

@@ -21,6 +21,7 @@ RIBBON = [
    ("Create",[("New Folder","folder","MakeDirectoryCommand","S","F7"),("New File","file","NewFileCommand","S","Shift+F4"),("Rename","edit","RenameCommand","S","F2")]),
    ("Open",[("View","eye","ViewCommand","L","F3"),("Edit","file-text","EditCommand","S","F4"),("Terminal","external-link","OpenTerminalCommand","S","Primary+O"),("Reveal","search","RevealInFileManagerCommand","S","Primary+E")]),
    ("Archive",[("Pack","download","PackCommand","S","Alt+F5"),("Unpack","upload","UnpackCommand","S","Alt+F9")]),
+   ("Share",[("Share","share","ShareCommand","L","Primary+Shift+E"),("Serve Folder","signal","ServeFolderCommand","S","Primary+Shift+P"),("Sharing","activity","ToggleSharingCommand","S","Primary+Shift+J")]),
    ("Clipboard",[("Copy Paths","clipboard","CopyPathsToClipboardCommand","S","Primary+Shift+C"),("Name to Cmd","arrow-down","CopyNameToCommandLineCommand","S","Primary+Enter")]),
    ("Info",[("Folder Size","chart","CalculateFolderSizesCommand","L","Alt+Shift+Enter")]),
  ]),

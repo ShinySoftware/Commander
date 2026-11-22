@@ -1,0 +1,513 @@
+@page "/s/{Id}"
+@implements IAsyncDisposable
+@inject ShareApi Api
+@inject Uploads Uploads
+@inject NavigationManager Nav
+
+@*
+    A shared folder. Whoever opens this has the link and nothing else - no account, no app - so it carries none of
+    ShinyCommander's chrome: the folder, what can be done with it, and the uploads under way.
+*@
+
+<PageTitle>@(this.info?.Name ?? "Shared folder") · ShinyCommander</PageTitle>
+
+<div class="page">
+    <header class="top">
+        <Brand />
+        @if (this.info is { } head)
+        {
+            <div class="top__title">
+                <strong>@head.Name</strong>
+                <span class="muted">shared from @head.SharedBy@(head.ExpiresUtc is { } until ? $" · until {Format.When(until)}" : "")</span>
+            </div>
+            <span class="chip">@AccessText(head)</span>
+        }
+    </header>
+
+    <main class="main">
+        @if (this.loading)
+        {
+            <p class="muted pad">Opening…</p>
+        }
+        else if (this.fatal is { } fatal)
+        {
+            <div class="center">
+                <div class="card empty">
+                    <Icon Name="alert" Size="40" Class="muted" />
+                    <h1>This link won't open</h1>
+                    <p class="muted">@fatal</p>
+                </div>
+            </div>
+        }
+        else if (this.info is { NeedsKey: true })
+        {
+            <div class="center">
+                <form class="card keycard" @onsubmit="this.SubmitKey" @onsubmit:preventDefault>
+                    <Icon Name="lock" Size="32" Class="accent" />
+                    <h1>This folder needs its key</h1>
+                    <p class="muted">Ask the person who shared it - it looks like <span class="mono">k7mp-2xqa-9fhd</span>.</p>
+                    <input @ref="this.keyInput" class="input mono" placeholder="Key" autocomplete="off" autocapitalize="off" spellcheck="false" @bind="this.key" @bind:event="oninput" />
+                    @if (this.keyError is { } error)
+                    {
+                        <p class="error">@error</p>
+                    }
+                    <button class="button button--primary" type="submit" disabled="@(String.IsNullOrWhiteSpace(this.key) || this.busy)">Open</button>
+                </form>
+            </div>
+        }
+        else if (this.info is { CanList: false } dropbox)
+        {
+            <div class="center">
+                <div class="card dropzone @(this.dragging ? "dropzone--over" : "")">
+                    <Icon Name="inbox" Size="44" Class="accent" />
+                    <h1>Drop files here</h1>
+                    <p class="muted">They go straight into <strong>@dropbox.Name</strong>. You can add files, but not see what's there.</p>
+                    <label class="button button--primary">
+                        <Icon Name="upload" Size="16" /> Choose files
+                        <input type="file" multiple hidden @ref="this.fileInput" @onchange="this.Picked" />
+                    </label>
+                </div>
+            </div>
+        }
+        else if (this.info is { } share)
+        {
+            <div class="toolbar">
+                <nav class="crumbs" aria-label="Where you are">
+                    <a class="crumb" href="@this.PathUrl("")" @onclick="() => this.Go(String.Empty)" @onclick:preventDefault>@share.Name</a>
+                    @{ var walked = ""; }
+                    @foreach (var segment in this.Path.Split('/', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        walked = ShareApi.Join(walked, segment);
+                        var target = walked;
+                        <Icon Name="chevron" Size="14" Class="muted" />
+                        <a class="crumb" href="@this.PathUrl(target)" @onclick="() => this.Go(target)" @onclick:preventDefault>@segment</a>
+                    }
+                </nav>
+                <div class="actions">
+                    <button class="button" title="Refresh" @onclick="this.Refresh"><Icon Name="refresh" Size="16" /></button>
+                    @if (share.CanUpload)
+                    {
+                        <button class="button" @onclick="this.NewFolder"><Icon Name="folder-plus" Size="16" /> New folder</button>
+                        <label class="button">
+                            <Icon Name="upload" Size="16" /> Upload
+                            <input type="file" multiple hidden @ref="this.fileInput" @onchange="this.Picked" />
+                        </label>
+                    }
+                    <a class="button button--primary" href="@ShareApi.ZipUrl(share.Id, this.Path)" download><Icon Name="download" Size="16" /> Download all</a>
+                </div>
+            </div>
+
+            <div class="card list @(this.dragging && share.CanUpload ? "list--over" : "")">
+                @if (this.listError is { } listError)
+                {
+                    <p class="error pad">@listError</p>
+                }
+                else if (this.listing is null)
+                {
+                    <p class="muted pad">Reading the folder…</p>
+                }
+                else if (this.listing.Entries.Count == 0)
+                {
+                    <div class="empty">
+                        <Icon Name="folder" Size="36" Class="muted" />
+                        <p class="muted">This folder is empty.@(share.CanUpload ? " Drop files here to add them." : "")</p>
+                    </div>
+                }
+                else
+                {
+                    <table class="files">
+                        <thead>
+                            <tr><th class="files__name">Name</th><th class="files__size">Size</th><th class="files__date">Modified</th><th class="files__act"></th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in this.listing.Entries)
+                            {
+                                var item = entry;
+                                var path = ShareApi.Join(this.Path, item.Name);
+                                <tr>
+                                    <td class="files__name">
+                                        @if (item.IsDirectory)
+                                        {
+                                            <a href="@this.PathUrl(path)" @onclick="() => this.Go(path)" @onclick:preventDefault>
+                                                <Icon Name="folder" Class="accent" /> <span>@item.Name</span>
+                                            </a>
+                                        }
+                                        else
+                                        {
+                                            <a href="@ShareApi.FileUrl(share.Id, path)" target="_blank" rel="noopener">
+                                                <Icon Name="@Icon.For(item.Name, false)" Class="muted" /> <span>@item.Name</span>
+                                            </a>
+                                        }
+                                    </td>
+                                    <td class="files__size muted">@(item.IsDirectory ? "" : Format.Bytes(item.Size))</td>
+                                    <td class="files__date muted">@Format.When(item.Modified)</td>
+                                    <td class="files__act">
+                                        @if (item.IsDirectory)
+                                        {
+                                            <a class="icon-button" title="Download as zip" href="@ShareApi.ZipUrl(share.Id, path)" download><Icon Name="download" Size="16" /></a>
+                                        }
+                                        else
+                                        {
+                                            <a class="icon-button" title="Download" href="@ShareApi.FileUrl(share.Id, path)" download="@item.Name"><Icon Name="download" Size="16" /></a>
+                                        }
+                                        @if (share.CanModify)
+                                        {
+                                            <button class="icon-button" title="Rename" @onclick="() => this.Rename(item)"><Icon Name="edit" Size="16" /></button>
+                                            <button class="icon-button icon-button--danger" title="Delete" @onclick="() => this.Delete(item)"><Icon Name="trash" Size="16" /></button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        }
+    </main>
+
+    @if (this.dragging && this.info is { NeedsKey: false, CanUpload: true, CanList: true })
+    {
+        <div class="drop-hint"><Icon Name="upload" Size="20" /> Drop to upload into @(String.IsNullOrEmpty(this.Path) ? this.info.Name : this.Path.Split('/').Last())</div>
+    }
+
+    @if (this.Uploads.HasItems)
+    {
+        <aside class="uploads card">
+            <header>
+                <strong>Uploads</strong>
+                <span class="muted">@(this.Uploads.Pending > 0 ? $"{this.Uploads.Pending} to go" : "all done")</span>
+                <button class="link" @onclick="this.Uploads.ClearFinished">Clear finished</button>
+            </header>
+            <ul>
+                @foreach (var upload in this.Uploads.Items)
+                {
+                    var u = upload;
+                    <li class="upload upload--@u.State.ToString().ToLowerInvariant()">
+                        <div class="upload__row">
+                            <span class="upload__name" title="@ShareApi.Join(u.Folder, u.Name)">@(u.SavedAs ?? u.Name)</span>
+                            @if (!u.IsFinished)
+                            {
+                                <button class="icon-button" title="Cancel" @onclick="() => this.Uploads.CancelItem(u)"><Icon Name="x" Size="14" /></button>
+                            }
+                            else if (u.State == UploadState.Done)
+                            {
+                                <Icon Name="check" Size="14" Class="ok" />
+                            }
+                        </div>
+                        <div class="bar"><div class="bar__fill" style="width:@((u.Fraction * 100).ToString("0.#", System.Globalization.CultureInfo.InvariantCulture))%"></div></div>
+                        <div class="upload__meta muted">
+                            @switch (u.State)
+                            {
+                                case UploadState.Waiting: <span>Waiting · @Format.Bytes(u.Size)</span> break;
+                                case UploadState.Sending: <span>@Format.Bytes(u.Sent) of @Format.Bytes(u.Size) · @Format.Speed(u.BytesPerSecond) · @Format.Duration(u.Remaining)</span> break;
+                                case UploadState.Done: <span>@Format.Bytes(u.Size)@(u.SavedAs != null && u.SavedAs != u.Name ? " · saved as " + u.SavedAs : "")</span> break;
+                                case UploadState.Cancelled: <span>Cancelled</span> break;
+                                case UploadState.Failed: <span class="error">@u.Status</span> break;
+                            }
+                            @if (u.State == UploadState.Sending && u.Status is { } status)
+                            {
+                                <span> · @status</span>
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+        </aside>
+    }
+
+    @if (this.dialog is { } d)
+    {
+        <div class="scrim" @onclick="() => this.CloseDialog(false)">
+            <form class="card dialog" @onclick:stopPropagation @onsubmit="() => this.CloseDialog(true)" @onsubmit:preventDefault>
+                <h2>@d.Title</h2>
+                @if (d.Message != null)
+                {
+                    <p class="muted">@d.Message</p>
+                }
+                @if (d.IsPrompt)
+                {
+                    <input @ref="this.dialogInput" class="input" @bind="this.dialogText" @bind:event="oninput" />
+                }
+                <div class="dialog__buttons">
+                    <button type="button" class="button" @onclick="() => this.CloseDialog(false)">Cancel</button>
+                    <button type="submit" class="button @(d.Danger ? "button--danger" : "button--primary")">@d.Ok</button>
+                </div>
+            </form>
+        </div>
+    }
+
+    @if (this.toast is { } t)
+    {
+        <div class="toast" role="status">@t</div>
+    }
+</div>
+
+@code {
+    [Parameter] public string Id { get; set; } = "";
+    [SupplyParameterFromQuery(Name = "path")] public string? PathQuery { get; set; }
+    [SupplyParameterFromQuery(Name = "key")] public string? KeyQuery { get; set; }
+
+    string Path => this.PathQuery ?? "";
+
+    ShareInfo? info;
+    ShareListing? listing;
+    bool loading = true;
+    bool busy;
+    bool dragging;
+    string? fatal;
+    string? listError;
+    string? key;
+    string? keyError;
+    string? toast;
+    ElementReference keyInput;
+    ElementReference fileInput;
+    ElementReference dialogInput;
+    DotNetObjectReference<SharePage>? self;
+    CancellationTokenSource? toastTimer;
+    string? listedPath;
+
+    sealed record DialogState(string Title, string? Message, string Ok, bool IsPrompt, bool Danger, TaskCompletionSource<bool> Result);
+    DialogState? dialog;
+    string dialogText = "";
+    bool focusDialog;
+    bool focusKey;
+
+    static string AccessText(ShareInfo share) => share.Access switch
+    {
+        ShareAccess.ReadOnly => "Download only",
+        ShareAccess.UploadOnly => "Drop box",
+        _ => share.CanModify ? "Full access" : "Download and upload"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.Uploads.Changed += this.OnUploadsChanged;
+        this.Uploads.Landed += this.OnLanded;
+        try
+        {
+            // a key in the link signs this browser in - then it comes off the address bar
+            this.info = await this.Api.Info(this.Id, this.KeyQuery);
+            this.Uploads.Use(this.info);
+            if (this.KeyQuery != null)
+                await (await this.Uploads.Module()).InvokeVoidAsync("replaceUrl", this.PathUrl(this.Path));
+
+            this.focusKey = this.info.NeedsKey;
+        }
+        catch (ShareApiException ex)
+        {
+            this.fatal = ex.Message;
+        }
+        catch (HttpRequestException)
+        {
+            this.fatal = "The computer sharing this folder can't be reached. It may have stopped sharing, or gone to sleep.";
+        }
+        this.loading = false;
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (this.info is { NeedsKey: false, CanList: true } && this.listedPath != this.Path)
+            await this.Load();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (this.info != null && this.self == null && !this.info.NeedsKey && this.info.CanUpload)
+        {
+            this.self = DotNetObjectReference.Create(this);
+            await (await this.Uploads.Module()).InvokeVoidAsync("watchDrops", this.self);
+        }
+
+        if (this.focusKey)
+        {
+            this.focusKey = false;
+            await (await this.Uploads.Module()).InvokeVoidAsync("focus", this.keyInput);
+        }
+        if (this.focusDialog)
+        {
+            this.focusDialog = false;
+            await (await this.Uploads.Module()).InvokeVoidAsync("focus", this.dialogInput);
+        }
+    }
+
+    async Task Load()
+    {
+        this.listedPath = this.Path;
+        this.listError = null;
+        try
+        {
+            this.listing = await this.Api.List(this.Id, this.Path);
+        }
+        catch (ShareApiException ex)
+        {
+            this.listing = null;
+            this.listError = ex.Message;
+        }
+        catch (HttpRequestException)
+        {
+            this.listError = "The computer sharing this folder can't be reached.";
+        }
+    }
+
+    async Task Refresh()
+    {
+        await this.Load();
+    }
+
+    string PathUrl(string path) => $"s/{this.Id}" + (String.IsNullOrEmpty(path) ? "" : "?path=" + Uri.EscapeDataString(path));
+
+    void Go(string path) => this.Nav.NavigateTo(this.PathUrl(path));
+
+    async Task SubmitKey()
+    {
+        if (String.IsNullOrWhiteSpace(this.key))
+            return;
+
+        this.busy = true;
+        this.keyError = null;
+        try
+        {
+            await this.Api.Key(this.Id, this.key.Trim());
+            this.info = await this.Api.Info(this.Id, null);
+            this.Uploads.Use(this.info);
+            if (this.info.CanList)
+                await this.Load();
+        }
+        catch (ShareApiException ex)
+        {
+            this.keyError = ex.Message;
+            this.focusKey = true;
+        }
+        finally
+        {
+            this.busy = false;
+        }
+    }
+
+    // ------------------------------------------------------------------------------------------- uploads
+
+    async Task Picked()
+    {
+        var claim = await (await this.Uploads.Module()).InvokeAsync<System.Text.Json.JsonElement>("claimInput", this.fileInput);
+        await this.Uploads.Add(claim, this.Path);
+    }
+
+    [JSInvokable]
+    public void OnDragging(bool value)
+    {
+        this.dragging = value;
+        this.StateHasChanged();
+    }
+
+    [JSInvokable]
+    public async Task OnDropped(System.Text.Json.JsonElement claim)
+    {
+        await this.Uploads.Add(claim, this.info?.CanList == true ? this.Path : "");
+        this.StateHasChanged();
+    }
+
+    void OnUploadsChanged() => _ = this.InvokeAsync(this.StateHasChanged);
+
+    void OnLanded(string folder)
+    {
+        if (folder == this.Path && this.info?.CanList == true)
+            _ = this.InvokeAsync(async () =>
+            {
+                await this.Load();
+                this.StateHasChanged();
+            });
+    }
+
+    // ------------------------------------------------------------------------------------------- changes
+
+    async Task NewFolder()
+    {
+        var name = await this.Prompt("New folder", null, "", "Create");
+        if (String.IsNullOrWhiteSpace(name))
+            return;
+
+        await this.Try(() => this.Api.CreateFolder(this.Id, this.Path, name.Trim()));
+    }
+
+    async Task Rename(ShareEntry entry)
+    {
+        var name = await this.Prompt("Rename", null, entry.Name, "Rename");
+        if (String.IsNullOrWhiteSpace(name) || name == entry.Name)
+            return;
+
+        await this.Try(() => this.Api.Rename(this.Id, ShareApi.Join(this.Path, entry.Name), name.Trim()));
+    }
+
+    async Task Delete(ShareEntry entry)
+    {
+        var what = entry.IsDirectory ? $"the folder \"{entry.Name}\" and everything in it" : $"\"{entry.Name}\"";
+        if (!await this.Confirm("Delete?", $"This deletes {what} from the computer sharing it. It can't be undone from here.", "Delete"))
+            return;
+
+        await this.Try(() => this.Api.Delete(this.Id, ShareApi.Join(this.Path, entry.Name)));
+    }
+
+    async Task Try(Func<Task> change)
+    {
+        try
+        {
+            await change();
+        }
+        catch (ShareApiException ex)
+        {
+            this.Toast(ex.Message);
+        }
+        await this.Load();
+    }
+
+    void Toast(string message)
+    {
+        this.toast = message;
+        this.toastTimer?.Cancel();
+        var cts = this.toastTimer = new CancellationTokenSource();
+        _ = this.InvokeAsync(async () =>
+        {
+            try
+            {
+                await Task.Delay(4000, cts.Token);
+                this.toast = null;
+                this.StateHasChanged();
+            }
+            catch (TaskCanceledException)
+            {
+            }
+        });
+    }
+
+    Task<string?> Prompt(string title, string? message, string value, string ok)
+    {
+        this.dialogText = value;
+        this.focusDialog = true;
+        var state = new DialogState(title, message, ok, true, false, new TaskCompletionSource<bool>());
+        this.dialog = state;
+        return state.Result.Task.ContinueWith(t => t.Result ? this.dialogText : null, TaskScheduler.Current);
+    }
+
+    Task<bool> Confirm(string title, string message, string ok)
+    {
+        var state = new DialogState(title, message, ok, false, true, new TaskCompletionSource<bool>());
+        this.dialog = state;
+        return state.Result.Task;
+    }
+
+    void CloseDialog(bool ok)
+    {
+        var d = this.dialog;
+        this.dialog = null;
+        d?.Result.TrySetResult(ok);
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        this.Uploads.Changed -= this.OnUploadsChanged;
+        this.Uploads.Landed -= this.OnLanded;
+        this.self?.Dispose();
+        this.toastTimer?.Cancel();
+        return ValueTask.CompletedTask;
+    }
+}

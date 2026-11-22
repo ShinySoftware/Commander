@@ -45,6 +45,9 @@ and **Linux** (GTK4 via maui-labs), and dressed in [Shiny Controls](https://gith
 | **Photo metadata** | F4 on a JPEG edits its EXIF - title, description, keywords, author, copyright, date taken, camera, GPS - without re-encoding the picture; remove the location or all metadata; every tag listed |
 | **Find files** | wildcard masks with TC syntax (`*.cs;*.xaml \| bin/ obj/`), content search, size filter, go-to-file |
 | **Multi-rename (Ctrl/⌘+M)** | `[N] [N2-5] [E] [C] [P] [YMD] [hms]` placeholders, search/replace (plain or regex), case, counters, live preview, undo - on disk and inside archives |
+| **Share (Primary+Shift+E)** | the marked files - or the one under the cursor - to the system share sheet (AirDrop, Mail, Messages on a Mac; Nearby Share and apps on Windows). A folder is zipped first, and a file inside an archive or on a server is copied out first, as a background job |
+| **Serve a folder (Primary+Shift+P)** | serves the folder under the cursor over HTTP to anyone on your network, or anywhere through a [pinggy.io](https://pinggy.io) public address: a browser page to browse, download (folders as zip), upload by drag and drop (big files resumably), make folders, rename and delete - whatever the share allows: download only, a drop box, download and upload, or full access. An optional key (in the link, or typed), an expiry (time or number of downloads), a speed limit, hidden files on or off, and a Bonjour listing. The same folder is a WebDAV mount for Finder, Explorer or another ShinyCommander. Shares without a key never go through the public address. Nothing is saved: closing the app ends every share |
+| **Sharing window (Primary+Shift+J)** | every shared folder with its link, WebDAV address, key and QR code; downloads and uploads as they happen with speed, progress and time left (and Stop); who has connected (Block / Unblock); an activity log; the port, the pinggy token (kept in the keychain), keeping the computer awake while sharing, and a toast for each upload |
 | **Synchronize dirs** | compare trees by date/size/content, per-row direction, copy both ways |
 | **Customizable** | choose the buttons beside each path (right-click the path row), columns, view mode and tree per panel, theme, panel font size, external editor |
 | **Updates** | the macOS build checks GitHub releases and updates itself |
@@ -55,7 +58,10 @@ and **Linux** (GTK4 via maui-labs), and dressed in [Shiny Controls](https://gith
 
 **C# / .NET 10** throughout. One shared **.NET MAUI** UI runs on three native heads: **WinUI** on Windows, **AppKit**
 on macOS and **GTK4** on Linux (the last two from [maui-labs](https://github.com/dotnet/maui-labs)). The file-system
-core (`ShinyCommander.Core`) and the remote providers (`ShinyCommander.Remote`) are plain .NET with no UI dependency.
+core (`ShinyCommander.Core`), the remote providers (`ShinyCommander.Remote`) and the folder server (`ShinyCommander.Share`)
+are plain .NET with no UI dependency; the page a shared folder opens in is a Blazor WebAssembly app (`ShinyCommander.Web`)
+embedded in the server's assembly. Build with `-p:SkipFrontendBuild=true` to skip publishing it during inner-loop work
+(a share's page then falls back to the WebDAV mount's own file manager).
 Tests use xUnit v3, and the UI suite drives the real app through MAUI DevFlow.
 
 | Library | Version | Used for |
@@ -89,6 +95,10 @@ Tests use xUnit v3, and the UI suite drives the real app through MAUI DevFlow.
 | [AWSSDK.S3](https://github.com/aws/aws-sdk-net) | 4.1.0 | Amazon S3 and S3-compatible storage (MinIO, R2, Wasabi, B2) |
 | [Azure.Storage.Blobs](https://github.com/Azure/azure-sdk-for-net) | 12.30.1 | Azure Blob storage |
 | [Shiny.Net.Discovery](https://github.com/shinyorg/shiny) | 6.5.2 | finding file servers on the network (Bonjour / mDNS) |
+| **Sharing** | | |
+| [Shiny.Net.HttpServer](https://shinylib.net/httpserver) (`.WebDav`, `.Tus`, `.Ssh`, `.Discovery`) | 2.2.1 | the folder server: HTTP, WebDAV, resumable uploads (tus), the pinggy.io tunnel and the Bonjour listing |
+| [QRCoder](https://github.com/codebude/QRCoder) | 1.9.0 | the QR code of a share's link |
+| [Blazor WebAssembly](https://github.com/dotnet/aspnetcore) | 10.0.11 | the page a shared folder opens in |
 | **Testing** | | |
 | [Microsoft.Maui.DevFlow](https://github.com/dotnet/maui-labs) (`.Agent`, `.Agent.Gtk`, `.Client`) | 0.1.0-preview.14 | the in-app agent and client the UI tests drive the real app through (Debug only) |
 | [xunit.v3](https://github.com/xunit/xunit) · xunit.runner.visualstudio | 3.2.2 · 3.1.5 | tests |

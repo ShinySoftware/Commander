@@ -1,0 +1,71 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <TargetFramework>$(BaseTargetFramework)</TargetFramework>
+        <RootNamespace>ShinyCommander.Share</RootNamespace>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Shiny.Net.HttpServer" />
+        <PackageReference Include="Shiny.Net.HttpServer.WebDav" />
+        <PackageReference Include="Shiny.Net.HttpServer.Tus" />
+        <PackageReference Include="Shiny.Net.HttpServer.Ssh" />
+        <PackageReference Include="Shiny.Net.HttpServer.Discovery" />
+        <PackageReference Include="QRCoder" />
+    </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="ShinyCommander.Core.Tests" />
+    </ItemGroup>
+
+    <!--
+        The browser app (ShinyCommander.Web) is published, zipped and embedded here as
+        "ShinyCommander.Share.wwwroot.zip"; ShareServer serves it straight out of the resource, precompressed assets
+        included, so a head ships one assembly for the whole page.
+
+        ShinyCommander.Web is deliberately not a ProjectReference - that would drag the WebAssembly runtime into this
+        library. It is built out of band and consumed as a zip. The hook is AssignTargetPaths rather than BeforeCompile:
+        resource names are assigned before BeforeCompile runs, so a resource added there is silently dropped.
+
+        Build with -p:SkipFrontendBuild=true for inner-loop work: a placeholder zip goes in instead, and a share's page
+        falls back to the WebDAV mount's own file manager.
+    -->
+    <Target Name="_FrontendProps">
+        <PropertyGroup>
+            <FrontendProject>$(MSBuildThisFileDirectory)..\ShinyCommander.Web\ShinyCommander.Web.csproj</FrontendProject>
+            <!-- no trailing separator: on Windows a trailing backslash escapes the closing quote of the publish command -->
+            <FrontendPublishDir>$(MSBuildThisFileDirectory)$(IntermediateOutputPath)frontend</FrontendPublishDir>
+            <FrontendPlaceholderDir>$(MSBuildThisFileDirectory)$(IntermediateOutputPath)frontend-placeholder\</FrontendPlaceholderDir>
+            <FrontendZip>$(MSBuildThisFileDirectory)$(IntermediateOutputPath)wwwroot.zip</FrontendZip>
+        </PropertyGroup>
+        <ItemGroup>
+            <FrontendSource Include="$(MSBuildThisFileDirectory)..\ShinyCommander.Web\**\*.cs;$(MSBuildThisFileDirectory)..\ShinyCommander.Web\**\*.razor;$(MSBuildThisFileDirectory)..\ShinyCommander.Web\wwwroot\**\*;$(MSBuildThisFileDirectory)..\ShinyCommander.Web\*.csproj;$(MSBuildThisFileDirectory)Contracts\*.cs"
+                            Exclude="$(MSBuildThisFileDirectory)..\ShinyCommander.Web\bin\**;$(MSBuildThisFileDirectory)..\ShinyCommander.Web\obj\**" />
+        </ItemGroup>
+    </Target>
+
+    <Target Name="_BuildFrontendZip"
+            DependsOnTargets="_FrontendProps"
+            Condition="'$(SkipFrontendBuild)' != 'true'"
+            Inputs="@(FrontendSource)"
+            Outputs="$(FrontendZip)">
+        <RemoveDir Directories="$(FrontendPublishDir)" />
+        <!-- Release whatever this build is: the debug WebAssembly runtime is several times larger and much slower -->
+        <Exec Command="dotnet publish &quot;$(FrontendProject)&quot; -c Release -o &quot;$(FrontendPublishDir)&quot; --nologo -p:SkipFrontendBuild=true"
+              StandardOutputImportance="low" />
+        <Delete Files="$(FrontendZip)" />
+        <ZipDirectory SourceDirectory="$(FrontendPublishDir)/wwwroot" DestinationFile="$(FrontendZip)" Overwrite="true" />
+    </Target>
+
+    <Target Name="EmbedFrontend"
+            DependsOnTargets="_FrontendProps;_BuildFrontendZip"
+            BeforeTargets="AssignTargetPaths">
+        <MakeDir Directories="$(FrontendPlaceholderDir)" Condition="!Exists('$(FrontendZip)')" />
+        <WriteLinesToFile File="$(FrontendPlaceholderDir)README.txt" Overwrite="true"
+                          Lines="The browser app was not built into this assembly (SkipFrontendBuild)."
+                          Condition="!Exists('$(FrontendZip)')" />
+        <ZipDirectory SourceDirectory="$(FrontendPlaceholderDir)" DestinationFile="$(FrontendZip)"
+                      Overwrite="true" Condition="!Exists('$(FrontendZip)')" />
+        <ItemGroup>
+            <EmbeddedResource Include="$(FrontendZip)" LogicalName="ShinyCommander.Share.wwwroot.zip" Visible="false" />
+        </ItemGroup>
+    </Target>
+</Project>

@@ -61,6 +61,9 @@
         <shiny:KeyboardShortcut Gesture="Primary+Backspace" Command="{Binding DeleteKeyCommand}" Description="{l:Tr Key_DeleteFinder}" Category="{l:Tr Cat_Files}" TextInput="Always" />
         <shiny:KeyboardShortcut Gesture="Primary+Alt+Backspace" Command="{Binding DeletePermanentlyKeyCommand}" Description="{l:Tr Key_DeletePermanently}" Category="{l:Tr Cat_Files}" TextInput="Always" />
         <shiny:KeyboardShortcut Gesture="Alt+F5" Command="{Binding PackCommand}" Description="{l:Tr Key_Pack}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+E" Command="{Binding ShareCommand}" Description="{l:Tr Key_Share}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+P" Command="{Binding ServeFolderCommand}" Description="{l:Tr Key_ServeFolder}" Category="{l:Tr Cat_Files}" />
+        <shiny:KeyboardShortcut Gesture="Primary+Shift+J" Command="{Binding ToggleSharingCommand}" Description="{l:Tr Key_Sharing}" Category="{l:Tr Cat_View}" />
         <shiny:KeyboardShortcut Gesture="Alt+F9" Command="{Binding UnpackCommand}" Description="{l:Tr Key_Unpack}" Category="{l:Tr Cat_Files}" />
         <shiny:KeyboardShortcut Gesture="Primary+Shift+C" Command="{Binding CopyPathsToClipboardCommand}" Description="{l:Tr Key_CopyPaths}" Category="{l:Tr Cat_Files}" />
         <shiny:KeyboardShortcut Gesture="Primary+V" Command="{Binding PasteFilesCommand}" Description="{l:Tr Key_PasteFiles}" Category="{l:Tr Cat_Files}" />
@@ -191,6 +194,23 @@
                     <shiny:RibbonButton Text="{l:Tr Cmd_Unpack}" Size="Small" Command="{Binding UnpackCommand}" Shortcut="Alt+F9" Tooltip="{l:Tr Cmd_Unpack, Suffix=' (Alt+F9)'}">
                         <shiny:RibbonButton.IconTemplate>
                             <DataTemplate><shiny:MotionIconView Icon="upload" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                </shiny:RibbonGroup>
+                <shiny:RibbonGroup Title="{l:Tr Ribbon_Group_Share}">
+                    <shiny:RibbonButton Text="{l:Tr Cmd_Share}" Size="Large" Command="{Binding ShareCommand}" Shortcut="Primary+Shift+E" Tooltip="{l:Tr Cmd_Share, Suffix=' (Primary+Shift+E)'}">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="share" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="30" HeightRequest="30" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="{l:Tr Cmd_ServeFolder}" Size="Small" Command="{Binding ServeFolderCommand}" Shortcut="Primary+Shift+P" Tooltip="{l:Tr Cmd_ServeFolder, Suffix=' (Primary+Shift+P)'}">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="signal" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
+                        </shiny:RibbonButton.IconTemplate>
+                    </shiny:RibbonButton>
+                    <shiny:RibbonButton Text="{l:Tr Cmd_ToggleSharing}" Size="Small" Command="{Binding ToggleSharingCommand}" Shortcut="Primary+Shift+J" Tooltip="{l:Tr Cmd_ToggleSharing, Suffix=' (Primary+Shift+J)'}">
+                        <shiny:RibbonButton.IconTemplate>
+                            <DataTemplate><shiny:MotionIconView Icon="activity" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear" StrokeWidth="2" WidthRequest="18" HeightRequest="18" /></DataTemplate>
                         </shiny:RibbonButton.IconTemplate>
                     </shiny:RibbonButton>
                 </shiny:RibbonGroup>
@@ -636,6 +656,44 @@
                                 </VerticalStackLayout>
                             </HorizontalStackLayout>
                             <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Archive}" Style="{StaticResource RibbonGroupTitle}" />
+                        </Grid>
+                        <BoxView Style="{StaticResource RibbonDivider}" />
+                        <Grid RowDefinitions="*,Auto" Padding="4,0">
+                            <HorizontalStackLayout Spacing="2">
+                            <Border Style="{StaticResource RibbonLarge}" AutomationId="ribbon-Share" ToolTipProperties.Text="{l:Tr Cmd_Share, Suffix=' (Primary+Shift+E)'}">
+                                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ShareCommand}" /></Border.GestureRecognizers>
+                                <Grid>
+                                    <VerticalStackLayout Spacing="3">
+                                        <shiny:MotionIconView Icon="share" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" />
+                                        <Label Text="{l:Tr Cmd_Share}" Style="{StaticResource RibbonText}" HorizontalTextAlignment="Center" />
+                                    </VerticalStackLayout>
+                                    <Label Text=" "><Label.GestureRecognizers><TapGestureRecognizer Command="{Binding ShareCommand}" /></Label.GestureRecognizers></Label>
+                                </Grid>
+                            </Border>
+                                <VerticalStackLayout Spacing="0" VerticalOptions="Center">
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-ServeFolder" ToolTipProperties.Text="{l:Tr Cmd_ServeFolder, Suffix=' (Primary+Shift+P)'}">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ServeFolderCommand}" /></Border.GestureRecognizers>
+                                    <Grid>
+                                        <HorizontalStackLayout Spacing="6">
+                                            <shiny:MotionIconView Icon="signal" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                            <Label Text="{l:Tr Cmd_ServeFolder}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        </HorizontalStackLayout>
+                                        <Label Text=" "><Label.GestureRecognizers><TapGestureRecognizer Command="{Binding ServeFolderCommand}" /></Label.GestureRecognizers></Label>
+                                    </Grid>
+                                </Border>
+                                <Border Style="{StaticResource RibbonSmall}" AutomationId="ribbon-ToggleSharing" ToolTipProperties.Text="{l:Tr Cmd_ToggleSharing, Suffix=' (Primary+Shift+J)'}">
+                                    <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleSharingCommand}" /></Border.GestureRecognizers>
+                                    <Grid>
+                                        <HorizontalStackLayout Spacing="6">
+                                            <shiny:MotionIconView Icon="activity" Color="{AppThemeBinding Light={StaticResource SubtleLight}, Dark={StaticResource SubtleDark}}" Trigger="Appear,Hover,Press" StrokeWidth="2" WidthRequest="16" HeightRequest="16" VerticalOptions="Center" />
+                                            <Label Text="{l:Tr Cmd_ToggleSharing}" Style="{StaticResource RibbonText}" VerticalTextAlignment="Center" />
+                                        </HorizontalStackLayout>
+                                        <Label Text=" "><Label.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleSharingCommand}" /></Label.GestureRecognizers></Label>
+                                    </Grid>
+                                </Border>
+                                </VerticalStackLayout>
+                            </HorizontalStackLayout>
+                            <Label Grid.Row="1" Text="{l:Tr Ribbon_Group_Share}" Style="{StaticResource RibbonGroupTitle}" />
                         </Grid>
                         <BoxView Style="{StaticResource RibbonDivider}" />
                         <Grid RowDefinitions="*,Auto" Padding="4,0">
@@ -1257,7 +1315,7 @@
         </Border>
 
         <!-- command line -->
-        <Grid Grid.Row="4" ColumnDefinitions="Auto,*,Auto" Padding="10,2,10,2" ColumnSpacing="6">
+        <Grid Grid.Row="4" ColumnDefinitions="Auto,*,Auto,Auto" Padding="10,2,10,2" ColumnSpacing="6">
             <Label Text="{Binding CommandPrompt}" FontFamily="{DynamicResource MonoFont}" FontSize="12" VerticalOptions="Center" LineBreakMode="HeadTruncation" MaximumWidthRequest="520" Style="{StaticResource Subtle}" />
             <Entry x:Name="CommandEntry" AutomationId="CommandLine"
                    Grid.Column="1"
@@ -1271,6 +1329,14 @@
                 <HorizontalStackLayout Spacing="5">
                     <ActivityIndicator IsRunning="{Binding Jobs.IsBusy}" IsVisible="{Binding Jobs.IsBusy}" HeightRequest="12" WidthRequest="12" Color="{StaticResource Accent}" VerticalOptions="Center" />
                     <Label Text="{Binding Jobs.Summary}" FontSize="12" VerticalTextAlignment="Center" />
+                </HorizontalStackLayout>
+            </Border>
+            <!-- folders being served - opens the Sharing window -->
+            <Border Grid.Column="3" Style="{StaticResource Chip}" IsVisible="{Binding Sharing.IsSharing}" AutomationId="SharingChip" ToolTipProperties.Text="{l:Tr Sharing_Chip, Suffix=' (Primary+Shift+J)'}" VerticalOptions="Center">
+                <Border.GestureRecognizers><TapGestureRecognizer Command="{Binding ToggleSharingCommand}" /></Border.GestureRecognizers>
+                <HorizontalStackLayout Spacing="5">
+                    <shiny:MotionIconView Icon="signal" Color="{StaticResource Accent}" IsPlaying="{Binding Sharing.HasTransfers}" WidthRequest="13" HeightRequest="13" VerticalOptions="Center" />
+                    <Label Text="{Binding Sharing.Summary}" FontSize="12" VerticalTextAlignment="Center" />
                 </HorizontalStackLayout>
             </Border>
         </Grid>

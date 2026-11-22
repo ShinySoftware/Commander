@@ -5,11 +5,19 @@ public partial class App : Application
     readonly AppSettings settings;
     readonly UpdateService updates;
     readonly QuitGuard quitGuard;
+    readonly SharingService sharing;
+    readonly IServiceProvider services;
     Window? updateWindow;
+    Window? sharingWindow;
+    Window? mainWindow;
     bool started;
 
-    public App(AppSettings settings, UpdateService updates, QuitGuard quitGuard, StringsLocalized strings)
+    public App(AppSettings settings, UpdateService updates, QuitGuard quitGuard, SharingService sharing, IServiceProvider services, StringsLocalized strings)
     {
+        this.sharing = sharing;
+        this.services = services;
+        // whatever an earlier run zipped or copied out for the share sheet
+        FileShareSheet.CleanUp();
         // before anything reads a string - the pages take their text as they are built
         Strings.ApplyLanguage(LanguageFor(settings));
         Strings.Initialize(strings);
@@ -66,6 +74,8 @@ public partial class App : Application
 #endif
         // closing while copies/moves are still running asks first
         this.quitGuard.Attach(window);
+        this.mainWindow = window;
+        window.Destroying += this.OnMainWindowDestroying;
         window.Created += (_, _) =>
         {
             if (this.started)
@@ -103,5 +113,81 @@ public partial class App : Application
         };
         this.updateWindow = window;
         this.OpenWindow(window);
+    }
+
+    /// <summary>
+    /// The Sharing window - one at a time, brought to the front when it's already open. With a folder, the Serve Folder
+    /// form opens for it.
+    /// </summary>
+    public void ShowSharing(string? servePath)
+    {
+        if (this.sharingWindow?.Page is SharingPage open)
+        {
+            if (servePath != null)
+                open.ViewModel.NewShare(servePath);
+            this.ActivateWindow(this.sharingWindow);
+            return;
+        }
+
+        var page = this.services.GetRequiredService<SharingPage>();
+        page.ViewModel.CurrentFolder = this.CurrentFolder;
+        if (servePath != null)
+            page.ViewModel.NewShare(servePath);
+
+        var window = new Window(page)
+        {
+            Title = L.Sharing_Title,
+            Width = 880,
+            Height = 860,
+            MinimumWidth = 820,
+            MinimumHeight = 480
+        };
+#if MACOS_APPKIT
+        // a compact titlebar with the content below it, like the main window
+        Microsoft.Maui.Platforms.MacOS.Platform.MacOSWindow.SetFullSizeContentView(window, false);
+        Microsoft.Maui.Platforms.MacOS.Platform.MacOSWindow.SetTitlebarStyle(window, Microsoft.Maui.Platforms.MacOS.Platform.MacOSTitlebarStyle.UnifiedCompact);
+        Microsoft.Maui.Platforms.MacOS.Platform.MacOSWindow.SetTitleVisibility(window, Microsoft.Maui.Platforms.MacOS.Platform.MacOSTitleVisibility.Visible);
+#endif
+        window.Destroying += this.OnSharingWindowDestroying;
+        this.sharingWindow = window;
+        this.OpenWindow(window);
+    }
+
+    /// <summary>The Sharing window, while it's open.</summary>
+    public Window? SharingWindow => this.sharingWindow;
+
+    /// <summary>Closes the Sharing window if it's open (the shares carry on).</summary>
+    public void CloseSharing()
+    {
+        if (this.sharingWindow is { } window)
+            this.CloseWindow(window);
+    }
+
+    Task StopSharingAsync() => this.sharing.DisposeAsync().AsTask();
+
+    string? CurrentFolder() => (this.mainWindow?.Page as Shell)?.CurrentPage?.BindingContext is MainViewModel main ? main.ActivePanel.Path : null;
+
+    void OnSharingWindowDestroying(object? sender, EventArgs e)
+    {
+        if (sender is Window window)
+            window.Destroying -= this.OnSharingWindowDestroying;
+        if (this.sharingWindow == sender)
+            this.sharingWindow = null;
+    }
+
+    /// <summary>The app is closing: the Sharing window goes with it, and every share ends - nothing is restored next time.</summary>
+    void OnMainWindowDestroying(object? sender, EventArgs e)
+    {
+        if (sender is Window window)
+            window.Destroying -= this.OnMainWindowDestroying;
+
+        if (this.sharingWindow is { } sharingWindow)
+            this.CloseWindow(sharingWindow);
+        if (this.updateWindow is { } updateWindow)
+            this.CloseWindow(updateWindow);
+
+        // off the UI thread (nothing it awaits may need this thread back), and bounded - the server drains for at most a
+        // few seconds
+        Task.Run(this.StopSharingAsync).Wait(TimeSpan.FromSeconds(4));
     }
 }

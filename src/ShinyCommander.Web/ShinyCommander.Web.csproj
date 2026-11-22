@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+    <!--
+        The page a visitor opens for a shared folder. It is not referenced by anything: ShinyCommander.Share publishes
+        it, zips the output and embeds the zip, and the share server serves it from there (see that project).
+    -->
+    <PropertyGroup>
+        <TargetFramework>$(BaseTargetFramework)</TargetFramework>
+        <RootNamespace>ShinyCommander.Web</RootNamespace>
+        <InvariantGlobalization>true</InvariantGlobalization>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
+        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" PrivateAssets="all" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- the wire records, shared with the server -->
+        <Compile Include="..\ShinyCommander.Share\Contracts\ShareContracts.cs" Link="Contracts\ShareContracts.cs" />
+    </ItemGroup>
+</Project>

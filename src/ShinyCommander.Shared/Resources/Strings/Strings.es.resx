@@ -856,11 +856,11 @@ Existente: {3} bytes  {4}</value>
     <value>Tareas en curso</value>
   </data>
   <data name="Quit_Message" xml:space="preserve">
-    <value>{0} tarea(s) en segundo plano no han terminado:
+    <value>{0} tarea(s) o transferencia(s) no han terminado:
 
 {1}
 
-Salir las detiene a medias. Lo que ya se copió, movió o eliminó se queda así.</value>
+Salir las detiene a medias y termina todas las carpetas compartidas. Lo que ya se copió, movió o eliminó se queda así.</value>
   </data>
   <data name="Quit_StopAndQuit" xml:space="preserve">
     <value>Detener y salir</value>
@@ -2336,5 +2336,416 @@ Inténtalo de nuevo.</value>
   </data>
   <data name="Settings_ChooseColumns" xml:space="preserve">
     <value>Columnas y su orden…</value>
+  </data>
+  <data name="Cmd_Share" xml:space="preserve">
+    <value>Compartir</value>
+  </data>
+  <data name="Cmd_ServeFolder" xml:space="preserve">
+    <value>Servir carpeta</value>
+  </data>
+  <data name="Cmd_ToggleSharing" xml:space="preserve">
+    <value>Compartidos</value>
+  </data>
+  <data name="Ribbon_Group_Share" xml:space="preserve">
+    <value>Compartir</value>
+  </data>
+  <data name="Key_Share" xml:space="preserve">
+    <value>Compartir la selección (hoja para compartir)</value>
+  </data>
+  <data name="Key_ServeFolder" xml:space="preserve">
+    <value>Servir una carpeta por HTTP / WebDAV</value>
+  </data>
+  <data name="Key_Sharing" xml:space="preserve">
+    <value>Ventana Compartidos</value>
+  </data>
+  <data name="Quit_Transfer" xml:space="preserve">
+    <value>{0} - {1}</value>
+  </data>
+  <data name="Share_Failed" xml:space="preserve">
+    <value>No se pudo abrir la hoja para compartir: {0}</value>
+  </data>
+  <data name="Share_NotSupported" xml:space="preserve">
+    <value>Compartir no está disponible en este sistema.</value>
+  </data>
+  <data name="Share_Preparing" xml:space="preserve">
+    <value>Preparando {0} para compartir</value>
+  </data>
+  <data name="Sharing_AccessDropBox" xml:space="preserve">
+    <value>Buzón (solo subir)</value>
+  </data>
+  <data name="Sharing_AccessFull" xml:space="preserve">
+    <value>Acceso completo</value>
+  </data>
+  <data name="Sharing_AccessReadOnly" xml:space="preserve">
+    <value>Solo descargar</value>
+  </data>
+  <data name="Sharing_AccessReadWrite" xml:space="preserve">
+    <value>Descargar y subir</value>
+  </data>
+  <data name="Sharing_ActDelete" xml:space="preserve">
+    <value>Eliminó {0}</value>
+  </data>
+  <data name="Sharing_ActDownload" xml:space="preserve">
+    <value>Descargó {0}</value>
+  </data>
+  <data name="Sharing_ActFolder" xml:space="preserve">
+    <value>Creó la carpeta {0}</value>
+  </data>
+  <data name="Sharing_ActKey" xml:space="preserve">
+    <value>Dio la clave de {0}</value>
+  </data>
+  <data name="Sharing_ActRefused" xml:space="preserve">
+    <value>Rechazado para {0}: {1}</value>
+  </data>
+  <data name="Sharing_ActRename" xml:space="preserve">
+    <value>Renombró {0} a {1}</value>
+  </data>
+  <data name="Sharing_ActUpload" xml:space="preserve">
+    <value>Subió {0}</value>
+  </data>
+  <data name="Sharing_ActVisit" xml:space="preserve">
+    <value>Abrió {0}</value>
+  </data>
+  <data name="Sharing_ActWrongKey" xml:space="preserve">
+    <value>Clave incorrecta para {0}</value>
+  </data>
+  <data name="Sharing_Activity" xml:space="preserve">
+    <value>Actividad</value>
+  </data>
+  <data name="Sharing_Ago" xml:space="preserve">
+    <value>hace {0}</value>
+  </data>
+  <data name="Sharing_BandwidthUnlimited" xml:space="preserve">
+    <value>Sin límite</value>
+  </data>
+  <data name="Sharing_Block" xml:space="preserve">
+    <value>Bloquear</value>
+  </data>
+  <data name="Sharing_Blocked" xml:space="preserve">
+    <value>Bloqueado</value>
+  </data>
+  <data name="Sharing_BytesOf" xml:space="preserve">
+    <value>{0} de {1}</value>
+  </data>
+  <data name="Sharing_Chip" xml:space="preserve">
+    <value>Carpetas compartidas</value>
+  </data>
+  <data name="Sharing_ChipShared" xml:space="preserve">
+    <value>{0} compartida(s)</value>
+  </data>
+  <data name="Sharing_ChipTransfers" xml:space="preserve">
+    <value>{0} en curso</value>
+  </data>
+  <data name="Sharing_Clear" xml:space="preserve">
+    <value>Borrar</value>
+  </data>
+  <data name="Sharing_ClientDetail" xml:space="preserve">
+    <value>{0} · {1} solicitudes</value>
+  </data>
+  <data name="Sharing_Clients" xml:space="preserve">
+    <value>Quién se conecta</value>
+  </data>
+  <data name="Sharing_Copied" xml:space="preserve">
+    <value>Copiado</value>
+  </data>
+  <data name="Sharing_Copy" xml:space="preserve">
+    <value>Copiar</value>
+  </data>
+  <data name="Sharing_CopyDavTip" xml:space="preserve">
+    <value>Conéctate desde el Finder (⌘K), el Explorador de Windows u otro ShinyCommander</value>
+  </data>
+  <data name="Sharing_CopyLinkTip" xml:space="preserve">
+    <value>El enlace, con la clave si la hay</value>
+  </data>
+  <data name="Sharing_DownloadsLeft" xml:space="preserve">
+    <value>Quedan {0} descargas</value>
+  </data>
+  <data name="Sharing_Edit" xml:space="preserve">
+    <value>Editar</value>
+  </data>
+  <data name="Sharing_Ended" xml:space="preserve">
+    <value>{0} ya no se comparte: caducó o alcanzó su límite de descargas.</value>
+  </data>
+  <data name="Sharing_Expiry1d" xml:space="preserve">
+    <value>Después de 1 día</value>
+  </data>
+  <data name="Sharing_Expiry1h" xml:space="preserve">
+    <value>Después de 1 hora</value>
+  </data>
+  <data name="Sharing_Expiry4h" xml:space="preserve">
+    <value>Después de 4 horas</value>
+  </data>
+  <data name="Sharing_Expiry7d" xml:space="preserve">
+    <value>Después de 7 días</value>
+  </data>
+  <data name="Sharing_ExpiryNever" xml:space="preserve">
+    <value>Cuando lo detenga</value>
+  </data>
+  <data name="Sharing_FirewallLinux" xml:space="preserve">
+    <value>Otros en tu red pueden abrir los enlaces de abajo. Si no pueden, puede que el cortafuegos bloquee el puerto: permítelo (por ejemplo: sudo ufw allow 8080/tcp).</value>
+  </data>
+  <data name="Sharing_FirewallMac" xml:space="preserve">
+    <value>Otros en tu red pueden abrir los enlaces de abajo. Si macOS pregunta si ShinyCommander puede aceptar conexiones entrantes, elige Permitir; si no, nadie más podrá conectarse.</value>
+  </data>
+  <data name="Sharing_FirewallWindows" xml:space="preserve">
+    <value>Otros en tu red pueden abrir los enlaces de abajo. Si el Firewall de Windows pregunta por ShinyCommander, permítelo en redes privadas; si no, nadie más podrá conectarse.</value>
+  </data>
+  <data name="Sharing_FormAccess" xml:space="preserve">
+    <value>Los visitantes pueden</value>
+  </data>
+  <data name="Sharing_FormAdvertise" xml:space="preserve">
+    <value>Visible en la red</value>
+  </data>
+  <data name="Sharing_FormAdvertiseDesc" xml:space="preserve">
+    <value>Aparece en el Finder y en otros ShinyCommander (Bonjour)</value>
+  </data>
+  <data name="Sharing_FormBadDownloads" xml:space="preserve">
+    <value>El límite de descargas debe ser un número entero mayor que 0.</value>
+  </data>
+  <data name="Sharing_FormBandwidth" xml:space="preserve">
+    <value>Límite de velocidad</value>
+  </data>
+  <data name="Sharing_FormEditTitle" xml:space="preserve">
+    <value>CAMBIAR ESTE COMPARTIDO</value>
+  </data>
+  <data name="Sharing_FormExpiry" xml:space="preserve">
+    <value>Dejar de compartir</value>
+  </data>
+  <data name="Sharing_FormFolder" xml:space="preserve">
+    <value>Carpeta</value>
+  </data>
+  <data name="Sharing_FormHidden" xml:space="preserve">
+    <value>Incluir archivos ocultos</value>
+  </data>
+  <data name="Sharing_FormMaxDownloads" xml:space="preserve">
+    <value>o tras</value>
+  </data>
+  <data name="Sharing_FormModify" xml:space="preserve">
+    <value>También renombrar y eliminar</value>
+  </data>
+  <data name="Sharing_FormNewKey" xml:space="preserve">
+    <value>Nueva clave</value>
+  </data>
+  <data name="Sharing_FormNewTitle" xml:space="preserve">
+    <value>COMPARTIR UNA CARPETA</value>
+  </data>
+  <data name="Sharing_FormNoFolder" xml:space="preserve">
+    <value>Esa carpeta no existe.</value>
+  </data>
+  <data name="Sharing_FormNoKey" xml:space="preserve">
+    <value>Escribe una clave o desactívala.</value>
+  </data>
+  <data name="Sharing_FormNoLimit" xml:space="preserve">
+    <value>descargas</value>
+  </data>
+  <data name="Sharing_FormStart" xml:space="preserve">
+    <value>Empezar a compartir</value>
+  </data>
+  <data name="Sharing_FormUseKey" xml:space="preserve">
+    <value>Pedir una clave</value>
+  </data>
+  <data name="Sharing_GotIt" xml:space="preserve">
+    <value>Entendido</value>
+  </data>
+  <data name="Sharing_Idle" xml:space="preserve">
+    <value>Nada en curso</value>
+  </data>
+  <data name="Sharing_JustNow" xml:space="preserve">
+    <value>ahora mismo</value>
+  </data>
+  <data name="Sharing_KeepAwakeOff" xml:space="preserve">
+    <value>Dejar que se suspenda</value>
+  </data>
+  <data name="Sharing_KeepAwakeServing" xml:space="preserve">
+    <value>Mientras haya algo compartido</value>
+  </data>
+  <data name="Sharing_KeepAwakeTransfers" xml:space="preserve">
+    <value>Mientras haya transferencias</value>
+  </data>
+  <data name="Sharing_Key" xml:space="preserve">
+    <value>Clave</value>
+  </data>
+  <data name="Sharing_Left" xml:space="preserve">
+    <value>quedan {0}</value>
+  </data>
+  <data name="Sharing_Link" xml:space="preserve">
+    <value>Enlace</value>
+  </data>
+  <data name="Sharing_LocalOnly" xml:space="preserve">
+    <value>Sin clave, solo accesible en esta red, no desde la dirección pública.</value>
+  </data>
+  <data name="Sharing_NoActivity" xml:space="preserve">
+    <value>Aquí aparecen las visitas, claves, descargas y subidas.</value>
+  </data>
+  <data name="Sharing_NoClients" xml:space="preserve">
+    <value>Nadie se ha conectado todavía.</value>
+  </data>
+  <data name="Sharing_NoShares" xml:space="preserve">
+    <value>No hay nada compartido. Usa Servir carpeta (⌘⇧P / Ctrl+Mayús+P) en una carpeta, o Compartir una carpeta arriba.</value>
+  </data>
+  <data name="Sharing_NoTransfers" xml:space="preserve">
+    <value>Las descargas y subidas aparecen aquí con su velocidad y el tiempo restante.</value>
+  </data>
+  <data name="Sharing_NotRunning" xml:space="preserve">
+    <value>Detenido</value>
+  </data>
+  <data name="Sharing_NothingShared" xml:space="preserve">
+    <value>El servidor se inicia cuando compartes una carpeta.</value>
+  </data>
+  <data name="Sharing_OnlyLocal" xml:space="preserve">
+    <value>Solo se pueden servir carpetas de este equipo.</value>
+  </data>
+  <data name="Sharing_Open" xml:space="preserve">
+    <value>Abrir</value>
+  </data>
+  <data name="Sharing_PillAdvertised" xml:space="preserve">
+    <value>En la red</value>
+  </data>
+  <data name="Sharing_PillKey" xml:space="preserve">
+    <value>Clave</value>
+  </data>
+  <data name="Sharing_PillNoKey" xml:space="preserve">
+    <value>Sin clave</value>
+  </data>
+  <data name="Sharing_PillPublic" xml:space="preserve">
+    <value>Público</value>
+  </data>
+  <data name="Sharing_PublicAddress" xml:space="preserve">
+    <value>DIRECCIÓN PÚBLICA (PINGGY.IO)</value>
+  </data>
+  <data name="Sharing_QrCode" xml:space="preserve">
+    <value>Código QR</value>
+  </data>
+  <data name="Sharing_Running" xml:space="preserve">
+    <value>En marcha en el puerto {0}</value>
+  </data>
+  <data name="Sharing_Settings" xml:space="preserve">
+    <value>Ajustes</value>
+  </data>
+  <data name="Sharing_SettingsBadPort" xml:space="preserve">
+    <value>El puerto debe estar entre 1024 y 65535.</value>
+  </data>
+  <data name="Sharing_SettingsForwarded" xml:space="preserve">
+    <value>Detrás de un proxy</value>
+  </data>
+  <data name="Sharing_SettingsForwardedDesc" xml:space="preserve">
+    <value>Confiar en X-Forwarded-*: solo con un proxy inverso propio</value>
+  </data>
+  <data name="Sharing_SettingsKeepAwake" xml:space="preserve">
+    <value>Mantener el equipo activo</value>
+  </data>
+  <data name="Sharing_SettingsNotify" xml:space="preserve">
+    <value>Avisarme de las subidas</value>
+  </data>
+  <data name="Sharing_SettingsPort" xml:space="preserve">
+    <value>Puerto</value>
+  </data>
+  <data name="Sharing_SettingsPortDesc" xml:space="preserve">
+    <value>Si está ocupado se usa el siguiente libre</value>
+  </data>
+  <data name="Sharing_SettingsTitle" xml:space="preserve">
+    <value>AJUSTES DE COMPARTIR</value>
+  </data>
+  <data name="Sharing_SettingsToken" xml:space="preserve">
+    <value>Token de pinggy.io</value>
+  </data>
+  <data name="Sharing_SettingsTokenDesc" xml:space="preserve">
+    <value>Sin token, una dirección pública dura una hora y cambia cada vez. Se guarda en el llavero.</value>
+  </data>
+  <data name="Sharing_SettingsTokenPlaceholder" xml:space="preserve">
+    <value>Opcional</value>
+  </data>
+  <data name="Sharing_ShareFolder" xml:space="preserve">
+    <value>Compartir una carpeta</value>
+  </data>
+  <data name="Sharing_ShareStats" xml:space="preserve">
+    <value>Descargado {0} ({1} archivos) · Subido {2} ({3} archivos)</value>
+  </data>
+  <data name="Sharing_Shares" xml:space="preserve">
+    <value>CARPETAS COMPARTIDAS</value>
+  </data>
+  <data name="Sharing_Speed" xml:space="preserve">
+    <value>{0} en curso · {1}</value>
+  </data>
+  <data name="Sharing_Start" xml:space="preserve">
+    <value>Iniciar</value>
+  </data>
+  <data name="Sharing_StateDone" xml:space="preserve">
+    <value>Hecho</value>
+  </data>
+  <data name="Sharing_StateDownloading" xml:space="preserve">
+    <value>Descargando</value>
+  </data>
+  <data name="Sharing_StateFailed" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Sharing_StateStopped" xml:space="preserve">
+    <value>Detenido</value>
+  </data>
+  <data name="Sharing_StateUploading" xml:space="preserve">
+    <value>Subiendo</value>
+  </data>
+  <data name="Sharing_StopAll" xml:space="preserve">
+    <value>Detener todo</value>
+  </data>
+  <data name="Sharing_StopSharing" xml:space="preserve">
+    <value>Detener</value>
+  </data>
+  <data name="Sharing_Stopped" xml:space="preserve">
+    <value>Detenido: no hay nada compartido</value>
+  </data>
+  <data name="Sharing_ThisNetwork" xml:space="preserve">
+    <value>ESTA RED</value>
+  </data>
+  <data name="Sharing_Title" xml:space="preserve">
+    <value>Compartidos</value>
+  </data>
+  <data name="Sharing_Totals" xml:space="preserve">
+    <value>Descargado {0} ({1} archivos) · Subido {2} ({3} archivos)</value>
+  </data>
+  <data name="Sharing_TransferWhere" xml:space="preserve">
+    <value>{0} · {1}</value>
+  </data>
+  <data name="Sharing_Transfers" xml:space="preserve">
+    <value>TRANSFERENCIAS</value>
+  </data>
+  <data name="Sharing_TunnelClose" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="Sharing_TunnelConnected" xml:space="preserve">
+    <value>Cualquiera con un enlace puede llegar a los compartidos que tienen clave.</value>
+  </data>
+  <data name="Sharing_TunnelConnecting" xml:space="preserve">
+    <value>Conectando…</value>
+  </data>
+  <data name="Sharing_TunnelFailed" xml:space="preserve">
+    <value>No se pudo abrir la dirección pública.</value>
+  </data>
+  <data name="Sharing_TunnelKeyless" xml:space="preserve">
+    <value>Los compartidos sin clave se quedan en esta red.</value>
+  </data>
+  <data name="Sharing_TunnelOff" xml:space="preserve">
+    <value>Desactivada: abre una para compartir fuera de esta red.</value>
+  </data>
+  <data name="Sharing_TunnelOffAnonymous" xml:space="preserve">
+    <value>Desactivada: abre una para compartir fuera de esta red (dura una hora sin token de pinggy.io).</value>
+  </data>
+  <data name="Sharing_TunnelOpen" xml:space="preserve">
+    <value>Abrir dirección pública</value>
+  </data>
+  <data name="Sharing_TunnelReconnecting" xml:space="preserve">
+    <value>Reconectando: la dirección cambiará…</value>
+  </data>
+  <data name="Sharing_Unblock" xml:space="preserve">
+    <value>Desbloquear</value>
+  </data>
+  <data name="Sharing_Until" xml:space="preserve">
+    <value>hasta las {0}</value>
+  </data>
+  <data name="Sharing_Uploaded" xml:space="preserve">
+    <value>{0} se subió a {1}</value>
+  </data>
+  <data name="Sharing_ViaTunnel" xml:space="preserve">
+    <value>público</value>
   </data>
 </root>

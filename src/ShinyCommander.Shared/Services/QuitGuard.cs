@@ -10,19 +10,21 @@ public class QuitGuard
 {
     readonly JobQueue jobs;
     readonly IAppDialogs dialogs;
+    readonly SharingService sharing;
     bool confirmed;
     bool asking;
 
-    public QuitGuard(JobQueue jobs, IAppDialogs dialogs)
+    public QuitGuard(JobQueue jobs, IAppDialogs dialogs, SharingService sharing)
     {
         this.jobs = jobs;
         this.dialogs = dialogs;
+        this.sharing = sharing;
         // a job started after "quit anyway" was answered (and the quit didn't happen) deserves its own question
         jobs.Started += (_, _) => this.confirmed = false;
     }
 
     /// <summary>True when the app may close right now without asking.</summary>
-    public bool CanQuit => this.confirmed || this.jobs.RunningCount == 0;
+    public bool CanQuit => this.confirmed || (this.jobs.RunningCount == 0 && this.sharing.ActiveTransfers == 0);
 
     /// <summary>
     /// Asks whether to stop the running jobs and quit. On yes the jobs are stopped (and given a moment to clean up
@@ -40,8 +42,11 @@ public class QuitGuard
         this.asking = true;
         try
         {
-            var running = this.jobs.Jobs.Where(x => x.IsRunning).ToList();
-            var list = String.Join("\n", running.Take(5).Select(x => "•  " + x.Title));
+            // jobs and people downloading or uploading from a shared folder - quitting stops both
+            var running = this.jobs.Jobs.Where(x => x.IsRunning).Select(x => x.Title)
+                .Concat(this.sharing.Monitor.Running.Select(x => L.Quit_TransferFormat(x.Name, x.ClientIp)))
+                .ToList();
+            var list = String.Join("\n", running.Take(5).Select(x => "•  " + x));
             if (running.Count > 5)
                 list += "\n" + L.Job_AndMoreFormat(running.Count - 5);
 
@@ -53,6 +58,7 @@ public class QuitGuard
             if (!ok)
                 return false;
 
+            this.sharing.Monitor.CancelAll();
             await this.jobs.StopAllAndWait(TimeSpan.FromSeconds(3));
             this.confirmed = true;
             return true;

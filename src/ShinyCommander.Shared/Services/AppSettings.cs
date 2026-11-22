@@ -104,6 +104,19 @@ public partial class AppSettings
     /// <summary>The release "Don't show again" was ticked for - a newer one asks again.</summary>
     [Bind] public partial string? SkippedUpdate { get; set; }
 
+    /// <summary>Sharing (the Sharing window): the port, X-Forwarded-* trust, keep-awake ("Off" / "Transfers" / "Serving"),
+    /// a toast per finished upload, and the answers the Serve Folder form starts from. The shares themselves are never
+    /// saved - they end when the app closes. The pinggy token is in the keychain (SharingService.TunnelTokenKey).</summary>
+    [Bind] public partial int SharePort { get; set; }
+    [Bind] public partial bool ShareTrustForwardedHeaders { get; set; }
+    [Bind] public partial string? ShareKeepAwake { get; set; }
+    [Bind] public partial bool ShareNotifyUploads { get; set; }
+    [Bind] public partial bool ShareFirewallHintSeen { get; set; }
+    [Bind] public partial string? ShareLastAccess { get; set; }
+    [Bind] public partial bool ShareLastAllowModify { get; set; }
+    [Bind] public partial bool ShareLastUseKey { get; set; }
+    [Bind] public partial bool ShareLastAdvertise { get; set; }
+
     [Bind] public partial bool HasInitialized { get; set; }
 
     public void EnsureDefaults()

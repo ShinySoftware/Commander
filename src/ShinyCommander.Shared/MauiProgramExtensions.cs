@@ -75,6 +75,10 @@ public static class MauiProgramExtensions
             .AddFilePreviewer<PowerPointFilePreviewer>();
 #endif
 
+        // the Sharing window: one view model for the app's life (its QR toggles and form survive closing the window)
+        builder.Services.AddSingleton<SharingViewModel>();
+        builder.Services.AddTransient<SharingPage>();
+
         builder.Services.AddSingleton<FileColumns>();
         builder.Services.AddBuiltInFileColumns();
         // for UpdateService's hourly check

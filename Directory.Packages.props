@@ -40,6 +40,16 @@
         <PackageVersion Include="AWSSDK.S3" Version="4.1.0" />
         <PackageVersion Include="Azure.Storage.Blobs" Version="12.30.1" />
         <PackageVersion Include="Shiny.Net.Discovery" Version="6.5.2" />
+        <!-- sharing a folder over HTTP / WebDAV (ShinyCommander.Share) and its browser client (ShinyCommander.Web) -->
+        <PackageVersion Include="Shiny.Net.HttpServer" Version="2.2.1" />
+        <PackageVersion Include="Shiny.Net.HttpServer.WebDav" Version="2.2.1" />
+        <PackageVersion Include="Shiny.Net.HttpServer.Tus" Version="2.2.1" />
+        <PackageVersion Include="Shiny.Net.HttpServer.Ssh" Version="2.2.1" />
+        <PackageVersion Include="Shiny.Net.HttpServer.Discovery" Version="2.2.1" />
+        <PackageVersion Include="Shiny.Net.HttpServer.Testing" Version="2.2.1" />
+        <PackageVersion Include="QRCoder" Version="1.9.0" />
+        <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.11" />
+        <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.11" />
         <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
         <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
         <PackageVersion Include="Microsoft.Extensions.Localization" Version="10.0.0" />
