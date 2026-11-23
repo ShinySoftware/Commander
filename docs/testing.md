@@ -48,7 +48,7 @@ doesn't fight your own build or the copy of the app you're using.
 ### How it works
 
 ```
- test process (net10.0, xunit v3)                     ShinyCommander.app (Debug, SHINYCOMMANDER_UITEST=1)
+ test process (net11.0, xunit v3)                     ShinyCommander.app (Debug, SHINYCOMMANDER_UITEST=1)
  ─────────────────────────────────                    ──────────────────────────────────────────────────
  AppFixture ── launch / attach (.uitest-app.json) ──▶  MAUI DevFlow agent :102xx
  AgentClient (one client = one mutation lease) ──────▶  ├─ ui/* : tree, tap, fill, key, screenshot

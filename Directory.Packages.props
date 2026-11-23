@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <MauiVersion>10.0.110</MauiVersion>
+        <MauiVersion>11.0.10</MauiVersion>
         <MauiLabsVersion>0.1.0-preview.14.26555.2</MauiLabsVersion>
         <ShinyControlsVersion>2.5.0</ShinyControlsVersion>
     </PropertyGroup>
@@ -20,17 +20,17 @@
         <PackageVersion Include="Shiny.Maui.Controls.MediaElement" Version="$(ShinyControlsVersion)" />
         <PackageVersion Include="Shiny.Maui.Controls.MediaElement.Linux" Version="$(ShinyControlsVersion)" />
         <PackageVersion Include="Shiny.Maui.Controls.Office" Version="$(ShinyControlsVersion)" />
-        <PackageVersion Include="Shiny.Maui.Shell" Version="7.0.3" />
+        <PackageVersion Include="Shiny.Maui.Shell" Version="8.0.0" />
         <PackageVersion Include="Shiny.Mediator.Maui" Version="6.12.0" />
-        <PackageVersion Include="Shiny.Extensions.DependencyInjection" Version="6.0.1" />
-        <PackageVersion Include="Shiny.Extensions.Stores" Version="6.0.1" />
+        <PackageVersion Include="Shiny.Extensions.DependencyInjection" Version="6.0.2" />
+        <PackageVersion Include="Shiny.Extensions.Stores" Version="6.0.2" />
         <PackageVersion Include="Shiny.Extensions.Localization.Generator" Version="2.1.2" />
 
         <!-- misc -->
         <PackageVersion Include="SharpCompress" Version="1.0.0" />
         <!-- editors: lossless EXIF writes in JPEGs, and SQLite databases -->
         <PackageVersion Include="ExifLibNet" Version="2.1.4" />
-        <PackageVersion Include="Microsoft.Data.Sqlite" Version="10.0.15" />
+        <PackageVersion Include="Microsoft.Data.Sqlite" Version="11.0.0" />
         <!-- custom columns: duration, dimensions and tags of audio, video and pictures (LGPL-2.1, used unmodified) -->
         <PackageVersion Include="TagLibSharp" Version="2.3.0" />
 
@@ -39,20 +39,20 @@
         <PackageVersion Include="FluentFTP" Version="55.1.0" />
         <PackageVersion Include="AWSSDK.S3" Version="4.1.0" />
         <PackageVersion Include="Azure.Storage.Blobs" Version="12.30.1" />
-        <PackageVersion Include="Shiny.Net.Discovery" Version="6.5.2" />
+        <PackageVersion Include="Shiny.Net.Discovery" Version="7.0.0" />
         <!-- sharing a folder over HTTP / WebDAV (ShinyCommander.Share) and its browser client (ShinyCommander.Web) -->
-        <PackageVersion Include="Shiny.Net.HttpServer" Version="2.2.1" />
-        <PackageVersion Include="Shiny.Net.HttpServer.WebDav" Version="2.2.1" />
-        <PackageVersion Include="Shiny.Net.HttpServer.Tus" Version="2.2.1" />
-        <PackageVersion Include="Shiny.Net.HttpServer.Ssh" Version="2.2.1" />
-        <PackageVersion Include="Shiny.Net.HttpServer.Discovery" Version="2.2.1" />
-        <PackageVersion Include="Shiny.Net.HttpServer.Testing" Version="2.2.1" />
+        <PackageVersion Include="Shiny.Net.HttpServer" Version="3.0.0" />
+        <PackageVersion Include="Shiny.Net.HttpServer.WebDav" Version="3.0.0" />
+        <PackageVersion Include="Shiny.Net.HttpServer.Tus" Version="3.0.0" />
+        <PackageVersion Include="Shiny.Net.HttpServer.Ssh" Version="3.0.0" />
+        <PackageVersion Include="Shiny.Net.HttpServer.Discovery" Version="3.0.0" />
+        <PackageVersion Include="Shiny.Net.HttpServer.Testing" Version="3.0.0" />
         <PackageVersion Include="QRCoder" Version="1.9.0" />
-        <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="10.0.11" />
-        <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="10.0.11" />
+        <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly" Version="11.0.0" />
+        <PackageVersion Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="11.0.0" />
         <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-        <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
-        <PackageVersion Include="Microsoft.Extensions.Localization" Version="10.0.0" />
+        <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="11.0.0" />
+        <PackageVersion Include="Microsoft.Extensions.Localization" Version="11.0.0" />
         <PackageVersion Include="Microsoft.Maui.DevFlow.Agent" Version="$(MauiLabsVersion)" />
         <PackageVersion Include="Microsoft.Maui.DevFlow.Agent.Gtk" Version="$(MauiLabsVersion)" />
         <PackageVersion Include="Microsoft.Maui.DevFlow.Client" Version="$(MauiLabsVersion)" />

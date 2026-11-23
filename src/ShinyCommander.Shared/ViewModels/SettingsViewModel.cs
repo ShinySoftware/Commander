@@ -1,7 +1,7 @@
 namespace ShinyCommander.ViewModels;
 
 [ShellMap<SettingsPage>("Settings")]
-public partial class SettingsViewModel(AppSettings settings, UpdateService updates, INavigator navigator, IAppDialogs dialogs, FilePreviewers previewers, PreviewPaneViewModel preview, FileColumns fileColumns, FolderSetups folderSetups) : ObservableObject
+public partial class SettingsViewModel(AppSettings settings, KeepAwakeService keepAwake, UpdateService updates, INavigator navigator, IAppDialogs dialogs, FilePreviewers previewers, PreviewPaneViewModel preview, FileColumns fileColumns, FolderSetups folderSetups) : ObservableObject
 {
     /// <summary>The folders with their own columns, sort and view mode; tapping one offers to forget it.</summary>
     public ObservableCollection<FolderSetupItem> FolderSetupItems => this.folderSetupItems ??= new(folderSetups.All.Select(x => new FolderSetupItem(x, fileColumns, this.ForgetFolderSetupCommand)));
@@ -121,6 +121,19 @@ public partial class SettingsViewModel(AppSettings settings, UpdateService updat
         {
             if (Int32.TryParse(value, out var v))
                 settings.ViewerFontSize = v;
+            this.OnPropertyChanged();
+        }
+    }
+
+    /// <summary>A KeepAwakePolicy name - the radio group's value.</summary>
+    public string KeepAwake
+    {
+        get => keepAwake.Policy.ToString();
+        set
+        {
+            if (!Enum.TryParse<KeepAwakePolicy>(value, out var policy))
+                return;
+            keepAwake.Policy = policy;
             this.OnPropertyChanged();
         }
     }

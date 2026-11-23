@@ -4,7 +4,7 @@ using Shiny.Maui.Controls.Toast;
 
 namespace ShinyCommander.Services;
 
-public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThread mainThread) : IAppDialogs
+public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster) : IAppDialogs
 {
     public event EventHandler? DialogClosed;
 
@@ -24,7 +24,7 @@ public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThre
     {
         try
         {
-            return await mainThread.InvokeOnMainThreadAsync(() =>
+            return await MainThread.InvokeOnMainThreadAsync(() =>
             {
                 this.openDialogs++;
                 this.AcceptClicks(0);
@@ -33,7 +33,7 @@ public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThre
         }
         finally
         {
-            mainThread.BeginInvokeOnMainThread(() =>
+            MainThread.BeginInvokeOnMainThread(() =>
             {
                 this.openDialogs--;
                 if (this.openDialogs == 0)
@@ -189,7 +189,7 @@ public class ShinyAppDialogs(IDialogService dialogs, IToaster toaster, IMainThre
     }
 
     public Task Toast(string message, ToastKind kind = ToastKind.Info)
-        => mainThread.InvokeOnMainThreadAsync(async () =>
+        => MainThread.InvokeOnMainThreadAsync(async () =>
         {
             IDisposable _ = kind switch
             {

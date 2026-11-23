@@ -16,7 +16,7 @@
 
         <!-- Apple silicon only. Left unset, a Release build compiles both architectures and lipos them into one
              universal bundle, and the osx-arm64 folder is an unsigned intermediate. The bundle to ship is then
-             bin/Release/net10.0-macos/osx-arm64/ShinyCommander.app; publish without -o, which splits it. -->
+             bin/Release/net11.0-macos/osx-arm64/ShinyCommander.app; publish without -o, which splits it. -->
         <RuntimeIdentifier>osx-arm64</RuntimeIdentifier>
     </PropertyGroup>
 

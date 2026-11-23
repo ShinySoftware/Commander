@@ -930,6 +930,21 @@ Salir las detiene a medias y termina todas las carpetas compartidas. Lo que ya s
   <data name="Settings_UseTrashDesc" xml:space="preserve">
     <value>Mayús+F8 siempre elimina de forma permanente</value>
   </data>
+  <data name="Settings_KeepAwake" xml:space="preserve">
+    <value>Mantener activo</value>
+  </data>
+  <data name="Settings_KeepAwakeDesc" xml:space="preserve">
+    <value>Evita que el equipo se suspenda mientras se ejecutan copias, movimientos y otras tareas, o las transferencias de una carpeta compartida. La pantalla puede apagarse igualmente.</value>
+  </data>
+  <data name="Settings_KeepAwakePlatform" xml:space="preserve">
+    <value>Predeterminado del sistema</value>
+  </data>
+  <data name="Settings_KeepAwakePluggedIn" xml:space="preserve">
+    <value>Conectado a la corriente</value>
+  </data>
+  <data name="Settings_KeepAwakeAlways" xml:space="preserve">
+    <value>Incluso con batería</value>
+  </data>
   <data name="Settings_ExtractPerArchive" xml:space="preserve">
     <value>Extraer cada archivo comprimido en su propia carpeta</value>
   </data>

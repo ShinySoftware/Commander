@@ -16,7 +16,6 @@ public partial class MainViewModel : ObservableObject,
     readonly IAppDialogs dialogs;
     readonly INavigator navigator;
     readonly IMediator mediator;
-    readonly IMainThread mainThread;
     readonly Shiny.Maui.Controls.IKeyboardShortcutService shortcuts;
     readonly ColumnSet columns;
     readonly QuitGuard quitGuard;
@@ -39,7 +38,6 @@ public partial class MainViewModel : ObservableObject,
         IAppDialogs dialogs,
         INavigator navigator,
         IMediator mediator,
-        IMainThread mainThread,
         Shiny.Maui.Controls.IKeyboardShortcutService shortcuts,
         ColumnSet columns,
         PaneToolbar toolbar,
@@ -80,14 +78,13 @@ public partial class MainViewModel : ObservableObject,
         this.dialogs = dialogs;
         this.navigator = navigator;
         this.mediator = mediator;
-        this.mainThread = mainThread;
-        this.writeBack.Saved += (_, e) => this.mainThread.BeginInvokeOnMainThread(async () =>
+        this.writeBack.Saved += (_, e) => MainThread.BeginInvokeOnMainThread(async () =>
         {
             // a server's folder (uploads), or an archive file (and the folder it's in)
             await this.dialogs.Toast(L.Main_ArchiveSavedFormat(Path.GetFileName(e.Key), VirtualFileSystem.GetName(e.ArchiveFile)), ToastKind.Success);
             await this.Changed(RemotePath.IsRemote(e.ArchiveFile) ? e.ArchiveFile : Path.GetDirectoryName(e.ArchiveFile));
         });
-        this.writeBack.Failed += (_, e) => this.mainThread.BeginInvokeOnMainThread(async () =>
+        this.writeBack.Failed += (_, e) => MainThread.BeginInvokeOnMainThread(async () =>
             await this.dialogs.Toast(L.Main_ArchiveSaveFailedFormat(Path.GetFileName(e.Key), VirtualFileSystem.GetName(e.ArchiveFile), e.Error?.Message ?? String.Empty), ToastKind.Error));
 
         // the ribbon's tab colours come from converters, which only run when RibbonTab changes - a theme switch while
@@ -124,7 +121,7 @@ public partial class MainViewModel : ObservableObject,
         this.RibbonTab = settings.RibbonTab is { Length: > 0 } ribbonTab ? ribbonTab : "files";
 
         // a connection added, removed, opened or closed - the drive bars show them
-        connections.Changed += (_, _) => mainThread.BeginInvokeOnMainThread(() =>
+        connections.Changed += (_, _) => MainThread.BeginInvokeOnMainThread(() =>
         {
             this.Left.RefreshDrives();
             this.Right.RefreshDrives();
@@ -132,7 +129,7 @@ public partial class MainViewModel : ObservableObject,
 
         // row colours come from converters - rebuild rows so they pick up the new palette
         if (Application.Current != null)
-            Application.Current.RequestedThemeChanged += (_, _) => this.mainThread.BeginInvokeOnMainThread(() =>
+            Application.Current.RequestedThemeChanged += (_, _) => MainThread.BeginInvokeOnMainThread(() =>
             {
                 _ = this.Left.ActiveTab?.RefreshAsync();
                 _ = this.Right.ActiveTab?.RefreshAsync();
@@ -300,7 +297,7 @@ public partial class MainViewModel : ObservableObject,
             if (value)
                 this.DetailsView();
             else
-                this.mainThread.BeginInvokeOnMainThread(() => this.OnPropertyChanged(nameof(this.IsDetails)));
+                MainThread.BeginInvokeOnMainThread(() => this.OnPropertyChanged(nameof(this.IsDetails)));
         }
     }
 
@@ -471,7 +468,7 @@ public partial class MainViewModel : ObservableObject,
     // Mediator events --------------------------------------------------------------------------
 
     public Task Handle(FileSystemChangedEvent @event, IMediatorContext context, CancellationToken ct)
-        => this.mainThread.InvokeOnMainThreadAsync(async () =>
+        => MainThread.InvokeOnMainThreadAsync(async () =>
         {
             var dirs = @event.Directories.Select(VirtualFileSystem.Normalize).ToHashSet();
             foreach (var tab in this.Left.Tabs.Concat(this.Right.Tabs))
@@ -484,7 +481,7 @@ public partial class MainViewModel : ObservableObject,
         });
 
     public Task Handle(GoToPathEvent @event, IMediatorContext context, CancellationToken ct)
-        => this.mainThread.InvokeOnMainThreadAsync(async () =>
+        => MainThread.InvokeOnMainThreadAsync(async () =>
         {
             var panel = @event.OtherPanel ? this.InactivePanel : this.ActivePanel;
             await panel.NavigateAsync(@event.Directory, @event.FocusName);
@@ -808,7 +805,7 @@ public partial class MainViewModel : ObservableObject,
         if (tab.IsRemote && !tab.IsBranchView)
         {
             // the ribbon's toggle already shows it pressed - put it back up
-            this.mainThread.BeginInvokeOnMainThread(() => this.OnPropertyChanged(nameof(this.IsBranchView)));
+            MainThread.BeginInvokeOnMainThread(() => this.OnPropertyChanged(nameof(this.IsBranchView)));
             await this.dialogs.Toast(L.Remote_NoBranchView, ToastKind.Warning);
             return;
         }
@@ -1116,7 +1113,7 @@ public partial class MainViewModel : ObservableObject,
                 if (Environment.TickCount64 - lastFlush > 150)
                 {
                     lastFlush = Environment.TickCount64;
-                    this.mainThread.BeginInvokeOnMainThread(() =>
+                    MainThread.BeginInvokeOnMainThread(() =>
                     {
                         lock (output)
                             this.CommandOutput = output.ToString();
@@ -1405,7 +1402,7 @@ public partial class MainViewModel : ObservableObject,
         string? choice;
         try
         {
-            choice = await this.mainThread.InvokeOnMainThreadAsync(() => this.dialogs.Choose(msg, options, L.Common_Cancel));
+            choice = await MainThread.InvokeOnMainThreadAsync(() => this.dialogs.Choose(msg, options, L.Common_Cancel));
         }
         finally
         {
@@ -1595,7 +1592,7 @@ public partial class MainViewModel : ObservableObject,
         }
         catch (Exception ex)
         {
-            await this.mainThread.InvokeOnMainThreadAsync(() => this.dialogs.Toast(L.Share_FailedFormat(ex.Message), ToastKind.Error));
+            await MainThread.InvokeOnMainThreadAsync(() => this.dialogs.Toast(L.Share_FailedFormat(ex.Message), ToastKind.Error));
         }
     }
 

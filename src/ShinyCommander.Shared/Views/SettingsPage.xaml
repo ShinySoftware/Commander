@@ -85,6 +85,12 @@
                         <shiny:EntryCell Title="{l:Tr Settings_ExternalEditor}" Placeholder="{l:Tr Settings_ExternalEditorBuiltIn}" ValueText="{Binding ExternalEditor, Mode=TwoWay}" />
                     </shiny:TableSection>
 
+                    <shiny:TableSection x:Name="KeepAwakeSection" Title="{l:Tr Settings_KeepAwake}" FooterText="{l:Tr Settings_KeepAwakeDesc}" shiny:RadioCell.SelectedValue="{Binding KeepAwake, Mode=TwoWay}">
+                        <shiny:RadioCell Title="{l:Tr Settings_KeepAwakePlatform}" Value="PlatformDefault" AutomationId="SettingsKeepAwakePlatformDefault" />
+                        <shiny:RadioCell Title="{l:Tr Settings_KeepAwakePluggedIn}" Value="PluggedIn" AutomationId="SettingsKeepAwakePluggedIn" />
+                        <shiny:RadioCell Title="{l:Tr Settings_KeepAwakeAlways}" x:Name="KeepAwakeAlwaysCell" Value="Always" AutomationId="SettingsKeepAwakeAlways" />
+                    </shiny:TableSection>
+
                     <shiny:TableSection x:Name="LanguageSection" Title="{l:Tr Settings_Language}" shiny:RadioCell.SelectedValue="{Binding Language, Mode=TwoWay}">
                         <shiny:RadioCell Title="{l:Tr Settings_LanguageSystem}" Value="System" />
                         <shiny:RadioCell Title="English" Value="en" />

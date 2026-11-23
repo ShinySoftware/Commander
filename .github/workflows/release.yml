@@ -19,14 +19,14 @@ permissions:
   contents: write
 
 env:
-  # The workload set whose macos SDK (27.0) builds with Xcode 27.
-  WORKLOAD_VERSION: 10.0.402.1
-  DOTNET_VERSION: 10.0.4xx
+  # The workload set whose macos SDK (27.2) builds with Xcode 27.2.
+  WORKLOAD_VERSION: 11.0.100.1
+  DOTNET_VERSION: 11.0.1xx
   PROJECT: src/ShinyCommander.MacOS/ShinyCommander.MacOS.csproj
   WINDOWS_PROJECT: src/ShinyCommander.Windows/ShinyCommander.Windows.csproj
   LINUX_PROJECT: src/ShinyCommander.Linux/ShinyCommander.Linux.csproj
   NFPM_VERSION: 2.48.0
-  APP_PATH: src/ShinyCommander.MacOS/bin/Release/net10.0-macos/osx-arm64/ShinyCommander.app
+  APP_PATH: src/ShinyCommander.MacOS/bin/Release/net11.0-macos/osx-arm64/ShinyCommander.app
 
 jobs:
   version:
@@ -64,11 +64,11 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # The workload set's macOS SDK (27.0.10742) needs Xcode 27.1 exactly: the runner defaults to 27.0, and the
+      # The workload set's macOS SDK (27.0.10742) needs Xcode 27.2 exactly: the runner defaults to 27.0, and the
       # newest it has (a 27.2 beta) is refused too. Bump this with WORKLOAD_VERSION.
       - name: Xcode
         run: |
-          XCODE=/Applications/Xcode_27.1.app
+          XCODE=/Applications/Xcode_27.2.app
           if [ ! -d "$XCODE" ]; then ls -d /Applications/Xcode*.app; echo "No $XCODE on this runner"; exit 1; fi
           sudo xcode-select -s "$XCODE/Contents/Developer"
           xcodebuild -version
@@ -77,10 +77,9 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # The runner image also carries a newer SDK (11.0.100), which dotnet would otherwise pick - and it can't
-      # install this 10.0 workload set (its emscripten manifests clash). Hold the commands below to DOTNET_VERSION.
+      # Hold the commands below to DOTNET_VERSION, so the workload set matches the SDK that builds.
       - name: Pin SDK
-        run: dotnet new globaljson --sdk-version 10.0.400 --roll-forward latestPatch
+        run: dotnet new globaljson --sdk-version 11.0.100 --roll-forward latestPatch
 
       - name: Workloads
         run: dotnet workload install macos maui --version "$WORKLOAD_VERSION"
@@ -111,7 +110,7 @@ jobs:
       # on the hardened runtime (see the csproj), which notarization requires.
       - name: Build
         run: >
-          dotnet publish "$PROJECT" -c Release -f net10.0-macos
+          dotnet publish "$PROJECT" -c Release -f net11.0-macos
           -p:CreatePackage=false
           -p:CodesignKey="$SIGNING_IDENTITY"
           -p:Version="$VERSION"
@@ -185,10 +184,9 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # The runner image also carries a newer SDK (11.0.100), which dotnet would otherwise pick - and it can't
-      # install this 10.0 workload set (its emscripten manifests clash). Hold the commands below to DOTNET_VERSION.
+      # Hold the commands below to DOTNET_VERSION, so the workload set matches the SDK that builds.
       - name: Pin SDK
-        run: dotnet new globaljson --sdk-version 10.0.400 --roll-forward latestPatch
+        run: dotnet new globaljson --sdk-version 11.0.100 --roll-forward latestPatch
 
       - name: Workloads
         run: dotnet workload install maui-windows --version "$env:WORKLOAD_VERSION"
@@ -198,7 +196,7 @@ jobs:
       - name: Build
         run: |
           foreach ($arch in 'x64', 'arm64') {
-            dotnet publish "$env:WINDOWS_PROJECT" -c Release -f net10.0-windows10.0.19041.0 -r "win-$arch" `
+            dotnet publish "$env:WINDOWS_PROJECT" -c Release -f net11.0-windows10.0.19041.0 -r "win-$arch" `
               --self-contained `
               -p:WindowsAppSDKSelfContained=true `
               -p:Version="$env:VERSION" `
@@ -241,7 +239,7 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # No workload: the Linux head is a plain net10.0 project on NuGet packages, as maui-labs' template is. Both
+      # No workload: the Linux head is a plain net11.0 project on NuGet packages, as maui-labs' template is. Both
       # architectures from one runner - the app is managed code over GTK, which it loads from the system at run
       # time, so an arm64 publish only needs the arm64 runtime pack.
       - name: Build

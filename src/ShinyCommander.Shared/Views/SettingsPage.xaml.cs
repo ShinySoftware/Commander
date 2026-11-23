@@ -11,6 +11,10 @@ public partial class SettingsPage : ContentPage
         // only macOS installs its own updates - elsewhere there is nothing to check with
         if (IPlatformApplication.Current?.Services.GetService<UpdateService>() is not { IsSupported: true })
             this.AboutSection.Cells.Remove(this.UpdateCell);
+
+        // "even on battery" means nothing on a machine without one
+        if (IPlatformApplication.Current?.Services.GetService<KeepAwakeService>() is { HasBattery: false })
+            this.KeepAwakeSection.Cells.Remove(this.KeepAwakeAlwaysCell);
     }
 
     protected override void OnAppearing()
@@ -21,7 +25,7 @@ public partial class SettingsPage : ContentPage
         // before the cells are built, so re-apply it once the table is up.
         this.Dispatcher.DispatchDelayed(TimeSpan.FromMilliseconds(50), () =>
         {
-            foreach (var section in new BindableObject[] { this.PreviewSection, this.LanguageSection, this.ThemeSection, this.FontSection })
+            foreach (var section in new BindableObject[] { this.PreviewSection, this.KeepAwakeSection, this.LanguageSection, this.ThemeSection, this.FontSection })
             {
                 var value = RadioCell.GetSelectedValue(section);
                 RadioCell.SetSelectedValue(section, null);

@@ -1,7 +1,7 @@
 <Project>
     <!--
         The UI is shared as linked source rather than a class library: there is no Linux TFM, the macOS
-        AppKit head is net10.0-macos and the Windows head is WinUI, so each head compiles these files
+        AppKit head is net11.0-macos and the Windows head is WinUI, so each head compiles these files
         itself (the same pattern maui-labs and Shiny's own samples use). That also lets the source
         generators (Shiny DI, Mediator, Shell, XAML) run per head.
     -->
@@ -41,10 +41,10 @@
         <!-- the database editor's schema diagram -->
         <PackageReference Include="Shiny.Maui.Controls.Diagram" />
         <!-- preview plugins: audio and video (the Linux head has its own GTK backend), Word / Excel / PowerPoint -->
-        <PackageReference Include="Shiny.Maui.Controls.MediaElement" Condition="'$(TargetFramework)' != 'net10.0'" />
-        <PackageReference Include="Shiny.Maui.Controls.MediaElement.Linux" Condition="'$(TargetFramework)' == 'net10.0'" />
+        <PackageReference Include="Shiny.Maui.Controls.MediaElement" Condition="'$(TargetFramework)' != '$(BaseTargetFramework)'" />
+        <PackageReference Include="Shiny.Maui.Controls.MediaElement.Linux" Condition="'$(TargetFramework)' == '$(BaseTargetFramework)'" />
         <!-- no SkiaSharp canvas on the GTK head - the Office previewers are left out there -->
-        <PackageReference Include="Shiny.Maui.Controls.Office" Condition="'$(TargetFramework)' != 'net10.0'" />
+        <PackageReference Include="Shiny.Maui.Controls.Office" Condition="'$(TargetFramework)' != '$(BaseTargetFramework)'" />
         <PackageReference Include="Shiny.Maui.Shell" />
         <PackageReference Include="Shiny.Mediator.Maui" />
         <PackageReference Include="Shiny.Extensions.DependencyInjection" />

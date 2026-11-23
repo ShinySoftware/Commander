@@ -647,6 +647,29 @@ public class RealUiTests(AppFixture fixture) : UiTest(fixture)
     }
 
     [Fact]
+    public async Task Settings_show_the_keep_awake_choices()
+    {
+        await this.Start(l => l.File("plain.txt"));
+
+        await this.Ui.Tap("ribbon-tab-tools");
+        await this.Ui.Tap("ribbon-Settings");
+        await this.App.WaitFor(x => x.Page == "SettingsPage", "the settings page");
+        // below the column sets - scroll it into view so the table builds the rows
+        var cell = await this.Ui.ById("SettingsKeepAwakePluggedIn");
+        await this.Fixture.Client.ScrollAsync(cell.Id, animated: false);
+        await this.Ui.ByText("Keep awake");
+        await this.Ui.ByText("Platform default");
+        await Task.Delay(300); // the radio values are re-applied once the table is up
+        var page = (await this.Ui.All()).Last(x => x.Type == "SettingsPage" && x.Bounds is { Width: > 0 });
+        if (await this.Fixture.Client.ScreenshotAsync(elementId: page.Id) is { } png)
+        {
+            Directory.CreateDirectory(TestConfig.ArtifactDir);
+            await File.WriteAllBytesAsync(Path.Combine(TestConfig.ArtifactDir, "settings-keep-awake.png"), png);
+        }
+        await this.Ui.Tap("PageBack");
+    }
+
+    [Fact]
     public async Task The_lister_shows_the_file_text()
     {
         await this.Start(l => l.File("read-me.txt", "the quick brown fox"));

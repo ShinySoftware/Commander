@@ -930,6 +930,21 @@ Quitter les arrête en cours de route et met fin à tous les partages. Ce qui a 
   <data name="Settings_UseTrashDesc" xml:space="preserve">
     <value>Maj+F8 supprime toujours définitivement</value>
   </data>
+  <data name="Settings_KeepAwake" xml:space="preserve">
+    <value>Empêcher la mise en veille</value>
+  </data>
+  <data name="Settings_KeepAwakeDesc" xml:space="preserve">
+    <value>Empêche l'ordinateur de se mettre en veille pendant les copies, déplacements et autres tâches, ou les transferts d'un partage. L'écran peut toujours s'éteindre.</value>
+  </data>
+  <data name="Settings_KeepAwakePlatform" xml:space="preserve">
+    <value>Comportement du système</value>
+  </data>
+  <data name="Settings_KeepAwakePluggedIn" xml:space="preserve">
+    <value>Sur secteur</value>
+  </data>
+  <data name="Settings_KeepAwakeAlways" xml:space="preserve">
+    <value>Même sur batterie</value>
+  </data>
   <data name="Settings_ExtractPerArchive" xml:space="preserve">
     <value>Extraire chaque archive dans son propre dossier</value>
   </data>

@@ -4,7 +4,7 @@ using ShinyCommander.Share;
 
 namespace ShinyCommander.Services;
 
-/// <summary>When the computer is kept from sleeping while sharing.</summary>
+/// <summary>When sharing counts as work that keeps the computer awake (KeepAwakeService decides whether it does, and on battery).</summary>
 public enum KeepAwakeMode
 {
     Off,
@@ -18,7 +18,7 @@ public enum KeepAwakeMode
 
 /// <summary>
 /// The app's folder server (<see cref="ShareServer"/>) and everything around it: settings, the pinggy token in the
-/// keychain, keeping the computer awake, telling the user about finished uploads, and shutting it all down when the app
+/// keychain, whether sharing should keep the computer awake (<see cref="WantsKeepAwake"/>), telling the user about finished uploads, and shutting it all down when the app
 /// closes. Nothing here is restored on the next launch - a share lasts as long as the app is open.
 /// <see cref="Changed"/> is raised on the UI thread.
 /// </summary>
@@ -30,7 +30,6 @@ public partial class SharingService : ObservableObject, IAsyncDisposable
     readonly AppSettings settings;
     readonly ISecretStore secrets;
     readonly IAppDialogs dialogs;
-    readonly SleepInhibitor sleep = new();
     bool shutDown;
 
     public SharingService(AppSettings settings, ISecretStore secrets, IAppDialogs dialogs, IMdnsManager mdns, ILoggerFactory loggerFactory)
@@ -62,6 +61,14 @@ public partial class SharingService : ObservableObject, IAsyncDisposable
     public bool HasTransfers => this.Monitor.RunningCount > 0;
 
     public KeepAwakeMode KeepAwake => Enum.TryParse<KeepAwakeMode>(this.settings.ShareKeepAwake, out var mode) ? mode : KeepAwakeMode.Transfers;
+    /// <summary>Sharing wants the computer kept awake right now, per <see cref="KeepAwake"/>.</summary>
+    public bool WantsKeepAwake => this.KeepAwake switch
+    {
+        KeepAwakeMode.Serving => this.IsSharing,
+        KeepAwakeMode.Transfers => this.Monitor.RunningCount > 0,
+        _ => false
+    };
+
     public bool NotifyUploads => this.settings.ShareNotifyUploads;
 
     public string? TunnelToken => this.secrets.Get(TunnelTokenKey);
@@ -112,7 +119,7 @@ public partial class SharingService : ObservableObject, IAsyncDisposable
             this.secrets.Set(TunnelTokenKey, tunnelToken.Trim());
 
         await this.Server.ApplySettingsAsync(this.ReadSettings());
-        this.UpdateSleep();
+        this.Raise();
     }
 
     // ------------------------------------------------------------------------------------------- events
@@ -145,23 +152,11 @@ public partial class SharingService : ObservableObject, IAsyncDisposable
 
     void RaiseNow()
     {
-        this.UpdateSleep();
         this.OnPropertyChanged(nameof(this.Summary));
         this.OnPropertyChanged(nameof(this.IsSharing));
         this.OnPropertyChanged(nameof(this.ActiveTransfers));
         this.OnPropertyChanged(nameof(this.HasTransfers));
         this.Changed?.Invoke(this, EventArgs.Empty);
-    }
-
-    void UpdateSleep()
-    {
-        var hold = this.KeepAwake switch
-        {
-            KeepAwakeMode.Serving => this.IsSharing,
-            KeepAwakeMode.Transfers => this.Monitor.RunningCount > 0,
-            _ => false
-        };
-        this.sleep.Set(hold, "ShinyCommander is sharing files");
     }
 
     /// <summary>The app is closing: every share ends, the tunnel closes and the server stops. Nothing is kept.</summary>
@@ -171,7 +166,6 @@ public partial class SharingService : ObservableObject, IAsyncDisposable
             return;
 
         this.shutDown = true;
-        this.sleep.Dispose();
         try
         {
             await this.Server.DisposeAsync().AsTask().WaitAsync(TimeSpan.FromSeconds(3));

@@ -943,6 +943,21 @@ Quitting stops them part-way and ends every shared folder. What's already been c
   <data name="Settings_UseTrashDesc" xml:space="preserve">
     <value>Shift+F8 always deletes permanently</value>
   </data>
+  <data name="Settings_KeepAwake" xml:space="preserve">
+    <value>Keep awake</value>
+  </data>
+  <data name="Settings_KeepAwakeDesc" xml:space="preserve">
+    <value>Stops the computer sleeping while copies, moves and other jobs, or a share's transfers, are running. The screen can still turn off.</value>
+  </data>
+  <data name="Settings_KeepAwakePlatform" xml:space="preserve">
+    <value>Platform default</value>
+  </data>
+  <data name="Settings_KeepAwakePluggedIn" xml:space="preserve">
+    <value>When plugged in</value>
+  </data>
+  <data name="Settings_KeepAwakeAlways" xml:space="preserve">
+    <value>Even on battery</value>
+  </data>
   <data name="Settings_ExtractPerArchive" xml:space="preserve">
     <value>Unpack each archive into its own folder</value>
   </data>

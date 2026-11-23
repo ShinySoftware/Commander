@@ -35,7 +35,7 @@ and **Linux** (GTK4 via maui-labs), and dressed in [Shiny Controls](https://gith
 | **Archives** | Enter opens an archive like a folder. **zip** (+ jar/nupkg/docx/apk/…), **7z**, **tar**, **tar.gz**, **tar.bz2** and **tar.zst** work like folders: copy and move in and out (archive to archive too), delete, rename, move within, new folder, new file, multi-rename, and edit a file (F4) to save it back into the archive. rar, tar.xz and lone .gz/.bz2/.xz are read-only. Tar changes keep links, permissions and macOS metadata; 7z is written by a built-in writer |
 | **Pack & unpack** | Pack (Alt+F5) files or whole folders - everything under them - into a new or existing zip, 7z, tar, tar.gz, tar.bz2 or tar.zst; Unpack (Alt+F9) any supported archive, one folder per archive if you like |
 | **Operations** | copy/move/delete with byte progress, conflict resolution (overwrite / all / older / skip / keep both), move-by-rename fast path, trash/recycle bin (⌘⌫ on a Mac, like Finder) |
-| **Background jobs (Primary+J)** | copy, move, delete, pack and unpack run in the background while you keep working: live progress per job, Stop, Go To (opens where the result went, cursor on it), Clear Completed. Closing or quitting while a job runs asks first |
+| **Background jobs (Primary+J)** | copy, move, delete, pack and unpack run in the background while you keep working: live progress per job, Stop, Go To (opens where the result went, cursor on it), Clear Completed. Closing or quitting while a job runs asks first. While jobs (or a share's transfers) run the computer is kept from sleeping - when plugged in by default; Settings → Keep awake can leave it to the system or keep it awake on battery too |
 | **Lister (F3)** | text, hex, images, rendered Markdown — also for files inside archives; N/P walks the folder |
 | **Preview panel** | Ctrl+Q opens a panel beside (or under) both file panels that shows whatever is under the cursor: images (with camera and date taken), rendered Markdown, HTML (scripts off), PDF, SQLite tables and their first rows, audio and video (Shiny MediaElement), and Word, Excel and PowerPoint files, read-only (Shiny's Office viewers; not on Linux), else text or hex; folders get a size summary. Preview plugins (`IFilePreviewer` in `Services/Previewers`, registered with `AddFilePreviewer<T>()`) can each be turned off in Settings; the dock side and size are remembered. Enter or a double-click opens the file in its default app, or asks which app when none is set. Word, Excel, PowerPoint, OpenDocument and EPUB files are zips, but they open in their app too; Primary+PageDown goes inside any zip-based file as an archive |
 | **Editor (F4)** | F4 picks an editor by file type (`IFileEditor` plugins in `Services/Editors`, registered with `AddFileEditor<T>()`): the database and photo editors below, else the text editor (Markdown files get Shiny's MarkdownEditor with live preview) or your external editor - inside an archive or on a server too, saving back into it |
@@ -56,7 +56,7 @@ and **Linux** (GTK4 via maui-labs), and dressed in [Shiny Controls](https://gith
 
 ## Tech stack
 
-**C# / .NET 10** throughout. One shared **.NET MAUI** UI runs on three native heads: **WinUI** on Windows, **AppKit**
+**C# / .NET 11** throughout. One shared **.NET MAUI** UI runs on three native heads: **WinUI** on Windows, **AppKit**
 on macOS and **GTK4** on Linux (the last two from [maui-labs](https://github.com/dotnet/maui-labs)). The file-system
 core (`ShinyCommander.Core`), the remote providers (`ShinyCommander.Remote`) and the folder server (`ShinyCommander.Share`)
 are plain .NET with no UI dependency; the page a shared folder opens in is a Blazor WebAssembly app (`ShinyCommander.Web`)
@@ -67,7 +67,7 @@ Tests use xUnit v3, and the UI suite drives the real app through MAUI DevFlow.
 | Library | Version | Used for |
 |---|---|---|
 | **UI & platforms** | | |
-| [.NET MAUI](https://github.com/dotnet/maui) (`Microsoft.Maui.Controls`) | 10.0.110 | the UI framework - one shared UI for all three platforms |
+| [.NET MAUI](https://github.com/dotnet/maui) (`Microsoft.Maui.Controls`) | 11.0.10 | the UI framework - one shared UI for all three platforms |
 | [maui-labs](https://github.com/dotnet/maui-labs) (`Microsoft.Maui.Platforms.MacOS`, `.MacOS.Essentials`) | 0.1.0-preview.14 | the native AppKit macOS head (not Mac Catalyst) |
 | [maui-labs](https://github.com/dotnet/maui-labs) (`Microsoft.Maui.Platforms.Linux.Gtk4`, `.Linux.Gtk4.Essentials`) | 0.1.0-preview.14 | the GTK4 Linux head |
 | [Shiny.Maui.Controls](https://github.com/shinyorg/controls) | 2.5.0 | ribbon, motion icons, keyboard shortcuts, dialogs, toasts, data grids, table views, pills, badges, progress bars, buttons |
@@ -75,30 +75,30 @@ Tests use xUnit v3, and the UI suite drives the real app through MAUI DevFlow.
 | [Shiny.Maui.Controls.Desktop](https://github.com/shinyorg/controls) | 2.5.0 | AppKit / GTK keyboard sources for the shortcuts |
 | [Shiny.Maui.Controls.Diagram](https://github.com/shinyorg/controls) | 2.5.0 | the database editor's schema diagram |
 | **App architecture** | | |
-| [Shiny.Maui.Shell](https://github.com/shinyorg/maui) | 7.0.3 | ViewModel-first navigation (`[ShellMap]`, `[ShellProperty]`) |
+| [Shiny.Maui.Shell](https://github.com/shinyorg/maui) | 8.0.0 | ViewModel-first navigation (`[ShellMap]`, `[ShellProperty]`) |
 | [Shiny.Mediator.Maui](https://github.com/shinyorg/mediator) | 6.12.0 | file-system-changed and go-to events between pages |
-| [Shiny.Extensions.DependencyInjection](https://github.com/shinyorg/extensions) | 6.0.1 | `[Singleton]` source-generated service registration |
-| [Shiny.Extensions.Stores](https://github.com/shinyorg/extensions) | 6.0.1 | `[Bind]` persisted settings |
+| [Shiny.Extensions.DependencyInjection](https://github.com/shinyorg/extensions) | 6.0.2 | `[Singleton]` source-generated service registration |
+| [Shiny.Extensions.Stores](https://github.com/shinyorg/extensions) | 6.0.2 | `[Bind]` persisted settings |
 | [Shiny.Extensions.Localization.Generator](https://github.com/shinyorg/extensions) | 2.1.2 | strongly typed `StringsLocalized` from the `.resx` files |
 | [CommunityToolkit.Mvvm](https://github.com/CommunityToolkit/dotnet) | 8.4.2 | `[ObservableProperty]` / `[RelayCommand]` view models |
-| [Microsoft.Extensions.Localization](https://github.com/dotnet/runtime) | 10.0.0 | the resource-string plumbing the localization generator builds on |
-| [Microsoft.Extensions.Logging.Debug](https://github.com/dotnet/runtime) | 10.0.0 | debug logging |
+| [Microsoft.Extensions.Localization](https://github.com/dotnet/runtime) | 11.0.0 | the resource-string plumbing the localization generator builds on |
+| [Microsoft.Extensions.Logging.Debug](https://github.com/dotnet/runtime) | 11.0.0 | debug logging |
 | **Files & formats** | | |
 | System.IO.Compression · System.Formats.Tar (.NET) | 10.0 | zip read/write; tar read/write |
 | [SharpCompress](https://github.com/adamhathcock/sharpcompress) | 1.0.0 | reading 7z, rar and compressed tars; bzip2 / zstd compression and the LZMA encoder behind the 7z writer |
 | [ExifLibNet](https://github.com/oozcitak/exiflibrary) | 2.1.4 | lossless EXIF edits in JPEGs |
 | [TagLibSharp](https://github.com/mono/taglib-sharp) | 2.3.0 | duration, dimensions and tags of audio, video and pictures for the custom columns (LGPL-2.1, used unmodified) |
-| [Microsoft.Data.Sqlite](https://github.com/dotnet/efcore) | 10.0.15 | the SQLite database editor |
+| [Microsoft.Data.Sqlite](https://github.com/dotnet/efcore) | 11.0.0 | the SQLite database editor |
 | **Servers & cloud** | | |
 | [SSH.NET](https://github.com/sshnet/SSH.NET) | 2026.0.0 | SFTP |
 | [FluentFTP](https://github.com/robinrodricks/FluentFTP) | 55.1.0 | FTP and FTPS |
 | [AWSSDK.S3](https://github.com/aws/aws-sdk-net) | 4.1.0 | Amazon S3 and S3-compatible storage (MinIO, R2, Wasabi, B2) |
 | [Azure.Storage.Blobs](https://github.com/Azure/azure-sdk-for-net) | 12.30.1 | Azure Blob storage |
-| [Shiny.Net.Discovery](https://github.com/shinyorg/shiny) | 6.5.2 | finding file servers on the network (Bonjour / mDNS) |
+| [Shiny.Net.Discovery](https://github.com/shinyorg/shiny) | 7.0.0 | finding file servers on the network (Bonjour / mDNS) |
 | **Sharing** | | |
-| [Shiny.Net.HttpServer](https://shinylib.net/httpserver) (`.WebDav`, `.Tus`, `.Ssh`, `.Discovery`) | 2.2.1 | the folder server: HTTP, WebDAV, resumable uploads (tus), the pinggy.io tunnel and the Bonjour listing |
+| [Shiny.Net.HttpServer](https://shinylib.net/httpserver) (`.WebDav`, `.Tus`, `.Ssh`, `.Discovery`) | 3.0.0 | the folder server: HTTP, WebDAV, resumable uploads (tus), the pinggy.io tunnel and the Bonjour listing |
 | [QRCoder](https://github.com/codebude/QRCoder) | 1.9.0 | the QR code of a share's link |
-| [Blazor WebAssembly](https://github.com/dotnet/aspnetcore) | 10.0.11 | the page a shared folder opens in |
+| [Blazor WebAssembly](https://github.com/dotnet/aspnetcore) | 11.0.0 | the page a shared folder opens in |
 | **Testing** | | |
 | [Microsoft.Maui.DevFlow](https://github.com/dotnet/maui-labs) (`.Agent`, `.Agent.Gtk`, `.Client`) | 0.1.0-preview.14 | the in-app agent and client the UI tests drive the real app through (Debug only) |
 | [xunit.v3](https://github.com/xunit/xunit) · xunit.runner.visualstudio | 3.2.2 · 3.1.5 | tests |
@@ -122,11 +122,11 @@ language is missing a key or a `{0}` placeholder, or if the XAML uses a key that
 ## Layout
 
 ```
-src/ShinyCommander.Core      net10.0 - VFS (disk + archives), operations, search, multi-rename, compare  (no MAUI)
+src/ShinyCommander.Core      net11.0 - VFS (disk + archives), operations, search, multi-rename, compare  (no MAUI)
 src/ShinyCommander.Shared    shared MAUI UI as linked source (ShinyCommander.Shared.props)
-src/ShinyCommander.Windows   net10.0-windows WinUI head
-src/ShinyCommander.MacOS     net10.0-macos AppKit head (maui-labs)
-src/ShinyCommander.Linux     net10.0 GTK4 head (maui-labs)
+src/ShinyCommander.Windows   net11.0-windows WinUI head
+src/ShinyCommander.MacOS     net11.0-macos AppKit head (maui-labs)
+src/ShinyCommander.Linux     net11.0 GTK4 head (maui-labs)
 tests/ShinyCommander.Core.Tests
 tools/ribbon.py              generates the ribbon markup from one command table
 tests/ShinyCommander.UITests UI tests driving the real macOS app via DevFlow (docs/testing.md)
@@ -154,7 +154,7 @@ The UI suite never types on your desktop or touches your settings - see [docs/te
 dotnet test tests/ShinyCommander.Core.Tests
 
 # macOS (AppKit)
-dotnet build src/ShinyCommander.MacOS && open src/ShinyCommander.MacOS/bin/Debug/net10.0-macos/osx-arm64/ShinyCommander.app
+dotnet build src/ShinyCommander.MacOS && open src/ShinyCommander.MacOS/bin/Debug/net11.0-macos/osx-arm64/ShinyCommander.app
 
 # Linux (needs GTK 4 / WebKitGTK typelibs - see the maui-labs Linux.Gtk4 README)
 dotnet run --project src/ShinyCommander.Linux

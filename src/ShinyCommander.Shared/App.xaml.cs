@@ -6,15 +6,18 @@ public partial class App : Application
     readonly UpdateService updates;
     readonly QuitGuard quitGuard;
     readonly SharingService sharing;
+    readonly KeepAwakeService keepAwake;
     readonly IServiceProvider services;
     Window? updateWindow;
     Window? sharingWindow;
     Window? mainWindow;
     bool started;
 
-    public App(AppSettings settings, UpdateService updates, QuitGuard quitGuard, SharingService sharing, IServiceProvider services, StringsLocalized strings)
+    public App(AppSettings settings, UpdateService updates, QuitGuard quitGuard, SharingService sharing, KeepAwakeService keepAwake, IServiceProvider services, StringsLocalized strings)
     {
         this.sharing = sharing;
+        // built here so it watches the jobs and shares from the start
+        this.keepAwake = keepAwake;
         this.services = services;
         // whatever an earlier run zipped or copied out for the share sheet
         FileShareSheet.CleanUp();
@@ -189,5 +192,6 @@ public partial class App : Application
         // off the UI thread (nothing it awaits may need this thread back), and bounded - the server drains for at most a
         // few seconds
         Task.Run(this.StopSharingAsync).Wait(TimeSpan.FromSeconds(4));
+        this.keepAwake.Dispose();
     }
 }

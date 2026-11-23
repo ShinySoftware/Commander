@@ -117,6 +117,9 @@ public partial class AppSettings
     [Bind] public partial bool ShareLastUseKey { get; set; }
     [Bind] public partial bool ShareLastAdvertise { get; set; }
 
+    /// <summary>Keeping the computer awake while work runs (KeepAwakePolicy) - null means "PluggedIn".</summary>
+    [Bind] public partial string? KeepAwake { get; set; }
+
     [Bind] public partial bool HasInitialized { get; set; }
 
     public void EnsureDefaults()
