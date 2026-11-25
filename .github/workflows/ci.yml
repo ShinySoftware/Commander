@@ -63,9 +63,10 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # Hold the commands below to DOTNET_VERSION, so the workload set matches the SDK that builds.
+      # Hold the commands below to DOTNET_VERSION, so the workload set matches the SDK that builds. --force replaces
+      # the repo's global.json, which only carries the test runner setting (MTP) that a build job doesn't need.
       - name: Pin SDK
-        run: dotnet new globaljson --sdk-version 11.0.100 --roll-forward latestPatch
+        run: dotnet new globaljson --sdk-version 11.0.100 --roll-forward latestPatch --force
 
       - name: Workloads
         run: dotnet workload install maui-windows --version "$env:WORKLOAD_VERSION"
@@ -89,9 +90,10 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # Hold the commands below to DOTNET_VERSION, so the workload set matches the SDK that builds.
+      # Hold the commands below to DOTNET_VERSION, so the workload set matches the SDK that builds. --force replaces
+      # the repo's global.json, which only carries the test runner setting (MTP) that a build job doesn't need.
       - name: Pin SDK
-        run: dotnet new globaljson --sdk-version 11.0.100 --roll-forward latestPatch
+        run: dotnet new globaljson --sdk-version 11.0.100 --roll-forward latestPatch --force
 
       - name: Workloads
         run: dotnet workload install macos maui --version "$WORKLOAD_VERSION"
