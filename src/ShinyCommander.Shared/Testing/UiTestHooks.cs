@@ -102,7 +102,9 @@ public static class UiTestHooks
             return Task.FromResult((object)true);
         });
         Map(ext, "preview_js", "Runs JavaScript in the preview panel's web view (HTML / PDF previews) and returns the result: { script }", PreviewJs);
-        Map(ext, "click_at", "A real mouse click (macOS): mouse down/up NSEvents through the window at page point { x, y, secondary = false, clicks = 1 } - AppKit hit-testing and all. Returns the native view under it (hit) and the MAUI elements behind it (element)", ClickAt);
+        Map(ext, "click_at", "A real mouse click (macOS): mouse down/up NSEvents through the window at page point { x, y, secondary = false, clicks = 1, modifiers = \"shift+cmd\" } - AppKit hit-testing and all. Returns the native view under it (hit) and the MAUI elements behind it (element)", ClickAt);
+        Map(ext, "drag_from", "Drag and drop (macOS): the files a drag started at page point { x, y } would carry - real hit testing, no drag session", DragFrom);
+        Map(ext, "drop_at", "Drag and drop (macOS): drops { paths: [...], allowed = \"copy+move\" } at page point { x, y } as a drag from Finder would - the operation it chose, or none", DropAt);
         Map(ext, "real_dialogs", "Show the real dialogs instead of answering from the queue: { on = true }", RealDialogs);
         ext.MapTool("state_now", "The state without waiting for the app to settle (while a real dialog is open)", "POST", "state_now",
             async _ => HttpResponse.Json(await MainThread.InvokeOnMainThreadAsync(() => new { result = (object)true, state = Snapshot(MainViewModel.Current!) })));
@@ -397,11 +399,33 @@ public static class UiTestHooks
         var secondary = args.TryGetProperty("secondary", out var sec) && sec.GetBoolean();
         // clicks = 2 is a double-click: a second down/up pair with AppKit's click count at 2
         var clicks = args.TryGetProperty("clicks", out var c) ? c.GetInt32() : 1;
+        // modifiers = "shift", "cmd", "shift+cmd", ... - held for the click (Shift / ⌘ selection)
+        var keys = (Str(args, "modifiers") ?? String.Empty).ToLowerInvariant();
+        var flags = (AppKit.NSEventModifierMask)0;
+        if (keys.Contains("shift"))
+            flags |= AppKit.NSEventModifierMask.ShiftKeyMask;
+        if (keys.Contains("cmd"))
+            flags |= AppKit.NSEventModifierMask.CommandKeyMask;
+        if (keys.Contains("alt"))
+            flags |= AppKit.NSEventModifierMask.AlternateKeyMask;
+        // a click on an inactive app's window only brings it forward (AppKit's first click) - unless ⌘ is held. The test
+        // app is usually behind whatever you're doing, so bring it forward the way a first click would have
+        if (!AppKit.NSApplication.SharedApplication.Active || !ns.IsKeyWindow)
+        {
+#pragma warning disable CA1422 // the cooperative Activate() is refused while another app is in front
+            AppKit.NSApplication.SharedApplication.ActivateIgnoringOtherApps(true);
+#pragma warning restore CA1422
+            ns.MakeKeyAndOrderFront(null);
+            // activation lands a moment later; a click before then is still a first click
+            for (var wait = 0; wait < 20 && !(AppKit.NSApplication.SharedApplication.Active && ns.IsKeyWindow); wait++)
+                await Task.Delay(100);
+            await Task.Delay(200);
+        }
         for (var i = 1; i <= clicks; i++)
         {
             var now = NSProcessInfoUptime();
-            var down = AppKit.NSEvent.MouseEvent(secondary ? AppKit.NSEventType.RightMouseDown : AppKit.NSEventType.LeftMouseDown, point, 0, now, ns.WindowNumber, null, 0, i, 1f);
-            var up = AppKit.NSEvent.MouseEvent(secondary ? AppKit.NSEventType.RightMouseUp : AppKit.NSEventType.LeftMouseUp, point, 0, now + 0.05, ns.WindowNumber, null, 0, i, 0f);
+            var down = AppKit.NSEvent.MouseEvent(secondary ? AppKit.NSEventType.RightMouseDown : AppKit.NSEventType.LeftMouseDown, point, flags, now, ns.WindowNumber, null, 0, i, 1f);
+            var up = AppKit.NSEvent.MouseEvent(secondary ? AppKit.NSEventType.RightMouseUp : AppKit.NSEventType.LeftMouseUp, point, flags, now + 0.05, ns.WindowNumber, null, 0, i, 0f);
             AppKit.NSApplication.SharedApplication.PostEvent(up, false);
             ns.SendEvent(down);
             if (i < clicks)
@@ -413,6 +437,38 @@ public static class UiTestHooks
         await Task.CompletedTask;
         throw new NotSupportedException("click_at is macOS only");
 #endif
+    }
+
+    static Task<object> DragFrom(MainViewModel main, JsonElement args)
+    {
+        var drag = PanelDragDrop.Current ?? throw new InvalidOperationException("drag and drop isn't attached");
+        return Task.FromResult<object>(drag.GetDragSource(WindowPoint(args)));
+    }
+
+    static Task<object> DropAt(MainViewModel main, JsonElement args)
+    {
+        var drag = PanelDragDrop.Current ?? throw new InvalidOperationException("drag and drop isn't attached");
+        var paths = args.GetProperty("paths").EnumerateArray().Select(x => x.GetString()!).ToList();
+        var allowedText = (Str(args, "allowed") ?? "copy+move").ToLowerInvariant();
+        var allowed = (allowedText.Contains("copy") ? DragOperations.Copy : DragOperations.None)
+            | (allowedText.Contains("move") ? DragOperations.Move : DragOperations.None);
+
+        var point = WindowPoint(args);
+        var op = drag.DragOver(point, paths, allowed);
+        var dropped = drag.Drop(point, paths, allowed);
+        return Task.FromResult<object>(dropped ? op.ToString().ToLowerInvariant() : "none");
+    }
+
+    // page points are top-down from the content view; AppKit's window coordinates are bottom-up
+    static Point WindowPoint(JsonElement args)
+    {
+        var x = args.GetProperty("x").GetDouble();
+        var y = args.GetProperty("y").GetDouble();
+#if MACOS_APPKIT
+        if (Application.Current?.Windows.FirstOrDefault()?.Handler?.PlatformView is AppKit.NSWindow { ContentView: { } content })
+            return new Point(x, content.Frame.Height - y);
+#endif
+        return new Point(x, y);
     }
 
 #if MACOS_APPKIT

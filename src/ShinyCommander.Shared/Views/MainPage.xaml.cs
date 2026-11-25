@@ -5,6 +5,7 @@ public partial class MainPage : ContentPage
     public MainPage()
     {
         this.InitializeComponent();
+        this.Loaded += this.OnPageLoaded;
 #if MACOS_APPKIT
         // Shiny's Ribbon builds its tab bodies after its native view exists, which the AppKit head never
         // lays out - use the ribbon-styled bar generated from the same command table (tools/ribbon.py).
@@ -138,6 +139,8 @@ public partial class MainPage : ContentPage
     protected override void OnBindingContextChanged()
     {
         base.OnBindingContextChanged();
+        // the page can appear before it has its view model or window - whichever comes last attaches
+        this.AttachDragDrop();
         if (this.ViewModel is { } vm)
         {
             vm.FocusCommandLineRequested -= this.OnFocusCommandLine;
@@ -175,6 +178,42 @@ public partial class MainPage : ContentPage
     {
         base.OnAppearing();
         this.OnFocusCommandLine(this, EventArgs.Empty);
+        this.AttachDragDrop();
+    }
+
+    // --- file drag and drop (where the head has it) ----------------------------------------------
+
+    IDisposable? dragDrop;
+    Window? dragDropWindow;
+
+    void OnPageLoaded(object? sender, EventArgs e) => this.AttachDragDrop();
+
+    void AttachDragDrop()
+    {
+        if (this.dragDrop != null || this.Window is not { } window || this.ViewModel is not { } vm)
+            return;
+
+        var platform = IPlatformApplication.Current?.Services.GetService<IFileDragDrop>();
+        if (platform == null)
+            return;
+
+        var handler = new PanelDragDrop(platform, vm, this.LeftPanel, this.RightPanel);
+#if DEBUG
+        handler.Register();
+#endif
+        this.dragDrop = platform.Attach(window, handler);
+        this.dragDropWindow = window;
+        window.Destroying += this.OnWindowDestroying;
+    }
+
+    void OnWindowDestroying(object? sender, EventArgs e)
+    {
+        this.Loaded -= this.OnPageLoaded;
+        if (this.dragDropWindow != null)
+            this.dragDropWindow.Destroying -= this.OnWindowDestroying;
+        this.dragDrop?.Dispose();
+        this.dragDrop = null;
+        this.dragDropWindow = null;
     }
 
     // TC keeps typing going to the command line; arrow/enter/F-keys are claimed by shortcuts first. Not while a name is

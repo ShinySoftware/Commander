@@ -1,8 +1,10 @@
 <Project>
     <PropertyGroup>
         <MauiVersion>11.0.10</MauiVersion>
-        <MauiLabsVersion>0.1.0-preview.14.26555.2</MauiLabsVersion>
-        <ShinyControlsVersion>2.5.0</ShinyControlsVersion>
+        <MauiLabsVersion>0.1.0-preview.15.26574.3</MauiLabsVersion>
+        <!-- DevFlow preview.15 depends on Microsoft.Extensions.Http 11.0.1 (not on nuget.org yet) and crashes AppKit at launch; Shiny Controls 3.0 pins preview.14.26573.4 -->
+        <MauiDevFlowVersion>0.1.0-preview.14.26573.4</MauiDevFlowVersion>
+        <ShinyControlsVersion>3.0.0-beta.3</ShinyControlsVersion>
     </PropertyGroup>
     <ItemGroup>
         <!-- MAUI + maui-labs desktop backends -->
@@ -20,8 +22,8 @@
         <PackageVersion Include="Shiny.Maui.Controls.MediaElement" Version="$(ShinyControlsVersion)" />
         <PackageVersion Include="Shiny.Maui.Controls.MediaElement.Linux" Version="$(ShinyControlsVersion)" />
         <PackageVersion Include="Shiny.Maui.Controls.Office" Version="$(ShinyControlsVersion)" />
-        <PackageVersion Include="Shiny.Maui.Shell" Version="8.0.0" />
-        <PackageVersion Include="Shiny.Mediator.Maui" Version="6.12.0" />
+        <PackageVersion Include="Shiny.Maui.Shell" Version="8.0.1" />
+        <PackageVersion Include="Shiny.Mediator.Maui" Version="6.13.0" />
         <PackageVersion Include="Shiny.Extensions.DependencyInjection" Version="6.0.2" />
         <PackageVersion Include="Shiny.Extensions.Stores" Version="6.0.2" />
         <PackageVersion Include="Shiny.Extensions.Localization.Generator" Version="2.1.2" />
@@ -35,11 +37,11 @@
         <PackageVersion Include="TagLibSharp" Version="2.3.0" />
 
         <!-- remote file systems (ShinyCommander.Remote) -->
-        <PackageVersion Include="SSH.NET" Version="2026.0.0" />
+        <PackageVersion Include="SSH.NET" Version="2026.0.1" />
         <PackageVersion Include="FluentFTP" Version="55.1.0" />
-        <PackageVersion Include="AWSSDK.S3" Version="4.1.0" />
-        <PackageVersion Include="Azure.Storage.Blobs" Version="12.30.1" />
-        <PackageVersion Include="Shiny.Net.Discovery" Version="7.0.0" />
+        <PackageVersion Include="AWSSDK.S3" Version="4.1.2.1" />
+        <PackageVersion Include="Azure.Storage.Blobs" Version="12.30.2" />
+        <PackageVersion Include="Shiny.Net.Discovery" Version="7.0.1" />
         <!-- sharing a folder over HTTP / WebDAV (ShinyCommander.Share) and its browser client (ShinyCommander.Web) -->
         <PackageVersion Include="Shiny.Net.HttpServer" Version="3.0.0" />
         <PackageVersion Include="Shiny.Net.HttpServer.WebDav" Version="3.0.0" />
@@ -53,14 +55,14 @@
         <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
         <PackageVersion Include="Microsoft.Extensions.Logging.Debug" Version="11.0.0" />
         <PackageVersion Include="Microsoft.Extensions.Localization" Version="11.0.0" />
-        <PackageVersion Include="Microsoft.Maui.DevFlow.Agent" Version="$(MauiLabsVersion)" />
-        <PackageVersion Include="Microsoft.Maui.DevFlow.Agent.Gtk" Version="$(MauiLabsVersion)" />
-        <PackageVersion Include="Microsoft.Maui.DevFlow.Client" Version="$(MauiLabsVersion)" />
+        <PackageVersion Include="Microsoft.Maui.DevFlow.Agent" Version="$(MauiDevFlowVersion)" />
+        <PackageVersion Include="Microsoft.Maui.DevFlow.Agent.Gtk" Version="$(MauiDevFlowVersion)" />
+        <PackageVersion Include="Microsoft.Maui.DevFlow.Client" Version="$(MauiDevFlowVersion)" />
 
         <!-- tests -->
-        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-        <PackageVersion Include="xunit.v3" Version="3.2.2" />
-        <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
+        <PackageVersion Include="xunit.v3" Version="4.0.3" />
+        <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
         <PackageVersion Include="Shouldly" Version="4.3.0" />
     </ItemGroup>
 </Project>

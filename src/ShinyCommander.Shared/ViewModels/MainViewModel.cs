@@ -28,6 +28,7 @@ public partial class MainViewModel : ObservableObject,
     readonly FileColumns fileColumns;
     readonly FolderSetups folderSetups;
     readonly IFileClipboard? fileClipboard;
+    readonly IKeyModifiers? keyModifiers;
     CancellationTokenSource? commandCts;
     bool initialized;
 
@@ -49,9 +50,11 @@ public partial class MainViewModel : ObservableObject,
         FileColumns fileColumns,
         FolderSetups folderSetups,
         SharingService sharing,
-        IFileClipboard? fileClipboard = null
+        IFileClipboard? fileClipboard = null,
+        IKeyModifiers? keyModifiers = null
     )
     {
+        this.keyModifiers = keyModifiers;
         this.Sharing = sharing;
         this.fileClipboard = fileClipboard;
         this.fileColumns = fileColumns;
@@ -687,9 +690,23 @@ public partial class MainViewModel : ObservableObject,
         if (tab == null)
             return;
 
-        tab.SetCursor(item);
         if (doubleTap)
+        {
+            tab.SetCursor(item);
             _ = this.OpenItem(item);
+        }
+        else
+        {
+            // Finder / Explorer: a click selects that row alone, Shift+click a range from the last click, Primary+click
+            // (⌘ / Ctrl) adds or removes one row
+            var modifiers = this.keyModifiers?.Current ?? ModifierKeys.None;
+            if (modifiers.HasFlag(ModifierKeys.Shift))
+                tab.SelectRange(item, modifiers.HasFlag(ModifierKeys.Primary));
+            else if (modifiers.HasFlag(ModifierKeys.Primary))
+                tab.ToggleSelect(item);
+            else
+                tab.SelectOnly(item);
+        }
         this.RequestCommandLineFocus();
     }
 
@@ -1385,6 +1402,38 @@ public partial class MainViewModel : ObservableObject,
             return result;
         });
     }
+
+    /// <summary>
+    /// Files dropped on a folder - dragged from a panel or from another app - copied or moved there as a job, the same
+    /// as F5 / F6 without the prompt.
+    /// </summary>
+    public bool DropFiles(IReadOnlyList<string> paths, string targetDir, bool move)
+    {
+        var sources = paths
+            .Select(x => Directory.Exists(x) ? (FileSystemInfo)new DirectoryInfo(x) : new FileInfo(x))
+            .Where(x => x.Exists)
+            .Select(FileEntry.FromInfo)
+            .ToList();
+        if (sources.Count == 0)
+            return false;
+
+        var what = What(sources);
+        var title = move ? L.Op_MoveTitleFormat(what) : L.Op_CopyTitleFormat(what);
+        var sourceDirs = sources.Select(x => Path.GetDirectoryName(x.FullPath)).Distinct().ToArray();
+        this.RunOperation(title, move ? FileOperationKind.Move : FileOperationKind.Copy, new JobDestination(targetDir, sources.Count == 1 ? sources[0].Name : null), async (progress, ct) =>
+        {
+            var target = new OperationTarget(targetDir);
+            var result = move
+                ? await this.ops.MoveAsync(sources, target, this.ResolveConflict, progress, ct)
+                : await this.ops.CopyAsync(sources, target, this.ResolveConflict, progress, ct);
+            await this.Changed([.. sourceDirs, targetDir]);
+            return result;
+        });
+        return true;
+    }
+
+    /// <summary>Files we dragged out were dropped elsewhere (Finder moves them itself) - the folders they came from changed.</summary>
+    public void DraggedOut(IReadOnlyList<string> paths) => _ = this.Changed(paths.Select(Path.GetDirectoryName).ToArray());
 
     /// <summary>"'a.txt'" for one item, "3 items" for more - what a title or question is about.</summary>
     static string What(IReadOnlyList<FileEntry> items) => items.Count == 1 ? L.Op_QuotedFormat(items[0].Name) : L.Op_ItemsFormat(items.Count);

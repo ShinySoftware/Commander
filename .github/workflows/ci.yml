@@ -37,7 +37,7 @@ jobs:
       # Core is plain net11.0 - no workload. The UI tests drive a real AppKit window, so they stay local
       # (tests/ShinyCommander.UITests/run.sh).
       - name: Core tests
-        run: dotnet test tests/ShinyCommander.Core.Tests -c Release
+        run: dotnet test --project tests/ShinyCommander.Core.Tests -c Release
 
   linux:
     runs-on: ubuntu-24.04

@@ -35,6 +35,8 @@ public class RowBackgroundConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => (value as string) switch
     {
+        // the folder dragged files would drop into
+        "DropTarget" => ThemeColors.Get("Accent").WithAlpha(0.28f),
         // a soft accent tint for the active panel's cursor, a neutral one for the other panel's
         "Active" or "ActiveMarked" => ThemeColors.Get("CursorInactive"),
         "Inactive" or "InactiveMarked" => ThemeColors.Get("Header"),

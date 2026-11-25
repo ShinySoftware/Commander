@@ -68,15 +68,15 @@ Tests use xUnit v3, and the UI suite drives the real app through MAUI DevFlow.
 |---|---|---|
 | **UI & platforms** | | |
 | [.NET MAUI](https://github.com/dotnet/maui) (`Microsoft.Maui.Controls`) | 11.0.10 | the UI framework - one shared UI for all three platforms |
-| [maui-labs](https://github.com/dotnet/maui-labs) (`Microsoft.Maui.Platforms.MacOS`, `.MacOS.Essentials`) | 0.1.0-preview.14 | the native AppKit macOS head (not Mac Catalyst) |
-| [maui-labs](https://github.com/dotnet/maui-labs) (`Microsoft.Maui.Platforms.Linux.Gtk4`, `.Linux.Gtk4.Essentials`) | 0.1.0-preview.14 | the GTK4 Linux head |
-| [Shiny.Maui.Controls](https://github.com/shinyorg/controls) | 2.5.0 | ribbon, motion icons, keyboard shortcuts, dialogs, toasts, data grids, table views, pills, badges, progress bars, buttons |
-| [Shiny.Maui.Controls.Markdown](https://github.com/shinyorg/controls) | 2.5.0 | Markdown in the lister, the editor and F1 help |
-| [Shiny.Maui.Controls.Desktop](https://github.com/shinyorg/controls) | 2.5.0 | AppKit / GTK keyboard sources for the shortcuts |
-| [Shiny.Maui.Controls.Diagram](https://github.com/shinyorg/controls) | 2.5.0 | the database editor's schema diagram |
+| [maui-labs](https://github.com/dotnet/maui-labs) (`Microsoft.Maui.Platforms.MacOS`, `.MacOS.Essentials`) | 0.1.0-preview.15 | the native AppKit macOS head (not Mac Catalyst) |
+| [maui-labs](https://github.com/dotnet/maui-labs) (`Microsoft.Maui.Platforms.Linux.Gtk4`, `.Linux.Gtk4.Essentials`) | 0.1.0-preview.15 | the GTK4 Linux head |
+| [Shiny.Maui.Controls](https://github.com/shinyorg/controls) | 3.0.0-beta.3 | ribbon, motion icons, keyboard shortcuts, dialogs, toasts, data grids, table views, pills, badges, progress bars, buttons |
+| [Shiny.Maui.Controls.Markdown](https://github.com/shinyorg/controls) | 3.0.0-beta.3 | Markdown in the lister, the editor and F1 help |
+| [Shiny.Maui.Controls.Desktop](https://github.com/shinyorg/controls) | 3.0.0-beta.3 | AppKit / GTK keyboard sources for the shortcuts |
+| [Shiny.Maui.Controls.Diagram](https://github.com/shinyorg/controls) | 3.0.0-beta.3 | the database editor's schema diagram |
 | **App architecture** | | |
-| [Shiny.Maui.Shell](https://github.com/shinyorg/maui) | 8.0.0 | ViewModel-first navigation (`[ShellMap]`, `[ShellProperty]`) |
-| [Shiny.Mediator.Maui](https://github.com/shinyorg/mediator) | 6.12.0 | file-system-changed and go-to events between pages |
+| [Shiny.Maui.Shell](https://github.com/shinyorg/maui) | 8.0.1 | ViewModel-first navigation (`[ShellMap]`, `[ShellProperty]`) |
+| [Shiny.Mediator.Maui](https://github.com/shinyorg/mediator) | 6.13.0 | file-system-changed and go-to events between pages |
 | [Shiny.Extensions.DependencyInjection](https://github.com/shinyorg/extensions) | 6.0.2 | `[Singleton]` source-generated service registration |
 | [Shiny.Extensions.Stores](https://github.com/shinyorg/extensions) | 6.0.2 | `[Bind]` persisted settings |
 | [Shiny.Extensions.Localization.Generator](https://github.com/shinyorg/extensions) | 2.1.2 | strongly typed `StringsLocalized` from the `.resx` files |
@@ -90,20 +90,20 @@ Tests use xUnit v3, and the UI suite drives the real app through MAUI DevFlow.
 | [TagLibSharp](https://github.com/mono/taglib-sharp) | 2.3.0 | duration, dimensions and tags of audio, video and pictures for the custom columns (LGPL-2.1, used unmodified) |
 | [Microsoft.Data.Sqlite](https://github.com/dotnet/efcore) | 11.0.0 | the SQLite database editor |
 | **Servers & cloud** | | |
-| [SSH.NET](https://github.com/sshnet/SSH.NET) | 2026.0.0 | SFTP |
+| [SSH.NET](https://github.com/sshnet/SSH.NET) | 2026.0.1 | SFTP |
 | [FluentFTP](https://github.com/robinrodricks/FluentFTP) | 55.1.0 | FTP and FTPS |
-| [AWSSDK.S3](https://github.com/aws/aws-sdk-net) | 4.1.0 | Amazon S3 and S3-compatible storage (MinIO, R2, Wasabi, B2) |
-| [Azure.Storage.Blobs](https://github.com/Azure/azure-sdk-for-net) | 12.30.1 | Azure Blob storage |
-| [Shiny.Net.Discovery](https://github.com/shinyorg/shiny) | 7.0.0 | finding file servers on the network (Bonjour / mDNS) |
+| [AWSSDK.S3](https://github.com/aws/aws-sdk-net) | 4.1.2.1 | Amazon S3 and S3-compatible storage (MinIO, R2, Wasabi, B2) |
+| [Azure.Storage.Blobs](https://github.com/Azure/azure-sdk-for-net) | 12.30.2 | Azure Blob storage |
+| [Shiny.Net.Discovery](https://github.com/shinyorg/shiny) | 7.0.1 | finding file servers on the network (Bonjour / mDNS) |
 | **Sharing** | | |
 | [Shiny.Net.HttpServer](https://shinylib.net/httpserver) (`.WebDav`, `.Tus`, `.Ssh`, `.Discovery`) | 3.0.0 | the folder server: HTTP, WebDAV, resumable uploads (tus), the pinggy.io tunnel and the Bonjour listing |
 | [QRCoder](https://github.com/codebude/QRCoder) | 1.9.0 | the QR code of a share's link |
 | [Blazor WebAssembly](https://github.com/dotnet/aspnetcore) | 11.0.0 | the page a shared folder opens in |
 | **Testing** | | |
-| [Microsoft.Maui.DevFlow](https://github.com/dotnet/maui-labs) (`.Agent`, `.Agent.Gtk`, `.Client`) | 0.1.0-preview.14 | the in-app agent and client the UI tests drive the real app through (Debug only) |
-| [xunit.v3](https://github.com/xunit/xunit) · xunit.runner.visualstudio | 3.2.2 · 3.1.5 | tests |
+| [Microsoft.Maui.DevFlow](https://github.com/dotnet/maui-labs) (`.Agent`, `.Agent.Gtk`, `.Client`) | 0.1.0-preview.14.26573.4 | the in-app agent and client the UI tests drive the real app through (Debug only) |
+| [xunit.v3](https://github.com/xunit/xunit) · xunit.runner.visualstudio | 4.0.3 · 4.0.1 | tests |
 | [Shouldly](https://github.com/shouldly/shouldly) | 4.3.0 | test assertions |
-| Microsoft.NET.Test.Sdk | 18.0.1 | test runner |
+| Microsoft.NET.Test.Sdk | 18.12.0 | test runner |
 
 ## Translations
 
@@ -141,7 +141,7 @@ generators — the same pattern maui-labs and Shiny's own samples use.
 ## Testing
 
 ```bash
-dotnet test tests/ShinyCommander.Core.Tests                 # core, ~1s
+dotnet test --project tests/ShinyCommander.Core.Tests                 # core, ~1s
 tests/ShinyCommander.UITests/run.sh                         # the real macOS app through MAUI DevFlow, ~5 min
 tests/ShinyCommander.UITests/run.sh --no-build -t F5_copies # one test, seconds (attaches to the running test app)
 ```
@@ -151,7 +151,7 @@ The UI suite never types on your desktop or touches your settings - see [docs/te
 ## Build & run
 
 ```bash
-dotnet test tests/ShinyCommander.Core.Tests
+dotnet test --project tests/ShinyCommander.Core.Tests
 
 # macOS (AppKit)
 dotnet build src/ShinyCommander.MacOS && open src/ShinyCommander.MacOS/bin/Debug/net11.0-macos/osx-arm64/ShinyCommander.app

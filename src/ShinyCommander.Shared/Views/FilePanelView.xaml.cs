@@ -26,6 +26,7 @@ public partial class FilePanelView : ContentView
         this.crumbMenuHost = (Grid)this.CrumbMenuLayer.Parent;
         this.crumbMenuHost.Children.Remove(this.CrumbMenuLayer);
         this.PanelRoot.Children.Remove(this.TabMenuLayer);
+        this.PanelRoot.Children.Remove(this.DropOutline);
 
         this.Loaded += (_, _) =>
         {
@@ -150,6 +151,10 @@ public partial class FilePanelView : ContentView
                 this.CloseCrumbMenu();
                 break;
 
+            case nameof(PanelViewModel.IsDropTarget):
+                this.ShowDropOutline(this.panel?.IsDropTarget == true);
+                break;
+
             case nameof(PanelViewModel.Path):
             case nameof(PanelViewModel.ShowTree) when this.panel?.ShowTree == true:
                 this.RevealInTree(this.panel?.Path);
@@ -219,6 +224,36 @@ public partial class FilePanelView : ContentView
             this.FileList.ItemsSource = details;
         if (!ReferenceEquals(this.ThumbList.ItemsSource, thumbs))
             this.ThumbList.ItemsSource = thumbs;
+    }
+
+    // --- drag and drop ---------------------------------------------------------------------------
+
+    void ShowDropOutline(bool show)
+    {
+        var shown = this.PanelRoot.Children.Contains(this.DropOutline);
+        if (show && !shown)
+            this.PanelRoot.Children.Add(this.DropOutline);
+        else if (!show && shown)
+            this.PanelRoot.Children.Remove(this.DropOutline);
+    }
+
+    /// <summary>
+    /// The row of the showing list under a point, found with <paramref name="contains"/> (a native hit test) over the
+    /// rows the list has realized - the ones on screen plus a few it keeps around, which the hit test rules out.
+    /// </summary>
+    public FileItemViewModel? RowAt(Func<VisualElement, bool> contains)
+    {
+        CollectionView list = this.panel is { IsThumbnails: true } ? this.ThumbList : this.FileList;
+        if (!contains(list))
+            return null;
+
+        // a row's root is the first element carrying its item; its children inherit the same binding context
+        return list.GetVisualTreeDescendants()
+            .OfType<VisualElement>()
+            .Where(x => x.BindingContext is FileItemViewModel && !ReferenceEquals((x.Parent as BindableObject)?.BindingContext, x.BindingContext))
+            .Where(contains)
+            .Select(x => (FileItemViewModel)x.BindingContext)
+            .FirstOrDefault();
     }
 
     // AutomationId can only be set once, and the binding context can change more than once

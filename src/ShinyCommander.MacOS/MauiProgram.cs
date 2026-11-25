@@ -19,7 +19,13 @@ public static class MauiProgram
         VerticallyAlignedLabelHandler.Register();
 
 #if DEBUG
-        builder.AddMauiDevFlowAgent(o => ShinyCommander.Testing.UiTestHooks.Register(o));
+        // maui-labs preview.15 only wires Essentials up in Build(); DevFlow's file logging reads
+        // FileSystem.CacheDirectory before that and throws, leaving the app with no window
+        builder.AddMauiDevFlowAgent(o =>
+        {
+            o.EnableFileLogging = false;
+            ShinyCommander.Testing.UiTestHooks.Register(o);
+        });
 #endif
         return builder.Build();
     }

@@ -526,6 +526,7 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
             item.Cursor = CursorState.None;
 
         this.Items = new ObservableCollection<FileItemViewModel>(sorted);
+        this.selectionAnchor = -1;
 
         var index = 0;
         if (focusName != null)
@@ -587,6 +588,59 @@ public partial class PanelTabViewModel : ObservableObject, IDisposable
 
         item.IsMarked = !item.IsMarked;
         this.UpdateStatus();
+    }
+
+    // where a Shift+click range starts: the last plain or Primary click (Finder / Explorer)
+    int selectionAnchor = -1;
+
+    /// <summary>A plain click: that row alone, as Finder and Explorer select.</summary>
+    public void SelectOnly(FileItemViewModel item)
+    {
+        foreach (var marked in this.Items.Where(x => x.IsMarked))
+            marked.IsMarked = false;
+        this.SetCursor(item);
+        this.selectionAnchor = this.Items.IndexOf(item);
+        this.UpdateStatus();
+    }
+
+    /// <summary>
+    /// Primary+click (⌘ / Ctrl): adds the row to the selection or takes it out. The row under the cursor counts as
+    /// selected while nothing is marked, so it joins the marks rather than dropping out of the selection.
+    /// </summary>
+    public void ToggleSelect(FileItemViewModel item)
+    {
+        if (this.MarkedCount == 0 && this.CursorItem is { Entry.IsParentLink: false } current && current != item)
+            current.IsMarked = true;
+
+        if (!item.Entry.IsParentLink)
+            item.IsMarked = !item.IsMarked;
+        this.SetCursor(item);
+        this.selectionAnchor = this.Items.IndexOf(item);
+        this.UpdateStatus();
+    }
+
+    /// <summary>
+    /// Shift+click: everything from the anchor (the last click) to the row. With <paramref name="add"/>
+    /// (Primary+Shift) the range joins the marks instead of replacing them. The anchor stays put, so the range can be
+    /// grown or shrunk from it.
+    /// </summary>
+    public void SelectRange(FileItemViewModel item, bool add)
+    {
+        var index = this.Items.IndexOf(item);
+        if (index < 0)
+            return;
+
+        var anchor = this.selectionAnchor >= 0 && this.selectionAnchor < this.Items.Count
+            ? this.selectionAnchor
+            : Math.Max(this.CursorIndex, 0);
+        if (!add)
+        {
+            foreach (var marked in this.Items.Where(x => x.IsMarked))
+                marked.IsMarked = false;
+        }
+        this.MarkRange(anchor, index);
+        this.SetCursor(item);
+        this.selectionAnchor = anchor;
     }
 
     public void MarkRange(int from, int to)

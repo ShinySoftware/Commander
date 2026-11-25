@@ -124,7 +124,22 @@ public sealed class Commander(AgentClient client)
     }
 
     /// <summary>A real mouse click at a page point (macOS): mouse down/up go through the window's event routing, unlike a DevFlow tap. <see cref="LastResult"/> has <c>hit</c>, the native view chain under the point, and <c>element</c>, the MAUI elements behind it.</summary>
-    public Task<AppState> ClickAt(double x, double y, bool secondary = false, int clicks = 1) => this.Call("click_at", new { x, y, secondary, clicks });
+    /// <summary>The files a drag starting at the page point would carry (real hit testing; no AppKit drag session).</summary>
+    public async Task<List<string>> DragFrom(double x, double y)
+    {
+        await this.Call("drag_from", new { x, y });
+        return this.LastResult.EnumerateArray().Select(e => e.GetString()!).ToList();
+    }
+
+    /// <summary>Drops files at the page point as a drag from Finder would: "copy", "move" or "none" (refused).</summary>
+    public async Task<string> DropAt(double x, double y, IEnumerable<string> paths, string allowed = "copy+move")
+    {
+        await this.Call("drop_at", new { x, y, paths, allowed });
+        return this.LastResult.GetString()!;
+    }
+
+    /// <summary>A real AppKit click; <paramref name="modifiers"/> holds keys down for it ("shift", "cmd", "shift+cmd").</summary>
+    public Task<AppState> ClickAt(double x, double y, bool secondary = false, int clicks = 1, string? modifiers = null) => this.Call("click_at", new { x, y, secondary, clicks, modifiers });
 
     /// <summary>What a click at a page point would hit, without clicking (a popup's menu would hold the main thread).</summary>
     public Task<AppState> HitAt(double x, double y) => this.Call("click_at", new { x, y, hitOnly = true });

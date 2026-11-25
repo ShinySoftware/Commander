@@ -105,8 +105,13 @@ public partial class FileItemViewModel(FileEntry entry, bool friendlySizes) : Ob
     [NotifyPropertyChangedFor(nameof(RowState), nameof(IsActiveCursor), nameof(IsMotionPlaying), nameof(IsTilePlaying), nameof(IconColor))]
     public partial CursorState Cursor { get; set; }
 
-    /// <summary>One mutually exclusive value for the row's DataTriggers (cursor x marked).</summary>
-    public string RowState => (this.Cursor, this.IsMarked) switch
+    /// <summary>A folder row that files dragged over it would drop into.</summary>
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(RowState))]
+    public partial bool IsDropTarget { get; set; }
+
+    /// <summary>One mutually exclusive value for the row's DataTriggers (cursor x marked, or a drop target).</summary>
+    public string RowState => this.IsDropTarget ? "DropTarget" : (this.Cursor, this.IsMarked) switch
     {
         (CursorState.Active, true) => "ActiveMarked",
         (CursorState.Active, false) => "Active",

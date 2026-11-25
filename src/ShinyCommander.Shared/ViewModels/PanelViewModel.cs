@@ -202,6 +202,10 @@ public partial class PanelViewModel : ObservableObject
     [ObservableProperty]
     public partial bool IsActive { get; set; }
 
+    /// <summary>Files dragged over the panel would drop into its folder - outlines it.</summary>
+    [ObservableProperty]
+    public partial bool IsDropTarget { get; set; }
+
     [ObservableProperty]
     public partial bool ShowQuickFilter { get; set; }
 

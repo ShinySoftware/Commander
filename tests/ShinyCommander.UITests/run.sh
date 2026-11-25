@@ -52,10 +52,7 @@ fi
 [[ -x "$HERE/.app-build/bin/ShinyCommander.app/Contents/MacOS/ShinyCommander" ]] || { echo "No app build - run without --no-build." >&2; exit 1; }
 
 step "Run the UI tests${FILTER:+ ($FILTER)}"
-ARGS=(test "$HERE/ShinyCommander.UITests.csproj" --nologo --logger "console;verbosity=normal")
+ARGS=(test --project "$HERE/ShinyCommander.UITests.csproj" --output Detailed)
 [[ -n "$FILTER" ]] && ARGS+=(--filter "$FILTER")
-if [[ $EXPLICIT == 1 ]]; then
-    dotnet "${ARGS[@]}" -- xUnit.Explicit=on
-else
-    dotnet "${ARGS[@]}"
-fi
+[[ $EXPLICIT == 1 ]] && ARGS+=(--explicit on)
+dotnet "${ARGS[@]}"

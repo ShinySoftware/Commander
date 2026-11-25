@@ -625,5 +625,15 @@
                 </VerticalStackLayout>
             </Border>
         </Grid>
+
+        <!-- outlines the panel while files dragged over it would drop into its folder. Only in the tree during the
+             drag (code-behind), and never takes the pointer. -->
+        <Border x:Name="DropOutline"
+                Grid.Row="1"
+                InputTransparent="True"
+                StrokeShape="RoundRectangle 10"
+                StrokeThickness="2"
+                Stroke="{StaticResource Accent}"
+                BackgroundColor="Transparent" />
     </Grid>
 </ContentView>

@@ -2,8 +2,8 @@
 
 | Suite | What it proves | Run |
 |---|---|---|
-| `tests/ShinyCommander.Core.Tests` (xunit v3) | The file system layer without UI: listing disk and archives, copy/move/delete/pack/extract, conflicts, search masks, multi-rename, directory compare, and what the custom columns read from files (`FileMetadataReaderTests`, with small media, PDF and plist samples in `Fixtures/`) | `dotnet test tests/ShinyCommander.Core.Tests` (~1s) |
-| **`tests/ShinyCommander.UITests`** (xunit v3 + MAUI DevFlow) | **The real macOS (AppKit) app**: the keymap, panels, file operations, archives, views, dialogs, mouse clicks, ribbon, layout and leaks | `tests/ShinyCommander.UITests/run.sh` |
+| `tests/ShinyCommander.Core.Tests` (xunit v4) | The file system layer without UI: listing disk and archives, copy/move/delete/pack/extract, conflicts, search masks, multi-rename, directory compare, and what the custom columns read from files (`FileMetadataReaderTests`, with small media, PDF and plist samples in `Fixtures/`) | `dotnet test --project tests/ShinyCommander.Core.Tests` (~1s) |
+| **`tests/ShinyCommander.UITests`** (xunit v4 + MAUI DevFlow) | **The real macOS (AppKit) app**: the keymap, panels, file operations, archives, views, dialogs, mouse clicks, ribbon, layout and leaks | `tests/ShinyCommander.UITests/run.sh` |
 
 ## UI tests
 
@@ -48,7 +48,7 @@ doesn't fight your own build or the copy of the app you're using.
 ### How it works
 
 ```
- test process (net11.0, xunit v3)                     ShinyCommander.app (Debug, SHINYCOMMANDER_UITEST=1)
+ test process (net11.0, xunit v4)                     ShinyCommander.app (Debug, SHINYCOMMANDER_UITEST=1)
  ─────────────────────────────────                    ──────────────────────────────────────────────────
  AppFixture ── launch / attach (.uitest-app.json) ──▶  MAUI DevFlow agent :102xx
  AgentClient (one client = one mutation lease) ──────▶  ├─ ui/* : tree, tap, fill, key, screenshot
@@ -165,6 +165,6 @@ The Bonjour list on the Connections page shows a service advertised with
 ## Before a commit
 
 ```bash
-dotnet test tests/ShinyCommander.Core.Tests
+dotnet test --project tests/ShinyCommander.Core.Tests
 tests/ShinyCommander.UITests/run.sh
 ```
