@@ -23,11 +23,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  # Build and deploy are separate jobs on purpose: deploy-pages run straight after upload-pages-artifact in the same
+  # job can look up the artifact before GitHub lists it ("No artifacts named github-pages", actions/deploy-pages#451).
+  # It also means a failed deploy can be re-run alone, without uploading a second github-pages artifact.
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
 
@@ -40,5 +40,12 @@ jobs:
         with:
           path: _site
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v5
